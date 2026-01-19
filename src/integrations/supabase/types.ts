@@ -14,7 +14,177 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      daily_data: {
+        Row: {
+          acquisizioni: number
+          affitti_numero: number
+          affitti_valore: number
+          appuntamenti_vendita: number
+          clienti_gestiti: number
+          contatti_ideali: number
+          contatti_reali: number
+          created_at: string
+          date: string
+          id: string
+          incarichi_vendita: number
+          notizie_ideali: number
+          notizie_reali: number
+          updated_at: string
+          user_id: string
+          vendite_numero: number
+          vendite_valore: number
+        }
+        Insert: {
+          acquisizioni?: number
+          affitti_numero?: number
+          affitti_valore?: number
+          appuntamenti_vendita?: number
+          clienti_gestiti?: number
+          contatti_ideali?: number
+          contatti_reali?: number
+          created_at?: string
+          date: string
+          id?: string
+          incarichi_vendita?: number
+          notizie_ideali?: number
+          notizie_reali?: number
+          updated_at?: string
+          user_id: string
+          vendite_numero?: number
+          vendite_valore?: number
+        }
+        Update: {
+          acquisizioni?: number
+          affitti_numero?: number
+          affitti_valore?: number
+          appuntamenti_vendita?: number
+          clienti_gestiti?: number
+          contatti_ideali?: number
+          contatti_reali?: number
+          created_at?: string
+          date?: string
+          id?: string
+          incarichi_vendita?: number
+          notizie_ideali?: number
+          notizie_reali?: number
+          updated_at?: string
+          user_id?: string
+          vendite_numero?: number
+          vendite_valore?: number
+        }
+        Relationships: []
+      }
+      operations: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          notes: string | null
+          type: string
+          user_id: string
+          value: number | null
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          notes?: string | null
+          type: string
+          user_id: string
+          value?: number | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          notes?: string | null
+          type?: string
+          user_id?: string
+          value?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          role: string
+          sede: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          role?: string
+          sede?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          role?: string
+          sede?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sede_targets: {
+        Row: {
+          acquisizioni_target: number | null
+          appuntamenti_target: number | null
+          clienti_target: number | null
+          contatti_target: number | null
+          created_at: string
+          fatturato_target: number | null
+          id: string
+          incarichi_target: number | null
+          month: number
+          notizie_target: number | null
+          sede: string
+          updated_at: string
+          vendite_target: number | null
+          year: number
+        }
+        Insert: {
+          acquisizioni_target?: number | null
+          appuntamenti_target?: number | null
+          clienti_target?: number | null
+          contatti_target?: number | null
+          created_at?: string
+          fatturato_target?: number | null
+          id?: string
+          incarichi_target?: number | null
+          month: number
+          notizie_target?: number | null
+          sede: string
+          updated_at?: string
+          vendite_target?: number | null
+          year: number
+        }
+        Update: {
+          acquisizioni_target?: number | null
+          appuntamenti_target?: number | null
+          clienti_target?: number | null
+          contatti_target?: number | null
+          created_at?: string
+          fatturato_target?: number | null
+          id?: string
+          incarichi_target?: number | null
+          month?: number
+          notizie_target?: number | null
+          sede?: string
+          updated_at?: string
+          vendite_target?: number | null
+          year?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
