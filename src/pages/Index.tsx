@@ -1,13 +1,36 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { UserProvider } from '@/context/UserContext';
+import Header from '@/components/layout/Header';
+import Navigation from '@/components/layout/Navigation';
+import DashboardSede from '@/components/dashboard/DashboardSede';
+import MyNumbers from '@/components/dashboard/MyNumbers';
+import DataEntry from '@/components/dashboard/DataEntry';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('andamento');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'numeri':
+        return <MyNumbers />;
+      case 'inserisci':
+        return <DataEntry />;
+      case 'andamento':
+      default:
+        return <DashboardSede />;
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <UserProvider>
+      <div className="min-h-screen bg-background">
+        <Header />
+        <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+        <main className="container max-w-7xl">
+          {renderContent()}
+        </main>
       </div>
-    </div>
+    </UserProvider>
   );
 };
 
