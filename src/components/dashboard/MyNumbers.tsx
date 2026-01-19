@@ -1,4 +1,6 @@
-import { useUser } from '@/context/UserContext';
+import { useAuth } from '@/hooks/useAuth';
+import { useKPIs } from '@/hooks/useKPIs';
+import { useDailyData } from '@/hooks/useDailyData';
 import { Target, TrendingUp, Users, Phone, Calendar, Home } from 'lucide-react';
 import {
   AreaChart,
@@ -13,44 +15,55 @@ import {
 } from 'recharts';
 
 const MyNumbers = () => {
-  const { currentUser } = useUser();
+  const { profile } = useAuth();
+  const { kpis, chartData, isLoading } = useKPIs('month');
+  const { myData } = useDailyData();
 
-  const weeklyData = [
-    { day: '18/12', contatti: 5, notizie: 0 },
-    { day: '12/01', contatti: 3, notizie: 1 },
-    { day: '13/01', contatti: 8, notizie: 2 },
-    { day: '14/01', contatti: 10, notizie: 3 },
-  ];
-
-  const pipelineData = [
-    { day: '18/12', appVendita: 3, vendite: 1 },
-    { day: '12/01', appVendita: 0, vendite: 0 },
-    { day: '13/01', appVendita: 1, vendite: 0 },
-    { day: '14/01', appVendita: 1, vendite: 0 },
-  ];
+  const annualTarget = 32;
+  const currentSales = kpis?.vendite?.value || 0;
+  const completionPercent = ((currentSales / annualTarget) * 100).toFixed(1);
+  const conversionRate = kpis?.appuntamenti?.value 
+    ? ((kpis.vendite?.value || 0) / kpis.appuntamenti.value * 100).toFixed(1) 
+    : '0';
 
   const stats = [
-    { label: 'Contatti Reali Totali', value: 44, target: 100, icon: Phone },
-    { label: 'Notizie Reali Totali', value: 16, target: 9, icon: TrendingUp },
-    { label: 'Clienti Gestiti', value: 10, icon: Users },
-    { label: 'Vendite Concluse', value: 1, icon: Home },
+    { label: 'Contatti Reali Totali', value: kpis?.contatti?.value || 0, target: 100, icon: Phone },
+    { label: 'Notizie Reali Totali', value: kpis?.notizie?.value || 0, target: 9, icon: TrendingUp },
+    { label: 'Clienti Gestiti', value: kpis?.clienti?.value || 0, icon: Users },
+    { label: 'Vendite Concluse', value: kpis?.vendite?.value || 0, icon: Home },
   ];
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 animate-fade-in">
       {/* Obiettivo Annuale */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-card rounded-xl border border-border p-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+        <div className="bg-card rounded-xl border border-border p-4 md:p-6">
           <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Obiettivo Annuale</p>
           <div className="flex items-baseline gap-1 mb-2">
-            <span className="font-serif text-5xl font-bold text-foreground">1</span>
-            <span className="text-2xl text-muted-foreground">/32</span>
+            <span className="font-serif text-4xl md:text-5xl font-bold text-foreground">{currentSales}</span>
+            <span className="text-xl md:text-2xl text-muted-foreground">/{annualTarget}</span>
           </div>
           <p className="text-sm font-medium text-accent uppercase tracking-wider">Vendite</p>
-          <p className="text-xs text-muted-foreground mt-2">Hai completato il 3.1% del tuo piano vendite</p>
+          <p className="text-xs text-muted-foreground mt-2">Hai completato il {completionPercent}% del tuo piano vendite</p>
         </div>
 
-        <div className="bg-accent/5 border border-accent/20 rounded-xl p-6 lg:col-span-2">
+        <div className="bg-accent/5 border border-accent/20 rounded-xl p-4 md:p-6 lg:col-span-2">
           <div className="flex items-start gap-3 mb-4">
             <div className="p-2 rounded-lg bg-success/10 text-success">
               <Target className="w-5 h-5" />
@@ -58,19 +71,19 @@ const MyNumbers = () => {
             <div>
               <p className="text-sm font-semibold text-foreground">Performance Coach</p>
               <p className="text-sm text-muted-foreground mt-1">
-                "🌟 Sei sulla buona strada. Mantieni costante la ricerca di notizie e i contatti giornalieri per alimentare la tua pipeline."
+                "🌟 {currentSales > 0 ? 'Ottimo lavoro! Continua così.' : 'Sei sulla buona strada. Mantieni costante la ricerca di notizie e i contatti giornalieri per alimentare la tua pipeline.'}"
               </p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="bg-card rounded-lg p-4">
-              <p className="text-xs text-muted-foreground mb-1">Fatturato Agenzia Generato</p>
-              <p className="font-serif text-2xl font-semibold text-foreground">€ 40.000</p>
+          <div className="grid grid-cols-2 gap-3 md:gap-4 mt-4">
+            <div className="bg-card rounded-lg p-3 md:p-4">
+              <p className="text-xs text-muted-foreground mb-1">Fatturato Generato</p>
+              <p className="font-serif text-xl md:text-2xl font-semibold text-foreground">{formatCurrency(kpis?.fatturato?.value || 0)}</p>
               <p className="text-xs text-muted-foreground">Target: € 1.000.000</p>
             </div>
-            <div className="bg-card rounded-lg p-4">
-              <p className="text-xs text-muted-foreground mb-1">Tasso Conversione Appuntamenti</p>
-              <p className="font-serif text-2xl font-semibold text-foreground">25.0%</p>
+            <div className="bg-card rounded-lg p-3 md:p-4">
+              <p className="text-xs text-muted-foreground mb-1">Tasso Conversione</p>
+              <p className="font-serif text-xl md:text-2xl font-semibold text-foreground">{conversionRate}%</p>
               <p className="text-xs text-muted-foreground">Appuntamenti → Vendite</p>
             </div>
           </div>
@@ -78,18 +91,18 @@ const MyNumbers = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className="bg-card rounded-xl border border-border p-5">
-              <div className="flex items-center gap-2 mb-3">
+            <div key={stat.label} className="bg-card rounded-xl border border-border p-4 md:p-5">
+              <div className="flex items-center gap-2 mb-2 md:mb-3">
                 <Icon className="w-4 h-4 text-accent" />
-                <span className="text-xs text-muted-foreground">{stat.label}</span>
+                <span className="text-xs text-muted-foreground line-clamp-1">{stat.label}</span>
               </div>
-              <p className="font-serif text-3xl font-semibold text-foreground">{stat.value}</p>
+              <p className="font-serif text-2xl md:text-3xl font-semibold text-foreground">{stat.value}</p>
               {stat.target && (
-                <p className="text-xs text-muted-foreground mt-1">Target Ideale: {stat.target}</p>
+                <p className="text-xs text-muted-foreground mt-1">Target: {stat.target}</p>
               )}
             </div>
           );
@@ -97,56 +110,58 @@ const MyNumbers = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-serif text-lg font-semibold text-foreground mb-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+          <h3 className="font-serif text-base md:text-lg font-semibold text-foreground mb-4">
             Focus Acquisizione (Ultimi 7 gg)
           </h3>
-          <div className="h-64">
+          <div className="h-48 md:h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={weeklyData}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
+                    fontSize: '12px',
                   }}
                 />
-                <Bar dataKey="contatti" fill="hsl(var(--primary))" name="Contatti Reali" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="notizie" fill="hsl(var(--accent))" name="Notizie Nuove Reali" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="contatti" fill="hsl(var(--primary))" name="Contatti" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="notizie" fill="hsl(var(--accent))" name="Notizie" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-6 mt-4 text-xs">
+          <div className="flex items-center gap-4 md:gap-6 mt-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-primary" />
-              <span className="text-muted-foreground">Contatti Reali</span>
+              <span className="text-muted-foreground">Contatti</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-accent" />
-              <span className="text-muted-foreground">Notizie Nuove Reali</span>
+              <span className="text-muted-foreground">Notizie</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-card rounded-xl border border-border p-6">
-          <h3 className="font-serif text-lg font-semibold text-foreground mb-4">
+        <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+          <h3 className="font-serif text-base md:text-lg font-semibold text-foreground mb-4">
             Pipeline Vendita (Ultimi 7 gg)
           </h3>
-          <div className="h-64">
+          <div className="h-48 md:h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={pipelineData}>
+              <AreaChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'hsl(var(--card))',
                     border: '1px solid hsl(var(--border))',
                     borderRadius: '8px',
+                    fontSize: '12px',
                   }}
                 />
                 <Area
@@ -161,72 +176,65 @@ const MyNumbers = () => {
                   dataKey="vendite"
                   stroke="hsl(var(--success))"
                   fill="hsl(var(--success) / 0.2)"
-                  name="Vendite (N°)"
+                  name="Vendite"
                 />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex items-center gap-6 mt-4 text-xs">
+          <div className="flex items-center gap-4 md:gap-6 mt-4 text-xs">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-accent" />
               <span className="text-muted-foreground">App. Vendita</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded bg-success" />
-              <span className="text-muted-foreground">Vendite (N°)</span>
+              <span className="text-muted-foreground">Vendite</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Diario di Bordo */}
-      <div className="bg-card rounded-xl border border-border p-6">
-        <h3 className="font-serif text-lg font-semibold text-foreground mb-4">Diario di Bordo</h3>
+      <div className="bg-card rounded-xl border border-border p-4 md:p-6">
+        <h3 className="font-serif text-base md:text-lg font-semibold text-foreground mb-4">Diario di Bordo</h3>
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full min-w-[500px]">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Data</th>
                 <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Notizie</th>
                 <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Clienti</th>
-                <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">App. Vend.</th>
-                <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendite (N°)</th>
-                <th className="text-right py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Fatturato Agenzia</th>
+                <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">App.</th>
+                <th className="text-left py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendite</th>
+                <th className="text-right py-3 px-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">Fatturato</th>
               </tr>
             </thead>
             <tbody>
-              <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="py-3 px-2 text-sm">14/01/2026</td>
-                <td className="py-3 px-2 text-sm"><span className="text-success">10</span>/3</td>
-                <td className="py-3 px-2 text-sm">10</td>
-                <td className="py-3 px-2 text-sm">0</td>
-                <td className="py-3 px-2 text-sm">-</td>
-                <td className="py-3 px-2 text-sm text-right">-</td>
-              </tr>
-              <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="py-3 px-2 text-sm">13/01/2026</td>
-                <td className="py-3 px-2 text-sm"><span className="text-destructive">0</span>/3</td>
-                <td className="py-3 px-2 text-sm">0</td>
-                <td className="py-3 px-2 text-sm">1</td>
-                <td className="py-3 px-2 text-sm">-</td>
-                <td className="py-3 px-2 text-sm text-right">-</td>
-              </tr>
-              <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="py-3 px-2 text-sm">12/01/2026</td>
-                <td className="py-3 px-2 text-sm"><span className="text-destructive">1</span>/3</td>
-                <td className="py-3 px-2 text-sm">0</td>
-                <td className="py-3 px-2 text-sm">0</td>
-                <td className="py-3 px-2 text-sm">-</td>
-                <td className="py-3 px-2 text-sm text-right">-</td>
-              </tr>
-              <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors">
-                <td className="py-3 px-2 text-sm">18/12/2025</td>
-                <td className="py-3 px-2 text-sm"><span className="text-success">5</span>/0</td>
-                <td className="py-3 px-2 text-sm">0</td>
-                <td className="py-3 px-2 text-sm">3</td>
-                <td className="py-3 px-2 text-sm">1 🏠</td>
-                <td className="py-3 px-2 text-sm text-right font-medium">€ 40.000</td>
-              </tr>
+              {myData && myData.length > 0 ? (
+                myData.slice(0, 5).map((entry) => (
+                  <tr key={entry.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+                    <td className="py-3 px-2 text-sm">{new Date(entry.date).toLocaleDateString('it-IT')}</td>
+                    <td className="py-3 px-2 text-sm">
+                      <span className={entry.notizie_reali >= entry.notizie_ideali ? 'text-success' : 'text-destructive'}>
+                        {entry.notizie_reali}
+                      </span>
+                      /{entry.notizie_ideali}
+                    </td>
+                    <td className="py-3 px-2 text-sm">{entry.clienti_gestiti}</td>
+                    <td className="py-3 px-2 text-sm">{entry.appuntamenti_vendita}</td>
+                    <td className="py-3 px-2 text-sm">{entry.vendite_numero > 0 ? `${entry.vendite_numero} 🏠` : '-'}</td>
+                    <td className="py-3 px-2 text-sm text-right font-medium">
+                      {entry.vendite_valore > 0 ? formatCurrency(Number(entry.vendite_valore)) : '-'}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-muted-foreground">
+                    Nessun dato registrato. Inizia inserendo i tuoi dati giornalieri!
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
