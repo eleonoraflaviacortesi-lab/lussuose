@@ -52,9 +52,9 @@ const IndexContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="h-[120px]" />
+      <div className="h-[100px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl mx-auto animate-in fade-in duration-150">
+      <main className="max-w-3xl mx-auto px-3 animate-in fade-in duration-150">
         {renderContent()}
       </main>
     </div>
