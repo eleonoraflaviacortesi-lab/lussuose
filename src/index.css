@@ -64,7 +64,7 @@
     --pink-dark: 326 85% 45%;
 
     --font-serif: "Playfair Display", Georgia, serif;
-    --font-sans: Helvetica, "Helvetica Neue", Arial, sans-serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
@@ -127,27 +127,29 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    font-weight: 400;
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 0.01em;
   }
 
   h1 {
     font-family: var(--font-sans);
-    @apply tracking-widest uppercase font-black text-2xl;
+    @apply tracking-widest uppercase font-semibold text-xl;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-bold text-xl;
+    @apply tracking-wide uppercase font-semibold text-lg;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-bold text-lg;
+    @apply tracking-wide uppercase font-medium text-base;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply tracking-wide font-semibold;
+    @apply tracking-wide font-medium text-sm;
   }
 
   p {
