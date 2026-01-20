@@ -281,7 +281,11 @@
   }
 
   .pill-nav-item {
-    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100;
+    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-150;
+  }
+
+  .pill-nav-item:not(.active):hover {
+    @apply scale-110;
   }
 
   .pill-nav-item.active {
