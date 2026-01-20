@@ -60,7 +60,7 @@
     --pink-dark: 326 85% 45%;
 
     --font-serif: "Playfair Display", Georgia, serif;
-    --font-sans: "Inter", system-ui, sans-serif;
+    --font-sans: Helvetica, "Helvetica Neue", Arial, sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
