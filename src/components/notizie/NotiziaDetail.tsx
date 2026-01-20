@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, X, Trash2, CalendarIcon, Clock } from 'lucide-react';
+import { Phone, X, Trash2, CalendarIcon, Clock, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
+import { generateNotiziaCalendarUrl } from '@/lib/googleCalendar';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -334,6 +335,33 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </Popover>
             </div>
           </div>
+
+          {/* Google Calendar Button */}
+          {editData.reminder_date && (
+            <button
+              type="button"
+              onClick={() => {
+                const [hours, minutes] = editData.reminder_time.split(':');
+                const reminderDate = new Date(editData.reminder_date!);
+                reminderDate.setHours(parseInt(hours), parseInt(minutes));
+                
+                const url = generateNotiziaCalendarUrl({
+                  name: editData.name,
+                  emoji: editData.emoji,
+                  zona: editData.zona || undefined,
+                  type: editData.type || undefined,
+                  notes: editData.notes || undefined,
+                  reminder_date: reminderDate,
+                });
+                window.open(url, '_blank');
+              }}
+              className="w-full flex items-center justify-center gap-2 bg-white rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.08)] active:scale-[0.98] transition-transform hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
+            >
+              <CalendarIcon className="w-4 h-4 text-primary" />
+              <span>Aggiungi a Google Calendar</span>
+              <ExternalLink className="w-3 h-3 text-muted-foreground" />
+            </button>
+          )}
           
           <div className="flex justify-center gap-2 pt-3">
             <Button 
