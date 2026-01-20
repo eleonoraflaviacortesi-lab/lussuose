@@ -19,8 +19,8 @@ const IncarchiWidget = ({ weeklyIdeal = 3 }: IncarchiWidgetProps) => {
       ?.filter(d => new Date(d.date) >= startOfMonth)
       .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0) || 0;
     
-    // Calculate monthly target based on weekly ideal (approx 4.3 weeks per month)
-    const targetMensile = Math.round(weeklyIdeal * 4.3);
+    // Calculate monthly target based on weekly ideal * 4
+    const targetMensile = weeklyIdeal * 4;
     
     const mancanti = Math.max(0, targetMensile - incarichiMese);
     const percent = Math.min(100, Math.round((incarichiMese / targetMensile) * 100));
