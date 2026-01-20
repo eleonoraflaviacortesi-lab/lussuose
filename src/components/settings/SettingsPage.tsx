@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Settings, Target, Phone, FileText, CalendarDays, Gift, Award, ArrowRight } from 'lucide-react';
+import { Settings, Target, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 const SettingsPage = () => {
   const [settings, setSettings] = useState({
@@ -35,6 +36,7 @@ const SettingsPage = () => {
   const handleSave = () => {
     // TODO: Save to database
     console.log('Saving settings:', settings);
+    toast('✓ Aggiornato!');
   };
 
   const InputField = ({ 

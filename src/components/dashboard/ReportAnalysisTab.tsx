@@ -321,43 +321,12 @@ const ReportAnalysisTab = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center">
                       <span className="text-sm font-semibold">{formatShortDate(entry.date)}</span>
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-                      <div>
-                        <span className="text-muted-foreground">Cont.</span>
-                        <span className="ml-1 font-medium">{entry.contatti_reali}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Not.</span>
-                        <span className="ml-1 font-medium">{entry.notizie_reali}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">App.</span>
-                        <span className="ml-1 font-medium">{entry.appuntamenti_vendita}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">N.Tr.</span>
-                        <span className="ml-1 font-medium">{entry.nuove_trattative || 0}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">T.Ch.</span>
-                        <span className="ml-1 font-medium">{entry.trattative_chiuse || 0}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">F.Cr.</span>
-                        <span className="ml-1 font-medium">€{Number(entry.fatturato_a_credito || 0).toLocaleString()}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Vend.</span>
-                        <span className="ml-1 font-medium">{entry.vendite_numero}</span>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Fatt.</span>
-                        <span className="ml-1 font-medium">€{Number(entry.vendite_valore).toLocaleString()}</span>
-                      </div>
-                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Tocca per visualizzare i dettagli
+                    </p>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
