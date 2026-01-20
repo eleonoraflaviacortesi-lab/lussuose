@@ -47,11 +47,12 @@ const IndexContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
       <Header />
-      <div className="h-[120px]" />
+      {/* Spacer che considera safe-area-inset-top + altezza header */}
+      <div className="h-[120px]" style={{ marginTop: 'env(safe-area-inset-top)' }} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl mx-auto animate-in fade-in duration-150">
+      <main className="max-w-3xl mx-auto animate-in fade-in duration-150 px-4">
         {renderContent()}
       </main>
     </div>
