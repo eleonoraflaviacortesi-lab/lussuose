@@ -16,6 +16,11 @@ const SettingsPage = () => {
     appuntamenti_settimana: 4,
     acquisizioni_settimana: 3,
     incarichi_settimana: 1,
+    nuove_trattative_settimana: 2,
+    trattative_chiuse_settimana: 1,
+    vendite_settimana: 1,
+    fatturato_credito_settimana: 50000,
+    fatturato_generato_settimana: 20000,
   });
 
   // Calculate projections
@@ -161,6 +166,36 @@ const SettingsPage = () => {
               value={settings.incarichi_settimana}
               field="incarichi_settimana"
               suffix="Qt"
+            />
+            <InputField
+              label="NUOVE TRATTATIVE"
+              value={settings.nuove_trattative_settimana}
+              field="nuove_trattative_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="TRATTATIVE CHIUSE"
+              value={settings.trattative_chiuse_settimana}
+              field="trattative_chiuse_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="VENDITE"
+              value={settings.vendite_settimana}
+              field="vendite_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="FATTURATO A CREDITO"
+              value={settings.fatturato_credito_settimana}
+              field="fatturato_credito_settimana"
+              suffix="€"
+            />
+            <InputField
+              label="FATTURATO GENERATO"
+              value={settings.fatturato_generato_settimana}
+              field="fatturato_generato_settimana"
+              suffix="€"
             />
           </div>
         </div>
