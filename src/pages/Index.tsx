@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, AuthProvider } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
@@ -47,16 +47,23 @@ const IndexContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
+    <div className="min-h-screen bg-background">
       <Header />
-      {/* Spacer che considera safe-area-inset-top + altezza header */}
-      <div className="h-[120px]" style={{ marginTop: 'env(safe-area-inset-top)' }} />
+      <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl mx-auto animate-in fade-in duration-150 px-4">
+      <main className="max-w-3xl mx-auto animate-in fade-in duration-150">
         {renderContent()}
       </main>
     </div>
   );
 };
 
-export default IndexContent;
+const Index = () => {
+  return (
+    <AuthProvider>
+      <IndexContent />
+    </AuthProvider>
+  );
+};
+
+export default Index;

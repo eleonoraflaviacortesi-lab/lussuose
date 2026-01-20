@@ -124,20 +124,10 @@
     @apply border-border;
   }
 
-  html {
-    /* iOS safe area support */
-    padding-top: env(safe-area-inset-top);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
     font-weight: 400;
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
   }
 
   h1 {
