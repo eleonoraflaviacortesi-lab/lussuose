@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Heart } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import logo from '@/assets/le_lussuose_large.svg';
@@ -51,12 +51,12 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
 
         {/* Main Header - Liquid Glass Effect */}
         <div className="glass-header flex items-center justify-between px-6 rounded-b-3xl">
-          {/* Profile Button with Heart */}
+          {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
             className="w-11 h-11 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform"
           >
-            <Heart className="w-5 h-5 text-foreground" fill="currentColor" />
+            <User className="w-5 h-5 text-foreground" />
           </button>
 
           {/* Brand Logo */}

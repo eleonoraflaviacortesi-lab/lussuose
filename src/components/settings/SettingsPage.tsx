@@ -37,30 +37,25 @@ const SettingsPage = () => {
     value, 
     field, 
     suffix,
-    icon: Icon 
   }: { 
     label: string; 
     value: number; 
     field: string; 
     suffix?: string;
-    icon?: any;
   }) => (
     <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        {Icon && <Icon className="w-4 h-4 text-muted-foreground" />}
-        <span className="text-xs font-medium tracking-[0.15em] uppercase text-primary">
-          {label}
-        </span>
-      </div>
+      <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+        {label}
+      </span>
       <div className="relative">
         <Input
           type="number"
           value={value}
           onChange={(e) => handleChange(field, parseInt(e.target.value) || 0)}
-          className="bg-muted border-0 rounded-xl h-14 text-base pr-12"
+          className="bg-muted border-0 rounded-xl h-12 text-base pr-12"
         />
         {suffix && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground">
+          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
             {suffix}
           </span>
         )}
@@ -70,165 +65,153 @@ const SettingsPage = () => {
 
   return (
     <div className="px-6 pb-8 animate-fade-in">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Settings Form */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Header */}
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-              <Settings className="w-7 h-7" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold tracking-tight">IMPOSTAZIONI STRATEGICHE</h2>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-primary">
-                DEFINISCI I TARGET DELL'AGENZIA
-              </p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
+          <Settings className="w-7 h-7" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">IMPOSTAZIONI</h2>
+          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+            CONFIGURA I TUOI TARGET
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        {/* Piano Finanziario */}
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
+          <div className="flex items-center gap-2 pb-3 border-b border-muted">
+            <Target className="w-4 h-4 text-muted-foreground" />
+            <h3 className="text-sm font-bold tracking-wider uppercase">
+              PIANO FINANZIARIO ANNUALE
+            </h3>
           </div>
 
-          {/* Piano Finanziario */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-muted-foreground" />
-              <h3 className="text-sm font-medium tracking-[0.2em] uppercase text-primary">
-                PIANO FINANZIARIO ANNUALE
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <InputField
-                label="OBBIETTIVO FATTURATO AGENZIA"
-                value={settings.obbiettivo_fatturato}
-                field="obbiettivo_fatturato"
-                suffix="€"
-              />
-              <InputField
-                label="BASE FISSA ANNUALE"
-                value={settings.base_fissa_annuale}
-                field="base_fissa_annuale"
-                suffix="€"
-              />
-              <InputField
-                label="TUA PERCENTUALE (%)"
-                value={settings.percentuale_personale}
-                field="percentuale_personale"
-                suffix="%"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="PREZZO MEDIO VENDITA"
-                value={settings.prezzo_medio_vendita}
-                field="prezzo_medio_vendita"
-                suffix="€"
-              />
-              <InputField
-                label="PROVVIGIONE AGENZIA (%)"
-                value={settings.provvigione_agenzia}
-                field="provvigione_agenzia"
-                suffix="%"
-              />
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              label="OBIETTIVO FATTURATO"
+              value={settings.obbiettivo_fatturato}
+              field="obbiettivo_fatturato"
+              suffix="€"
+            />
+            <InputField
+              label="BASE FISSA ANNUALE"
+              value={settings.base_fissa_annuale}
+              field="base_fissa_annuale"
+              suffix="€"
+            />
           </div>
 
-          {/* Obiettivi Settimanali */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">✨</span>
-              <h3 className="text-sm font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                OBIETTIVI OPERATIVI SETTIMANALI (IDEALI)
-              </h3>
-            </div>
-
-            <div className="grid grid-cols-3 gap-4">
-              <InputField
-                label="CONTATTI/SETTIMANA"
-                value={settings.contatti_settimana}
-                field="contatti_settimana"
-                suffix="Q.ty"
-                icon={Phone}
-              />
-              <InputField
-                label="NOTIZIE/SETTIMANA"
-                value={settings.notizie_settimana}
-                field="notizie_settimana"
-                suffix="Q.ty"
-                icon={FileText}
-              />
-              <InputField
-                label="APPUNTAMENTI/SETTIMANA"
-                value={settings.appuntamenti_settimana}
-                field="appuntamenti_settimana"
-                suffix="Q.ty"
-                icon={CalendarDays}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <InputField
-                label="ACQUISIZIONI/SETTIMANA"
-                value={settings.acquisizioni_settimana}
-                field="acquisizioni_settimana"
-                suffix="Q.ty"
-                icon={Gift}
-              />
-              <InputField
-                label="INCARICHI/SETTIMANA"
-                value={settings.incarichi_settimana}
-                field="incarichi_settimana"
-                suffix="Q.ty"
-                icon={Award}
-              />
-            </div>
+          <div className="grid grid-cols-3 gap-4">
+            <InputField
+              label="TUA %"
+              value={settings.percentuale_personale}
+              field="percentuale_personale"
+              suffix="%"
+            />
+            <InputField
+              label="PREZZO MEDIO"
+              value={settings.prezzo_medio_vendita}
+              field="prezzo_medio_vendita"
+              suffix="€"
+            />
+            <InputField
+              label="PROVVIGIONE"
+              value={settings.provvigione_agenzia}
+              field="provvigione_agenzia"
+              suffix="%"
+            />
           </div>
         </div>
 
-        {/* Right Column - Projection */}
-        <div className="space-y-6">
-          <div className="dark-card space-y-6">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">✦</span>
-              <h3 className="text-sm font-medium tracking-[0.15em] uppercase text-white">
-                PROIEZIONE RISULTATI
-              </h3>
-            </div>
+        {/* Obiettivi Settimanali */}
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
+          <div className="flex items-center gap-2 pb-3 border-b border-muted">
+            <span className="text-base">✨</span>
+            <h3 className="text-sm font-bold tracking-wider uppercase">
+              OBIETTIVI SETTIMANALI
+            </h3>
+          </div>
 
+          <div className="grid grid-cols-3 gap-4">
+            <InputField
+              label="CONTATTI"
+              value={settings.contatti_settimana}
+              field="contatti_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="NOTIZIE"
+              value={settings.notizie_settimana}
+              field="notizie_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="APPUNTAMENTI"
+              value={settings.appuntamenti_settimana}
+              field="appuntamenti_settimana"
+              suffix="Qt"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <InputField
+              label="ACQUISIZIONI"
+              value={settings.acquisizioni_settimana}
+              field="acquisizioni_settimana"
+              suffix="Qt"
+            />
+            <InputField
+              label="INCARICHI"
+              value={settings.incarichi_settimana}
+              field="incarichi_settimana"
+              suffix="Qt"
+            />
+          </div>
+        </div>
+
+        {/* Proiezione Risultati */}
+        <div className="dark-card space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-base">✦</span>
+            <h3 className="text-sm font-bold tracking-wider uppercase text-white">
+              PROIEZIONE RISULTATI
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
-                REDDITO NETTO STIMATO
+              <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
+                REDDITO NETTO
               </p>
-              <p className="text-4xl font-light text-primary">
+              <p className="text-2xl font-light text-white">
                 € {new Intl.NumberFormat('it-IT').format(fatturatoNetto)}
               </p>
             </div>
-
-            <div className="border-t border-white/10 pt-6">
-              <p className="text-6xl font-bold text-white">{venditeTotali}</p>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mt-1">
+            <div>
+              <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
                 VENDITE TOTALI
               </p>
+              <p className="text-2xl font-bold text-white">{venditeTotali}</p>
             </div>
-
-            <div className="bg-white/10 rounded-xl p-4">
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-1">
-                MEDIA VENDITE/MESE
+            <div>
+              <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
+                MEDIA/MESE
               </p>
-              <p className="text-2xl font-light text-white">
-                {mediaVenditeMese} <span className="text-sm text-muted-foreground">Unità</span>
-              </p>
+              <p className="text-2xl font-light text-white">{mediaVenditeMese}</p>
             </div>
           </div>
-
-          {/* Save Button */}
-          <button
-            onClick={handleSave}
-            className="w-full bg-card text-foreground border border-border rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-muted transition-colors"
-          >
-            SALVA CONFIGURAZIONE
-            <ArrowRight className="w-5 h-5" />
-          </button>
         </div>
+
+        {/* Save Button */}
+        <button
+          onClick={handleSave}
+          className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors"
+        >
+          SALVA CONFIGURAZIONE
+          <ArrowRight className="w-5 h-5" />
+        </button>
       </div>
     </div>
   );
