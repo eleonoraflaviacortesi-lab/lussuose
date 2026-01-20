@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, MapPin, FileText, Calendar, Clock, Tag, Bell, Trash2, X } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Phone, X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
@@ -22,6 +20,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
+const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+
 const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆'];
 
 interface NotiziaDetailProps {
@@ -29,14 +30,6 @@ interface NotiziaDetailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
-const statusColors: Record<NotiziaStatus, string> = {
-  new: 'bg-yellow-200 text-yellow-900',
-  in_progress: 'bg-yellow-400 text-yellow-950',
-  done: 'bg-orange-400 text-orange-950',
-  on_shot: 'bg-red-400 text-red-950',
-  taken: 'bg-green-200 text-green-900',
-};
 
 const statusLabels: Record<NotiziaStatus, string> = {
   new: 'New',
@@ -48,7 +41,16 @@ const statusLabels: Record<NotiziaStatus, string> = {
 
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
-  const [editData, setEditData] = useState<Partial<Notizia>>({});
+  const [editData, setEditData] = useState({
+    name: '',
+    zona: '',
+    phone: '',
+    type: '',
+    notes: '',
+    status: 'new' as NotiziaStatus,
+    emoji: '📋',
+    reminder_date: '',
+  });
 
   // Inizializza editData quando cambia la notizia
   useEffect(() => {
@@ -66,10 +68,12 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     }
   }, [notizia]);
 
-  if (!notizia) return null;
-  if (!open) return null;
+  if (!notizia || !open) return null;
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editData.name.trim()) return;
+    
     updateNotizia.mutate({
       id: notizia.id,
       ...editData,
@@ -91,191 +95,205 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-        onClick={() => onOpenChange(false)}
-      />
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      onClick={() => onOpenChange(false)}
+    >
+      {/* Blur backdrop */}
+      <div className="absolute inset-0 bg-black/10 backdrop-blur-md" />
       
-      {/* Modal - Liquid Glass Style */}
-      <div className="relative w-full max-w-md bg-background/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 animate-scale-in overflow-hidden">
+      {/* Compact floating card - same style as AddNotiziaDialog */}
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "relative z-10 w-full max-w-sm",
+          "bg-white/85 backdrop-blur-2xl",
+          "rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]",
+          "p-5 animate-in zoom-in-95 fade-in duration-200",
+          "max-h-[90vh] overflow-y-auto"
+        )}
+      >
         {/* Close button */}
-        <button
+        <button 
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full active:scale-95 transition-transform"
+          className="absolute right-4 top-4 text-muted-foreground active:scale-95 transition-transform"
         >
-          <X className="w-5 h-5 text-muted-foreground" />
+          <X className="w-4 h-4" />
         </button>
 
-        <div className="p-6 max-h-[85vh] overflow-y-auto">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-6">
-            {/* Emoji Selector */}
-            <Popover>
-              <PopoverTrigger asChild>
-                <button 
+        {/* Title */}
+        <h3 className="text-center text-base font-bold tracking-wide uppercase mb-4">
+          Modifica Notizia
+        </h3>
+
+        <form onSubmit={handleSave} className="space-y-3">
+          {/* Emoji + Name row */}
+          <div className="flex gap-2">
+            <div>
+              <Label className="text-xs font-medium mb-1.5 block">Emoji</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    type="button"
+                    className="w-12 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg active:scale-95 transition-transform"
+                  >
+                    {editData.emoji}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2 bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl" align="start">
+                  <div className="grid grid-cols-5 gap-1">
+                    {commonEmojis.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setEditData({ ...editData, emoji })}
+                        className={cn(
+                          "w-8 h-8 flex items-center justify-center rounded-lg active:scale-95 transition-transform",
+                          editData.emoji === emoji && "bg-accent"
+                        )}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="edit-name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
+              <input
+                id="edit-name"
+                value={editData.name}
+                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                placeholder="Es: Villa Serenity"
+                required
+                className={pillInputClass}
+              />
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="edit-zona" className="text-xs font-medium mb-1.5 block">Zona</Label>
+              <input
+                id="edit-zona"
+                value={editData.zona}
+                onChange={(e) => setEditData({ ...editData, zona: e.target.value })}
+                placeholder="Es: Umbertide"
+                className={pillInputClass}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-type" className="text-xs font-medium mb-1.5 block">Tipo</Label>
+              <input
+                id="edit-type"
+                value={editData.type}
+                onChange={(e) => setEditData({ ...editData, type: e.target.value })}
+                placeholder="Es: Casale"
+                className={pillInputClass}
+              />
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="edit-phone" className="text-xs font-medium mb-1.5 block">Telefono</Label>
+            <div className="flex gap-2">
+              <input
+                id="edit-phone"
+                type="tel"
+                value={editData.phone}
+                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                placeholder="+39 333 1234567"
+                className={cn(pillInputClass, "flex-1")}
+              />
+              {editData.phone && (
+                <button
                   type="button"
-                  className="w-14 h-14 bg-muted/50 rounded-xl flex items-center justify-center text-3xl active:scale-95 transition-transform border border-primary/20"
+                  onClick={handlePhoneClick}
+                  className="w-10 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center active:scale-95 transition-transform"
                 >
-                  {editData.emoji || '📋'}
+                  <Phone className="w-4 h-4 text-primary" />
                 </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-2 bg-background/90 backdrop-blur-xl border border-white/10" align="start">
-                <div className="grid grid-cols-5 gap-1">
-                  {commonEmojis.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      onClick={() => setEditData({ ...editData, emoji })}
-                      className={cn(
-                        "w-8 h-8 flex items-center justify-center rounded-lg active:scale-95 transition-transform",
-                        editData.emoji === emoji && "bg-accent"
-                      )}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-            
-            {/* Name Input */}
-            <Input
-              value={editData.name || ''}
-              onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-              className="text-xl font-bold bg-transparent border-muted/50 focus:border-primary/50"
-              placeholder="Nome notizia"
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <Label htmlFor="edit-status" className="text-xs font-medium mb-1.5 block">Status</Label>
+            <Select
+              value={editData.status}
+              onValueChange={(value) => setEditData({ ...editData, status: value as NotiziaStatus })}
+            >
+              <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-xl">
+                {Object.entries(statusLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>{label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="edit-notes" className="text-xs font-medium mb-1.5 block">Note</Label>
+            <textarea
+              id="edit-notes"
+              value={editData.notes}
+              onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+              placeholder="Aggiungi note..."
+              rows={2}
+              className={pillTextareaClass}
             />
           </div>
 
-          <div className="space-y-4">
-            {/* Status */}
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Status</span>
-              <Select
-                value={editData.status}
-                onValueChange={(value) => setEditData({ ...editData, status: value as NotiziaStatus })}
-              >
-                <SelectTrigger className="w-32 bg-muted/30 border-muted/50">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background/90 backdrop-blur-xl border border-white/10">
-                  {Object.entries(statusLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Zona */}
-            <div className="flex items-center gap-3">
-              <MapPin className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Zona</span>
-              <Input
-                value={editData.zona || ''}
-                onChange={(e) => setEditData({ ...editData, zona: e.target.value })}
-                placeholder="Inserisci zona"
-                className="flex-1 bg-muted/30 border-muted/50"
-              />
-            </div>
-
-            {/* Notes */}
-            <div className="flex items-start gap-3">
-              <FileText className="w-4 h-4 text-muted-foreground mt-2" />
-              <span className="text-muted-foreground w-24 text-sm mt-2">Note</span>
-              <Textarea
-                value={editData.notes || ''}
-                onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                placeholder="Aggiungi note"
-                className="flex-1 bg-muted/30 border-muted/50 min-h-[80px]"
-              />
-            </div>
-
-            {/* Created Date - Read only */}
-            <div className="flex items-center gap-3">
-              <Calendar className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Creata</span>
-              <span className="text-foreground text-sm">
-                {format(new Date(notizia.created_at), 'd MMMM yyyy', { locale: it })}
-              </span>
-            </div>
-
-            {/* Phone */}
-            <div className="flex items-center gap-3">
-              <Phone className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Telefono</span>
-              <div className="flex-1 flex gap-2">
-                <Input
-                  value={editData.phone || ''}
-                  onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
-                  placeholder="Numero di telefono"
-                  type="tel"
-                  className="flex-1 bg-muted/30 border-muted/50"
-                />
-                {editData.phone && (
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handlePhoneClick}
-                    className="active:scale-95 transition-transform bg-muted/30 border-muted/50"
-                  >
-                    <Phone className="w-4 h-4" />
-                  </Button>
-                )}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label className="text-xs font-medium mb-1.5 block text-muted-foreground">Creata</Label>
+              <div className="bg-muted/30 rounded-full px-4 py-2.5 text-sm text-muted-foreground">
+                {format(new Date(notizia.created_at), 'd MMM yyyy', { locale: it })}
               </div>
             </div>
-
-            {/* Type */}
-            <div className="flex items-center gap-3">
-              <Tag className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Tipo</span>
-              <Input
-                value={editData.type || ''}
-                onChange={(e) => setEditData({ ...editData, type: e.target.value })}
-                placeholder="Es: Villa, Casale, Appartamento"
-                className="flex-1 bg-muted/30 border-muted/50"
-              />
-            </div>
-
-            {/* Last Edited - Read only */}
-            <div className="flex items-center gap-3">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Modificata</span>
-              <span className="text-foreground text-sm">
-                {format(new Date(notizia.updated_at), 'd MMMM yyyy', { locale: it })}
-              </span>
-            </div>
-
-            {/* Reminder */}
-            <div className="flex items-center gap-3">
-              <Bell className="w-4 h-4 text-muted-foreground" />
-              <span className="text-muted-foreground w-24 text-sm">Promemoria</span>
-              <Input
+            <div>
+              <Label htmlFor="edit-reminder" className="text-xs font-medium mb-1.5 block">Promemoria</Label>
+              <input
+                id="edit-reminder"
                 type="datetime-local"
-                value={editData.reminder_date || ''}
+                value={editData.reminder_date}
                 onChange={(e) => setEditData({ ...editData, reminder_date: e.target.value })}
-                className="flex-1 bg-muted/30 border-muted/50"
+                className={pillInputClass}
               />
             </div>
           </div>
-
-          {/* Actions */}
-          <div className="mt-8 flex gap-2">
-            <Button onClick={handleSave} className="flex-1 active:scale-[0.98] transition-transform">
-              Salva
-            </Button>
-            <Button variant="outline" onClick={() => onOpenChange(false)} className="active:scale-[0.98] transition-transform bg-muted/30 border-muted/50">
+          
+          <div className="flex justify-center gap-2 pt-3">
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => onOpenChange(false)}
+              className="rounded-full px-5 text-sm active:scale-[0.98] transition-transform"
+            >
               Annulla
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={!editData.name.trim()}
+              className="rounded-full px-5 text-sm active:scale-[0.98] transition-transform"
+            >
+              Salva
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="icon" className="active:scale-95 transition-transform">
+                <Button 
+                  type="button"
+                  variant="destructive" 
+                  size="icon" 
+                  className="rounded-full w-10 h-10 active:scale-95 transition-transform"
+                >
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-background/90 backdrop-blur-xl border border-white/10">
+              <AlertDialogContent className="bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border-0 rounded-2xl">
                 <AlertDialogHeader>
                   <AlertDialogTitle>Eliminare questa notizia?</AlertDialogTitle>
                   <AlertDialogDescription>
@@ -283,13 +301,13 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="active:scale-[0.98] transition-transform">Annulla</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="active:scale-[0.98] transition-transform">Elimina</AlertDialogAction>
+                  <AlertDialogCancel className="rounded-full active:scale-[0.98] transition-transform">Annulla</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} className="rounded-full active:scale-[0.98] transition-transform">Elimina</AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );

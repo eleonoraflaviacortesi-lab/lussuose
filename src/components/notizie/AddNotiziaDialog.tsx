@@ -110,7 +110,7 @@ const AddNotiziaDialog = () => {
                         {formData.emoji}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-2" align="start">
+                    <PopoverContent className="w-auto p-2 bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl" align="start">
                       <div className="grid grid-cols-5 gap-1">
                         {commonEmojis.map((emoji) => (
                           <button
@@ -186,7 +186,7 @@ const AddNotiziaDialog = () => {
                   <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-xl">
                     <SelectItem value="new">New</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="done">Done</SelectItem>
