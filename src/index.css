@@ -125,22 +125,22 @@
 
   h1 {
     font-family: var(--font-sans);
-    @apply tracking-widest uppercase font-bold text-2xl;
+    @apply tracking-widest uppercase font-black text-2xl;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-semibold text-xl;
+    @apply tracking-wide uppercase font-bold text-xl;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-medium text-lg;
+    @apply tracking-wide uppercase font-bold text-lg;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply tracking-wide font-medium;
+    @apply tracking-wide font-semibold;
   }
 
   p {
