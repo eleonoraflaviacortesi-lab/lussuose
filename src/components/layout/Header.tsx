@@ -35,14 +35,17 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50">
+        {/* iOS Safe Area Background */}
+        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-primary" />
+        
         {/* Ticker Banner */}
-        <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden">
-          <div className="flex animate-ticker whitespace-nowrap">
+        <div className="bg-primary text-primary-foreground pt-[env(safe-area-inset-top)] pb-2.5 overflow-hidden">
+          <div className="flex animate-ticker whitespace-nowrap pt-2.5">
             {[...Array(6)].map((_, i) => (
               <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.2em] uppercase">
-                <span>MANCANO € {formatCurrency(remaining)} AL TRAGUARDO</span>
+                <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
                 <span>★</span>
-                <span>OBBIETTIVO FATTURATO AGENZIA € {formatCurrency(target)}</span>
+                <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>
                 <span>★</span>
               </span>
             ))}

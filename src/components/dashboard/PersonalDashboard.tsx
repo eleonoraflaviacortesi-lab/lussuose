@@ -174,7 +174,7 @@ const PersonalDashboard = () => {
 
       {/* Performance Charts Section */}
       <div className="bg-card rounded-3xl shadow-lg p-6 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-foreground" />
             <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-foreground">

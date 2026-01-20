@@ -124,6 +124,10 @@
     @apply border-border;
   }
 
+  html {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
