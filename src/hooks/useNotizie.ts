@@ -27,6 +27,7 @@ export interface NotiziaInput {
   notes?: string;
   status?: NotiziaStatus;
   reminder_date?: string;
+  created_at?: string;
 }
 
 export const useNotizie = () => {
