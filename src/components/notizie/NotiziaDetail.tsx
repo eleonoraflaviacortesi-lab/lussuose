@@ -30,11 +30,11 @@ interface NotiziaDetailProps {
 }
 
 const statusColors: Record<NotiziaStatus, string> = {
-  new: 'bg-yellow-500 text-yellow-950',
-  in_progress: 'bg-amber-600 text-amber-950',
-  done: 'bg-purple-600 text-purple-950',
-  on_shot: 'bg-pink-600 text-pink-950',
-  taken: 'bg-muted text-muted-foreground',
+  new: 'bg-yellow-200 text-yellow-900',
+  in_progress: 'bg-yellow-400 text-yellow-950',
+  done: 'bg-orange-400 text-orange-950',
+  on_shot: 'bg-red-400 text-red-950',
+  taken: 'bg-green-200 text-green-900',
 };
 
 const statusLabels: Record<NotiziaStatus, string> = {

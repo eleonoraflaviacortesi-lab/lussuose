@@ -34,9 +34,11 @@ const NotiziaCard = ({ notizia, onClick }: NotiziaCardProps) => {
               variant="secondary" 
               className={cn(
                 "mt-1 text-[10px] px-1.5 py-0",
-                notizia.status === 'on_shot' && "bg-pink-600/20 text-pink-300",
-                notizia.status === 'done' && "bg-purple-600/20 text-purple-300",
-                notizia.status === 'in_progress' && "bg-amber-600/20 text-amber-300"
+                notizia.status === 'new' && "bg-yellow-200/50 text-yellow-800",
+                notizia.status === 'in_progress' && "bg-yellow-400/30 text-yellow-900",
+                notizia.status === 'done' && "bg-orange-400/30 text-orange-800",
+                notizia.status === 'on_shot' && "bg-red-400/30 text-red-800",
+                notizia.status === 'taken' && "bg-green-200/50 text-green-800"
               )}
             >
               {notizia.zona}
