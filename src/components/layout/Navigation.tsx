@@ -15,7 +15,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   ];
 
   return (
-    <nav className="flex flex-col items-center gap-6 py-6 bg-background">
+    <nav className="flex flex-col items-center gap-4 py-4 bg-background">
       {/* Pill Navigation */}
       <div className="pill-nav">
         {tabs.map((tab, index) => {
@@ -32,21 +32,22 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 )}
                 title={tab.label}
               >
-                <Icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.5} />
+                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
               {index === 2 && (
-                <div className="w-px h-8 bg-border mx-1" />
+                <div className="w-px h-6 bg-border mx-1" />
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Report Button */}
-      <button className="btn-pink flex items-center gap-3">
-        <span className="text-lg">✦</span>
-        <span className="text-sm tracking-[0.3em]">REPORT</span>
-        <span className="text-lg">✦</span>
+      {/* Report Button - Black Minimal */}
+      <button 
+        onClick={() => onTabChange('inserisci')}
+        className="btn-report"
+      >
+        Report
       </button>
     </nav>
   );
