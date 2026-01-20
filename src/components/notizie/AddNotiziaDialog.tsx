@@ -317,32 +317,32 @@ const AddNotiziaDialog = () => {
               </div>
 
               {/* Google Calendar Button */}
-              {formData.reminder_date && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    const [hours, minutes] = formData.reminder_time.split(':');
-                    const reminderDate = new Date(formData.reminder_date!);
-                    reminderDate.setHours(parseInt(hours), parseInt(minutes));
-                    
-                    const url = generateNotiziaCalendarUrl({
-                      name: formData.name || 'Nuova notizia',
-                      emoji: formData.emoji,
-                      zona: formData.zona || undefined,
-                      type: formData.type || undefined,
-                      phone: formData.phone || undefined,
-                      notes: formData.notes || undefined,
-                      reminder_date: reminderDate,
-                    });
-                    window.open(url, '_blank');
-                  }}
-                  className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
-                >
-                  <CalendarIcon className="w-4 h-4" />
-                  <span>Aggiungi a Google Calendar</span>
-                  <ExternalLink className="w-3 h-3 opacity-60" />
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => {
+                  const [hours, minutes] = formData.reminder_time.split(':');
+                  const reminderDate = formData.reminder_date 
+                    ? new Date(formData.reminder_date)
+                    : new Date();
+                  reminderDate.setHours(parseInt(hours), parseInt(minutes));
+                  
+                  const url = generateNotiziaCalendarUrl({
+                    name: formData.name || 'Nuova notizia',
+                    emoji: formData.emoji,
+                    zona: formData.zona || undefined,
+                    type: formData.type || undefined,
+                    phone: formData.phone || undefined,
+                    notes: formData.notes || undefined,
+                    reminder_date: reminderDate,
+                  });
+                  window.open(url, '_blank');
+                }}
+                className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
+              >
+                <CalendarIcon className="w-4 h-4" />
+                <span>Aggiungi a Google Calendar</span>
+                <ExternalLink className="w-3 h-3 opacity-60" />
+              </button>
               
               <div className="flex justify-center gap-2 pt-3">
                 <Button 
