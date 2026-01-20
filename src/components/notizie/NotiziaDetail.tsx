@@ -337,48 +337,51 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           </div>
 
           {/* Google Calendar Button */}
-          {editData.reminder_date && (
-            <button
-              type="button"
-              onClick={() => {
-                // First save the notizia
-                let reminderDateTime: string | null = null;
-                const [hours, minutes] = editData.reminder_time.split(':');
-                const reminderDate = new Date(editData.reminder_date!);
-                reminderDate.setHours(parseInt(hours), parseInt(minutes));
+          <button
+            type="button"
+            onClick={() => {
+              // First save the notizia
+              let reminderDateTime: string | null = null;
+              const [hours, minutes] = editData.reminder_time.split(':');
+              const reminderDate = editData.reminder_date 
+                ? new Date(editData.reminder_date)
+                : new Date();
+              reminderDate.setHours(parseInt(hours), parseInt(minutes));
+              
+              if (editData.reminder_date) {
                 reminderDateTime = reminderDate.toISOString();
-                
-                updateNotizia.mutate({
-                  id: notizia.id,
-                  name: editData.name,
-                  zona: editData.zona || undefined,
-                  phone: editData.phone || undefined,
-                  type: editData.type || undefined,
-                  notes: editData.notes || undefined,
-                  status: editData.status,
-                  emoji: editData.emoji || '📋',
-                  reminder_date: reminderDateTime,
-                });
-                
-                // Then open Google Calendar
-                const url = generateNotiziaCalendarUrl({
-                  name: editData.name,
-                  emoji: editData.emoji,
-                  zona: editData.zona || undefined,
-                  type: editData.type || undefined,
-                  phone: editData.phone || undefined,
-                  notes: editData.notes || undefined,
-                  reminder_date: reminderDate,
-                });
-                window.open(url, '_blank');
-              }}
-              className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
-            >
-              <CalendarIcon className="w-4 h-4" />
-              <span>Aggiungi a Google Calendar</span>
-              <ExternalLink className="w-3 h-3 opacity-60" />
-            </button>
-          )}
+              }
+              
+              updateNotizia.mutate({
+                id: notizia.id,
+                name: editData.name,
+                zona: editData.zona || undefined,
+                phone: editData.phone || undefined,
+                type: editData.type || undefined,
+                notes: editData.notes || undefined,
+                status: editData.status,
+                emoji: editData.emoji || '📋',
+                reminder_date: reminderDateTime,
+              });
+              
+              // Then open Google Calendar
+              const url = generateNotiziaCalendarUrl({
+                name: editData.name,
+                emoji: editData.emoji,
+                zona: editData.zona || undefined,
+                type: editData.type || undefined,
+                phone: editData.phone || undefined,
+                notes: editData.notes || undefined,
+                reminder_date: reminderDate,
+              });
+              window.open(url, '_blank');
+            }}
+            className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
+          >
+            <CalendarIcon className="w-4 h-4" />
+            <span>Aggiungi a Google Calendar</span>
+            <ExternalLink className="w-3 h-3 opacity-60" />
+          </button>
           
           <div className="flex justify-center gap-2 pt-3">
             <Button 
