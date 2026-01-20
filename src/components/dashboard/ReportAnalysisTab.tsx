@@ -1,11 +1,27 @@
 import { useState, useMemo } from 'react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
-import { Calendar, ChevronLeft, ChevronRight, Edit2, X, Check } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, X, Check } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type FilterPeriod = 'week' | 'month' | '6months' | 'year';
 
 const ReportAnalysisTab = () => {
-  const { myData, saveDailyData } = useDailyData();
+  const { myData, saveDailyData, deleteDailyData } = useDailyData();
   
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('month');
   const [selectedWeekStart, setSelectedWeekStart] = useState(() => {
@@ -14,8 +30,10 @@ const ReportAnalysisTab = () => {
     const diff = now.getDate() - day + (day === 0 ? -6 : 1);
     return new Date(now.setDate(diff));
   });
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<any>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const getDateRange = () => {
     const now = new Date();
@@ -87,11 +105,19 @@ const ReportAnalysisTab = () => {
     }).format(value);
   };
 
-  const formatDate = (dateStr: string) => {
+  const formatShortDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('it-IT', {
-      weekday: 'short',
       day: '2-digit',
       month: '2-digit',
+    });
+  };
+
+  const formatFullDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('it-IT', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
     });
   };
 
@@ -101,28 +127,35 @@ const ReportAnalysisTab = () => {
     setSelectedWeekStart(newDate);
   };
 
-  const startEdit = (entry: any) => {
-    setEditingId(entry.id);
+  const openReportDetail = (entry: any) => {
+    setSelectedReport(entry);
+    setIsEditing(false);
+    setEditFormData(null);
+  };
+
+  const startEditing = () => {
+    if (!selectedReport) return;
+    setIsEditing(true);
     setEditFormData({
-      contatti_reali: entry.contatti_reali,
-      notizie_reali: entry.notizie_reali,
-      appuntamenti_vendita: entry.appuntamenti_vendita,
-      nuove_trattative: entry.nuove_trattative || 0,
-      trattative_chiuse: entry.trattative_chiuse || 0,
-      fatturato_a_credito: Number(entry.fatturato_a_credito) || 0,
-      vendite_numero: entry.vendite_numero,
-      vendite_valore: Number(entry.vendite_valore),
-      date: entry.date,
+      contatti_reali: selectedReport.contatti_reali,
+      notizie_reali: selectedReport.notizie_reali,
+      appuntamenti_vendita: selectedReport.appuntamenti_vendita,
+      nuove_trattative: selectedReport.nuove_trattative || 0,
+      trattative_chiuse: selectedReport.trattative_chiuse || 0,
+      fatturato_a_credito: Number(selectedReport.fatturato_a_credito) || 0,
+      vendite_numero: selectedReport.vendite_numero,
+      vendite_valore: Number(selectedReport.vendite_valore),
+      date: selectedReport.date,
     });
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
+  const cancelEditing = () => {
+    setIsEditing(false);
     setEditFormData(null);
   };
 
   const saveEdit = () => {
-    if (!editFormData) return;
+    if (!editFormData || !selectedReport) return;
     
     const input: DailyDataInput = {
       date: editFormData.date,
@@ -133,7 +166,7 @@ const ReportAnalysisTab = () => {
       clienti_gestiti: 0,
       appuntamenti_vendita: editFormData.appuntamenti_vendita,
       acquisizioni: 0,
-      incarichi_vendita: 0,
+      incarichi_vendita: selectedReport.incarichi_vendita || 0,
       vendite_numero: editFormData.vendite_numero,
       vendite_valore: editFormData.vendite_valore,
       affitti_numero: 0,
@@ -147,8 +180,19 @@ const ReportAnalysisTab = () => {
     
     saveDailyData.mutate(input, {
       onSuccess: () => {
-        setEditingId(null);
+        setSelectedReport(null);
+        setIsEditing(false);
         setEditFormData(null);
+      },
+    });
+  };
+
+  const handleDelete = () => {
+    if (!deleteConfirmId) return;
+    deleteDailyData.mutate(deleteConfirmId, {
+      onSuccess: () => {
+        setDeleteConfirmId(null);
+        setSelectedReport(null);
       },
     });
   };
@@ -161,6 +205,25 @@ const ReportAnalysisTab = () => {
       <p className="text-2xl font-light text-foreground">
         {isCurrency ? formatCurrency(value) : value}
       </p>
+    </div>
+  );
+
+  const DetailRow = ({ label, value, isCurrency = false }: { label: string; value: number; isCurrency?: boolean }) => (
+    <div className="flex items-center justify-between py-3 border-b border-muted last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-lg font-medium">{isCurrency ? formatCurrency(value) : value}</span>
+    </div>
+  );
+
+  const EditField = ({ label, field }: { label: string; field: string }) => (
+    <div className="flex items-center justify-between py-3 border-b border-muted last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <input
+        type="number"
+        value={editFormData[field]}
+        onChange={(e) => setEditFormData({ ...editFormData, [field]: parseInt(e.target.value) || 0 })}
+        className="w-24 bg-muted rounded-lg px-3 py-2 text-right text-sm font-medium"
+      />
     </div>
   );
 
@@ -238,7 +301,7 @@ const ReportAnalysisTab = () => {
         </div>
       </div>
 
-      {/* Report List */}
+      {/* Report List - Preview Only */}
       <div>
         <h2 className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-4">
           DETTAGLIO REPORT ({filteredData.length})
@@ -253,123 +316,175 @@ const ReportAnalysisTab = () => {
             filteredData.map((entry) => (
               <div 
                 key={entry.id} 
-                className="bg-card rounded-2xl shadow-lg p-4 transition-all duration-150"
+                className="bg-card rounded-2xl shadow-lg p-4 transition-all duration-150 cursor-pointer hover:shadow-xl"
+                onClick={() => openReportDetail(entry)}
               >
-                {editingId === entry.id ? (
-                  // Edit Mode
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">{formatDate(entry.date)}</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={cancelEdit}
-                          className="w-8 h-8 rounded-full bg-muted flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={saveEdit}
-                          disabled={saveDailyData.isPending}
-                          className="w-8 h-8 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/80 transition-colors disabled:opacity-50"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                      </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
+                      <span className="text-sm font-semibold">{formatShortDate(entry.date)}</span>
                     </div>
-                    <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                      {[
-                        { key: 'contatti_reali', label: 'Contatti' },
-                        { key: 'notizie_reali', label: 'Notizie' },
-                        { key: 'appuntamenti_vendita', label: 'Appunt.' },
-                        { key: 'nuove_trattative', label: 'Nuove Tratt.' },
-                        { key: 'trattative_chiuse', label: 'Tratt. Chiuse' },
-                        { key: 'vendite_numero', label: 'Vendite' },
-                      ].map(({ key, label }) => (
-                        <div key={key}>
-                          <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {label}
-                          </label>
-                          <input
-                            type="number"
-                            value={editFormData[key]}
-                            onChange={(e) => setEditFormData({ ...editFormData, [key]: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                          />
-                        </div>
-                      ))}
-                      {[
-                        { key: 'fatturato_a_credito', label: 'Fatt. Credito' },
-                        { key: 'vendite_valore', label: 'Fatturato' },
-                      ].map(({ key, label }) => (
-                        <div key={key}>
-                          <label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            {label}
-                          </label>
-                          <input
-                            type="number"
-                            value={editFormData[key]}
-                            onChange={(e) => setEditFormData({ ...editFormData, [key]: parseInt(e.target.value) || 0 })}
-                            className="w-full bg-muted rounded-lg px-3 py-2 text-sm"
-                          />
-                        </div>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                      <div>
+                        <span className="text-muted-foreground">Cont.</span>
+                        <span className="ml-1 font-medium">{entry.contatti_reali}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Not.</span>
+                        <span className="ml-1 font-medium">{entry.notizie_reali}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">App.</span>
+                        <span className="ml-1 font-medium">{entry.appuntamenti_vendita}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">N.Tr.</span>
+                        <span className="ml-1 font-medium">{entry.nuove_trattative || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">T.Ch.</span>
+                        <span className="ml-1 font-medium">{entry.trattative_chiuse || 0}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">F.Cr.</span>
+                        <span className="ml-1 font-medium">€{Number(entry.fatturato_a_credito || 0).toLocaleString()}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Vend.</span>
+                        <span className="ml-1 font-medium">{entry.vendite_numero}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Fatt.</span>
+                        <span className="ml-1 font-medium">€{Number(entry.vendite_valore).toLocaleString()}</span>
+                      </div>
                     </div>
                   </div>
-                ) : (
-                  // View Mode
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center">
-                        <span className="text-sm font-semibold">{formatDate(entry.date).split(' ')[1]}</span>
-                      </div>
-                      <div className="grid grid-cols-4 md:grid-cols-8 gap-x-4 gap-y-1 text-xs">
-                        <div>
-                          <span className="text-muted-foreground">Cont.</span>
-                          <span className="ml-1 font-medium">{entry.contatti_reali}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Not.</span>
-                          <span className="ml-1 font-medium">{entry.notizie_reali}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">App.</span>
-                          <span className="ml-1 font-medium">{entry.appuntamenti_vendita}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">N.Tr.</span>
-                          <span className="ml-1 font-medium">{entry.nuove_trattative || 0}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">T.Ch.</span>
-                          <span className="ml-1 font-medium">{entry.trattative_chiuse || 0}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">F.Cr.</span>
-                          <span className="ml-1 font-medium">€{Number(entry.fatturato_a_credito || 0).toLocaleString()}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Vend.</span>
-                          <span className="ml-1 font-medium">{entry.vendite_numero}</span>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Fatt.</span>
-                          <span className="ml-1 font-medium">€{Number(entry.vendite_valore).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => startEdit(entry)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openReportDetail(entry);
+                        setTimeout(startEditing, 100);
+                      }}
                       className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeleteConfirmId(entry.id);
+                      }}
+                      className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
             ))
           )}
         </div>
       </div>
+
+      {/* Report Detail Dialog */}
+      <Dialog open={!!selectedReport} onOpenChange={() => setSelectedReport(null)}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span className="text-lg font-bold tracking-tight">DETTAGLIO REPORT</span>
+              {!isEditing && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={startEditing}
+                    className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center hover:bg-foreground hover:text-background transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirmId(selectedReport?.id)}
+                    className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center hover:bg-destructive hover:text-destructive-foreground transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+          
+          {selectedReport && (
+            <div className="space-y-4">
+              <div className="text-center py-4 bg-muted rounded-xl">
+                <p className="text-xs text-muted-foreground uppercase tracking-wider">Data</p>
+                <p className="text-lg font-medium capitalize">{formatFullDate(selectedReport.date)}</p>
+              </div>
+
+              {isEditing && editFormData ? (
+                <div className="space-y-1">
+                  <EditField label="Contatti Reali" field="contatti_reali" />
+                  <EditField label="Notizie Acquisite" field="notizie_reali" />
+                  <EditField label="Appuntamenti Vendita" field="appuntamenti_vendita" />
+                  <EditField label="Nuove Trattative" field="nuove_trattative" />
+                  <EditField label="Trattative Chiuse" field="trattative_chiuse" />
+                  <EditField label="Fatturato a Credito (€)" field="fatturato_a_credito" />
+                  <EditField label="Numero Vendite" field="vendite_numero" />
+                  <EditField label="Fatturato (€)" field="vendite_valore" />
+                  
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={cancelEditing}
+                      className="flex-1 h-12 rounded-xl bg-muted flex items-center justify-center gap-2 font-medium hover:bg-muted/80 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                      Annulla
+                    </button>
+                    <button
+                      onClick={saveEdit}
+                      disabled={saveDailyData.isPending}
+                      className="flex-1 h-12 rounded-xl bg-foreground text-background flex items-center justify-center gap-2 font-medium hover:bg-foreground/90 transition-colors disabled:opacity-50"
+                    >
+                      <Check className="w-4 h-4" />
+                      Salva
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <DetailRow label="Contatti Reali" value={selectedReport.contatti_reali} />
+                  <DetailRow label="Notizie Acquisite" value={selectedReport.notizie_reali} />
+                  <DetailRow label="Appuntamenti Vendita" value={selectedReport.appuntamenti_vendita} />
+                  <DetailRow label="Nuove Trattative" value={selectedReport.nuove_trattative || 0} />
+                  <DetailRow label="Trattative Chiuse" value={selectedReport.trattative_chiuse || 0} />
+                  <DetailRow label="Fatturato a Credito" value={Number(selectedReport.fatturato_a_credito) || 0} isCurrency />
+                  <DetailRow label="Numero Vendite" value={selectedReport.vendite_numero} />
+                  <DetailRow label="Fatturato" value={Number(selectedReport.vendite_valore)} isCurrency />
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={() => setDeleteConfirmId(null)}>
+        <AlertDialogContent className="rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare questo report?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Questa azione non può essere annullata. Il report verrà eliminato permanentemente.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-xl">Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl"
+            >
+              {deleteDailyData.isPending ? 'Eliminazione...' : 'Elimina'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
