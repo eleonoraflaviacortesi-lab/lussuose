@@ -97,12 +97,12 @@ const PersonalDashboard = () => {
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
   const PeriodToggle = () => (
-    <div className="flex items-center gap-1 bg-muted rounded-full p-1">
+    <div className="inline-flex items-center gap-1 bg-muted rounded-full p-1">
       {(['week', 'month', 'year'] as const).map((p) => (
         <button
           key={p}
           onClick={() => setChartPeriod(p)}
-          className={`px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
+          className={`px-4 py-1.5 text-[10px] font-medium tracking-[0.1em] uppercase rounded-full transition-all duration-150 ${
             chartPeriod === p 
               ? 'bg-foreground text-background' 
               : 'text-muted-foreground hover:text-foreground'
@@ -174,7 +174,7 @@ const PersonalDashboard = () => {
 
       {/* Performance Charts Section */}
       <div className="bg-card rounded-3xl shadow-lg p-6 space-y-6">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-foreground" />
             <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-foreground">
@@ -185,7 +185,7 @@ const PersonalDashboard = () => {
         </div>
 
         {/* Chart Grid */}
-        <div className="space-y-6">
+        <div key={chartPeriod} className="space-y-6 animate-fade-in">
           {/* Incarichi Chart */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
