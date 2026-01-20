@@ -97,7 +97,7 @@ const PersonalDashboard = () => {
             FATTURATO AGENZIA
           </p>
         </div>
-        <div className="col-span-2 bg-card rounded-2xl border border-border p-5">
+        <div className="col-span-2 bg-card rounded-2xl shadow-lg p-5">
           <p className="text-xs font-medium tracking-[0.15em] uppercase text-primary mb-2">
             GIORNATE TRACKING
           </p>
@@ -108,7 +108,7 @@ const PersonalDashboard = () => {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-card rounded-2xl border border-border p-5">
+        <div className="bg-card rounded-2xl shadow-lg p-5">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CONTATTI REALI
@@ -117,7 +117,7 @@ const PersonalDashboard = () => {
           </div>
           <p className="text-3xl font-light text-foreground">{contatti}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
+        <div className="bg-card rounded-2xl shadow-lg p-5">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               NOTIZIE ACQUISITE
@@ -126,7 +126,7 @@ const PersonalDashboard = () => {
           </div>
           <p className="text-3xl font-light text-foreground">{notizie}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
+        <div className="bg-card rounded-2xl shadow-lg p-5">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CHIUSURE TOTALI
@@ -135,7 +135,7 @@ const PersonalDashboard = () => {
           </div>
           <p className="text-3xl font-light text-foreground">{chiusure}</p>
         </div>
-        <div className="bg-card rounded-2xl border border-border p-5">
+        <div className="bg-card rounded-2xl shadow-lg p-5">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CONVERSIONI
@@ -147,7 +147,7 @@ const PersonalDashboard = () => {
       </div>
 
       {/* Incarichi Team Card */}
-      <div className="bg-card rounded-3xl border border-border p-6 relative overflow-hidden">
+      <div className="bg-card rounded-3xl shadow-lg p-6 relative overflow-hidden">
         <div className="absolute right-4 top-4 opacity-10">
           <Gift className="w-32 h-32 text-primary" />
         </div>
@@ -176,7 +176,7 @@ const PersonalDashboard = () => {
             <span className="font-semibold text-primary">{incarichiPercent}%</span>
           </div>
 
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-muted">
             <span>🌷</span>
             <span>💎</span>
             <span>🖤</span>
@@ -189,7 +189,7 @@ const PersonalDashboard = () => {
 
       {/* Trend Chart */}
       {chartData.length > 0 && (
-        <div className="bg-card rounded-3xl border border-border p-6">
+        <div className="bg-card rounded-3xl shadow-lg p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
               TREND NOTIZIE PERSONALI
