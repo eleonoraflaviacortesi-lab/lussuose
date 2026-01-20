@@ -52,18 +52,18 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </div>
         </div>
 
-        {/* Main Header - Liquid Glass Effect - Compact */}
-        <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[1.5rem]">
+        {/* Main Header - Liquid Glass Effect */}
+        <div className="glass-header flex items-center justify-between px-4 py-2 rounded-b-[1.5rem]">
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
-            className="w-9 h-9 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-lg"
+            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
           >
             {profile?.avatar_emoji || '🖤'}
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Le Lussuose" className="h-14" />
+          <img src={logo} alt="Le Lussuose" className="h-16" />
 
           {/* Logout */}
           <button 
