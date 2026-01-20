@@ -19,7 +19,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   ];
 
   return (
-    <nav className="flex flex-col items-center gap-3 py-3 bg-background">
+    <nav className="flex flex-col items-center gap-4 py-4 bg-background">
       {/* Pill Navigation */}
       <div className="pill-nav">
         {tabs.map((tab, index) => {
@@ -36,7 +36,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 )}
                 title={tab.label}
               >
-                <Icon className="w-3.5 h-3.5" strokeWidth={isActive ? 2 : 1.5} />
+                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
               {index === 3 && (
                 <div className="w-px h-5 bg-border mx-0.5" />

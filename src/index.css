@@ -271,15 +271,15 @@
     background: rgba(0, 0, 0, 0.04);
   }
 
-  /* Pill Navigation - Minimal & Compact */
+  /* Pill Navigation - Minimal */
   .pill-nav {
     background: hsl(var(--secondary));
-    @apply rounded-full px-1 py-1 flex items-center gap-0.5;
+    @apply rounded-full px-1.5 py-1.5 flex items-center gap-1;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .pill-nav-item {
-    @apply flex items-center justify-center w-8 h-8 rounded-full transition-all duration-100;
+    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100;
   }
 
   .pill-nav-item.active {
@@ -292,7 +292,7 @@
 
   /* Report Button - Dynamic States */
   .btn-report {
-    @apply rounded-full px-5 py-2 font-medium uppercase tracking-widest text-xs;
+    @apply rounded-full px-6 py-2.5 font-medium uppercase tracking-widest text-xs;
     transition: all 0.15s ease;
   }
 
