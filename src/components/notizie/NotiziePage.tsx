@@ -32,7 +32,7 @@ const NotiziePage = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 pt-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Le mie Notizie</h2>
