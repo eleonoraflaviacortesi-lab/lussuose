@@ -14,7 +14,7 @@ interface ProfileModalProps {
 const EMOJI_OPTIONS = ['👑', '👩‍💼', '📈', '🏠', '✨', '🖤', '💼', '💎'];
 
 const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
-  const { profile, user } = useAuth();
+  const { profile, user, refetchProfile } = useAuth();
   const [avatarType, setAvatarType] = useState<'emoji' | 'photo'>('emoji');
   const [selectedEmoji, setSelectedEmoji] = useState('🖤');
   const [customEmoji, setCustomEmoji] = useState('');
@@ -24,6 +24,9 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
+      if (profile.avatar_emoji) {
+        setSelectedEmoji(profile.avatar_emoji);
+      }
     }
   }, [profile]);
 
@@ -32,13 +35,18 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
     
     setIsLoading(true);
     try {
+      const avatarToSave = customEmoji || selectedEmoji;
       const { error } = await supabase
         .from('profiles')
-        .update({ full_name: fullName })
+        .update({ 
+          full_name: fullName,
+          avatar_emoji: avatarToSave
+        })
         .eq('user_id', user.id);
       
       if (error) throw error;
       
+      await refetchProfile();
       toast({ title: 'Profilo aggiornato con successo!' });
       onClose();
     } catch (error: any) {
