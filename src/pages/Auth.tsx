@@ -73,7 +73,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Pink Header */}
       <div className="bg-primary py-8 text-center rounded-b-3xl">
-        <img src={logo} alt="Le Lussuose" className="h-12 mx-auto invert brightness-0 invert" />
+        <img src={logo} alt="Le Lussuose" className="h-16 mx-auto invert brightness-0 invert" />
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
