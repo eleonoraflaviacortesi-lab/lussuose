@@ -152,8 +152,8 @@ const ReportForm = () => {
       {/* Two Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Attività Lead */}
-        <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-border">
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
+          <div className="flex items-center gap-2 pb-4 border-b border-muted">
             <span className="text-lg">⚡</span>
             <h3 className="text-sm font-bold tracking-[0.15em] uppercase">ATTIVITÀ LEAD</h3>
           </div>
@@ -184,8 +184,8 @@ const ReportForm = () => {
         </div>
 
         {/* Risultati Chiusura */}
-        <div className="bg-card rounded-2xl border border-border p-6 space-y-6">
-          <div className="flex items-center gap-2 pb-4 border-b border-border">
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
+          <div className="flex items-center gap-2 pb-4 border-b border-muted">
             <span className="text-lg">€</span>
             <h3 className="text-sm font-bold tracking-[0.15em] uppercase">RISULTATI CHIUSURA</h3>
           </div>
@@ -238,8 +238,8 @@ const ReportForm = () => {
         disabled={saveDailyData.isPending}
         className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
       >
-        <Check className="w-5 h-5" />
         {saveDailyData.isPending ? 'SALVATAGGIO...' : 'SALVA REPORT PERFORMANCE'}
+        <Check className="w-5 h-5" />
       </button>
     </div>
   );
