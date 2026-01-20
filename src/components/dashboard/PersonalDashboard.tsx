@@ -19,7 +19,12 @@ const PersonalDashboard = () => {
   const currentSales = kpis?.vendite?.value || 0;
   const completionPercent = Math.min(100, Math.round((currentSales / annualTarget) * 100));
   const fatturato = kpis?.fatturato?.value || 0;
-  const giornateTacking = myData?.length || 0;
+  
+  // Calculate fatturato a credito from myData
+  const fatturatoCredito = useMemo(() => {
+    if (!myData) return 0;
+    return myData.reduce((sum, d) => sum + (Number(d.fatturato_a_credito) || 0), 0);
+  }, [myData]);
 
   // Prepare performance chart data based on selected period
   const performanceChartData = useMemo(() => {
@@ -151,30 +156,34 @@ const PersonalDashboard = () => {
         </div>
       </div>
 
-      {/* Volume Generato & Giornate */}
-      <div className="grid grid-cols-5 gap-4">
-        <div className="col-span-3 dark-card">
+      {/* Incarichi Widget */}
+      <IncarchiWidget weeklyIdeal={3} />
+
+      {/* Volume Generato & Volume a Credito */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="dark-card">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
             VOLUME GENERATO
           </p>
-          <p className="text-4xl font-light text-white mb-1">
+          <p className="text-3xl font-light text-white mb-1">
             {formatCurrency(fatturato)}
           </p>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
             FATTURATO AGENZIA
           </p>
         </div>
-        <div className="col-span-2 bg-card rounded-2xl shadow-lg p-5">
-          <p className="text-xs font-medium tracking-[0.15em] uppercase text-foreground mb-2">
-            GIORNATE TRACKING
+        <div className="dark-card">
+          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
+            VOLUME A CREDITO
           </p>
-          <p className="text-4xl font-light text-foreground">{giornateTacking}</p>
-          <p className="text-xs text-muted-foreground mt-1">DATI ACQUISITI</p>
+          <p className="text-3xl font-light text-white mb-1">
+            {formatCurrency(fatturatoCredito)}
+          </p>
+          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+            IN ATTESA DI ROGITO
+          </p>
         </div>
       </div>
-
-      {/* Incarichi Widget */}
-      <IncarchiWidget weeklyIdeal={3} />
 
       {/* Performance Charts Section */}
       <div className="bg-card rounded-3xl shadow-lg p-6 space-y-6">
