@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
-import { LayoutGrid, PlusCircle, Users, Settings, BarChart3 } from 'lucide-react';
+import { LayoutGrid, PlusCircle, Users, Settings, BarChart3, Check } from 'lucide-react';
+import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
 interface NavigationProps {
   activeTab: string;
@@ -7,6 +8,8 @@ interface NavigationProps {
 }
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
+  const { hasReportedToday } = useTodayReportStatus();
+  
   const tabs = [
     { id: 'numeri', icon: LayoutGrid, label: 'I miei numeri' },
     { id: 'inserisci', icon: PlusCircle, label: 'Report giornaliero' },
@@ -16,7 +19,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   ];
 
   return (
-    <nav className="flex flex-col items-center gap-4 py-4 bg-background">
+    <nav className="flex flex-col items-center gap-3 py-3 bg-background">
       {/* Pill Navigation */}
       <div className="pill-nav">
         {tabs.map((tab, index) => {
@@ -33,22 +36,32 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 )}
                 title={tab.label}
               >
-                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
+                <Icon className="w-3.5 h-3.5" strokeWidth={isActive ? 2 : 1.5} />
               </button>
               {index === 3 && (
-                <div className="w-px h-6 bg-border mx-1" />
+                <div className="w-px h-5 bg-border mx-0.5" />
               )}
             </div>
           );
         })}
       </div>
 
-      {/* Report Button - Black Minimal */}
+      {/* Report Button - Dynamic State */}
       <button 
         onClick={() => onTabChange('inserisci')}
-        className="btn-report"
+        className={cn(
+          'btn-report flex items-center gap-2',
+          hasReportedToday ? 'completed' : 'pending'
+        )}
       >
-        Report
+        {hasReportedToday ? (
+          <>
+            <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <span>Fatto</span>
+          </>
+        ) : (
+          'Report'
+        )}
       </button>
     </nav>
   );

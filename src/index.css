@@ -271,15 +271,15 @@
     background: rgba(0, 0, 0, 0.04);
   }
 
-  /* Pill Navigation - Minimal */
+  /* Pill Navigation - Minimal & Compact */
   .pill-nav {
     background: hsl(var(--secondary));
-    @apply rounded-full px-1.5 py-1.5 flex items-center gap-0.5;
+    @apply rounded-full px-1 py-1 flex items-center gap-0.5;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   }
 
   .pill-nav-item {
-    @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-100;
+    @apply flex items-center justify-center w-8 h-8 rounded-full transition-all duration-100;
   }
 
   .pill-nav-item.active {
@@ -290,21 +290,46 @@
     @apply text-muted-foreground hover:text-foreground;
   }
 
-  /* Report Button - Black Minimal */
+  /* Report Button - Dynamic States */
   .btn-report {
-    @apply text-background bg-foreground rounded-full px-6 py-3 font-medium uppercase tracking-widest text-xs;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    transition: all 0.1s ease;
+    @apply rounded-full px-5 py-2 font-medium uppercase tracking-widest text-xs;
+    transition: all 0.15s ease;
+  }
+
+  .btn-report.pending {
+    background: hsl(var(--pink));
+    color: white;
+    box-shadow: 
+      0 4px 20px hsla(326, 80%, 55%, 0.4),
+      0 0 30px hsla(326, 80%, 55%, 0.3);
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .btn-report.completed {
+    @apply bg-foreground text-background;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
   .btn-report:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     transform: translateY(-1px);
   }
 
-  /* Dark Card */
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 
+        0 4px 20px hsla(326, 80%, 55%, 0.4),
+        0 0 30px hsla(326, 80%, 55%, 0.3);
+    }
+    50% {
+      box-shadow: 
+        0 4px 30px hsla(326, 80%, 55%, 0.6),
+        0 0 50px hsla(326, 80%, 55%, 0.5);
+    }
+  }
+
+  /* Dark Card - Compact */
   .dark-card {
-    @apply bg-dashboard-card text-white rounded-2xl p-6;
+    @apply bg-dashboard-card text-white rounded-xl p-4;
   }
 
   /* Ticker animation */
