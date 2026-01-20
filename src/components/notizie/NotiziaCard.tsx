@@ -9,22 +9,14 @@ interface NotiziaCardProps {
   onClick: () => void;
 }
 
-const statusIcons: Record<string, string> = {
-  new: '🆕',
-  in_progress: '🔴',
-  done: '😶',
-  on_shot: '🌸',
-  taken: '🌺',
-};
-
 const NotiziaCard = ({ notizia, onClick }: NotiziaCardProps) => {
   return (
     <div
       onClick={onClick}
-      className="bg-card rounded-lg p-3 cursor-pointer hover:bg-accent/50 transition-colors border border-border/50"
+      className="bg-card rounded-xl p-3 cursor-pointer hover:bg-accent/30 transition-all border-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
     >
       <div className="flex items-start gap-2">
-        <span className="text-sm">{statusIcons[notizia.status] || '📋'}</span>
+        <span className="text-base">{(notizia as any).emoji || '📋'}</span>
         <div className="flex-1 min-w-0">
           <h4 className="font-medium text-sm text-foreground truncate">
             {notizia.name}

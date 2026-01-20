@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, MapPin, FileText, Calendar, Clock, Tag, Bell, X, Trash2 } from 'lucide-react';
+import { Phone, MapPin, FileText, Calendar, Clock, Tag, Bell, Trash2, Smile } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
 import {
@@ -22,6 +23,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆'];
 
 interface NotiziaDetailProps {
   notizia: Notizia | null;
@@ -60,6 +63,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       type: notizia.type || '',
       notes: notizia.notes || '',
       status: notizia.status,
+      emoji: notizia.emoji || '📋',
       reminder_date: notizia.reminder_date?.slice(0, 16) || '',
     });
     setIsEditing(true);
@@ -69,6 +73,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     updateNotizia.mutate({
       id: notizia.id,
       ...editData,
+      emoji: editData.emoji || '📋',
       reminder_date: editData.reminder_date || null,
     });
     setIsEditing(false);
@@ -89,8 +94,40 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-md overflow-y-auto">
         <SheetHeader className="text-left">
-          <div className="flex items-center justify-between">
-            <SheetTitle className="text-2xl font-bold pr-8">
+          <div className="flex items-center gap-3">
+            {/* Emoji */}
+            {isEditing ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    type="button"
+                    className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center text-2xl hover:bg-accent/50 transition-colors"
+                  >
+                    {editData.emoji || '📋'}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-2" align="start">
+                  <div className="grid grid-cols-5 gap-1">
+                    {commonEmojis.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => setEditData({ ...editData, emoji })}
+                        className={cn(
+                          "w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors",
+                          editData.emoji === emoji && "bg-accent"
+                        )}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <span className="text-3xl">{notizia.emoji || '📋'}</span>
+            )}
+            <SheetTitle className="text-2xl font-bold flex-1">
               {isEditing ? (
                 <Input
                   value={editData.name || ''}
