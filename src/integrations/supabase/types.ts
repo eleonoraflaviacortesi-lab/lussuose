@@ -203,6 +203,72 @@ export type Database = {
         }
         Relationships: []
       }
+      user_settings: {
+        Row: {
+          acquisizioni_settimana: number
+          appuntamenti_settimana: number
+          base_fissa_annuale: number
+          contatti_settimana: number
+          created_at: string
+          fatturato_credito_settimana: number
+          fatturato_generato_settimana: number
+          id: string
+          incarichi_settimana: number
+          notizie_settimana: number
+          nuove_trattative_settimana: number
+          obbiettivo_fatturato: number
+          percentuale_personale: number
+          prezzo_medio_vendita: number
+          provvigione_agenzia: number
+          trattative_chiuse_settimana: number
+          updated_at: string
+          user_id: string
+          vendite_settimana: number
+        }
+        Insert: {
+          acquisizioni_settimana?: number
+          appuntamenti_settimana?: number
+          base_fissa_annuale?: number
+          contatti_settimana?: number
+          created_at?: string
+          fatturato_credito_settimana?: number
+          fatturato_generato_settimana?: number
+          id?: string
+          incarichi_settimana?: number
+          notizie_settimana?: number
+          nuove_trattative_settimana?: number
+          obbiettivo_fatturato?: number
+          percentuale_personale?: number
+          prezzo_medio_vendita?: number
+          provvigione_agenzia?: number
+          trattative_chiuse_settimana?: number
+          updated_at?: string
+          user_id: string
+          vendite_settimana?: number
+        }
+        Update: {
+          acquisizioni_settimana?: number
+          appuntamenti_settimana?: number
+          base_fissa_annuale?: number
+          contatti_settimana?: number
+          created_at?: string
+          fatturato_credito_settimana?: number
+          fatturato_generato_settimana?: number
+          id?: string
+          incarichi_settimana?: number
+          notizie_settimana?: number
+          nuove_trattative_settimana?: number
+          obbiettivo_fatturato?: number
+          percentuale_personale?: number
+          prezzo_medio_vendita?: number
+          provvigione_agenzia?: number
+          trattative_chiuse_settimana?: number
+          updated_at?: string
+          user_id?: string
+          vendite_settimana?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

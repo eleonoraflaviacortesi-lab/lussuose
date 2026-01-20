@@ -1,42 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Settings, Target, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { toast } from 'sonner';
+import { useUserSettings, UserSettingsInput } from '@/hooks/useUserSettings';
 
 const SettingsPage = () => {
-  const [settings, setSettings] = useState({
-    // Piano Finanziario
-    obbiettivo_fatturato: 500000,
-    base_fissa_annuale: 0,
-    percentuale_personale: 10,
-    prezzo_medio_vendita: 500000,
-    provvigione_agenzia: 4,
-    // Obiettivi settimanali
-    contatti_settimana: 25,
-    notizie_settimana: 10,
-    appuntamenti_settimana: 4,
-    acquisizioni_settimana: 3,
-    incarichi_settimana: 1,
-    nuove_trattative_settimana: 2,
-    trattative_chiuse_settimana: 1,
-    vendite_settimana: 1,
-    fatturato_credito_settimana: 50000,
-    fatturato_generato_settimana: 20000,
-  });
+  const { settings, isLoading, saveSettings, defaultSettings } = useUserSettings();
+  
+  const [localSettings, setLocalSettings] = useState<UserSettingsInput>(defaultSettings);
+
+  // Sync local state with fetched settings
+  useEffect(() => {
+    if (settings) {
+      setLocalSettings({
+        obbiettivo_fatturato: Number(settings.obbiettivo_fatturato),
+        base_fissa_annuale: Number(settings.base_fissa_annuale),
+        percentuale_personale: Number(settings.percentuale_personale),
+        prezzo_medio_vendita: Number(settings.prezzo_medio_vendita),
+        provvigione_agenzia: Number(settings.provvigione_agenzia),
+        contatti_settimana: settings.contatti_settimana,
+        notizie_settimana: settings.notizie_settimana,
+        appuntamenti_settimana: settings.appuntamenti_settimana,
+        acquisizioni_settimana: settings.acquisizioni_settimana,
+        incarichi_settimana: settings.incarichi_settimana,
+        nuove_trattative_settimana: settings.nuove_trattative_settimana,
+        trattative_chiuse_settimana: settings.trattative_chiuse_settimana,
+        vendite_settimana: settings.vendite_settimana,
+        fatturato_credito_settimana: Number(settings.fatturato_credito_settimana),
+        fatturato_generato_settimana: Number(settings.fatturato_generato_settimana),
+      });
+    }
+  }, [settings]);
 
   // Calculate projections
-  const fatturatoNetto = settings.obbiettivo_fatturato * (settings.percentuale_personale / 100);
-  const venditeTotali = Math.ceil(settings.obbiettivo_fatturato / (settings.prezzo_medio_vendita * (settings.provvigione_agenzia / 100)));
+  const fatturatoNetto = localSettings.obbiettivo_fatturato * (localSettings.percentuale_personale / 100);
+  const venditeTotali = Math.ceil(localSettings.obbiettivo_fatturato / (localSettings.prezzo_medio_vendita * (localSettings.provvigione_agenzia / 100)));
   const mediaVenditeMese = (venditeTotali / 11).toFixed(1);
 
   const handleChange = (field: string, value: number) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
+    setLocalSettings(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSave = () => {
-    // TODO: Save to database
-    console.log('Saving settings:', settings);
-    toast('✓ Aggiornato!');
+    saveSettings.mutate(localSettings);
   };
 
   const InputField = ({ 
@@ -70,6 +75,14 @@ const SettingsPage = () => {
     </div>
   );
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-foreground border-t-transparent"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header */}
@@ -98,31 +111,31 @@ const SettingsPage = () => {
           <div className="space-y-4">
             <InputField
               label="OBIETTIVO FATTURATO"
-              value={settings.obbiettivo_fatturato}
+              value={localSettings.obbiettivo_fatturato}
               field="obbiettivo_fatturato"
               suffix="€"
             />
             <InputField
               label="BASE FISSA ANNUALE"
-              value={settings.base_fissa_annuale}
+              value={localSettings.base_fissa_annuale}
               field="base_fissa_annuale"
               suffix="€"
             />
             <InputField
               label="TUA %"
-              value={settings.percentuale_personale}
+              value={localSettings.percentuale_personale}
               field="percentuale_personale"
               suffix="%"
             />
             <InputField
               label="PREZZO MEDIO VENDITA"
-              value={settings.prezzo_medio_vendita}
+              value={localSettings.prezzo_medio_vendita}
               field="prezzo_medio_vendita"
               suffix="€"
             />
             <InputField
               label="PROVVIGIONE AGENZIA"
-              value={settings.provvigione_agenzia}
+              value={localSettings.provvigione_agenzia}
               field="provvigione_agenzia"
               suffix="%"
             />
@@ -141,61 +154,61 @@ const SettingsPage = () => {
           <div className="space-y-4">
             <InputField
               label="CONTATTI"
-              value={settings.contatti_settimana}
+              value={localSettings.contatti_settimana}
               field="contatti_settimana"
               suffix="Qt"
             />
             <InputField
               label="NOTIZIE"
-              value={settings.notizie_settimana}
+              value={localSettings.notizie_settimana}
               field="notizie_settimana"
               suffix="Qt"
             />
             <InputField
               label="APPUNTAMENTI"
-              value={settings.appuntamenti_settimana}
+              value={localSettings.appuntamenti_settimana}
               field="appuntamenti_settimana"
               suffix="Qt"
             />
             <InputField
               label="ACQUISIZIONI"
-              value={settings.acquisizioni_settimana}
+              value={localSettings.acquisizioni_settimana}
               field="acquisizioni_settimana"
               suffix="Qt"
             />
             <InputField
               label="INCARICHI"
-              value={settings.incarichi_settimana}
+              value={localSettings.incarichi_settimana}
               field="incarichi_settimana"
               suffix="Qt"
             />
             <InputField
               label="NUOVE TRATTATIVE"
-              value={settings.nuove_trattative_settimana}
+              value={localSettings.nuove_trattative_settimana}
               field="nuove_trattative_settimana"
               suffix="Qt"
             />
             <InputField
               label="TRATTATIVE CHIUSE"
-              value={settings.trattative_chiuse_settimana}
+              value={localSettings.trattative_chiuse_settimana}
               field="trattative_chiuse_settimana"
               suffix="Qt"
             />
             <InputField
               label="VENDITE"
-              value={settings.vendite_settimana}
+              value={localSettings.vendite_settimana}
               field="vendite_settimana"
               suffix="Qt"
             />
             <InputField
               label="FATTURATO A CREDITO"
-              value={settings.fatturato_credito_settimana}
+              value={localSettings.fatturato_credito_settimana}
               field="fatturato_credito_settimana"
               suffix="€"
             />
             <InputField
               label="FATTURATO GENERATO"
-              value={settings.fatturato_generato_settimana}
+              value={localSettings.fatturato_generato_settimana}
               field="fatturato_generato_settimana"
               suffix="€"
             />
@@ -238,9 +251,10 @@ const SettingsPage = () => {
         {/* Save Button */}
         <button
           onClick={handleSave}
-          className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors"
+          disabled={saveSettings.isPending}
+          className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
         >
-          SALVA CONFIGURAZIONE
+          {saveSettings.isPending ? 'SALVATAGGIO...' : 'SALVA CONFIGURAZIONE'}
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

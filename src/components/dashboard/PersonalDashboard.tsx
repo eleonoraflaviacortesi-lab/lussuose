@@ -157,7 +157,7 @@ const PersonalDashboard = () => {
       </div>
 
       {/* Incarichi Widget */}
-      <IncarchiWidget weeklyIdeal={3} />
+      <IncarchiWidget />
 
       {/* Volume Generato & Volume a Credito */}
       <div className="grid grid-cols-2 gap-4">
