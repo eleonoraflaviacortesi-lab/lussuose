@@ -65,7 +65,7 @@ const AddNotiziaDialog = () => {
           Nuova notizia
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-white/80 backdrop-blur-xl border-white/30 shadow-[0_8px_32px_rgba(0,0,0,0.12)]">
+      <DialogContent className="sm:max-w-md bg-white/90 backdrop-blur-2xl border-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-3xl"  >
         <DialogHeader>
           <DialogTitle className="text-center text-lg font-bold tracking-wide uppercase">
             Aggiungi nuova notizia
