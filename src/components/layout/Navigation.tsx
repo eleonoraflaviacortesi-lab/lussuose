@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LayoutGrid, PlusCircle, Users, Settings, BarChart3, Check } from 'lucide-react';
+import { LayoutGrid, PlusCircle, Users, Settings, BarChart3, Check, Newspaper } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
 interface NavigationProps {
@@ -12,6 +12,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   
   const tabs = [
     { id: 'numeri', icon: LayoutGrid, label: 'I miei numeri' },
+    { id: 'notizie', icon: Newspaper, label: 'Notizie' },
     { id: 'inserisci', icon: PlusCircle, label: 'Report giornaliero' },
     { id: 'analisi', icon: BarChart3, label: 'Analisi Report' },
     { id: 'agenzia', icon: Users, label: 'Agenzia' },
@@ -38,7 +39,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
-              {index === 3 && (
+              {index === 4 && (
                 <div className="w-px h-5 bg-border mx-0.5" />
               )}
             </div>
