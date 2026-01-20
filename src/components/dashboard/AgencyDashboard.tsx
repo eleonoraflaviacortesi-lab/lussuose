@@ -69,26 +69,32 @@ const AgencyDashboard = () => {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4">
-          <Select value={selectedSede} onValueChange={setSelectedSede}>
-            <SelectTrigger className="w-48 glass-select-trigger border-0 rounded-2xl h-11 text-sm font-medium">
-              <SelectValue placeholder="Seleziona sede" />
-            </SelectTrigger>
-            <SelectContent className="glass-select-content border-0 rounded-2xl overflow-hidden">
-              {SEDI.map((sede) => (
-                <SelectItem key={sede} value={sede} className="glass-select-item rounded-xl">
-                  {sede}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Select value={selectedSede} onValueChange={setSelectedSede}>
+              <SelectTrigger className="flex-1 sm:w-40 glass-select-trigger border-0 rounded-2xl h-10 text-sm font-medium">
+                <SelectValue placeholder="Seleziona sede" />
+              </SelectTrigger>
+              <SelectContent className="glass-select-content border-0 rounded-2xl overflow-hidden">
+                {SEDI.map((sede) => (
+                  <SelectItem key={sede} value={sede} className="glass-select-item rounded-xl">
+                    {sede}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-          <div className="flex items-center gap-1 bg-muted rounded-full p-1">
+            <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0">
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-full sm:w-auto justify-center">
             {(['week', 'month', 'year'] as const).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
-                className={`px-4 py-2 text-xs font-medium tracking-[0.15em] uppercase rounded-full transition-colors ${
+                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
                   period === p 
                     ? 'bg-foreground text-background' 
                     : 'text-muted-foreground hover:text-foreground'
@@ -98,10 +104,6 @@ const AgencyDashboard = () => {
               </button>
             ))}
           </div>
-
-          <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
-            <Settings className="w-5 h-5" />
-          </button>
         </div>
       </div>
 
