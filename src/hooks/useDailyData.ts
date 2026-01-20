@@ -17,6 +17,11 @@ export interface DailyDataInput {
   vendite_valore: number;
   affitti_numero: number;
   affitti_valore: number;
+  nuove_trattative: number;
+  nuove_trattative_ideali: number;
+  trattative_chiuse: number;
+  trattative_chiuse_ideali: number;
+  fatturato_a_credito: number;
 }
 
 export const useDailyData = () => {

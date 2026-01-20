@@ -7,6 +7,7 @@ import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
 import ReportForm from '@/components/dashboard/ReportForm';
 import AgencyDashboard from '@/components/dashboard/AgencyDashboard';
 import SettingsPage from '@/components/settings/SettingsPage';
+import ReportAnalysisTab from '@/components/dashboard/ReportAnalysisTab';
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
@@ -37,6 +38,8 @@ const IndexContent = () => {
         return <PersonalDashboard />;
       case 'inserisci':
         return <ReportForm />;
+      case 'analisi':
+        return <ReportAnalysisTab />;
       case 'agenzia':
         return <AgencyDashboard />;
       case 'impostazioni':

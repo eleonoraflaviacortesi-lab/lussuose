@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro } from 'lucide-react';
+import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
 const ReportForm = () => {
@@ -10,6 +10,9 @@ const ReportForm = () => {
     appuntamenti_vendita: 0,
     vendite_numero: 0,
     vendite_valore: 0,
+    nuove_trattative: 0,
+    trattative_chiuse: 0,
+    fatturato_a_credito: 0,
   });
 
   const { saveDailyData, myData } = useDailyData();
@@ -24,7 +27,10 @@ const ReportForm = () => {
           notizie_reali: existingEntry.notizie_reali,
           appuntamenti_vendita: existingEntry.appuntamenti_vendita,
           vendite_numero: existingEntry.vendite_numero,
-          vendite_valore: existingEntry.vendite_valore,
+          vendite_valore: Number(existingEntry.vendite_valore),
+          nuove_trattative: existingEntry.nuove_trattative || 0,
+          trattative_chiuse: existingEntry.trattative_chiuse || 0,
+          fatturato_a_credito: Number(existingEntry.fatturato_a_credito) || 0,
         });
       } else {
         setFormData({
@@ -33,6 +39,9 @@ const ReportForm = () => {
           appuntamenti_vendita: 0,
           vendite_numero: 0,
           vendite_valore: 0,
+          nuove_trattative: 0,
+          trattative_chiuse: 0,
+          fatturato_a_credito: 0,
         });
       }
     }
@@ -61,16 +70,10 @@ const ReportForm = () => {
       incarichi_vendita: 0,
       affitti_numero: 0,
       affitti_valore: 0,
+      nuove_trattative_ideali: 2,
+      trattative_chiuse_ideali: 1,
     };
     saveDailyData.mutate(input);
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('it-IT', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
   };
 
   const CounterField = ({ 
@@ -124,6 +127,50 @@ const ReportForm = () => {
     </div>
   );
 
+  const CurrencyField = ({
+    label,
+    value,
+    field,
+    icon: Icon,
+  }: {
+    label: string;
+    value: number;
+    field: keyof typeof formData;
+    icon: any;
+  }) => (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+        <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      <div className="flex items-center rounded-xl border border-border bg-background">
+        <button
+          onClick={() => handleValueChange(field, value - 1000)}
+          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Minus className="w-4 h-4" />
+        </button>
+        <div className="flex-1 flex items-center justify-center">
+          <span className="text-muted-foreground mr-2">€</span>
+          <input
+            type="number"
+            value={value}
+            onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
+            className="w-24 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
+          />
+        </div>
+        <button
+          onClick={() => handleValueChange(field, value + 1000)}
+          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header */}
@@ -149,8 +196,8 @@ const ReportForm = () => {
         </div>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Three Column Layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {/* Attività Lead */}
         <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
           <div className="flex items-center gap-2 pb-4 border-b border-muted">
@@ -183,6 +230,37 @@ const ReportForm = () => {
           />
         </div>
 
+        {/* Trattative */}
+        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
+          <div className="flex items-center gap-2 pb-4 border-b border-muted">
+            <span className="text-lg">🤝</span>
+            <h3 className="text-sm font-bold tracking-[0.15em] uppercase">TRATTATIVE</h3>
+          </div>
+          
+          <CounterField
+            label="NUOVE TRATTATIVE"
+            value={formData.nuove_trattative}
+            field="nuove_trattative"
+            ideal={2}
+            icon={Handshake}
+          />
+          
+          <CounterField
+            label="TRATTATIVE CHIUSE"
+            value={formData.trattative_chiuse}
+            field="trattative_chiuse"
+            ideal={1}
+            icon={CheckCircle}
+          />
+
+          <CurrencyField
+            label="FATTURATO A CREDITO"
+            value={formData.fatturato_a_credito}
+            field="fatturato_a_credito"
+            icon={CreditCard}
+          />
+        </div>
+
         {/* Risultati Chiusura */}
         <div className="bg-card rounded-2xl shadow-lg p-6 space-y-6">
           <div className="flex items-center gap-2 pb-4 border-b border-muted">
@@ -198,37 +276,12 @@ const ReportForm = () => {
             icon={Check}
           />
           
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <Euro className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-                FATTURATO (€)
-              </span>
-            </div>
-            <div className="flex items-center rounded-xl border border-border bg-background">
-              <button
-                onClick={() => handleValueChange('vendite_valore', formData.vendite_valore - 1000)}
-                className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Minus className="w-4 h-4" />
-              </button>
-              <div className="flex-1 flex items-center justify-center">
-                <span className="text-muted-foreground mr-2">€</span>
-                <input
-                  type="number"
-                  value={formData.vendite_valore}
-                  onChange={(e) => handleValueChange('vendite_valore', parseInt(e.target.value) || 0)}
-                  className="w-24 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
-                />
-              </div>
-              <button
-                onClick={() => handleValueChange('vendite_valore', formData.vendite_valore + 1000)}
-                className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
+          <CurrencyField
+            label="FATTURATO (€)"
+            value={formData.vendite_valore}
+            field="vendite_valore"
+            icon={Euro}
+          />
         </div>
       </div>
 
