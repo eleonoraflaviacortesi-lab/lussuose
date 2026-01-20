@@ -273,9 +273,11 @@
 
   /* Pill Navigation - Minimal */
   .pill-nav {
-    background: hsl(var(--secondary));
+    background: white;
     @apply rounded-full px-1.5 py-1.5 flex items-center gap-1;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: 
+      0 8px 30px rgba(0, 0, 0, 0.12),
+      0 4px 12px rgba(0, 0, 0, 0.08);
   }
 
   .pill-nav-item {
