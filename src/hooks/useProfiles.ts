@@ -17,6 +17,8 @@ export const useProfiles = () => {
       return data;
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // 5 minutes cache for profiles
+    gcTime: 1000 * 60 * 10,
   });
 
   return { profiles, isLoading };

@@ -28,6 +28,8 @@ export const useOperations = () => {
       return data;
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
   });
 
   const addOperation = useMutation({
