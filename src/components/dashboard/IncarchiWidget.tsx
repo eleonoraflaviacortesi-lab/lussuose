@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
 import { useDailyData } from '@/hooks/useDailyData';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { Progress } from '@/components/ui/progress';
 import { FileText, Target } from 'lucide-react';
 
-interface IncarchiWidgetProps {
-  weeklyIdeal?: number;
-}
-
-const IncarchiWidget = ({ weeklyIdeal = 3 }: IncarchiWidgetProps) => {
+const IncarchiWidget = () => {
   const { myData } = useDailyData();
+  const { settings } = useUserSettings();
 
   const { incarichiMese, targetMensile, mancanti, percent } = useMemo(() => {
     const now = new Date();
@@ -20,13 +18,14 @@ const IncarchiWidget = ({ weeklyIdeal = 3 }: IncarchiWidgetProps) => {
       .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0) || 0;
     
     // Calculate monthly target based on weekly ideal * 4
+    const weeklyIdeal = settings?.incarichi_settimana || 1;
     const targetMensile = weeklyIdeal * 4;
     
     const mancanti = Math.max(0, targetMensile - incarichiMese);
-    const percent = Math.min(100, Math.round((incarichiMese / targetMensile) * 100));
+    const percent = targetMensile > 0 ? Math.min(100, Math.round((incarichiMese / targetMensile) * 100)) : 0;
     
     return { incarichiMese, targetMensile, mancanti, percent };
-  }, [myData, weeklyIdeal]);
+  }, [myData, settings]);
 
   return (
     <div className="bg-card rounded-2xl shadow-lg p-5 relative overflow-hidden">
