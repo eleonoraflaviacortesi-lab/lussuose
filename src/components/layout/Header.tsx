@@ -49,7 +49,7 @@ const Header = () => {
         </button>
 
         {/* Brand Logo */}
-        <img src={logo} alt="Le Lussuose" className="h-12" />
+        <img src={logo} alt="Le Lussuose" className="h-20" />
 
         {/* Logout */}
         <button 
