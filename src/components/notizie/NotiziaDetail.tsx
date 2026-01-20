@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, X, Trash2 } from 'lucide-react';
+import { Phone, X, Trash2, CalendarIcon, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
 import {
@@ -22,8 +23,9 @@ import {
 
 const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
 const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+const liquidGlassPopover = "bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl";
 
-const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆'];
+const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆', '🌊', '🏖️', '🌅', '🌄', '🏔️', '🌲', '🌴', '🌷', '🌹', '💐', '🎨', '🎭', '🎪', '🎢', '🎡'];
 
 interface NotiziaDetailProps {
   notizia: Notizia | null;
@@ -41,6 +43,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
 
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
+  const [customEmoji, setCustomEmoji] = useState('');
   const [editData, setEditData] = useState({
     name: '',
     zona: '',
@@ -49,12 +52,14 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     notes: '',
     status: 'new' as NotiziaStatus,
     emoji: '📋',
-    reminder_date: '',
+    reminder_date: null as Date | null,
+    reminder_time: '09:00',
   });
 
   // Inizializza editData quando cambia la notizia
   useEffect(() => {
     if (notizia) {
+      const reminderDate = notizia.reminder_date ? new Date(notizia.reminder_date) : null;
       setEditData({
         name: notizia.name,
         zona: notizia.zona || '',
@@ -63,7 +68,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         notes: notizia.notes || '',
         status: notizia.status,
         emoji: notizia.emoji || '📋',
-        reminder_date: notizia.reminder_date?.slice(0, 16) || '',
+        reminder_date: reminderDate,
+        reminder_time: reminderDate ? format(reminderDate, 'HH:mm') : '09:00',
       });
     }
   }, [notizia]);
@@ -74,11 +80,24 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     e.preventDefault();
     if (!editData.name.trim()) return;
     
+    let reminderDateTime: string | null = null;
+    if (editData.reminder_date) {
+      const [hours, minutes] = editData.reminder_time.split(':');
+      const reminderDate = new Date(editData.reminder_date);
+      reminderDate.setHours(parseInt(hours), parseInt(minutes));
+      reminderDateTime = reminderDate.toISOString();
+    }
+    
     updateNotizia.mutate({
       id: notizia.id,
-      ...editData,
+      name: editData.name,
+      zona: editData.zona || undefined,
+      phone: editData.phone || undefined,
+      type: editData.type || undefined,
+      notes: editData.notes || undefined,
+      status: editData.status,
       emoji: editData.emoji || '📋',
-      reminder_date: editData.reminder_date || null,
+      reminder_date: reminderDateTime,
     });
     onOpenChange(false);
   };
@@ -91,6 +110,13 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const handlePhoneClick = () => {
     if (editData.phone) {
       window.location.href = `tel:${editData.phone}`;
+    }
+  };
+
+  const handleCustomEmojiSubmit = () => {
+    if (customEmoji.trim()) {
+      setEditData({ ...editData, emoji: customEmoji.trim() });
+      setCustomEmoji('');
     }
   };
 
@@ -140,8 +166,24 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     {editData.emoji}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-2 bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl" align="start">
-                  <div className="grid grid-cols-5 gap-1">
+                <PopoverContent className={cn(liquidGlassPopover, "w-auto p-3")} align="start">
+                  {/* Custom emoji input */}
+                  <div className="flex gap-2 mb-3">
+                    <input
+                      value={customEmoji}
+                      onChange={(e) => setCustomEmoji(e.target.value)}
+                      placeholder="Incolla emoji..."
+                      className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCustomEmojiSubmit}
+                      className="px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium active:scale-95 transition-transform"
+                    >
+                      Usa
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-7 gap-1">
                     {commonEmojis.map((emoji) => (
                       <button
                         key={emoji}
@@ -227,7 +269,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-xl">
+              <SelectContent className={cn(liquidGlassPopover, "rounded-xl")}>
                 {Object.entries(statusLabels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>{label}</SelectItem>
                 ))}
@@ -254,15 +296,42 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 {format(new Date(notizia.created_at), 'd MMM yyyy', { locale: it })}
               </div>
             </div>
+            
+            {/* Promemoria - Custom Calendar + Time */}
             <div>
-              <Label htmlFor="edit-reminder" className="text-xs font-medium mb-1.5 block">Promemoria</Label>
-              <input
-                id="edit-reminder"
-                type="datetime-local"
-                value={editData.reminder_date}
-                onChange={(e) => setEditData({ ...editData, reminder_date: e.target.value })}
-                className={pillInputClass}
-              />
+              <Label className="text-xs font-medium mb-1.5 block">Promemoria</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    type="button"
+                    className={cn(
+                      "w-full bg-white rounded-full px-4 py-2.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
+                      !editData.reminder_date && "text-muted-foreground"
+                    )}
+                  >
+                    <Clock className="w-4 h-4" />
+                    {editData.reminder_date ? format(editData.reminder_date, 'd MMM', { locale: it }) : 'Seleziona'}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className={cn(liquidGlassPopover, "w-auto p-0")} align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editData.reminder_date || undefined}
+                    onSelect={(date) => setEditData({ ...editData, reminder_date: date || null })}
+                    locale={it}
+                    className="pointer-events-auto"
+                  />
+                  <div className="p-3 border-t border-muted/20">
+                    <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
+                    <input
+                      type="time"
+                      value={editData.reminder_time}
+                      onChange={(e) => setEditData({ ...editData, reminder_time: e.target.value })}
+                      className="w-full bg-white rounded-full px-4 py-2 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                    />
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           
@@ -293,7 +362,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="bg-white/95 backdrop-blur-xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border-0 rounded-2xl">
+              <AlertDialogContent className={cn(liquidGlassPopover, "rounded-2xl")}>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Eliminare questa notizia?</AlertDialogTitle>
                   <AlertDialogDescription>
