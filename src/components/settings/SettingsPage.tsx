@@ -179,21 +179,21 @@ const SettingsPage = () => {
               <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
                 REDDITO NETTO
               </p>
-              <p className="text-2xl font-light text-white">
-                € {new Intl.NumberFormat('it-IT').format(fatturatoNetto)}
+              <p className="text-xl font-light text-white whitespace-nowrap">
+                €{new Intl.NumberFormat('it-IT').format(fatturatoNetto)}
               </p>
             </div>
             <div>
               <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
                 VENDITE TOTALI
               </p>
-              <p className="text-2xl font-bold text-white">{venditeTotali}</p>
+              <p className="text-xl font-bold text-white">{venditeTotali}</p>
             </div>
             <div>
               <p className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1">
                 MEDIA/MESE
               </p>
-              <p className="text-2xl font-light text-white">{mediaVenditeMese}</p>
+              <p className="text-xl font-light text-white">{mediaVenditeMese}</p>
             </div>
           </div>
         </div>
