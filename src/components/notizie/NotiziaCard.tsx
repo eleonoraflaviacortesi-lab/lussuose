@@ -13,7 +13,7 @@ const NotiziaCard = ({ notizia, onClick }: NotiziaCardProps) => {
   return (
     <div
       onClick={onClick}
-      className="bg-card rounded-xl p-3 cursor-pointer hover:bg-accent/30 transition-all border-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
+      className="bg-card rounded-xl p-3 cursor-pointer active:scale-[0.98] transition-transform border-0 shadow-[0_4px_12px_rgba(0,0,0,0.08)]"
     >
       <div className="flex items-start gap-2">
         <span className="text-base">{(notizia as any).emoji || '📋'}</span>
