@@ -89,6 +89,48 @@ export type Database = {
         }
         Relationships: []
       }
+      notizie: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          reminder_date: string | null
+          status: string
+          type: string | null
+          updated_at: string
+          user_id: string
+          zona: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          reminder_date?: string | null
+          status?: string
+          type?: string | null
+          updated_at?: string
+          user_id: string
+          zona?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          reminder_date?: string | null
+          status?: string
+          type?: string | null
+          updated_at?: string
+          user_id?: string
+          zona?: string | null
+        }
+        Relationships: []
+      }
       operations: {
         Row: {
           created_at: string
