@@ -1,12 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { Search, X } from 'lucide-react';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaColumn from './NotiziaColumn';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
+import { cn } from '@/lib/utils';
 
 const columns: { key: NotiziaStatus; title: string }[] = [
   { key: 'new', title: 'NEW!' },
@@ -21,11 +21,20 @@ const NotiziePage = () => {
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchExpanded, setSearchExpanded] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleNotiziaClick = (notizia: Notizia) => {
     setSelectedNotizia(notizia);
     setDetailOpen(true);
   };
+
+  // Focus input when expanded
+  useEffect(() => {
+    if (searchExpanded && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [searchExpanded]);
 
   // Filtra le notizie per ricerca
   const filteredNotizieByStatus = useMemo(() => {
@@ -69,6 +78,24 @@ const NotiziePage = () => {
     }
   };
 
+  const handleSearchToggle = () => {
+    if (searchExpanded) {
+      // Closing - clear search and collapse
+      setSearchQuery('');
+      setSearchExpanded(false);
+    } else {
+      // Opening
+      setSearchExpanded(true);
+    }
+  };
+
+  const handleSearchBlur = () => {
+    // Only collapse if search is empty
+    if (!searchQuery.trim()) {
+      setSearchExpanded(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -78,30 +105,10 @@ const NotiziePage = () => {
   }
 
   return (
-    <div className="space-y-4 pt-6">
+    <div className="space-y-4 pt-6 pb-20">
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold shrink-0">Le mie Notizie</h2>
-        
-        {/* Search Bar */}
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cerca notizie..."
-            className="pl-9 pr-8 bg-muted/30 border-muted/50"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full active:scale-95 transition-transform"
-            >
-              <X className="w-3.5 h-3.5 text-muted-foreground" />
-            </button>
-          )}
-        </div>
-        
         <AddNotiziaDialog />
       </div>
 
@@ -123,6 +130,47 @@ const NotiziePage = () => {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </DragDropContext>
+
+      {/* Floating Search Button/Bar */}
+      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40">
+        <div
+          className={cn(
+            "flex items-center bg-white/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out",
+            searchExpanded
+              ? "w-72 rounded-full px-4 py-3"
+              : "w-12 h-12 rounded-full justify-center cursor-pointer active:scale-95"
+          )}
+          onClick={!searchExpanded ? handleSearchToggle : undefined}
+        >
+          {searchExpanded ? (
+            <>
+              <Search className="w-5 h-5 text-foreground shrink-0" />
+              <input
+                ref={inputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={handleSearchBlur}
+                placeholder="Cerca notizie..."
+                className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
+              />
+              <button
+                onClick={handleSearchToggle}
+                className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90 transition-transform"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </>
+          ) : (
+            <Search className="w-5 h-5 text-foreground" />
+          )}
+        </div>
+        
+        {/* Active search indicator */}
+        {searchQuery && !searchExpanded && (
+          <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full" />
+        )}
+      </div>
 
       {/* Detail Modal */}
       <NotiziaDetail
