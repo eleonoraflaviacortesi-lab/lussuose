@@ -132,7 +132,7 @@ const NotiziePage = () => {
       </DragDropContext>
 
       {/* Floating Search Button/Bar */}
-      <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-40">
+      <div className="fixed bottom-24 right-4 z-40">
         <div
           className={cn(
             "flex items-center bg-white/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out",
