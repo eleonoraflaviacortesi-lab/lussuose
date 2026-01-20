@@ -5,6 +5,7 @@ import { useDailyData } from '@/hooks/useDailyData';
 import { Progress } from '@/components/ui/progress';
 import { TrendingUp, Users, Zap, Award, Gift, FileText, Euro } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts';
+import IncarchiWidget from './IncarchiWidget';
 
 type Period = 'week' | 'month' | 'year';
 
@@ -171,6 +172,9 @@ const PersonalDashboard = () => {
           <p className="text-xs text-muted-foreground mt-1">DATI ACQUISITI</p>
         </div>
       </div>
+
+      {/* Incarichi Widget */}
+      <IncarchiWidget weeklyIdeal={3} />
 
       {/* Performance Charts Section */}
       <div className="bg-card rounded-3xl shadow-lg p-6 space-y-6">

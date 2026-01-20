@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LayoutGrid, PlusCircle, Users, Settings } from 'lucide-react';
+import { LayoutGrid, PlusCircle, Users, Settings, BarChart3 } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -10,6 +10,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
     { id: 'numeri', icon: LayoutGrid, label: 'I miei numeri' },
     { id: 'inserisci', icon: PlusCircle, label: 'Report giornaliero' },
+    { id: 'analisi', icon: BarChart3, label: 'Analisi Report' },
     { id: 'agenzia', icon: Users, label: 'Agenzia' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
@@ -34,7 +35,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
-              {index === 2 && (
+              {index === 3 && (
                 <div className="w-px h-6 bg-border mx-1" />
               )}
             </div>

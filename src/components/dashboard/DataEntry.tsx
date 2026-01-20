@@ -20,6 +20,11 @@ const DataEntry = () => {
     vendite_valore: 0,
     affitti_numero: 0,
     affitti_valore: 0,
+    nuove_trattative: 0,
+    nuove_trattative_ideali: 2,
+    trattative_chiuse: 0,
+    trattative_chiuse_ideali: 1,
+    fatturato_a_credito: 0,
   });
 
   const { saveDailyData } = useDailyData();

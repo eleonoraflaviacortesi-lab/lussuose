@@ -25,10 +25,15 @@ export type Database = {
           contatti_reali: number
           created_at: string
           date: string
+          fatturato_a_credito: number
           id: string
           incarichi_vendita: number
           notizie_ideali: number
           notizie_reali: number
+          nuove_trattative: number
+          nuove_trattative_ideali: number
+          trattative_chiuse: number
+          trattative_chiuse_ideali: number
           updated_at: string
           user_id: string
           vendite_numero: number
@@ -44,10 +49,15 @@ export type Database = {
           contatti_reali?: number
           created_at?: string
           date: string
+          fatturato_a_credito?: number
           id?: string
           incarichi_vendita?: number
           notizie_ideali?: number
           notizie_reali?: number
+          nuove_trattative?: number
+          nuove_trattative_ideali?: number
+          trattative_chiuse?: number
+          trattative_chiuse_ideali?: number
           updated_at?: string
           user_id: string
           vendite_numero?: number
@@ -63,10 +73,15 @@ export type Database = {
           contatti_reali?: number
           created_at?: string
           date?: string
+          fatturato_a_credito?: number
           id?: string
           incarichi_vendita?: number
           notizie_ideali?: number
           notizie_reali?: number
+          nuove_trattative?: number
+          nuove_trattative_ideali?: number
+          trattative_chiuse?: number
+          trattative_chiuse_ideali?: number
           updated_at?: string
           user_id?: string
           vendite_numero?: number
