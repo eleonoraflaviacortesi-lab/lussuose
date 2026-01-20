@@ -161,22 +161,22 @@ const PersonalDashboard = () => {
 
       {/* Volume Generato & Volume a Credito */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="dark-card">
+        <div className="dark-card overflow-hidden">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
             VOLUME GENERATO
           </p>
-          <p className="text-3xl font-light text-white mb-1">
+          <p className="text-2xl md:text-3xl font-bold text-white mb-1 truncate">
             {formatCurrency(fatturato)}
           </p>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
             FATTURATO AGENZIA
           </p>
         </div>
-        <div className="dark-card">
+        <div className="dark-card overflow-hidden">
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
             VOLUME A CREDITO
           </p>
-          <p className="text-3xl font-light text-white mb-1">
+          <p className="text-2xl md:text-3xl font-bold text-white mb-1 truncate">
             {formatCurrency(fatturatoCredito)}
           </p>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
