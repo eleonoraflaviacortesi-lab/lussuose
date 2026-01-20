@@ -50,7 +50,7 @@ const IndexContent = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="container max-w-7xl pb-8">
+      <main className="max-w-md mx-auto">
         {renderContent()}
       </main>
     </div>
