@@ -1,53 +1,62 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Settings, LogOut } from 'lucide-react';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { LogOut, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useKPIs } from '@/hooks/useKPIs';
 
 const Header = () => {
-  const { profile, signOut } = useAuth();
+  const { signOut } = useAuth();
+  const { kpis } = useKPIs('year');
   const navigate = useNavigate();
-
-  const getInitials = (name: string) => {
-    return name.slice(0, 2).toUpperCase();
-  };
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'decimal',
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  const target = 1600010;
+  const current = kpis?.fatturato?.value || 0;
+  const remaining = Math.max(0, target - current);
+
   return (
-    <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 bg-card border-b border-border">
-      <div className="flex items-center gap-2">
-        <span className="font-serif text-xl md:text-2xl font-semibold tracking-wide text-foreground">
-          LUXURY
-        </span>
-        <span className="font-serif text-xl md:text-2xl font-light text-accent">
-          ESTATES
-        </span>
+    <header className="relative">
+      {/* Ticker Banner */}
+      <div className="bg-primary text-primary-foreground py-3 overflow-hidden">
+        <div className="flex animate-ticker whitespace-nowrap">
+          {[...Array(4)].map((_, i) => (
+            <span key={i} className="flex items-center gap-4 mx-8 text-sm font-medium tracking-widest uppercase">
+              <span>€ {formatCurrency(target)}</span>
+              <span>★</span>
+              <span>MANCANO: € {formatCurrency(remaining)}</span>
+              <span className="mx-4">•</span>
+            </span>
+          ))}
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 md:gap-4">
-        {profile && (
-          <div className="flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 rounded-lg">
-            <Avatar className="h-8 w-8 md:h-9 md:w-9 bg-accent text-accent-foreground">
-              <AvatarFallback className="bg-accent text-accent-foreground font-medium text-xs md:text-sm">
-                {getInitials(profile.full_name)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="hidden sm:block text-left">
-              <p className="text-sm font-medium text-foreground">{profile.full_name}</p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">{profile.sede}</p>
-            </div>
-          </div>
-        )}
-
-        <button className="p-2 text-muted-foreground hover:text-foreground transition-colors">
-          <Settings className="w-5 h-5" />
+      {/* Main Header */}
+      <div className="flex items-center justify-between px-6 py-4 bg-background">
+        {/* Logo with Heart */}
+        <button className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center border border-border">
+          <Heart className="w-5 h-5 text-foreground" fill="currentColor" />
         </button>
+
+        {/* Brand */}
+        <div className="flex items-center gap-0.5">
+          <span className="text-xl font-semibold tracking-[0.2em] text-foreground">LE LUSSUOS</span>
+          <span className="text-xl font-semibold text-primary">E</span>
+        </div>
+
+        {/* Logout */}
         <button 
           onClick={handleSignOut}
-          className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <LogOut className="w-5 h-5" />
         </button>

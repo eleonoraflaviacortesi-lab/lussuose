@@ -1,122 +1,143 @@
-import { Building, Target } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import KPICard from './KPICard';
-import MonthlyRanking from './MonthlyRanking';
-import RecentOperations from './RecentOperations';
 import { useKPIs } from '@/hooks/useKPIs';
+import { useProfiles } from '@/hooks/useProfiles';
 import { useState } from 'react';
+import { Progress } from '@/components/ui/progress';
 
 const DashboardSede = () => {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const { kpis, isLoading } = useKPIs(period);
-  const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+  const { profiles } = useProfiles();
+  
+  const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' }).toUpperCase();
 
-  const kpiCards = kpis ? [
-    { title: 'Contatti', icon: 'phone', ...kpis.contatti },
-    { title: 'Notizie Vendita', icon: 'fileText', ...kpis.notizie },
-    { title: 'Clienti Gestiti', icon: 'users', ...kpis.clienti },
-    { title: 'Appuntamenti Vendita', icon: 'calendar', ...kpis.appuntamenti },
-    { title: 'Acquisizioni', icon: 'building', ...kpis.acquisizioni },
-    { title: 'Incarichi', icon: 'briefcase', ...kpis.incarichi },
-    { title: 'Vendite (Rogiti)', icon: 'home', ...kpis.vendite },
-    { title: 'Fatturato', icon: 'euro', ...kpis.fatturato, format: 'currency' as const },
-  ] : [];
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const agents = profiles?.filter(p => p.role === 'agente') || [];
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="flex flex-col gap-4 bg-card rounded-xl border border-border p-4 md:p-5">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 text-accent">
-            <Building className="w-5 h-5" />
-          </div>
-          <div>
-            <h1 className="font-serif text-lg md:text-xl font-semibold text-foreground">Dashboard Sede</h1>
-            <p className="text-sm text-muted-foreground capitalize">{currentMonth}</p>
+    <div className="px-6 pb-8 space-y-8 animate-fade-in">
+      {/* Period Selector */}
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-full border border-border overflow-hidden">
+          {(['week', 'month', 'year'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`px-6 py-2.5 text-xs font-medium tracking-[0.2em] uppercase transition-colors ${
+                period === p 
+                  ? 'bg-foreground text-background' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {p === 'week' ? 'SETT' : p === 'month' ? 'MESE' : 'ANNO'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Month Header */}
+      <div className="text-center">
+        <h2 className="text-xs font-medium tracking-[0.3em] uppercase text-muted-foreground">
+          {currentMonth}
+        </h2>
+      </div>
+
+      {/* Fatturato Card */}
+      <div className="dark-card text-center">
+        <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-3">
+          FATTURATO SEDE
+        </p>
+        <p className="text-5xl font-light text-white mb-2">
+          {formatCurrency(kpis?.fatturato?.value || 0)}
+        </p>
+        <div className="flex items-center justify-center gap-2 mt-4">
+          <span className="text-xs text-muted-foreground">Target:</span>
+          <span className="text-xs text-white font-medium">
+            {formatCurrency(kpis?.fatturato?.target || 1000000)}
+          </span>
+        </div>
+      </div>
+
+      {/* KPI Grid */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
+            VENDITE
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-light text-foreground">{kpis?.vendite?.value || 0}</span>
+            <span className="text-sm text-muted-foreground">/{kpis?.vendite?.target || 10}</span>
           </div>
         </div>
-
-        <div className="flex flex-wrap items-center gap-2 md:gap-3">
-          <Button variant="outline" className="gap-2 text-xs md:text-sm">
-            <Target className="w-4 h-4" />
-            <span className="hidden sm:inline">Imposta Obiettivi Sede</span>
-            <span className="sm:hidden">Obiettivi</span>
-          </Button>
-          
-          <Select defaultValue="arezzo">
-            <SelectTrigger className="w-28 md:w-32 text-xs md:text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="arezzo">AREZZO</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <div className="flex rounded-lg border border-border overflow-hidden">
-            <button 
-              onClick={() => setPeriod('week')}
-              className={`px-3 md:px-4 py-2 text-xs md:text-sm transition-colors ${period === 'week' ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
-            >
-              Sett
-            </button>
-            <button 
-              onClick={() => setPeriod('month')}
-              className={`px-3 md:px-4 py-2 text-xs md:text-sm transition-colors ${period === 'month' ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
-            >
-              Mese
-            </button>
-            <button 
-              onClick={() => setPeriod('year')}
-              className={`px-3 md:px-4 py-2 text-xs md:text-sm transition-colors ${period === 'year' ? 'bg-accent text-accent-foreground font-medium' : 'text-muted-foreground hover:bg-muted'}`}
-            >
-              Anno
-            </button>
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
+            ACQUISIZIONI
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-light text-foreground">{kpis?.acquisizioni?.value || 0}</span>
+            <span className="text-sm text-muted-foreground">/{kpis?.acquisizioni?.target || 15}</span>
+          </div>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
+            INCARICHI
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-light text-foreground">{kpis?.incarichi?.value || 0}</span>
+            <span className="text-sm text-muted-foreground">/{kpis?.incarichi?.target || 12}</span>
+          </div>
+        </div>
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
+            APPUNTAMENTI
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-3xl font-light text-foreground">{kpis?.appuntamenti?.value || 0}</span>
+            <span className="text-sm text-muted-foreground">/{kpis?.appuntamenti?.target || 40}</span>
           </div>
         </div>
       </div>
 
-      {/* Performance Generale */}
-      <div className="bg-card rounded-xl border border-border p-4 md:p-6">
-        <div className="flex items-center gap-2 mb-4 md:mb-6">
-          <span className="text-accent text-lg">📊</span>
-          <h2 className="font-serif text-base md:text-lg font-semibold text-foreground">
-            Performance Generale <span className="font-normal text-muted-foreground">(Somma Agenti)</span>
-          </h2>
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-            {kpiCards.map((kpi) => (
-              <KPICard
-                key={kpi.title}
-                title={kpi.title}
-                value={kpi.value}
-                target={kpi.target}
-                delta={kpi.delta}
-                icon={kpi.icon}
-                format={'format' in kpi ? kpi.format : 'number'}
-              />
+      {/* Team Ranking */}
+      {agents.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-center text-muted-foreground">
+            CLASSIFICA TEAM
+          </h3>
+          <div className="space-y-3">
+            {agents.slice(0, 5).map((agent, index) => (
+              <div 
+                key={agent.id}
+                className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border"
+              >
+                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                  index === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
+                  {index + 1}
+                </span>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">{agent.full_name}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{agent.sede}</p>
+                </div>
+              </div>
             ))}
           </div>
-        )}
-      </div>
-
-      {/* Bottom Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <MonthlyRanking />
-        <RecentOperations />
-      </div>
+        </div>
+      )}
     </div>
   );
 };

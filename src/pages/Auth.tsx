@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
+import { Heart } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -69,67 +70,74 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl font-semibold text-foreground">
-            LUXURY <span className="text-accent">ESTATES</span>
-          </h1>
-          <p className="text-muted-foreground mt-2">
-            {isLogin ? 'Accedi al tuo account' : 'Crea un nuovo account'}
-          </p>
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Pink Header */}
+      <div className="bg-primary py-8 text-center">
+        <div className="flex items-center justify-center gap-0.5">
+          <span className="text-2xl font-semibold tracking-[0.2em] text-primary-foreground">LE LUSSUOS</span>
+          <span className="text-2xl font-semibold text-white/80">E</span>
         </div>
+      </div>
 
-        <div className="bg-card rounded-xl border border-border p-6 shadow-lg">
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-sm">
+          {/* Logo */}
+          <div className="flex justify-center mb-8">
+            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border border-border">
+              <Heart className="w-7 h-7 text-foreground" fill="currentColor" />
+            </div>
+          </div>
+
+          <h2 className="text-center text-xs font-medium tracking-[0.3em] uppercase text-muted-foreground mb-8">
+            {isLogin ? 'ACCEDI AL TUO ACCOUNT' : 'CREA UN NUOVO ACCOUNT'}
+          </h2>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
             {!isLogin && (
               <div>
-                <Label htmlFor="fullName">Nome Completo</Label>
+                <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Nome Completo</Label>
                 <Input
-                  id="fullName"
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="es. Eleonora Rossi"
                   required={!isLogin}
-                  className="mt-1"
+                  className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
                 />
               </div>
             )}
 
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Email</Label>
               <Input
-                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="email@esempio.com"
                 required
-                className="mt-1"
+                className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
               />
             </div>
 
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Password</Label>
               <Input
-                id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="mt-1"
+                className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
               />
             </div>
 
             {!isLogin && (
               <>
                 <div>
-                  <Label htmlFor="role">Ruolo</Label>
+                  <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Ruolo</Label>
                   <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-2 rounded-full px-5 py-6 bg-secondary border-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -140,9 +148,9 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="sede">Sede</Label>
+                  <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Sede</Label>
                   <Select value={sede} onValueChange={setSede}>
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-2 rounded-full px-5 py-6 bg-secondary border-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -153,20 +161,22 @@ const Auth = () => {
               </>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
+              className="btn-pink w-full mt-6"
               disabled={loading}
             >
-              {loading ? 'Caricamento...' : isLogin ? 'Accedi' : 'Registrati'}
-            </Button>
+              <span className="text-sm tracking-[0.2em]">
+                {loading ? 'CARICAMENTO...' : isLogin ? 'ACCEDI' : 'REGISTRATI'}
+              </span>
+            </button>
           </form>
 
-          <div className="mt-6 text-center">
+          <div className="mt-8 text-center">
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+              className="text-xs tracking-[0.1em] uppercase text-muted-foreground hover:text-foreground transition-colors"
             >
               {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
             </button>

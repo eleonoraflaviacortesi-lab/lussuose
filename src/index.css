@@ -11,30 +11,30 @@
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 
-/* Luxury Real Estate Design System - Magazine Style */
+/* Le Lussuose Design System - Pink & White Style */
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 220 20% 10%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 220 25% 12%;
-    --primary-foreground: 40 30% 95%;
+    --primary: 326 80% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 40 20% 96%;
-    --secondary-foreground: 220 20% 15%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 220 10% 94%;
-    --muted-foreground: 220 10% 45%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 38 70% 55%;
-    --accent-foreground: 220 25% 10%;
+    --accent: 326 80% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --success: 145 60% 40%;
     --success-foreground: 0 0% 100%;
@@ -42,70 +42,73 @@
     --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 90%;
-    --ring: 38 70% 55%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 326 80% 55%;
 
-    --radius: 0.5rem;
+    --radius: 1rem;
 
     /* Dashboard specific */
-    --dashboard-bg: 222 47% 11%;
-    --dashboard-card: 222 40% 14%;
-    --dashboard-card-hover: 222 35% 18%;
-    --dashboard-border: 222 30% 20%;
-    --champagne: 38 70% 55%;
-    --champagne-light: 38 50% 75%;
+    --dashboard-bg: 0 0% 95%;
+    --dashboard-card: 0 0% 12%;
+    --dashboard-card-hover: 0 0% 18%;
+    --dashboard-border: 0 0% 20%;
+    
+    /* Pink theme */
+    --pink: 326 80% 55%;
+    --pink-light: 326 70% 90%;
+    --pink-dark: 326 85% 45%;
 
     --font-serif: "Playfair Display", Georgia, serif;
     --font-sans: "Inter", system-ui, sans-serif;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 26%;
+    --sidebar-primary: 326 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 326 80% 55%;
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 40 30% 95%;
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
 
-    --card: 222 40% 14%;
-    --card-foreground: 40 30% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 222 40% 14%;
-    --popover-foreground: 40 30% 95%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 40 30% 95%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 326 80% 55%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 222 35% 18%;
-    --secondary-foreground: 40 30% 95%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
 
-    --muted: 222 30% 20%;
-    --muted-foreground: 220 15% 60%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 38 70% 55%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 326 80% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 30% 20%;
-    --input: 222 30% 20%;
-    --ring: 38 70% 55%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 326 80% 55%;
 
-    --sidebar-background: 222 47% 11%;
-    --sidebar-foreground: 40 30% 95%;
-    --sidebar-primary: 38 70% 55%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 222 35% 18%;
-    --sidebar-accent-foreground: 40 30% 95%;
-    --sidebar-border: 222 30% 20%;
-    --sidebar-ring: 38 70% 55%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 326 80% 55%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 326 80% 55%;
   }
 }
 
@@ -120,8 +123,8 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-serif);
-    @apply tracking-tight;
+    font-family: var(--font-sans);
+    @apply tracking-widest uppercase font-medium;
   }
 }
 
@@ -132,5 +135,58 @@
   
   .font-sans {
     font-family: var(--font-sans);
+  }
+
+  /* Pill Navigation */
+  .pill-nav {
+    @apply bg-white rounded-full shadow-lg px-2 py-2 flex items-center gap-1;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  .pill-nav-item {
+    @apply flex items-center justify-center w-12 h-12 rounded-full transition-all duration-200;
+  }
+
+  .pill-nav-item.active {
+    @apply bg-foreground text-background;
+  }
+
+  .pill-nav-item:not(.active) {
+    @apply text-muted-foreground hover:text-foreground;
+  }
+
+  /* Pink Button */
+  .btn-pink {
+    @apply bg-primary text-primary-foreground rounded-full px-8 py-4 font-medium uppercase tracking-widest;
+    background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
+    box-shadow: 0 8px 24px hsla(326, 80%, 55%, 0.3);
+  }
+
+  /* Dark Card */
+  .dark-card {
+    @apply bg-dashboard-card text-white rounded-2xl p-6;
+  }
+
+  /* Ticker animation */
+  @keyframes ticker {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .animate-ticker {
+    animation: ticker 20s linear infinite;
+  }
+}
+
+@layer utilities {
+  .text-gradient-pink {
+    background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }

@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LayoutGrid, PlusCircle, TrendingUp } from 'lucide-react';
+import { LayoutGrid, PlusCircle, Users, Settings } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -8,34 +8,48 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
-    { id: 'numeri', label: 'I miei Numeri', icon: LayoutGrid },
-    { id: 'inserisci', label: 'Inserisci Dati', icon: PlusCircle },
-    { id: 'andamento', label: 'Andamento Sede', icon: TrendingUp },
+    { id: 'numeri', icon: LayoutGrid },
+    { id: 'inserisci', icon: PlusCircle },
+    { id: 'andamento', icon: Users },
   ];
 
   return (
-    <nav className="flex items-center justify-center gap-1 md:gap-2 px-2 md:px-6 py-2 md:py-3 bg-card border-b border-border overflow-x-auto">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        
-        return (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={cn(
-              'flex items-center gap-1 md:gap-2 px-3 md:px-5 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium transition-all duration-200 whitespace-nowrap',
-              isActive
-                ? 'text-accent border-b-2 border-accent bg-accent/5'
-                : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-            )}
-          >
-            <Icon className="w-4 h-4" />
-            <span className="tracking-wide hidden sm:inline">{tab.label}</span>
-            <span className="tracking-wide sm:hidden">{tab.label.split(' ')[0]}</span>
-          </button>
-        );
-      })}
+    <nav className="flex flex-col items-center gap-6 py-6 bg-background">
+      {/* Pill Navigation */}
+      <div className="pill-nav">
+        {tabs.map((tab, index) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          
+          return (
+            <>
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className={cn(
+                  'pill-nav-item',
+                  isActive && 'active'
+                )}
+              >
+                <Icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.5} />
+              </button>
+              {index === 2 && (
+                <div key="separator" className="w-px h-8 bg-border mx-1" />
+              )}
+            </>
+          );
+        })}
+        <button className="pill-nav-item">
+          <Settings className="w-5 h-5" strokeWidth={1.5} />
+        </button>
+      </div>
+
+      {/* Report Button */}
+      <button className="btn-pink flex items-center gap-3">
+        <span className="text-lg">✦</span>
+        <span className="text-sm tracking-[0.3em]">REPORT</span>
+        <span className="text-lg">✦</span>
+      </button>
     </nav>
   );
 };
