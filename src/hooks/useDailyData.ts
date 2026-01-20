@@ -37,6 +37,8 @@ export const useDailyData = () => {
       return data;
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 2, // 2 minutes cache
+    gcTime: 1000 * 60 * 5, // 5 minutes garbage collection
   });
 
   const { data: allData, isLoading: allDataLoading } = useQuery({
@@ -52,6 +54,8 @@ export const useDailyData = () => {
       return data;
     },
     enabled: !!user && profile?.role !== 'agente',
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
   });
 
   const saveDailyData = useMutation({
