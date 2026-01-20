@@ -22,10 +22,7 @@ const IndexContent = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Caricamento...</p>
-        </div>
+        <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -52,10 +49,9 @@ const IndexContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      {/* Spacer for fixed header */}
       <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl mx-auto">
+      <main className="max-w-3xl mx-auto animate-in fade-in duration-150">
         {renderContent()}
       </main>
     </div>
