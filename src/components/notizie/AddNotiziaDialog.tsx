@@ -330,16 +330,17 @@ const AddNotiziaDialog = () => {
                       emoji: formData.emoji,
                       zona: formData.zona || undefined,
                       type: formData.type || undefined,
+                      phone: formData.phone || undefined,
                       notes: formData.notes || undefined,
                       reminder_date: reminderDate,
                     });
                     window.open(url, '_blank');
                   }}
-                  className="w-full flex items-center justify-center gap-2 bg-white rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.08)] active:scale-[0.98] transition-transform hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
+                  className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
                 >
-                  <CalendarIcon className="w-4 h-4 text-primary" />
+                  <CalendarIcon className="w-4 h-4" />
                   <span>Aggiungi a Google Calendar</span>
-                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                  <ExternalLink className="w-3 h-3 opacity-60" />
                 </button>
               )}
               
