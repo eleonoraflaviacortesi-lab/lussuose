@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth, AuthProvider } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
@@ -58,12 +58,4 @@ const IndexContent = () => {
   );
 };
 
-const Index = () => {
-  return (
-    <AuthProvider>
-      <IndexContent />
-    </AuthProvider>
-  );
-};
-
-export default Index;
+export default IndexContent;
