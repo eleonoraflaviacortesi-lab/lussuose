@@ -8,9 +8,10 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
-    { id: 'numeri', icon: LayoutGrid },
-    { id: 'inserisci', icon: PlusCircle },
-    { id: 'andamento', icon: Users },
+    { id: 'numeri', icon: LayoutGrid, label: 'I miei numeri' },
+    { id: 'inserisci', icon: PlusCircle, label: 'Report giornaliero' },
+    { id: 'agenzia', icon: Users, label: 'Agenzia' },
+    { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
   return (
@@ -22,26 +23,23 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
           const isActive = activeTab === tab.id;
           
           return (
-            <>
+            <div key={tab.id} className="flex items-center">
               <button
-                key={tab.id}
                 onClick={() => onTabChange(tab.id)}
                 className={cn(
                   'pill-nav-item',
                   isActive && 'active'
                 )}
+                title={tab.label}
               >
                 <Icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.5} />
               </button>
               {index === 2 && (
-                <div key="separator" className="w-px h-8 bg-border mx-1" />
+                <div className="w-px h-8 bg-border mx-1" />
               )}
-            </>
+            </div>
           );
         })}
-        <button className="pill-nav-item">
-          <Settings className="w-5 h-5" strokeWidth={1.5} />
-        </button>
       </div>
 
       {/* Report Button */}

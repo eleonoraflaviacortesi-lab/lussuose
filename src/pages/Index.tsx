@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, AuthProvider } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
-import DashboardSede from '@/components/dashboard/DashboardSede';
-import MyNumbers from '@/components/dashboard/MyNumbers';
-import DataEntry from '@/components/dashboard/DataEntry';
-import { useEffect } from 'react';
+import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
+import ReportForm from '@/components/dashboard/ReportForm';
+import AgencyDashboard from '@/components/dashboard/AgencyDashboard';
+import SettingsPage from '@/components/settings/SettingsPage';
 
 const IndexContent = () => {
-  const [activeTab, setActiveTab] = useState('andamento');
+  const [activeTab, setActiveTab] = useState('numeri');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
 
@@ -37,12 +37,15 @@ const IndexContent = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'numeri':
-        return <MyNumbers />;
+        return <PersonalDashboard />;
       case 'inserisci':
-        return <DataEntry />;
-      case 'andamento':
+        return <ReportForm />;
+      case 'agenzia':
+        return <AgencyDashboard />;
+      case 'impostazioni':
+        return <SettingsPage />;
       default:
-        return <DashboardSede />;
+        return <PersonalDashboard />;
     }
   };
 
@@ -52,7 +55,7 @@ const IndexContent = () => {
       {/* Spacer for fixed header */}
       <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-md mx-auto">
+      <main className="max-w-3xl mx-auto">
         {renderContent()}
       </main>
     </div>
