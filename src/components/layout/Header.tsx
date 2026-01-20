@@ -50,7 +50,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         </div>
 
         {/* Main Header - Liquid Glass Effect */}
-        <div className="glass-header flex items-center justify-between px-6 py-2 rounded-b-3xl">
+        <div className="glass-header flex items-center justify-between px-6 py-1 rounded-b-3xl">
           {/* Profile Button with Heart */}
           <button 
             onClick={() => setShowProfile(true)}
