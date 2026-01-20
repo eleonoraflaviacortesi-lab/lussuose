@@ -14,6 +14,7 @@ export interface Notizia {
   type: string | null;
   notes: string | null;
   status: NotiziaStatus;
+  emoji: string | null;
   reminder_date: string | null;
   created_at: string;
   updated_at: string;
@@ -26,6 +27,7 @@ export interface NotiziaInput {
   type?: string;
   notes?: string;
   status?: NotiziaStatus;
+  emoji?: string;
   reminder_date?: string;
   created_at?: string;
 }

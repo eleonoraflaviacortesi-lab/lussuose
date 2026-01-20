@@ -3,11 +3,14 @@ import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useNotizie, NotiziaStatus } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
 
 const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
 const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+
+const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆'];
 
 const AddNotiziaDialog = () => {
   const { addNotizia } = useNotizie();
@@ -19,6 +22,7 @@ const AddNotiziaDialog = () => {
     type: '',
     notes: '',
     status: 'new' as NotiziaStatus,
+    emoji: '📋',
     reminder_date: '',
     created_date: '',
   });
@@ -34,6 +38,7 @@ const AddNotiziaDialog = () => {
       type: formData.type || undefined,
       notes: formData.notes || undefined,
       status: formData.status,
+      emoji: formData.emoji,
       reminder_date: formData.reminder_date || undefined,
       created_at: formData.created_date ? new Date(formData.created_date).toISOString() : undefined,
     });
@@ -45,6 +50,7 @@ const AddNotiziaDialog = () => {
       type: '',
       notes: '',
       status: 'new',
+      emoji: '📋',
       reminder_date: '',
       created_date: '',
     });
@@ -91,16 +97,49 @@ const AddNotiziaDialog = () => {
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <Label htmlFor="name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
-                <input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Es: Villa Serenity"
-                  required
-                  className={pillInputClass}
-                />
+              {/* Emoji + Name row */}
+              <div className="flex gap-2">
+                <div>
+                  <Label className="text-xs font-medium mb-1.5 block">Emoji</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button 
+                        type="button"
+                        className="w-12 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg hover:bg-accent/50 transition-colors"
+                      >
+                        {formData.emoji}
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-2" align="start">
+                      <div className="grid grid-cols-5 gap-1">
+                        {commonEmojis.map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            onClick={() => setFormData({ ...formData, emoji })}
+                            className={cn(
+                              "w-8 h-8 flex items-center justify-center rounded-lg hover:bg-accent transition-colors",
+                              formData.emoji === emoji && "bg-accent"
+                            )}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="flex-1">
+                  <Label htmlFor="name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
+                  <input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Es: Villa Serenity"
+                    required
+                    className={pillInputClass}
+                  />
+                </div>
               </div>
               
               <div className="grid grid-cols-2 gap-2">
