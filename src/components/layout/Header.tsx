@@ -60,7 +60,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Le Lussuose" className="h-14" />
+          <img src={logo} alt="Le Lussuose" className="h-20" />
 
           {/* Logout */}
           <button 
