@@ -49,6 +49,8 @@ const IndexContent = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      {/* Spacer for fixed header */}
+      <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="max-w-md mx-auto">
         {renderContent()}

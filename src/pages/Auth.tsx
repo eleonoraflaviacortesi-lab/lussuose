@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
 import { Heart } from 'lucide-react';
+import logo from '@/assets/le_lussuose.svg';
 import {
   Select,
   SelectContent,
@@ -72,18 +72,15 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Pink Header */}
-      <div className="bg-primary py-8 text-center">
-        <div className="flex items-center justify-center gap-0.5">
-          <span className="text-2xl font-semibold tracking-[0.2em] text-primary-foreground">LE LUSSUOS</span>
-          <span className="text-2xl font-semibold text-white/80">E</span>
-        </div>
+      <div className="bg-primary py-8 text-center rounded-b-3xl">
+        <img src={logo} alt="Le Lussuose" className="h-8 mx-auto invert brightness-0 invert" />
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-sm">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center border border-border">
+            <div className="w-16 h-16 rounded-full glass-button flex items-center justify-center">
               <Heart className="w-7 h-7 text-foreground" fill="currentColor" />
             </div>
           </div>

@@ -137,10 +137,46 @@
     font-family: var(--font-sans);
   }
 
+  /* Liquid Glass Effect */
+  .glass-header {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 4px 24px rgba(0, 0, 0, 0.06),
+      0 8px 48px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .glass-button {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.2s ease;
+  }
+
+  .glass-button:hover {
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 4px 12px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+
   /* Pill Navigation */
   .pill-nav {
-    @apply bg-white rounded-full shadow-lg px-2 py-2 flex items-center gap-1;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    @apply rounded-full px-2 py-2 flex items-center gap-1;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08), 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .pill-nav-item {
@@ -157,9 +193,14 @@
 
   /* Pink Button */
   .btn-pink {
-    @apply bg-primary text-primary-foreground rounded-full px-8 py-4 font-medium uppercase tracking-widest;
+    @apply text-primary-foreground rounded-full px-8 py-4 font-medium uppercase tracking-widest;
     background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
     box-shadow: 0 8px 24px hsla(326, 80%, 55%, 0.3);
+  }
+
+  .btn-pink:hover {
+    box-shadow: 0 12px 32px hsla(326, 80%, 55%, 0.4);
+    transform: translateY(-1px);
   }
 
   /* Dark Card */
