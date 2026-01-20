@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LogOut, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
-import logo from '@/assets/le_lussuose.svg';
+import logo from '@/assets/le_lussuose_large.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 
 interface HeaderProps {
