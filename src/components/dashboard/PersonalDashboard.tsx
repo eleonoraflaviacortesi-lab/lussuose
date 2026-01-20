@@ -33,7 +33,7 @@ const PersonalDashboard = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-6 w-6 border-2 border-foreground border-t-transparent"></div>
       </div>
     );
   }
@@ -67,7 +67,7 @@ const PersonalDashboard = () => {
             </span>
             <span className="text-3xl font-light text-muted-foreground">/ {annualTarget}</span>
           </div>
-          <p className="text-xs font-medium tracking-[0.3em] uppercase text-primary">
+          <p className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
             VENDITE
           </p>
         </div>
@@ -98,7 +98,7 @@ const PersonalDashboard = () => {
           </p>
         </div>
         <div className="col-span-2 bg-card rounded-2xl shadow-lg p-5">
-          <p className="text-xs font-medium tracking-[0.15em] uppercase text-primary mb-2">
+          <p className="text-xs font-medium tracking-[0.15em] uppercase text-foreground mb-2">
             GIORNATE TRACKING
           </p>
           <p className="text-4xl font-light text-foreground">{giornateTacking}</p>
@@ -149,11 +149,11 @@ const PersonalDashboard = () => {
       {/* Incarichi Team Card */}
       <div className="bg-card rounded-3xl shadow-lg p-6 relative overflow-hidden">
         <div className="absolute right-4 top-4 opacity-10">
-          <Gift className="w-32 h-32 text-primary" />
+          <Gift className="w-32 h-32 text-foreground" />
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-1">
-            <Gift className="w-5 h-5 text-primary" />
+            <Gift className="w-5 h-5 text-foreground" />
           </div>
           <h3 className="text-sm font-bold tracking-[0.2em] uppercase mb-1">
             INCARICHI TOTALI TEAM
@@ -173,7 +173,7 @@ const PersonalDashboard = () => {
           <Progress value={incarichiPercent} className="h-1 bg-muted mb-3" />
           <div className="flex items-center justify-between text-xs">
             <span className="font-medium tracking-wider uppercase">PROGRESSO UFFICIO</span>
-            <span className="font-semibold text-primary">{incarichiPercent}%</span>
+            <span className="font-semibold text-foreground">{incarichiPercent}%</span>
           </div>
 
           <div className="flex items-center gap-2 mt-4 pt-4 border-t border-muted">
@@ -216,7 +216,7 @@ const PersonalDashboard = () => {
                 />
                 <Bar 
                   dataKey="notizie" 
-                  fill="hsl(var(--primary))" 
+                  fill="hsl(var(--foreground))" 
                   radius={[4, 4, 0, 0]}
                 />
               </BarChart>

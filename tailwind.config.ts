@@ -66,6 +66,10 @@ export default {
           light: "hsl(var(--pink-light))",
           dark: "hsl(var(--pink-dark))",
         },
+        banner: {
+          DEFAULT: "hsl(var(--banner))",
+          foreground: "hsl(var(--banner-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
