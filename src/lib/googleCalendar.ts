@@ -54,6 +54,7 @@ export function generateNotiziaCalendarUrl(notizia: {
   emoji?: string;
   zona?: string;
   type?: string;
+  phone?: string;
   notes?: string;
   reminder_date: Date;
 }): string {
@@ -66,6 +67,10 @@ export function generateNotiziaCalendarUrl(notizia: {
   
   if (notizia.type) {
     descriptionParts.push(`🏠 Tipo: ${notizia.type}`);
+  }
+  
+  if (notizia.phone) {
+    descriptionParts.push(`📞 Telefono: ${notizia.phone}`);
   }
   
   if (notizia.notes) {
