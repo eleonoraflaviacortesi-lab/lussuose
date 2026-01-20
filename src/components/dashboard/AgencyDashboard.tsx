@@ -71,12 +71,12 @@ const AgencyDashboard = () => {
 
         <div className="flex items-center justify-between gap-4">
           <Select value={selectedSede} onValueChange={setSelectedSede}>
-            <SelectTrigger className="w-48 bg-muted border-0 rounded-xl">
+            <SelectTrigger className="w-48 glass-select-trigger border-0 rounded-2xl h-11 text-sm font-medium">
               <SelectValue placeholder="Seleziona sede" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="glass-select-content border-0 rounded-2xl overflow-hidden">
               {SEDI.map((sede) => (
-                <SelectItem key={sede} value={sede}>
+                <SelectItem key={sede} value={sede} className="glass-select-item rounded-xl">
                   {sede}
                 </SelectItem>
               ))}
