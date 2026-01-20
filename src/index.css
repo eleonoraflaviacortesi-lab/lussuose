@@ -303,17 +303,15 @@
   }
 
   .btn-report.pending {
-    background: hsl(var(--pink));
+    background: hsl(0 0% 10%);
     color: white;
-    box-shadow: 
-      0 4px 20px hsla(326, 80%, 55%, 0.4),
-      0 0 30px hsla(326, 80%, 55%, 0.3);
-    animation: pulse-glow 2s ease-in-out infinite;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
 
   .btn-report.completed {
-    @apply bg-foreground text-background;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: hsl(0 0% 35%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .btn-report:hover {
