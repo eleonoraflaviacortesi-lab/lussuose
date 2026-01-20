@@ -1,19 +1,13 @@
 import { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useNotizie, NotiziaStatus } from '@/hooks/useNotizie';
+import { cn } from '@/lib/utils';
 
-const pillInputClass = "w-full bg-white rounded-full px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
-const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
+const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
 
 const AddNotiziaDialog = () => {
   const { addNotizia } = useNotizie();
@@ -58,140 +52,168 @@ const AddNotiziaDialog = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="gap-1.5">
-          <Plus className="w-4 h-4" />
-          Nuova notizia
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-white/90 backdrop-blur-2xl border-0 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-3xl"  >
-        <DialogHeader>
-          <DialogTitle className="text-center text-lg font-bold tracking-wide uppercase">
-            Aggiungi nuova notizia
-          </DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-2">
-          <div>
-            <Label htmlFor="name" className="text-sm font-medium mb-2 block">Nome proprietà *</Label>
-            <input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Es: Villa Serenity"
-              required
-              className={pillInputClass}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="zona" className="text-sm font-medium mb-2 block">Zona</Label>
-              <input
-                id="zona"
-                value={formData.zona}
-                onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
-                placeholder="Es: Umbertide"
-                className={pillInputClass}
-              />
-            </div>
-            <div>
-              <Label htmlFor="type" className="text-sm font-medium mb-2 block">Tipo</Label>
-              <input
-                id="type"
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                placeholder="Es: Casale"
-                className={pillInputClass}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="phone" className="text-sm font-medium mb-2 block">Telefono</Label>
-            <input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+39 333 1234567"
-              className={pillInputClass}
-            />
-          </div>
-          
-          <div>
-            <Label htmlFor="status" className="text-sm font-medium mb-2 block">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) => setFormData({ ...formData, status: value as NotiziaStatus })}
-            >
-              <SelectTrigger className="bg-white rounded-full px-4 py-3 h-auto text-sm shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="new">New</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
-                <SelectItem value="done">Done</SelectItem>
-                <SelectItem value="on_shot">On Shot</SelectItem>
-                <SelectItem value="taken">Taken</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div>
-            <Label htmlFor="notes" className="text-sm font-medium mb-2 block">Note</Label>
-            <textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Aggiungi note..."
-              rows={3}
-              className={pillTextareaClass}
-            />
-          </div>
+    <>
+      <Button size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
+        <Plus className="w-4 h-4" />
+        Nuova notizia
+      </Button>
 
-          <div>
-            <Label htmlFor="created_date" className="text-sm font-medium mb-2 block">Data creazione notizia</Label>
-            <input
-              id="created_date"
-              type="date"
-              value={formData.created_date}
-              onChange={(e) => setFormData({ ...formData, created_date: e.target.value })}
-              className={pillInputClass}
-            />
-          </div>
+      {/* Liquid Glass Overlay */}
+      {open && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          onClick={() => setOpen(false)}
+        >
+          {/* Blur backdrop */}
+          <div className="absolute inset-0 bg-black/10 backdrop-blur-md" />
           
-          <div>
-            <Label htmlFor="reminder" className="text-sm font-medium mb-2 block">Promemoria</Label>
-            <input
-              id="reminder"
-              type="datetime-local"
-              value={formData.reminder_date}
-              onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
-              className={pillInputClass}
-            />
-          </div>
-          
-          <div className="flex justify-center gap-3 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+          {/* Compact floating card */}
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              "relative z-10 w-full max-w-sm",
+              "bg-white/85 backdrop-blur-2xl",
+              "rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]",
+              "p-5 animate-in zoom-in-95 fade-in duration-200"
+            )}
+          >
+            {/* Close button */}
+            <button 
               onClick={() => setOpen(false)}
-              className="rounded-full px-6 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] border-0"
+              className="absolute right-4 top-4 text-muted-foreground hover:text-foreground transition-colors"
             >
-              Annulla
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={!formData.name.trim()}
-              className="rounded-full px-6"
-            >
-              Aggiungi
-            </Button>
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Title */}
+            <h3 className="text-center text-base font-bold tracking-wide uppercase mb-4">
+              Nuova Notizia
+            </h3>
+
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <Label htmlFor="name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
+                <input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Es: Villa Serenity"
+                  required
+                  className={pillInputClass}
+                />
+              </div>
+              
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="zona" className="text-xs font-medium mb-1.5 block">Zona</Label>
+                  <input
+                    id="zona"
+                    value={formData.zona}
+                    onChange={(e) => setFormData({ ...formData, zona: e.target.value })}
+                    placeholder="Es: Umbertide"
+                    className={pillInputClass}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="type" className="text-xs font-medium mb-1.5 block">Tipo</Label>
+                  <input
+                    id="type"
+                    value={formData.type}
+                    onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                    placeholder="Es: Casale"
+                    className={pillInputClass}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="phone" className="text-xs font-medium mb-1.5 block">Telefono</Label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="+39 333 1234567"
+                  className={pillInputClass}
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="status" className="text-xs font-medium mb-1.5 block">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value as NotiziaStatus })}
+                >
+                  <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">New</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="done">Done</SelectItem>
+                    <SelectItem value="on_shot">On Shot</SelectItem>
+                    <SelectItem value="taken">Taken</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="notes" className="text-xs font-medium mb-1.5 block">Note</Label>
+                <textarea
+                  id="notes"
+                  value={formData.notes}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Aggiungi note..."
+                  rows={2}
+                  className={pillTextareaClass}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label htmlFor="created_date" className="text-xs font-medium mb-1.5 block">Data notizia</Label>
+                  <input
+                    id="created_date"
+                    type="date"
+                    value={formData.created_date}
+                    onChange={(e) => setFormData({ ...formData, created_date: e.target.value })}
+                    className={pillInputClass}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="reminder" className="text-xs font-medium mb-1.5 block">Promemoria</Label>
+                  <input
+                    id="reminder"
+                    type="datetime-local"
+                    value={formData.reminder_date}
+                    onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+                    className={pillInputClass}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-center gap-2 pt-3">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={() => setOpen(false)}
+                  className="rounded-full px-5 text-sm"
+                >
+                  Annulla
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={!formData.name.trim()}
+                  className="rounded-full px-5 text-sm"
+                >
+                  Aggiungi
+                </Button>
+              </div>
+            </form>
           </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+        </div>
+      )}
+    </>
   );
 };
 
