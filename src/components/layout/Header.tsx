@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, User } from 'lucide-react';
+import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import logo from '@/assets/le_lussuose_large.svg';
@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 const Header = ({ onOpenProfile }: HeaderProps) => {
-  const { signOut } = useAuth();
+  const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
@@ -54,9 +54,9 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
-            className="w-11 h-11 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform"
+            className="w-11 h-11 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
           >
-            <User className="w-5 h-5 text-foreground" />
+            {profile?.avatar_emoji || '🖤'}
           </button>
 
           {/* Brand Logo */}
