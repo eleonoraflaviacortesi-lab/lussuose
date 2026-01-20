@@ -88,7 +88,7 @@ const SettingsPage = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <InputField
               label="OBIETTIVO FATTURATO"
               value={settings.obbiettivo_fatturato}
@@ -101,9 +101,6 @@ const SettingsPage = () => {
               field="base_fissa_annuale"
               suffix="€"
             />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
             <InputField
               label="TUA %"
               value={settings.percentuale_personale}
@@ -111,13 +108,13 @@ const SettingsPage = () => {
               suffix="%"
             />
             <InputField
-              label="PREZZO MEDIO"
+              label="PREZZO MEDIO VENDITA"
               value={settings.prezzo_medio_vendita}
               field="prezzo_medio_vendita"
               suffix="€"
             />
             <InputField
-              label="PROVVIGIONE"
+              label="PROVVIGIONE AGENZIA"
               value={settings.provvigione_agenzia}
               field="provvigione_agenzia"
               suffix="%"
@@ -134,7 +131,7 @@ const SettingsPage = () => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-4">
             <InputField
               label="CONTATTI"
               value={settings.contatti_settimana}
@@ -153,9 +150,6 @@ const SettingsPage = () => {
               field="appuntamenti_settimana"
               suffix="Qt"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <InputField
               label="ACQUISIZIONI"
               value={settings.acquisizioni_settimana}
