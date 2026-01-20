@@ -52,33 +52,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
 
+        // Load profile in background (never block the UI)
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id).catch(() => {
+            /* ignore */
+          });
         } else {
           setProfile(null);
         }
-      } finally {
+      } catch {
         if (isMounted) setLoading(false);
       }
     };
 
-    // Listener for ongoing auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
         if (!isMounted) return;
 
         setSession(session);
         setUser(session?.user ?? null);
+        setLoading(false);
 
         if (session?.user) {
-          await fetchProfile(session.user.id);
+          fetchProfile(session.user.id).catch(() => {
+            /* ignore */
+          });
         } else {
           setProfile(null);
         }
-
-        // do not setLoading(true) here; initial load controls it
-        setLoading(false);
       }
     );
 
