@@ -42,7 +42,7 @@ const Header = () => {
       </div>
 
       {/* Main Header - Liquid Glass Effect */}
-      <div className="glass-header flex items-center justify-between px-6 py-4 rounded-b-3xl">
+      <div className="glass-header flex items-center justify-between px-6 py-2 rounded-b-3xl">
         {/* Logo with Heart */}
         <button className="w-11 h-11 rounded-full glass-button flex items-center justify-center">
           <Heart className="w-5 h-5 text-foreground" fill="currentColor" />
