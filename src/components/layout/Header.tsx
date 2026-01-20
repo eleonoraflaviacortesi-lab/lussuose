@@ -36,17 +36,14 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50">
         {/* Ticker Banner */}
-        <div className="bg-primary text-primary-foreground py-2 overflow-hidden">
+        <div className="bg-primary text-primary-foreground py-2.5 overflow-hidden">
           <div className="flex animate-ticker whitespace-nowrap">
-            {[...Array(4)].map((_, i) => (
-              <span key={i} className="flex items-center gap-4 mx-8 text-xs tracking-widest uppercase">
-                <span className="font-light">OBBIETTIVO FATTURATO AGENZIA:</span>
-                <span className="font-bold">€ {formatCurrency(target)}</span>
-                <span className="font-light">★</span>
-                <span className="font-light">MANCANO:</span>
-                <span className="font-bold">€ {formatCurrency(remaining)}</span>
-                <span className="font-light">AL TRAGUARDO</span>
-                <span className="font-light">★</span>
+            {[...Array(6)].map((_, i) => (
+              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.2em] uppercase">
+                <span>MANCANO € {formatCurrency(remaining)} AL TRAGUARDO</span>
+                <span>★</span>
+                <span>OBBIETTIVO FATTURATO AGENZIA € {formatCurrency(target)}</span>
+                <span>★</span>
               </span>
             ))}
           </div>
