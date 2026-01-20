@@ -90,11 +90,37 @@ export const useDailyData = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['daily-data'] });
       queryClient.invalidateQueries({ queryKey: ['daily-data-all'] });
-      toast({ title: 'Dati salvati con successo!' });
+      toast({ title: '✓ Report salvato con successo!' });
     },
     onError: (error) => {
       toast({
         title: 'Errore nel salvataggio',
+        description: error.message,
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const deleteDailyData = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error('Non autenticato');
+
+      const { error } = await supabase
+        .from('daily_data')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['daily-data'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-data-all'] });
+      toast({ title: '✓ Report eliminato!' });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Errore nell\'eliminazione',
         description: error.message,
         variant: 'destructive',
       });
@@ -106,5 +132,6 @@ export const useDailyData = () => {
     allData: profile?.role !== 'agente' ? allData : myData,
     isLoading: myDataLoading || allDataLoading,
     saveDailyData,
+    deleteDailyData,
   };
 };
