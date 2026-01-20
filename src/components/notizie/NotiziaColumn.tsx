@@ -1,5 +1,6 @@
+import { Droppable, Draggable } from '@hello-pangea/dnd';
 import { Badge } from '@/components/ui/badge';
-import { Notizia } from '@/hooks/useNotizie';
+import { Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaCard from './NotiziaCard';
 import { cn } from '@/lib/utils';
 
@@ -7,7 +8,7 @@ interface NotiziaColumnProps {
   title: string;
   count: number;
   notizie: Notizia[];
-  variant: 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken';
+  variant: NotiziaStatus;
   onNotiziaClick: (notizia: Notizia) => void;
 }
 
@@ -38,16 +39,41 @@ const NotiziaColumn = ({ title, count, notizie, variant, onNotiziaClick }: Notiz
         <span className="text-sm text-muted-foreground">{count}</span>
       </div>
       
-      {/* Cards */}
-      <div className="flex flex-col gap-2">
-        {notizie.map((notizia) => (
-          <NotiziaCard
-            key={notizia.id}
-            notizia={notizia}
-            onClick={() => onNotiziaClick(notizia)}
-          />
-        ))}
-      </div>
+      {/* Droppable Area */}
+      <Droppable droppableId={variant}>
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            className={cn(
+              "flex flex-col gap-2 min-h-[100px] rounded-xl p-2 transition-colors",
+              snapshot.isDraggingOver && "bg-accent/20"
+            )}
+          >
+            {notizie.map((notizia, index) => (
+              <Draggable key={notizia.id} draggableId={notizia.id} index={index}>
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    {...provided.dragHandleProps}
+                    className={cn(
+                      "transition-transform",
+                      snapshot.isDragging && "scale-105 shadow-xl rotate-1"
+                    )}
+                  >
+                    <NotiziaCard
+                      notizia={notizia}
+                      onClick={() => onNotiziaClick(notizia)}
+                    />
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
     </div>
   );
 };
