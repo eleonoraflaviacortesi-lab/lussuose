@@ -182,7 +182,7 @@
   }
 
   .pill-nav-item {
-    @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200;
+    @apply flex items-center justify-center w-10 h-10 rounded-full transition-all duration-100;
   }
 
   .pill-nav-item.active {
@@ -197,7 +197,7 @@
   .btn-report {
     @apply text-background bg-foreground rounded-full px-6 py-3 font-medium uppercase tracking-widest text-xs;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
   }
 
   .btn-report:hover {
