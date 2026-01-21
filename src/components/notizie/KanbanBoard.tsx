@@ -19,16 +19,16 @@ const columns: { key: NotiziaStatus; label: string; style: string }[] = [
   { key: 'sold', label: 'Sold', style: 'bg-zinc-600 text-white' },
 ];
 
-// Minimal card - no date-fns, no Badge component
+// Minimal card - full name with word wrap
 const Card = memo(({ notizia, onClick }: { notizia: Notizia; onClick: () => void }) => (
   <div
     onClick={onClick}
     className="bg-card rounded-xl p-2.5 cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
   >
     <div className="flex items-start gap-2">
-      <span className="text-sm">{notizia.emoji || '📋'}</span>
+      <span className="text-sm shrink-0">{notizia.emoji || '📋'}</span>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{notizia.name}</p>
+        <p className="font-medium text-sm leading-tight">{notizia.name}</p>
         {notizia.zona && (
           <span className="text-[10px] text-muted-foreground">{notizia.zona}</span>
         )}
@@ -47,7 +47,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 pb-4 overflow-x-auto scrollbar-hide lg:h-full lg:gap-4">
+      <div className="flex gap-3 pb-4 overflow-x-auto lg:h-full lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
         {columns.map(({ key, label, style }) => (
           <div key={key} className="flex flex-col min-w-[180px] max-w-[240px] lg:flex-1 lg:min-w-0 lg:max-w-none">
             <div className="flex items-center gap-2 mb-2 lg:mb-3">
@@ -62,7 +62,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                   className={cn(
-                    "flex flex-col gap-1.5 min-h-[80px] rounded-lg p-1.5 transition-colors lg:flex-1 lg:overflow-y-auto lg:min-h-0",
+                    "flex flex-col gap-1.5 min-h-[80px] rounded-lg p-1.5 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
                     snapshot.isDraggingOver && "bg-accent/20"
                   )}
                 >
