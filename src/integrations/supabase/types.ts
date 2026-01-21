@@ -91,6 +91,8 @@ export type Database = {
       }
       notizie: {
         Row: {
+          card_color: string | null
+          comments: Json | null
           created_at: string
           emoji: string | null
           id: string
@@ -105,6 +107,8 @@ export type Database = {
           zona: string | null
         }
         Insert: {
+          card_color?: string | null
+          comments?: Json | null
           created_at?: string
           emoji?: string | null
           id?: string
@@ -119,6 +123,8 @@ export type Database = {
           zona?: string | null
         }
         Update: {
+          card_color?: string | null
+          comments?: Json | null
           created_at?: string
           emoji?: string | null
           id?: string
