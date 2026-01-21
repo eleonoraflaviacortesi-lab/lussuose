@@ -127,6 +127,10 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
+      // Haptic feedback on mobile
+      if (navigator.vibrate) {
+        navigator.vibrate(15);
+      }
       setPickerPos({ x: touch.clientX - 100, y: touch.clientY - 60 });
       setPickerOpen(true);
     }, 500);
