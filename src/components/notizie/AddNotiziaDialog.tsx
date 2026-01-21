@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, X, CalendarIcon, Clock, ExternalLink } from 'lucide-react';
+import { Plus, X, CalendarIcon, Bell, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -290,7 +290,7 @@ const AddNotiziaDialog = () => {
                           !formData.reminder_date && "text-muted-foreground"
                         )}
                       >
-                        <Clock className="w-4 h-4" />
+                        <Bell className="w-4 h-4" />
                         {formData.reminder_date ? format(formData.reminder_date, 'd MMM', { locale: it }) : 'Seleziona'}
                       </button>
                     </PopoverTrigger>

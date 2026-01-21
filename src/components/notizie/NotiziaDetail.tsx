@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, X, Trash2, CalendarIcon, Clock, ExternalLink } from 'lucide-react';
+import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -310,7 +310,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       !editData.reminder_date && "text-muted-foreground"
                     )}
                   >
-                    <Clock className="w-4 h-4" />
+                    <Bell className="w-4 h-4" />
                     {editData.reminder_date ? format(editData.reminder_date, 'd MMM', { locale: it }) : 'Seleziona'}
                   </button>
                 </PopoverTrigger>
