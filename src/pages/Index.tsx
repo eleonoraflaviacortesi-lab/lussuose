@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
-import PersonalDashboard from '@/components/dashboard/PersonalDashboard';
-import ReportForm from '@/components/dashboard/ReportForm';
-import AgencyDashboard from '@/components/dashboard/AgencyDashboard';
-import SettingsPage from '@/components/settings/SettingsPage';
-import ReportAnalysisTab from '@/components/dashboard/ReportAnalysisTab';
-import NotiziePage from '@/components/notizie/NotiziePage';
+
+// Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
+const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
+const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
+const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
+const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
+const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
+const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
@@ -58,7 +60,15 @@ const IndexContent = () => {
       <div className="h-[100px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="max-w-3xl mx-auto px-3 animate-in fade-in duration-150">
-        {renderContent()}
+        <Suspense
+          fallback={
+            <div className="py-10 flex items-center justify-center">
+              <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+            </div>
+          }
+        >
+          {renderContent()}
+        </Suspense>
       </main>
     </div>
   );

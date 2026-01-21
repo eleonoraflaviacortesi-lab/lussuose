@@ -20,7 +20,9 @@ export const useOperations = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('operations')
-        .select('*, profiles!inner(full_name)')
+        // NOTE: avoid embedded select with profiles because there's no FK relationship,
+        // which causes repeated 400s and slows down initial load.
+        .select('*')
         .order('date', { ascending: false })
         .limit(20);
       
@@ -30,6 +32,7 @@ export const useOperations = () => {
     enabled: !!user,
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
+    retry: false,
   });
 
   const addOperation = useMutation({
