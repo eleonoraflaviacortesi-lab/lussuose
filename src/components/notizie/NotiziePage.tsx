@@ -4,6 +4,7 @@ import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
+import NotizieStatsChart from './NotizieStatsChart';
 import { cn } from '@/lib/utils';
 
 // Lazy load drag-drop board for faster initial render
@@ -79,6 +80,8 @@ const NotiziePage = () => {
           <AddNotiziaDialog />
         </div>
       </div>
+
+      <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
 
       <div className="lg:flex-1 lg:min-h-0">
         {isLoading ? (
