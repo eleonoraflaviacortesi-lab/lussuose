@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { NotiziaStatus } from '@/hooks/useNotizie';
 import { ArrowDown } from 'lucide-react';
@@ -18,6 +18,18 @@ const funnelSteps: { key: NotiziaStatus; label: string; color: string }[] = [
 ];
 
 const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelChartModalProps) => {
+  const [animated, setAnimated] = useState(false);
+
+  // Trigger animation after modal opens
+  useEffect(() => {
+    if (open) {
+      const timer = setTimeout(() => setAnimated(true), 50);
+      return () => clearTimeout(timer);
+    } else {
+      setAnimated(false);
+    }
+  }, [open]);
+
   const funnelData = useMemo(() => {
     const steps = funnelSteps.map(s => ({
       ...s,
@@ -62,19 +74,44 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
 
         <div className="space-y-1 mt-4">
           {funnelData.map((step, i) => (
-            <div key={step.key} className="flex flex-col items-center">
+            <div 
+              key={step.key} 
+              className="flex flex-col items-center"
+              style={{ 
+                opacity: animated ? 1 : 0,
+                transform: animated ? 'translateY(0)' : 'translateY(10px)',
+                transition: `opacity 0.3s ease-out ${i * 0.1}s, transform 0.3s ease-out ${i * 0.1}s`
+              }}
+            >
               {/* Funnel bar */}
               <div
-                className={`${step.color} rounded-lg py-2.5 px-4 flex items-center justify-between transition-all duration-300`}
-                style={{ width: `${step.widthPercent}%` }}
+                className={`${step.color} rounded-lg py-2.5 px-4 flex items-center justify-between overflow-hidden`}
+                style={{ 
+                  width: animated ? `${step.widthPercent}%` : '15%',
+                  transition: `width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1 + 0.1}s`
+                }}
               >
-                <span className="text-xs font-semibold">{step.label}</span>
-                <span className="text-sm font-bold">{step.cumulativeCount}</span>
+                <span className="text-xs font-semibold whitespace-nowrap">{step.label}</span>
+                <span 
+                  className="text-sm font-bold"
+                  style={{
+                    opacity: animated ? 1 : 0,
+                    transition: `opacity 0.3s ease-out ${i * 0.1 + 0.4}s`
+                  }}
+                >
+                  {step.cumulativeCount}
+                </span>
               </div>
 
               {/* Conversion arrow */}
               {i < funnelData.length - 1 && (
-                <div className="flex items-center gap-1 py-1 text-muted-foreground">
+                <div 
+                  className="flex items-center gap-1 py-1 text-muted-foreground"
+                  style={{
+                    opacity: animated ? 1 : 0,
+                    transition: `opacity 0.3s ease-out ${i * 0.1 + 0.3}s`
+                  }}
+                >
                   <ArrowDown className="w-3 h-3" />
                   <span className="text-[10px] font-medium">
                     {funnelData[i + 1].conversionRate}%
@@ -86,7 +123,14 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
         </div>
 
         {/* Overall conversion summary */}
-        <div className="mt-6 pt-4 border-t border-border/50 text-center">
+        <div 
+          className="mt-6 pt-4 border-t border-border/50 text-center"
+          style={{
+            opacity: animated ? 1 : 0,
+            transform: animated ? 'scale(1)' : 'scale(0.9)',
+            transition: 'opacity 0.4s ease-out 0.6s, transform 0.4s ease-out 0.6s'
+          }}
+        >
           <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
             Conversione totale
           </p>
