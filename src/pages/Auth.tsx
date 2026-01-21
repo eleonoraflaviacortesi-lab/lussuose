@@ -1,71 +1,77 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { toast } from '@/hooks/use-toast';
-import { Heart } from 'lucide-react';
+import { Heart, User } from 'lucide-react';
 import logo from '@/assets/le_lussuose.svg';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { cn } from '@/lib/utils';
+
+// Demo accounts - no password required
+const demoAccounts = [
+  { 
+    id: 'eleonora',
+    name: 'Eleonora', 
+    emoji: '👸', 
+    email: 'eleonoraflaviacortesi@gmail.com',
+    color: 'bg-pink-100 dark:bg-pink-900/30'
+  },
+  { 
+    id: 'dalila',
+    name: 'Dalila', 
+    emoji: '💎', 
+    email: 'dalila@lelussuose.it',
+    color: 'bg-purple-100 dark:bg-purple-900/30'
+  },
+  { 
+    id: 'elisa',
+    name: 'Elisa', 
+    emoji: '🌸', 
+    email: 'elisa@lelussuose.it',
+    color: 'bg-rose-100 dark:bg-rose-900/30'
+  },
+];
+
+// Shared demo password (not exposed in UI)
+const DEMO_PASSWORD = 'lussuose2025!';
 
 const Auth = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('agente');
-  const [sede, setSede] = useState('AREZZO');
-  const [loading, setLoading] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [loading, setLoading] = useState<string | null>(null);
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  // If already logged in, redirect
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
+
+  const handleSelectAccount = async (account: typeof demoAccounts[0]) => {
+    setLoading(account.id);
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast({
-            title: 'Errore di accesso',
-            description: error.message,
-            variant: 'destructive',
-          });
-        } else {
-          toast({ title: 'Benvenuto!' });
-          navigate('/');
-        }
+      const { error } = await signIn(account.email, DEMO_PASSWORD);
+      
+      if (error) {
+        // If user doesn't exist, we'd need to create them first
+        // For now, show error
+        toast({
+          title: 'Errore',
+          description: 'Account non configurato. Contatta l\'amministratore.',
+          variant: 'destructive',
+        });
       } else {
-        if (!fullName.trim()) {
-          toast({
-            title: 'Errore',
-            description: 'Inserisci il tuo nome completo',
-            variant: 'destructive',
-          });
-          setLoading(false);
-          return;
-        }
-        const { error } = await signUp(email, password, fullName, role, sede);
-        if (error) {
-          toast({
-            title: 'Errore di registrazione',
-            description: error.message,
-            variant: 'destructive',
-          });
-        } else {
-          toast({ title: 'Account creato con successo!' });
-          navigate('/');
-        }
+        toast({ title: `Benvenuta, ${account.name}!` });
+        navigate('/');
       }
+    } catch (err) {
+      toast({
+        title: 'Errore',
+        description: 'Impossibile accedere',
+        variant: 'destructive',
+      });
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   };
 
@@ -86,98 +92,47 @@ const Auth = () => {
           </div>
 
           <h2 className="text-center text-xs font-medium tracking-[0.3em] uppercase text-muted-foreground mb-8">
-            {isLogin ? 'ACCEDI AL TUO ACCOUNT' : 'CREA UN NUOVO ACCOUNT'}
+            SELEZIONA IL TUO ACCOUNT
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLogin && (
-              <div>
-                <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Nome Completo</Label>
-                <Input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="es. Eleonora Rossi"
-                  required={!isLogin}
-                  className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
-                />
-              </div>
-            )}
-
-            <div>
-              <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Email</Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="email@esempio.com"
-                required
-                className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
-              />
-            </div>
-
-            <div>
-              <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                required
-                minLength={6}
-                className="mt-2 rounded-full px-5 py-6 bg-secondary border-0"
-              />
-            </div>
-
-            {!isLogin && (
-              <>
-                <div>
-                  <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Ruolo</Label>
-                  <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger className="mt-2 rounded-full px-5 py-6 bg-secondary border-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="agente">Agente</SelectItem>
-                      <SelectItem value="coordinatore">Coordinatore</SelectItem>
-                    </SelectContent>
-                  </Select>
+          {/* Account Selection */}
+          <div className="space-y-3">
+            {demoAccounts.map((account) => (
+              <button
+                key={account.id}
+                onClick={() => handleSelectAccount(account)}
+                disabled={loading !== null}
+                className={cn(
+                  "w-full flex items-center gap-4 p-4 rounded-2xl transition-all",
+                  "bg-card/80 backdrop-blur-sm border border-border/50",
+                  "hover:scale-[1.02] hover:shadow-lg hover:border-primary/30",
+                  "active:scale-[0.98]",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  loading === account.id && "ring-2 ring-primary animate-pulse"
+                )}
+              >
+                <div className={cn(
+                  "w-14 h-14 rounded-full flex items-center justify-center text-2xl",
+                  account.color
+                )}>
+                  {account.emoji}
                 </div>
-
-                <div>
-                  <Label className="text-xs tracking-[0.15em] uppercase text-muted-foreground">Sede</Label>
-                  <Select value={sede} onValueChange={setSede}>
-                    <SelectTrigger className="mt-2 rounded-full px-5 py-6 bg-secondary border-0">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AREZZO">AREZZO</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-foreground">{account.name}</p>
+                  <p className="text-xs text-muted-foreground">Tocca per accedere</p>
                 </div>
-              </>
-            )}
-
-            <button
-              type="submit"
-              className="btn-pink w-full mt-6"
-              disabled={loading}
-            >
-              <span className="text-sm tracking-[0.2em]">
-                {loading ? 'CARICAMENTO...' : isLogin ? 'ACCEDI' : 'REGISTRATI'}
-              </span>
-            </button>
-          </form>
-
-          <div className="mt-8 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-xs tracking-[0.1em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-            >
-              {isLogin ? 'Non hai un account? Registrati' : 'Hai già un account? Accedi'}
-            </button>
+                {loading === account.id ? (
+                  <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <User className="w-5 h-5 text-muted-foreground" />
+                )}
+              </button>
+            ))}
           </div>
+
+          <p className="text-center text-[10px] text-muted-foreground/60 mt-8 tracking-wide">
+            ACCESSO RISERVATO AL TEAM
+          </p>
         </div>
       </div>
     </div>
