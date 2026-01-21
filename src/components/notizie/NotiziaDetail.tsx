@@ -40,6 +40,8 @@ const statusLabels: Record<NotiziaStatus, string> = {
   done: 'Done',
   on_shot: 'On Shot',
   taken: 'Taken',
+  no: 'No',
+  sold: 'Sold',
 };
 
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {

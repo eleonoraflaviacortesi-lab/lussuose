@@ -18,6 +18,8 @@ const variantStyles = {
   done: 'bg-orange-400 text-orange-950',
   on_shot: 'bg-red-400 text-red-950',
   taken: 'bg-green-200 text-green-900',
+  no: 'bg-zinc-900 text-white',
+  sold: 'bg-zinc-600 text-white',
 };
 
 const titleMap = {
@@ -26,6 +28,8 @@ const titleMap = {
   done: 'Done',
   on_shot: 'On shot',
   taken: 'Taken',
+  no: 'No',
+  sold: 'Sold',
 };
 
 const NotiziaColumn = ({ title, count, notizie, variant, onNotiziaClick }: NotiziaColumnProps) => {

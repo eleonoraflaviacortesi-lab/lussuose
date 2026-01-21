@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from './use-toast';
 
-export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken';
+export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'no' | 'sold';
 
 export interface Notizia {
   id: string;
@@ -130,6 +130,8 @@ export const useNotizie = () => {
     done: notizie?.filter(n => n.status === 'done') || [],
     on_shot: notizie?.filter(n => n.status === 'on_shot') || [],
     taken: notizie?.filter(n => n.status === 'taken') || [],
+    no: notizie?.filter(n => n.status === 'no') || [],
+    sold: notizie?.filter(n => n.status === 'sold') || [],
   };
 
   return {
