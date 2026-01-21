@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar } from 'recharts';
 
 const ReportForm = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -17,27 +16,6 @@ const ReportForm = () => {
   });
 
   const { saveDailyData, myData } = useDailyData();
-
-  // Chart data for last 30 days
-  const chartData = useMemo(() => {
-    if (!myData || myData.length === 0) return [];
-    
-    const now = new Date();
-    const thirtyDaysAgo = new Date(now);
-    thirtyDaysAgo.setDate(now.getDate() - 30);
-    
-    return myData
-      .filter(d => new Date(d.date) >= thirtyDaysAgo)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .map(d => ({
-        date: new Date(d.date).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
-        contatti: d.contatti_reali || 0,
-        notizie: d.notizie_reali || 0,
-        appuntamenti: d.appuntamenti_vendita || 0,
-        vendite: d.vendite_numero || 0,
-        fatturato: Number(d.vendite_valore) || 0,
-      }));
-  }, [myData]);
 
   // Load existing data for selected date
   useEffect(() => {
@@ -217,80 +195,6 @@ const ReportForm = () => {
           />
         </div>
       </div>
-
-      {/* Monthly Trend Chart */}
-      {chartData.length > 0 && (
-        <div className="bg-card rounded-2xl shadow-lg p-6 mb-8">
-          <div className="flex items-center gap-2 pb-4 border-b border-muted mb-4">
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-            <h3 className="text-sm font-bold tracking-[0.15em] uppercase">ANDAMENTO ULTIMO MESE</h3>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Contatti & Notizie Chart */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">CONTATTI & NOTIZIE</span>
-              </div>
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                    />
-                    <Bar dataKey="contatti" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} name="Contatti" />
-                    <Bar dataKey="notizie" fill="hsl(var(--muted-foreground))" radius={[2, 2, 0, 0]} name="Notizie" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            
-            {/* Fatturato Chart */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">FATTURATO GENERATO</span>
-              </div>
-              <div className="h-32">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="fatturatoGradientForm" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--foreground))" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
-                    <YAxis hide />
-                    <Tooltip 
-                      formatter={(value: number) => [`€${value.toLocaleString('it-IT')}`, 'Fatturato']}
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        fontSize: '12px'
-                      }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="fatturato"
-                      stroke="hsl(var(--foreground))"
-                      strokeWidth={1.5}
-                      fill="url(#fatturatoGradientForm)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Three Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
