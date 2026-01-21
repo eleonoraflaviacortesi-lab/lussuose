@@ -6,6 +6,7 @@ import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaColumn from './NotiziaColumn';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
+import ImportCSVDialog from './ImportCSVDialog';
 import { cn } from '@/lib/utils';
 
 const columns: { key: NotiziaStatus; title: string }[] = [
@@ -109,7 +110,10 @@ const NotiziePage = () => {
       {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold shrink-0">Le mie Notizie</h2>
-        <AddNotiziaDialog />
+        <div className="flex items-center gap-2">
+          <ImportCSVDialog />
+          <AddNotiziaDialog />
+        </div>
       </div>
 
       {/* Kanban Board with Drag & Drop */}
