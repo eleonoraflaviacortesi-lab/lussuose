@@ -57,27 +57,25 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
   return (
     <div className="bg-card rounded-2xl shadow-lg p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <TrendingUp className="w-3.5 h-3.5 text-foreground" />
-          <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-foreground">PERFORMANCE</h3>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <TrendingUp className="w-3 h-3 text-foreground" />
+          <h3 className="text-[9px] font-medium tracking-[0.1em] uppercase text-foreground">PERF</h3>
         </div>
 
-        {/* Scrollable pills to avoid overflow on small screens */}
-        <div className="max-w-full overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <div className="inline-flex items-center gap-1 bg-muted rounded-full p-1">
-            {(['week', 'month', 'year'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => onChartPeriodChange(p)}
-                className={
-                  `px-3 py-1 text-[9px] font-medium tracking-[0.12em] uppercase rounded-full transition-all duration-150 whitespace-nowrap ` +
-                  (chartPeriod === p ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground')
-                }
-              >
-                {p === 'week' ? 'SETT' : p === 'month' ? 'MESE' : 'ANNO'}
-              </button>
-            ))}
-          </div>
+        {/* Compact toggle buttons */}
+        <div className="inline-flex items-center bg-muted rounded-full p-0.5">
+          {(['week', 'month', 'year'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => onChartPeriodChange(p)}
+              className={
+                `px-2.5 py-1 text-[8px] font-semibold tracking-wide uppercase rounded-full transition-all ` +
+                (chartPeriod === p ? 'bg-foreground text-background' : 'text-muted-foreground')
+              }
+            >
+              {p === 'week' ? 'S' : p === 'month' ? 'M' : 'A'}
+            </button>
+          ))}
         </div>
       </div>
 
