@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink } from 'lucide-react';
+import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
+import { Notizia, NotiziaStatus, NotiziaComment, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
 import { generateNotiziaCalendarUrl } from '@/lib/googleCalendar';
 import {
@@ -47,6 +47,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
   const [customEmoji, setCustomEmoji] = useState('');
+  const [newComment, setNewComment] = useState('');
   const [editData, setEditData] = useState({
     name: '',
     zona: '',
@@ -57,6 +58,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     emoji: '📋',
     reminder_date: null as Date | null,
     reminder_time: '09:00',
+    comments: [] as NotiziaComment[],
   });
 
   // Inizializza editData quando cambia la notizia
@@ -73,7 +75,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         emoji: notizia.emoji || '📋',
         reminder_date: reminderDate,
         reminder_time: reminderDate ? format(reminderDate, 'HH:mm') : '09:00',
+        comments: notizia.comments || [],
       });
+      setNewComment('');
     }
   }, [notizia]);
 
@@ -101,8 +105,27 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       status: editData.status,
       emoji: editData.emoji || '📋',
       reminder_date: reminderDateTime,
+      comments: editData.comments,
     });
     onOpenChange(false);
+  };
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+    const comment: NotiziaComment = {
+      id: crypto.randomUUID(),
+      text: newComment.trim(),
+      created_at: new Date().toISOString(),
+    };
+    setEditData({ ...editData, comments: [...editData.comments, comment] });
+    setNewComment('');
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setEditData({ 
+      ...editData, 
+      comments: editData.comments.filter(c => c.id !== commentId) 
+    });
   };
 
   const handleDelete = () => {
@@ -290,6 +313,59 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               rows={2}
               className={pillTextareaClass}
             />
+          </div>
+
+          {/* Comments Section */}
+          <div>
+            <Label className="text-xs font-medium mb-1.5 block">Commenti</Label>
+            {/* Existing comments */}
+            {editData.comments.length > 0 && (
+              <div className="space-y-2 mb-2 max-h-32 overflow-y-auto">
+                {editData.comments.map((comment) => (
+                  <div 
+                    key={comment.id}
+                    className="bg-white/60 rounded-xl px-3 py-2 text-sm flex items-start gap-2 group"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-foreground leading-snug">{comment.text}</p>
+                      <span className="text-[10px] text-muted-foreground">
+                        {format(new Date(comment.created_at), 'd MMM, HH:mm', { locale: it })}
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteComment(comment.id)}
+                      className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* New comment input */}
+            <div className="flex gap-2">
+              <input
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Aggiungi un commento..."
+                className={cn(pillInputClass, "flex-1")}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                onClick={handleAddComment}
+                disabled={!newComment.trim()}
+                className="w-10 h-10 bg-foreground text-background rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50"
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
