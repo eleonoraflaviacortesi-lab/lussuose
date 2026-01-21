@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
 import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import { Search, X } from 'lucide-react';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -19,6 +19,21 @@ const columns: { key: NotiziaStatus; title: string }[] = [
   { key: 'sold', title: 'Sold' },
 ];
 
+// Skeleton loader for initial state
+const ColumnSkeleton = () => (
+  <div className="flex flex-col min-w-[200px] max-w-[280px] animate-pulse">
+    <div className="flex items-center gap-2 mb-3">
+      <div className="h-5 w-16 bg-muted rounded-md" />
+      <div className="h-4 w-4 bg-muted rounded" />
+    </div>
+    <div className="flex flex-col gap-2 min-h-[100px] rounded-xl p-2">
+      {[1, 2].map((i) => (
+        <div key={i} className="bg-muted rounded-xl h-16" />
+      ))}
+    </div>
+  </div>
+);
+
 const NotiziePage = () => {
   const { notizie, notizieByStatus, isLoading, updateNotizia } = useNotizie();
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
@@ -27,10 +42,10 @@ const NotiziePage = () => {
   const [searchExpanded, setSearchExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleNotiziaClick = (notizia: Notizia) => {
+  const handleNotiziaClick = useCallback((notizia: Notizia) => {
     setSelectedNotizia(notizia);
     setDetailOpen(true);
-  };
+  }, []);
 
   // Focus input when expanded
   useEffect(() => {
@@ -39,7 +54,7 @@ const NotiziePage = () => {
     }
   }, [searchExpanded]);
 
-  // Filtra le notizie per ricerca
+  // Memoized filtered notizie - optimized for instant rendering
   const filteredNotizieByStatus = useMemo(() => {
     if (!searchQuery.trim()) {
       return notizieByStatus;
@@ -66,8 +81,8 @@ const NotiziePage = () => {
     };
   }, [notizieByStatus, searchQuery]);
 
-  // Gestisce il drag & drop
-  const handleDragEnd = (result: DropResult) => {
+  // Optimized drag handler
+  const handleDragEnd = useCallback((result: DropResult) => {
     const { destination, draggableId } = result;
 
     if (!destination) return;
@@ -81,33 +96,22 @@ const NotiziePage = () => {
         status: newStatus,
       });
     }
-  };
+  }, [notizie, updateNotizia]);
 
-  const handleSearchToggle = () => {
+  const handleSearchToggle = useCallback(() => {
     if (searchExpanded) {
-      // Closing - clear search and collapse
       setSearchQuery('');
       setSearchExpanded(false);
     } else {
-      // Opening
       setSearchExpanded(true);
     }
-  };
+  }, [searchExpanded]);
 
-  const handleSearchBlur = () => {
-    // Only collapse if search is empty
+  const handleSearchBlur = useCallback(() => {
     if (!searchQuery.trim()) {
       setSearchExpanded(false);
     }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
-  }
+  }, [searchQuery]);
 
   return (
     <div className="space-y-4 pt-6 pb-20">
@@ -124,16 +128,23 @@ const NotiziePage = () => {
       <DragDropContext onDragEnd={handleDragEnd}>
         <ScrollArea className="w-full">
           <div className="flex gap-4 pb-4 min-w-max">
-            {columns.map((column) => (
-              <NotiziaColumn
-                key={column.key}
-                title={column.title}
-                count={filteredNotizieByStatus[column.key].length}
-                notizie={filteredNotizieByStatus[column.key]}
-                variant={column.key}
-                onNotiziaClick={handleNotiziaClick}
-              />
-            ))}
+            {isLoading ? (
+              // Show skeletons while loading
+              columns.map((column) => (
+                <ColumnSkeleton key={column.key} />
+              ))
+            ) : (
+              columns.map((column) => (
+                <NotiziaColumn
+                  key={column.key}
+                  title={column.title}
+                  count={filteredNotizieByStatus[column.key].length}
+                  notizie={filteredNotizieByStatus[column.key]}
+                  variant={column.key}
+                  onNotiziaClick={handleNotiziaClick}
+                />
+              ))
+            )}
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>

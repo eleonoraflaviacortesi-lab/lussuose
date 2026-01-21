@@ -1,5 +1,5 @@
+import { memo, forwardRef } from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { Badge } from '@/components/ui/badge';
 import { Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaCard from './NotiziaCard';
 import { cn } from '@/lib/utils';
@@ -12,7 +12,7 @@ interface NotiziaColumnProps {
   onNotiziaClick: (notizia: Notizia) => void;
 }
 
-const variantStyles = {
+const variantStyles: Record<NotiziaStatus, string> = {
   new: 'bg-yellow-200 text-yellow-900',
   in_progress: 'bg-yellow-400 text-yellow-950',
   done: 'bg-orange-400 text-orange-950',
@@ -22,7 +22,7 @@ const variantStyles = {
   sold: 'bg-zinc-600 text-white',
 };
 
-const titleMap = {
+const titleMap: Record<NotiziaStatus, string> = {
   new: 'NEW!',
   in_progress: 'In progress',
   done: 'Done',
@@ -32,14 +32,28 @@ const titleMap = {
   sold: 'Sold',
 };
 
-const NotiziaColumn = ({ title, count, notizie, variant, onNotiziaClick }: NotiziaColumnProps) => {
+// Badge with forwardRef to fix console warning
+const ColumnBadge = forwardRef<HTMLSpanElement, { variant: NotiziaStatus }>(
+  ({ variant }, ref) => (
+    <span 
+      ref={ref}
+      className={cn(
+        'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold',
+        variantStyles[variant]
+      )}
+    >
+      {titleMap[variant]}
+    </span>
+  )
+);
+ColumnBadge.displayName = 'ColumnBadge';
+
+const NotiziaColumn = memo(({ count, notizie, variant, onNotiziaClick }: NotiziaColumnProps) => {
   return (
     <div className="flex flex-col min-w-[200px] max-w-[280px]">
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
-        <Badge className={cn('text-xs font-semibold', variantStyles[variant])}>
-          {titleMap[variant]}
-        </Badge>
+        <ColumnBadge variant={variant} />
         <span className="text-sm text-muted-foreground">{count}</span>
       </div>
       
@@ -80,6 +94,8 @@ const NotiziaColumn = ({ title, count, notizie, variant, onNotiziaClick }: Notiz
       </Droppable>
     </div>
   );
-};
+});
+
+NotiziaColumn.displayName = 'NotiziaColumn';
 
 export default NotiziaColumn;
