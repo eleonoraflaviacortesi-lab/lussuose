@@ -44,11 +44,11 @@ const DailyQuote = () => {
   }, []);
 
   return (
-    <div className="py-6 text-center">
-      <p className="text-[13px] tracking-wide text-foreground/80 italic font-light leading-relaxed">
+    <div className="py-3 text-center">
+      <p className="text-[12px] tracking-wide text-foreground/70 italic font-light leading-relaxed">
         "{todayQuote.text}"
       </p>
-      <p className="mt-2 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-medium">
+      <p className="mt-1 text-[9px] tracking-[0.15em] uppercase text-muted-foreground/70">
         — {todayQuote.author}
       </p>
     </div>
