@@ -137,41 +137,34 @@ const PersonalDashboard = () => {
   );
 
   return (
-    <div className="px-6 pb-8 space-y-6 animate-fade-in">
+    <div className="px-4 pb-6 space-y-4 animate-fade-in">
       {/* Daily Quote */}
       <DailyQuote />
 
       {/* Status Annuale Personale */}
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-foreground" />
-          <h2 className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
-            STATUS ANNUALE PERSONALE
+          <div className="w-1.5 h-1.5 rounded-full bg-foreground" />
+          <h2 className="text-[10px] font-medium tracking-[0.3em] uppercase text-foreground">
+            STATUS ANNUALE
           </h2>
         </div>
 
         {/* Big Number */}
-        <div className="space-y-1">
-          <div className="flex items-baseline justify-center gap-2">
-            <span className="text-8xl font-light text-foreground tracking-tight">
-              {currentSales}
-            </span>
-            <span className="text-3xl font-light text-muted-foreground">/ {annualTarget}</span>
-          </div>
-          <p className="text-xs font-medium tracking-[0.3em] uppercase text-foreground">
+        <div className="flex items-baseline justify-center gap-1.5">
+          <span className="text-6xl font-light text-foreground tracking-tight">
+            {currentSales}
+          </span>
+          <span className="text-2xl font-light text-muted-foreground">/ {annualTarget}</span>
+          <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground ml-1">
             VENDITE
-          </p>
+          </span>
         </div>
 
         {/* Progress Bar */}
-        <div className="max-w-md mx-auto space-y-2">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-medium tracking-[0.2em] uppercase text-muted-foreground">
-              AVANZAMENTO TARGET
-            </span>
-            <span className="font-semibold text-foreground">{completionPercent}%</span>
-          </div>
+        <div className="max-w-xs mx-auto">
           <Progress value={completionPercent} className="h-1 bg-muted" />
+          <p className="text-[10px] text-muted-foreground mt-1">{completionPercent}% target</p>
         </div>
       </div>
 
@@ -179,137 +172,97 @@ const PersonalDashboard = () => {
       <IncarchiWidget />
 
       {/* Volume Generato & Volume a Credito */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="dark-card">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="dark-card py-3 px-4">
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME GENERATO
           </p>
-          <p className="text-2xl font-bold text-white mb-1 whitespace-nowrap">
+          <p className="text-xl font-bold text-white whitespace-nowrap">
             {formatCompactCurrency(fatturato)}
           </p>
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-            FATTURATO AGENZIA
-          </p>
         </div>
-        <div className="dark-card">
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-2">
+        <div className="dark-card py-3 px-4">
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME A CREDITO
           </p>
-          <p className="text-2xl font-bold text-white mb-1 whitespace-nowrap">
+          <p className="text-xl font-bold text-white whitespace-nowrap">
             {formatCompactCurrency(fatturatoCredito)}
-          </p>
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-            IN ATTESA DI ROGITO
           </p>
         </div>
       </div>
 
       {/* Performance Charts Section */}
-      <div className="bg-card rounded-3xl shadow-lg p-6 space-y-6">
-        <div className="flex flex-col items-center gap-3">
+      <div className="bg-card rounded-2xl shadow-lg p-4 space-y-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-foreground" />
-            <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-foreground">
-              PERFORMANCE AGENTE
+            <TrendingUp className="w-3.5 h-3.5 text-foreground" />
+            <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-foreground">
+              PERFORMANCE
             </h3>
           </div>
           <PeriodToggle />
         </div>
 
         {/* Chart Grid */}
-        <div key={chartPeriod} className="space-y-6 animate-fade-in">
+        <div key={chartPeriod} className="space-y-3 animate-fade-in">
           {/* Incarichi Chart */}
-          <div className="space-y-3">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <FileText className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <FileText className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                   INCARICHI
                 </span>
               </div>
-              <span className="text-lg font-semibold text-foreground">{periodTotals.incarichi}</span>
+              <span className="text-sm font-semibold text-foreground">{periodTotals.incarichi}</span>
             </div>
-            <div className="h-24">
+            <div className="h-16">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={performanceChartData}>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 9 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
                   <YAxis hide />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '11px'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="incarichi" 
-                    fill="hsl(var(--foreground))" 
-                    radius={[3, 3, 0, 0]}
-                  />
+                  <Bar dataKey="incarichi" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Vendite Chart */}
-          <div className="space-y-3">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Award className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                   VENDITE
                 </span>
               </div>
-              <span className="text-lg font-semibold text-foreground">{periodTotals.vendite}</span>
+              <span className="text-sm font-semibold text-foreground">{periodTotals.vendite}</span>
             </div>
-            <div className="h-24">
+            <div className="h-16">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={performanceChartData}>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 9 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
                   <YAxis hide />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '11px'
-                    }}
-                  />
-                  <Bar 
-                    dataKey="vendite" 
-                    fill="hsl(var(--foreground))" 
-                    radius={[3, 3, 0, 0]}
-                  />
+                  <Bar dataKey="vendite" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
 
           {/* Fatturato Chart */}
-          <div className="space-y-3">
+          <div className="space-y-1">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Euro className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+              <div className="flex items-center gap-1.5">
+                <Euro className="w-3 h-3 text-muted-foreground" />
+                <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                   FATTURATO
                 </span>
               </div>
-              <span className="text-lg font-semibold text-foreground whitespace-nowrap">
+              <span className="text-sm font-semibold text-foreground whitespace-nowrap">
                 {formatCompactCurrency(periodTotals.fatturato)}
               </span>
             </div>
-            <div className="h-24">
+            <div className="h-16">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={performanceChartData}>
                   <defs>
@@ -318,27 +271,13 @@ const PersonalDashboard = () => {
                       <stop offset="95%" stopColor="hsl(var(--foreground))" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <XAxis 
-                    dataKey="date" 
-                    tick={{ fontSize: 9 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
                   <YAxis hide />
-                  <Tooltip 
-                    formatter={(value: number) => [formatCompactCurrency(value), 'Fatturato']}
-                    contentStyle={{ 
-                      background: 'hsl(var(--card))', 
-                      border: '1px solid hsl(var(--border))',
-                      borderRadius: '8px',
-                      fontSize: '11px'
-                    }}
-                  />
                   <Area 
                     type="monotone"
                     dataKey="fatturato" 
                     stroke="hsl(var(--foreground))" 
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     fill="url(#fatturatoGradient)"
                   />
                 </AreaChart>
@@ -349,54 +288,38 @@ const PersonalDashboard = () => {
       </div>
 
       {/* Stats Grid - Clickable Cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-4 gap-2">
         <button
           onClick={() => setSelectedKPI('contatti')}
-          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              CONTATTI REALI
-            </p>
-            <Users className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-light text-foreground">{contatti}</p>
+          <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xl font-light text-foreground">{contatti}</p>
+          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONTATTI</p>
         </button>
         <button
           onClick={() => setSelectedKPI('notizie')}
-          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              NOTIZIE ACQUISITE
-            </p>
-            <TrendingUp className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-light text-foreground">{notizie}</p>
+          <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xl font-light text-foreground">{notizie}</p>
+          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">NOTIZIE</p>
         </button>
         <button
           onClick={() => setSelectedKPI('chiusure')}
-          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              CHIUSURE TOTALI
-            </p>
-            <Award className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-light text-foreground">{chiusure}</p>
+          <Award className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xl font-light text-foreground">{chiusure}</p>
+          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CHIUSURE</p>
         </button>
         <button
           onClick={() => setSelectedKPI('conversioni')}
-          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              CONVERSIONI
-            </p>
-            <Zap className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-light text-foreground">{conversioni}%</p>
+          <Zap className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
+          <p className="text-xl font-light text-foreground">{conversioni}%</p>
+          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONV.</p>
         </button>
       </div>
 
@@ -426,42 +349,27 @@ const PersonalDashboard = () => {
       />
 
       {/* Incarichi Team Card */}
-      <div className="bg-card rounded-3xl shadow-lg p-6 relative overflow-hidden">
-        <div className="absolute right-4 top-4 opacity-10">
-          <Gift className="w-32 h-32 text-foreground" />
+      <div className="bg-card rounded-2xl shadow p-4 relative overflow-hidden">
+        <div className="absolute right-2 top-2 opacity-5">
+          <Gift className="w-20 h-20 text-foreground" />
         </div>
         <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-1">
-            <Gift className="w-5 h-5 text-foreground" />
+          <div className="flex items-center gap-2 mb-2">
+            <Gift className="w-4 h-4 text-foreground" />
+            <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase">
+              INCARICHI TEAM
+            </h3>
           </div>
-          <h3 className="text-sm font-bold tracking-[0.2em] uppercase mb-1">
-            INCARICHI TOTALI TEAM
-          </h3>
-          <p className="text-xs text-muted-foreground mb-6">
-            RISULTATO COLLETTIVO DEL MESE
-          </p>
           
-          <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-6xl font-bold text-foreground">{incarichiTeam}</span>
-            <span className="text-2xl font-light text-muted-foreground">/ {incarichiTarget}</span>
+          <div className="flex items-baseline gap-1.5 mb-2">
+            <span className="text-4xl font-bold text-foreground">{incarichiTeam}</span>
+            <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
           </div>
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-4">
-            INCARICHI ACQUISITI DAL TEAM
-          </p>
 
-          <Progress value={incarichiPercent} className="h-1 bg-muted mb-3" />
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-medium tracking-wider uppercase">PROGRESSO UFFICIO</span>
+          <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground">Progresso ufficio</span>
             <span className="font-semibold text-foreground">{incarichiPercent}%</span>
-          </div>
-
-          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-muted">
-            <span>🌷</span>
-            <span>💎</span>
-            <span>🖤</span>
-            <span className="text-xs text-muted-foreground tracking-wider uppercase ml-2">
-              INSIEME VERSO IL TRAGUARDO
-            </span>
           </div>
         </div>
       </div>
