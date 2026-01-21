@@ -47,7 +47,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         })}
       </div>
 
-      {/* Report Button - Dynamic State */}
+      {/* Ciclo Produttivo Button - Dynamic State */}
       <button 
         onClick={() => onTabChange('inserisci')}
         className={cn(
@@ -61,7 +61,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             <span>Fatto</span>
           </>
         ) : (
-          'Report'
+          'CICLO PRODUTTIVO'
         )}
       </button>
     </nav>
