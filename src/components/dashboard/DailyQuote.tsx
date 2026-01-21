@@ -1,37 +1,37 @@
 import { useMemo } from 'react';
 
 const quotes = [
-  { text: "Respira. Sei esattamente dove devi essere.", author: "" },
-  { text: "Non devi avere tutte le risposte. Solo il prossimo passo.", author: "" },
-  { text: "Rallenta. La fretta non ti porta dove pensi.", author: "" },
-  { text: "Quello che resisti, persiste. Quello che accetti, si trasforma.", author: "Carl Jung" },
-  { text: "Tra stimolo e risposta c'è uno spazio. In quello spazio c'è la tua libertà.", author: "Viktor Frankl" },
-  { text: "Non sei i tuoi pensieri. Sei chi li osserva.", author: "" },
-  { text: "Il presente è l'unico momento che esiste davvero.", author: "" },
-  { text: "Lascia andare ciò che non puoi controllare.", author: "" },
-  { text: "La gentilezza verso te stesso non è un lusso.", author: "" },
-  { text: "Ogni incontro è un'occasione per essere presente.", author: "" },
-  { text: "Non cercare di essere perfetto. Cerca di essere vero.", author: "" },
-  { text: "Il silenzio tra le parole dice più delle parole stesse.", author: "" },
-  { text: "Ascolta più di quanto parli. Imparerai cose che non sapevi di non sapere.", author: "" },
-  { text: "La pazienza non è passività. È fiducia nel processo.", author: "" },
-  { text: "Ciò che dai attenzione, cresce.", author: "" },
-  { text: "Non devi dimostrare niente a nessuno. Neanche a te stesso.", author: "" },
-  { text: "Fai spazio al dubbio. Le certezze chiudono le porte.", author: "" },
-  { text: "Il riposo non è una ricompensa. È un diritto.", author: "" },
-  { text: "Prima di reagire, fermati. Un respiro cambia tutto.", author: "" },
-  { text: "Le piccole cose non sono piccole.", author: "" },
-  { text: "Non confondere l'urgente con l'importante.", author: "" },
-  { text: "Ogni persona che incontri sta combattendo una battaglia che non conosci.", author: "" },
-  { text: "Il vero ascolto richiede che tu metta da parte la tua agenda.", author: "" },
-  { text: "Non devi capire tutto per andare avanti.", author: "" },
-  { text: "La vulnerabilità non è debolezza. È coraggio.", author: "Brené Brown" },
-  { text: "Stai facendo meglio di quanto pensi.", author: "" },
-  { text: "L'acqua che scorre non ha fretta, ma arriva al mare.", author: "" },
-  { text: "Smetti di aspettare il momento giusto. È questo.", author: "" },
-  { text: "Chi sei quando nessuno ti guarda?", author: "" },
-  { text: "Le radici crescono nel buio. È normale non vedere subito i risultati.", author: "" },
-  { text: "Non tutto ciò che conta può essere contato.", author: "" },
+  { text: "The obstacle is the way.", author: "Ryan Holiday" },
+  { text: "What you seek is seeking you.", author: "Rumi" },
+  { text: "Between stimulus and response there is a space.", author: "Viktor Frankl" },
+  { text: "The cave you fear to enter holds the treasure you seek.", author: "Joseph Campbell" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "The quality of your life is the quality of your questions.", author: "Tony Robbins" },
+  { text: "What we resist, persists.", author: "Carl Jung" },
+  { text: "You are not your thoughts.", author: "Eckhart Tolle" },
+  { text: "The map is not the territory.", author: "Alfred Korzybski" },
+  { text: "How we spend our days is how we spend our lives.", author: "Annie Dillard" },
+  { text: "The only way out is through.", author: "Robert Frost" },
+  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", author: "Ralph Waldo Emerson" },
+  { text: "He who has a why can bear almost any how.", author: "Nietzsche" },
+  { text: "The wound is the place where the light enters you.", author: "Rumi" },
+  { text: "Everything can be taken from a man but one thing: to choose one's attitude.", author: "Viktor Frankl" },
+  { text: "The privilege of a lifetime is to become who you truly are.", author: "Carl Jung" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Einstein" },
+  { text: "What you are aware of, you are in control of.", author: "Anthony de Mello" },
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "We don't see things as they are, we see them as we are.", author: "Anaïs Nin" },
+  { text: "The only person you are destined to become is the person you decide to be.", author: "Emerson" },
+  { text: "No tree can grow to heaven unless its roots reach down to hell.", author: "Carl Jung" },
+  { text: "The meaning of life is to find your gift. The purpose is to give it away.", author: "Picasso" },
+  { text: "What is not started today is never finished tomorrow.", author: "Goethe" },
+  { text: "One day or day one. You decide.", author: "Paulo Coelho" },
+  { text: "The mind is everything. What you think, you become.", author: "Buddha" },
+  { text: "Until you make the unconscious conscious, it will direct your life.", author: "Carl Jung" },
+  { text: "Where attention goes, energy flows.", author: "James Redfield" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "The present moment is the only moment available to us.", author: "Thich Nhat Hanh" },
+  { text: "What consumes your mind, controls your life.", author: "Stoic proverb" },
 ];
 
 const DailyQuote = () => {
@@ -44,18 +44,13 @@ const DailyQuote = () => {
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-5 mb-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-transparent to-transparent opacity-50" />
-      <div className="relative">
-        <p className="text-base leading-relaxed text-foreground/90">
-          {todayQuote.text}
-        </p>
-        {todayQuote.author && (
-          <p className="mt-2 text-sm text-muted-foreground">
-            — {todayQuote.author}
-          </p>
-        )}
-      </div>
+    <div className="py-6 text-center">
+      <p className="text-[13px] tracking-wide text-foreground/80 italic font-light leading-relaxed">
+        "{todayQuote.text}"
+      </p>
+      <p className="mt-2 text-[10px] tracking-[0.2em] uppercase text-muted-foreground font-medium">
+        — {todayQuote.author}
+      </p>
     </div>
   );
 };
