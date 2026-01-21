@@ -19,14 +19,14 @@ const columns: { key: NotiziaStatus; label: string; style: string }[] = [
   { key: 'sold', label: 'Sold', style: 'bg-zinc-600 text-white' },
 ];
 
-// Minimal card - full name with word wrap
+// Minimal card - full name with word wrap, emoji only if set
 const Card = memo(({ notizia, onClick }: { notizia: Notizia; onClick: () => void }) => (
   <div
     onClick={onClick}
     className="bg-card rounded-xl p-2.5 cursor-pointer active:scale-[0.98] transition-transform shadow-sm"
   >
     <div className="flex items-start gap-2">
-      <span className="text-sm shrink-0">{notizia.emoji || '📋'}</span>
+      {notizia.emoji && <span className="text-sm shrink-0">{notizia.emoji}</span>}
       <div className="flex-1 min-w-0">
         <p className="font-medium text-sm leading-tight">{notizia.name}</p>
         {notizia.zona && (
