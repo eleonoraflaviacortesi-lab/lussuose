@@ -71,7 +71,7 @@ const NotiziePage = () => {
   }, [updateNotizia]);
 
   return (
-    <div className="space-y-4 pt-6 pb-20">
+    <div className="space-y-4 pt-4 pb-20 lg:pt-2 lg:pb-6 lg:h-[calc(100vh-140px)] lg:flex lg:flex-col">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold shrink-0">Le mie Notizie</h2>
         <div className="flex items-center gap-2">
@@ -80,17 +80,19 @@ const NotiziePage = () => {
         </div>
       </div>
 
-      {isLoading ? (
-        <BoardSkeleton />
-      ) : (
-        <Suspense fallback={<BoardSkeleton />}>
-          <KanbanBoard
-            notizieByStatus={filteredNotizieByStatus}
-            onNotiziaClick={handleNotiziaClick}
-            onStatusChange={handleStatusChange}
-          />
-        </Suspense>
-      )}
+      <div className="lg:flex-1 lg:min-h-0">
+        {isLoading ? (
+          <BoardSkeleton />
+        ) : (
+          <Suspense fallback={<BoardSkeleton />}>
+            <KanbanBoard
+              notizieByStatus={filteredNotizieByStatus}
+              onNotiziaClick={handleNotiziaClick}
+              onStatusChange={handleStatusChange}
+            />
+          </Suspense>
+        )}
+      </div>
 
       {/* Floating Search */}
       <div className="fixed bottom-24 right-4 z-40">

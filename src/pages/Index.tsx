@@ -59,7 +59,7 @@ const IndexContent = () => {
       <Header />
       <div className="h-[100px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl mx-auto px-3 animate-in fade-in duration-150">
+      <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150">
         <Suspense
           fallback={
             <div className="py-10 flex items-center justify-center">
