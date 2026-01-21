@@ -1,16 +1,19 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, Users, Zap, Award, Gift, FileText, Euro } from 'lucide-react';
+import { TrendingUp, Users, Zap, Award, Gift, FileText, Euro, LucideIcon } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts';
 import IncarchiWidget from './IncarchiWidget';
+import KPIDetailModal from './KPIDetailModal';
 
 type Period = 'week' | 'month' | 'year';
+type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
 
 const PersonalDashboard = () => {
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
+  const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
@@ -329,9 +332,12 @@ const PersonalDashboard = () => {
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Clickable Cards */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-card rounded-2xl shadow-lg p-5">
+        <button
+          onClick={() => setSelectedKPI('contatti')}
+          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+        >
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CONTATTI REALI
@@ -339,8 +345,11 @@ const PersonalDashboard = () => {
             <Users className="w-4 h-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-light text-foreground">{contatti}</p>
-        </div>
-        <div className="bg-card rounded-2xl shadow-lg p-5">
+        </button>
+        <button
+          onClick={() => setSelectedKPI('notizie')}
+          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+        >
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               NOTIZIE ACQUISITE
@@ -348,8 +357,11 @@ const PersonalDashboard = () => {
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-light text-foreground">{notizie}</p>
-        </div>
-        <div className="bg-card rounded-2xl shadow-lg p-5">
+        </button>
+        <button
+          onClick={() => setSelectedKPI('chiusure')}
+          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+        >
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CHIUSURE TOTALI
@@ -357,8 +369,11 @@ const PersonalDashboard = () => {
             <Award className="w-4 h-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-light text-foreground">{chiusure}</p>
-        </div>
-        <div className="bg-card rounded-2xl shadow-lg p-5">
+        </button>
+        <button
+          onClick={() => setSelectedKPI('conversioni')}
+          className="bg-card rounded-2xl shadow-lg p-5 text-left transition-transform active:scale-[0.98] hover:shadow-xl"
+        >
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
               CONVERSIONI
@@ -366,8 +381,33 @@ const PersonalDashboard = () => {
             <Zap className="w-4 h-4 text-muted-foreground" />
           </div>
           <p className="text-3xl font-light text-foreground">{conversioni}%</p>
-        </div>
+        </button>
       </div>
+
+      {/* KPI Detail Modal */}
+      <KPIDetailModal
+        open={!!selectedKPI}
+        onOpenChange={(open) => !open && setSelectedKPI(null)}
+        kpiKey={selectedKPI}
+        title={
+          selectedKPI === 'contatti' ? 'CONTATTI REALI' :
+          selectedKPI === 'notizie' ? 'NOTIZIE ACQUISITE' :
+          selectedKPI === 'chiusure' ? 'CHIUSURE TOTALI' :
+          'CONVERSIONI'
+        }
+        value={
+          selectedKPI === 'contatti' ? contatti :
+          selectedKPI === 'notizie' ? notizie :
+          selectedKPI === 'chiusure' ? chiusure :
+          conversioni
+        }
+        icon={
+          selectedKPI === 'contatti' ? Users :
+          selectedKPI === 'notizie' ? TrendingUp :
+          selectedKPI === 'chiusure' ? Award :
+          Zap
+        }
+      />
 
       {/* Incarichi Team Card */}
       <div className="bg-card rounded-3xl shadow-lg p-6 relative overflow-hidden">
