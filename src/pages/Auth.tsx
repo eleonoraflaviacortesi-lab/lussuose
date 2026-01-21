@@ -104,11 +104,11 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header - Liquid Glass Style */}
-      <div className="bg-card/80 backdrop-blur-xl py-6 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
+      <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
         <img 
           src={logoLarge} 
           alt="Le Lussuose" 
-          className="h-10 mx-auto dark:invert" 
+          className="h-16 mx-auto dark:invert" 
         />
       </div>
 
