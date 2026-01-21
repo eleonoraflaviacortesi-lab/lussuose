@@ -83,10 +83,12 @@ const AddNotiziaDialog = () => {
 
   return (
     <>
-      <Button size="sm" className="gap-1.5" onClick={() => setOpen(true)}>
-        <Plus className="w-4 h-4" />
-        Nuova notizia
-      </Button>
+      <button 
+        onClick={() => setOpen(true)}
+        className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+      >
+        <Plus className="w-5 h-5" />
+      </button>
 
       {/* Liquid Glass Overlay */}
       {open && (
