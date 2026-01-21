@@ -31,23 +31,34 @@ const Auth = () => {
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch demo accounts from database
+  // Fetch demo accounts from database - match by name patterns
   useEffect(() => {
     const fetchAccounts = async () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('full_name, avatar_emoji')
-          .order('created_at');
+          .select('full_name, avatar_emoji, user_id');
 
         if (error) throw error;
 
-        // Get emails from auth users via a workaround - use known demo emails
-        const accountsWithEmails: DemoAccount[] = DEMO_EMAILS.map((email, index) => ({
-          email,
-          full_name: data?.[index]?.full_name || email.split('@')[0],
-          avatar_emoji: data?.[index]?.avatar_emoji || '🖤',
-        }));
+        // Match profiles to emails by name pattern
+        const accountsWithEmails: DemoAccount[] = DEMO_EMAILS.map((email) => {
+          const emailPrefix = email.split('@')[0].toLowerCase();
+          
+          // Find matching profile by checking if the name contains part of the email
+          const matchedProfile = data?.find(profile => {
+            const fullNameLower = profile.full_name.toLowerCase();
+            // Check if first name matches email prefix
+            const firstName = fullNameLower.split(' ')[0];
+            return emailPrefix.includes(firstName) || firstName.includes(emailPrefix.slice(0, 4));
+          });
+          
+          return {
+            email,
+            full_name: matchedProfile?.full_name || email.split('@')[0],
+            avatar_emoji: matchedProfile?.avatar_emoji || '🖤',
+          };
+        });
 
         setAccounts(accountsWithEmails);
       } catch (err) {
