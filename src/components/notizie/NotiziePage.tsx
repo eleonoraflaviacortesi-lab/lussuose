@@ -1,36 +1,28 @@
-import { useState, useMemo, useRef, useEffect, useCallback } from 'react';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
 import { Search, X } from 'lucide-react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
-import NotiziaColumn from './NotiziaColumn';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
 import { cn } from '@/lib/utils';
 
-const columns: { key: NotiziaStatus; title: string }[] = [
-  { key: 'new', title: 'NEW!' },
-  { key: 'in_progress', title: 'In progress' },
-  { key: 'done', title: 'Done' },
-  { key: 'on_shot', title: 'On shot' },
-  { key: 'taken', title: 'Taken' },
-  { key: 'no', title: 'No' },
-  { key: 'sold', title: 'Sold' },
-];
+// Lazy load drag-drop board for faster initial render
+const KanbanBoard = lazy(() => import('./KanbanBoard'));
 
-// Skeleton loader for initial state
-const ColumnSkeleton = () => (
-  <div className="flex flex-col min-w-[200px] max-w-[280px] animate-pulse">
-    <div className="flex items-center gap-2 mb-3">
-      <div className="h-5 w-16 bg-muted rounded-md" />
-      <div className="h-4 w-4 bg-muted rounded" />
-    </div>
-    <div className="flex flex-col gap-2 min-h-[100px] rounded-xl p-2">
-      {[1, 2].map((i) => (
-        <div key={i} className="bg-muted rounded-xl h-16" />
-      ))}
-    </div>
+const columns: NotiziaStatus[] = ['new', 'in_progress', 'done', 'on_shot', 'taken', 'no', 'sold'];
+
+// Ultra-light skeleton
+const BoardSkeleton = () => (
+  <div className="flex gap-4 pb-4 overflow-x-auto">
+    {columns.map((key) => (
+      <div key={key} className="flex flex-col min-w-[200px] animate-pulse">
+        <div className="h-5 w-16 bg-muted rounded-md mb-3" />
+        <div className="flex flex-col gap-2">
+          <div className="bg-muted rounded-xl h-14" />
+          <div className="bg-muted rounded-xl h-14" />
+        </div>
+      </div>
+    ))}
   </div>
 );
 
@@ -47,75 +39,39 @@ const NotiziePage = () => {
     setDetailOpen(true);
   }, []);
 
-  // Focus input when expanded
   useEffect(() => {
     if (searchExpanded && inputRef.current) {
       inputRef.current.focus();
     }
   }, [searchExpanded]);
 
-  // Memoized filtered notizie - optimized for instant rendering
   const filteredNotizieByStatus = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return notizieByStatus;
-    }
+    if (!searchQuery.trim()) return notizieByStatus;
 
-    const query = searchQuery.toLowerCase();
-    const filterNotizie = (list: Notizia[]) =>
-      list.filter(
-        (n) =>
-          n.name.toLowerCase().includes(query) ||
-          n.zona?.toLowerCase().includes(query) ||
-          n.type?.toLowerCase().includes(query) ||
-          n.notes?.toLowerCase().includes(query)
+    const q = searchQuery.toLowerCase();
+    const filter = (list: Notizia[]) =>
+      list.filter(n =>
+        n.name.toLowerCase().includes(q) ||
+        n.zona?.toLowerCase().includes(q)
       );
 
     return {
-      new: filterNotizie(notizieByStatus.new),
-      in_progress: filterNotizie(notizieByStatus.in_progress),
-      done: filterNotizie(notizieByStatus.done),
-      on_shot: filterNotizie(notizieByStatus.on_shot),
-      taken: filterNotizie(notizieByStatus.taken),
-      no: filterNotizie(notizieByStatus.no),
-      sold: filterNotizie(notizieByStatus.sold),
+      new: filter(notizieByStatus.new),
+      in_progress: filter(notizieByStatus.in_progress),
+      done: filter(notizieByStatus.done),
+      on_shot: filter(notizieByStatus.on_shot),
+      taken: filter(notizieByStatus.taken),
+      no: filter(notizieByStatus.no),
+      sold: filter(notizieByStatus.sold),
     };
   }, [notizieByStatus, searchQuery]);
 
-  // Optimized drag handler
-  const handleDragEnd = useCallback((result: DropResult) => {
-    const { destination, draggableId } = result;
-
-    if (!destination) return;
-
-    const newStatus = destination.droppableId as NotiziaStatus;
-    const notizia = notizie?.find((n) => n.id === draggableId);
-
-    if (notizia && notizia.status !== newStatus) {
-      updateNotizia.mutate({
-        id: draggableId,
-        status: newStatus,
-      });
-    }
-  }, [notizie, updateNotizia]);
-
-  const handleSearchToggle = useCallback(() => {
-    if (searchExpanded) {
-      setSearchQuery('');
-      setSearchExpanded(false);
-    } else {
-      setSearchExpanded(true);
-    }
-  }, [searchExpanded]);
-
-  const handleSearchBlur = useCallback(() => {
-    if (!searchQuery.trim()) {
-      setSearchExpanded(false);
-    }
-  }, [searchQuery]);
+  const handleStatusChange = useCallback((id: string, newStatus: NotiziaStatus) => {
+    updateNotizia.mutate({ id, status: newStatus });
+  }, [updateNotizia]);
 
   return (
     <div className="space-y-4 pt-6 pb-20">
-      {/* Header */}
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-semibold shrink-0">Le mie Notizie</h2>
         <div className="flex items-center gap-2">
@@ -124,59 +80,40 @@ const NotiziePage = () => {
         </div>
       </div>
 
-      {/* Kanban Board with Drag & Drop */}
-      <DragDropContext onDragEnd={handleDragEnd}>
-        <ScrollArea className="w-full">
-          <div className="flex gap-4 pb-4 min-w-max">
-            {isLoading ? (
-              // Show skeletons while loading
-              columns.map((column) => (
-                <ColumnSkeleton key={column.key} />
-              ))
-            ) : (
-              columns.map((column) => (
-                <NotiziaColumn
-                  key={column.key}
-                  title={column.title}
-                  count={filteredNotizieByStatus[column.key].length}
-                  notizie={filteredNotizieByStatus[column.key]}
-                  variant={column.key}
-                  onNotiziaClick={handleNotiziaClick}
-                />
-              ))
-            )}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </DragDropContext>
+      {isLoading ? (
+        <BoardSkeleton />
+      ) : (
+        <Suspense fallback={<BoardSkeleton />}>
+          <KanbanBoard
+            notizieByStatus={filteredNotizieByStatus}
+            onNotiziaClick={handleNotiziaClick}
+            onStatusChange={handleStatusChange}
+          />
+        </Suspense>
+      )}
 
-      {/* Floating Search Button/Bar */}
+      {/* Floating Search */}
       <div className="fixed bottom-24 right-4 z-40">
         <div
           className={cn(
-            "flex items-center bg-white/90 backdrop-blur-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] transition-all duration-300 ease-out",
-            searchExpanded
-              ? "w-72 rounded-full px-4 py-3"
-              : "w-12 h-12 rounded-full justify-center cursor-pointer active:scale-95"
+            "flex items-center bg-white/90 backdrop-blur-xl shadow-lg transition-all duration-200",
+            searchExpanded ? "w-64 rounded-full px-4 py-2.5" : "w-11 h-11 rounded-full justify-center cursor-pointer active:scale-95"
           )}
-          onClick={!searchExpanded ? handleSearchToggle : undefined}
+          onClick={!searchExpanded ? () => setSearchExpanded(true) : undefined}
         >
           {searchExpanded ? (
             <>
-              <Search className="w-5 h-5 text-foreground shrink-0" />
+              <Search className="w-4 h-4 text-foreground shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onBlur={handleSearchBlur}
-                placeholder="Cerca notizie..."
-                className="flex-1 bg-transparent border-0 outline-none px-3 text-sm text-foreground placeholder:text-muted-foreground"
+                onBlur={() => !searchQuery && setSearchExpanded(false)}
+                placeholder="Cerca..."
+                className="flex-1 bg-transparent border-0 outline-none px-2 text-sm"
               />
-              <button
-                onClick={handleSearchToggle}
-                className="w-6 h-6 flex items-center justify-center rounded-full active:scale-90 transition-transform"
-              >
+              <button onClick={() => { setSearchQuery(''); setSearchExpanded(false); }} className="p-1">
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </>
@@ -184,19 +121,12 @@ const NotiziePage = () => {
             <Search className="w-5 h-5 text-foreground" />
           )}
         </div>
-        
-        {/* Active search indicator */}
         {searchQuery && !searchExpanded && (
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full" />
+          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />
         )}
       </div>
 
-      {/* Detail Modal */}
-      <NotiziaDetail
-        notizia={selectedNotizia}
-        open={detailOpen}
-        onOpenChange={setDetailOpen}
-      />
+      <NotiziaDetail notizia={selectedNotizia} open={detailOpen} onOpenChange={setDetailOpen} />
     </div>
   );
 };
