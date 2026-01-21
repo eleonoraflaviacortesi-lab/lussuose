@@ -85,15 +85,16 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
             >
               {/* Funnel bar */}
               <div
-                className={`${step.color} rounded-lg py-2.5 px-4 flex items-center justify-between overflow-hidden`}
+                className={`${step.color} rounded-lg py-2.5 px-4 flex items-center justify-center gap-3 overflow-hidden`}
                 style={{ 
                   width: animated ? `${step.widthPercent}%` : '15%',
+                  minWidth: '100px',
                   transition: `width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1 + 0.1}s`
                 }}
               >
                 <span className="text-xs font-semibold whitespace-nowrap">{step.label}</span>
                 <span 
-                  className="text-sm font-bold"
+                  className="text-sm font-bold tabular-nums"
                   style={{
                     opacity: animated ? 1 : 0,
                     transition: `opacity 0.3s ease-out ${i * 0.1 + 0.4}s`
