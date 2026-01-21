@@ -42,14 +42,16 @@ export const useNotizie = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
-        .select('*')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date')
         .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data as Notizia[];
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in garbage collection for 10 minutes
+    refetchOnWindowFocus: false, // Don't refetch on tab focus
   });
 
   const addNotizia = useMutation({
