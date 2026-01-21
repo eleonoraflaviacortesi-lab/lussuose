@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from './use-toast';
+import { celebrateSuccess } from '@/lib/confetti';
 
 export interface DailyDataInput {
   date: string;
@@ -91,6 +92,7 @@ export const useDailyData = () => {
       queryClient.invalidateQueries({ queryKey: ['daily-data'] });
       queryClient.invalidateQueries({ queryKey: ['daily-data-all'] });
       toast({ title: '✓ Report salvato con successo!' });
+      celebrateSuccess();
     },
     onError: (error) => {
       toast({

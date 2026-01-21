@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
@@ -8,6 +8,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, A
 import IncarchiWidget from './IncarchiWidget';
 import KPIDetailModal from './KPIDetailModal';
 import DailyQuote from './DailyQuote';
+import { celebrateGoal } from '@/lib/confetti';
 
 type Period = 'week' | 'month' | 'year';
 type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
@@ -23,6 +24,17 @@ const PersonalDashboard = () => {
   const currentSales = kpis?.vendite?.value || 0;
   const completionPercent = Math.min(100, Math.round((currentSales / annualTarget) * 100));
   const fatturato = kpis?.fatturato?.value || 0;
+  
+  // Track if goal was just reached to celebrate
+  const previousSalesRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+    if (previousSalesRef.current !== null && previousSalesRef.current < annualTarget && currentSales >= annualTarget) {
+      // Goal just reached!
+      celebrateGoal();
+    }
+    previousSalesRef.current = currentSales;
+  }, [currentSales, annualTarget]);
   
   // Calculate fatturato a credito from myData
   const fatturatoCredito = useMemo(() => {
