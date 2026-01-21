@@ -2,10 +2,12 @@ import { FileText } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useOperations } from '@/hooks/useOperations';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const RecentOperations = () => {
   const { operations, isLoading } = useOperations();
+  const { profile } = useAuth();
 
   const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
@@ -68,10 +70,10 @@ const RecentOperations = () => {
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6 md:h-7 md:w-7 bg-muted">
                         <AvatarFallback className="text-xs bg-muted text-muted-foreground">
-                          {getInitials(op.profiles?.full_name || 'NN')}
+                          {getInitials(profile?.full_name || 'NN')}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-xs md:text-sm text-foreground hidden sm:inline">{op.profiles?.full_name}</span>
+                      <span className="text-xs md:text-sm text-foreground hidden sm:inline">{profile?.full_name || ''}</span>
                     </div>
                   </td>
                   <td className="py-3 md:py-4 px-2">
