@@ -7,6 +7,7 @@ import { TrendingUp, Users, Zap, Award, Gift, FileText, Euro, LucideIcon } from 
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, AreaChart, Area } from 'recharts';
 import IncarchiWidget from './IncarchiWidget';
 import KPIDetailModal from './KPIDetailModal';
+import DailyQuote from './DailyQuote';
 
 type Period = 'week' | 'month' | 'year';
 type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
@@ -125,6 +126,9 @@ const PersonalDashboard = () => {
 
   return (
     <div className="px-6 pb-8 space-y-6 animate-fade-in">
+      {/* Daily Quote */}
+      <DailyQuote />
+
       {/* Status Annuale Personale */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-2">
