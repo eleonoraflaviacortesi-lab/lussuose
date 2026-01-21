@@ -15,6 +15,8 @@ const columns: { key: NotiziaStatus; title: string }[] = [
   { key: 'done', title: 'Done' },
   { key: 'on_shot', title: 'On shot' },
   { key: 'taken', title: 'Taken' },
+  { key: 'no', title: 'No' },
+  { key: 'sold', title: 'Sold' },
 ];
 
 const NotiziePage = () => {
@@ -59,6 +61,8 @@ const NotiziePage = () => {
       done: filterNotizie(notizieByStatus.done),
       on_shot: filterNotizie(notizieByStatus.on_shot),
       taken: filterNotizie(notizieByStatus.taken),
+      no: filterNotizie(notizieByStatus.no),
+      sold: filterNotizie(notizieByStatus.sold),
     };
   }, [notizieByStatus, searchQuery]);
 
