@@ -89,6 +89,41 @@ export type Database = {
         }
         Relationships: []
       }
+      demo_users: {
+        Row: {
+          avatar_emoji: string | null
+          created_at: string | null
+          display_order: number | null
+          id: string
+          name: string
+          profile_id: string | null
+        }
+        Insert: {
+          avatar_emoji?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          name: string
+          profile_id?: string | null
+        }
+        Update: {
+          avatar_emoji?: string | null
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          name?: string
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_users_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notizie: {
         Row: {
           card_color: string | null
