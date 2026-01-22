@@ -176,74 +176,81 @@ function PropertyCard({
   );
 }
 
+interface WebSearchResult {
+  url: string;
+  title: string;
+  description: string;
+  ref_number: string | null;
+  price: number | null;
+}
+
 function AddPropertyDialog({ 
   clienteId,
   existingPropertyIds,
-  properties,
   onAdd,
   onSyncComplete,
 }: {
   clienteId: string;
   existingPropertyIds: string[];
-  properties: Property[];
   onAdd: (propertyId: string) => void;
   onSyncComplete: () => void;
 }) {
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [urlToImport, setUrlToImport] = useState('');
-  const [isImporting, setIsImporting] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('search');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState<WebSearchResult[]>([]);
+  const [isImporting, setIsImporting] = useState<string | null>(null);
 
-  const availableProperties = properties.filter(p => !existingPropertyIds.includes(p.id));
-  
-  // Filter properties by search query
-  const filteredProperties = useMemo(() => {
-    if (!searchQuery.trim()) return availableProperties;
-    const query = searchQuery.toLowerCase();
-    return availableProperties.filter(p => 
-      p.title.toLowerCase().includes(query) ||
-      p.ref_number?.toLowerCase().includes(query) ||
-      p.location?.toLowerCase().includes(query) ||
-      p.region?.toLowerCase().includes(query) ||
-      p.property_type?.toLowerCase().includes(query)
-    );
-  }, [availableProperties, searchQuery]);
-
-  const handleSelectProperty = (propertyId: string) => {
-    onAdd(propertyId);
-    setOpen(false);
-    setSearchQuery('');
-  };
-
-  const handleImportFromUrl = async () => {
-    if (!urlToImport.trim()) return;
+  const handleSearch = async () => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return;
     
-    // Validate URL is from the right domain
-    if (!urlToImport.includes('cortesiluxuryrealestate.com')) {
+    setIsSearching(true);
+    setSearchResults([]);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('search-website-properties', {
+        body: { query: searchQuery },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setSearchResults(data.results || []);
+        if (data.results.length === 0) {
+          toast({ title: 'Nessun risultato', description: 'Prova con termini diversi' });
+        }
+      } else {
+        throw new Error(data.error || 'Ricerca fallita');
+      }
+    } catch (err: any) {
       toast({
-        title: 'URL non valido',
-        description: 'Inserisci un URL dal sito cortesiluxuryrealestate.com',
+        title: 'Errore ricerca',
+        description: err.message,
         variant: 'destructive',
       });
-      return;
+    } finally {
+      setIsSearching(false);
     }
+  };
 
-    setIsImporting(true);
+  const handleImportAndAdd = async (result: WebSearchResult) => {
+    setIsImporting(result.url);
+    
     try {
       const { data, error } = await supabase.functions.invoke('import-single-property', {
-        body: { url: urlToImport },
+        body: { url: result.url },
       });
 
       if (error) throw error;
 
       if (data.success && data.propertyId) {
-        toast({ title: 'Proprietà importata!' });
+        toast({ title: 'Proprietà importata e aggiunta!' });
         onAdd(data.propertyId);
-        setUrlToImport('');
         setOpen(false);
-        onSyncComplete(); // Refresh properties list
+        setSearchQuery('');
+        setSearchResults([]);
+        onSyncComplete();
       } else {
         throw new Error(data.error || 'Importazione fallita');
       }
@@ -254,7 +261,7 @@ function AddPropertyDialog({
         variant: 'destructive',
       });
     } finally {
-      setIsImporting(false);
+      setIsImporting(null);
     }
   };
 
@@ -267,112 +274,108 @@ function AddPropertyDialog({
     }).format(price);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="w-full">
           <Plus className="h-4 w-4 mr-1" />
-          Aggiungi manualmente
+          Cerca sul sito
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Aggiungi proprietà</DialogTitle>
+          <DialogTitle>Cerca proprietà sul sito</DialogTitle>
         </DialogHeader>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="search">
-              <Search className="h-4 w-4 mr-1" />
-              Cerca
-            </TabsTrigger>
-            <TabsTrigger value="import">
-              <Link className="h-4 w-4 mr-1" />
-              Importa da URL
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="search" className="space-y-3 mt-3">
+        <div className="space-y-4">
+          <div className="flex gap-2">
             <Input
-              placeholder="Cerca per nome, ref, località..."
+              placeholder="Cerca villa, casale, Cortona, piscina..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full"
+              onKeyDown={handleKeyDown}
+              className="flex-1"
             />
-            
-            {filteredProperties.length === 0 ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">
-                  {availableProperties.length === 0 
-                    ? 'Nessuna proprietà disponibile. Sincronizza prima le proprietà.'
-                    : 'Nessun risultato trovato'}
-                </p>
-              </div>
-            ) : (
-              <ScrollArea className="h-[300px]">
-                <div className="space-y-2">
-                  {filteredProperties.map(property => (
-                    <div 
-                      key={property.id}
-                      className="p-3 rounded-lg border hover:border-primary cursor-pointer transition-colors"
-                      onClick={() => handleSelectProperty(property.id)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="min-w-0 flex-1">
-                          <p className="font-medium text-sm truncate">{property.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {property.ref_number} • {property.location || property.region}
-                          </p>
-                        </div>
-                        <span className="text-sm font-medium text-primary ml-2">
-                          {formatPrice(property.price)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                        {property.rooms && <span>{property.rooms} camere</span>}
-                        {property.surface_mq && <span>{property.surface_mq} mq</span>}
-                        {property.has_pool && <Droplets className="h-3 w-3 text-blue-500" />}
-                        {property.has_land && <Trees className="h-3 w-3 text-green-500" />}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            )}
-          </TabsContent>
-          
-          <TabsContent value="import" className="space-y-4 mt-3">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Incolla l'URL di una proprietà dal sito cortesiluxuryrealestate.com
-              </p>
-              <Input
-                placeholder="https://cortesiluxuryrealestate.com/property/..."
-                value={urlToImport}
-                onChange={(e) => setUrlToImport(e.target.value)}
-                className="w-full"
-              />
-            </div>
-            <Button 
-              onClick={handleImportFromUrl} 
-              disabled={!urlToImport.trim() || isImporting}
-              className="w-full"
-            >
-              {isImporting ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Importando...
-                </>
+            <Button onClick={handleSearch} disabled={isSearching || searchQuery.length < 2}>
+              {isSearching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <Link className="h-4 w-4 mr-2" />
-                  Importa proprietà
-                </>
+                <Search className="h-4 w-4" />
               )}
             </Button>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Cerca direttamente sul sito cortesiluxuryrealestate.com per titolo, località, tipologia...
+          </p>
+
+          {searchResults.length === 0 && !isSearching ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="text-sm">Inserisci un termine e clicca cerca</p>
+            </div>
+          ) : (
+            <ScrollArea className="h-[350px]">
+              <div className="space-y-2">
+                {searchResults.map((result, idx) => (
+                  <div 
+                    key={idx}
+                    className="p-3 rounded-lg border hover:border-primary transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-sm line-clamp-2">{result.title}</p>
+                        {result.ref_number && (
+                          <p className="text-xs text-muted-foreground">{result.ref_number}</p>
+                        )}
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                          {result.description}
+                        </p>
+                      </div>
+                      {result.price && (
+                        <span className="text-sm font-medium text-primary whitespace-nowrap">
+                          {formatPrice(result.price)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
+                      <a
+                        href={result.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Vedi sul sito <ExternalLink className="h-3 w-3" />
+                      </a>
+                      <Button
+                        size="sm"
+                        onClick={() => handleImportAndAdd(result)}
+                        disabled={isImporting !== null}
+                      >
+                        {isImporting === result.url ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Importa
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -487,7 +490,6 @@ export function PropertyMatchesSection({ clienteId }: PropertyMatchesSectionProp
       <AddPropertyDialog
         clienteId={clienteId}
         existingPropertyIds={existingPropertyIds}
-        properties={properties}
         onAdd={handleAddManual}
         onSyncComplete={refetchProperties}
       />
