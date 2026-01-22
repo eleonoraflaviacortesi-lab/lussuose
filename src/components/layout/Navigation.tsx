@@ -19,7 +19,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
     { id: 'agenzia', icon: Building2, label: 'Agenzia' },
-    ...(isCoordinator ? [{ id: 'clienti', icon: Users, label: 'Clienti' }] : []),
+    ...(isCoordinator ? [{ id: 'clienti', icon: Users, label: 'Buyers' }] : []),
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 

@@ -6,8 +6,9 @@ import { ClientiFilters } from './ClientiFilters';
 import { ClientiKanban } from './ClientiKanban';
 import { ClienteDetail } from './ClienteDetail';
 import { AddClienteDialog } from './AddClienteDialog';
+import { ImportTallyDialog } from './ImportTallyDialog';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Upload } from 'lucide-react';
 
 export function ClientiPage() {
   const { profile } = useAuth();
@@ -16,6 +17,7 @@ export function ClientiPage() {
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const {
     clienti,
@@ -39,13 +41,12 @@ export function ClientiPage() {
     setDetailOpen(true);
   }, []);
 
-  const handleStatusChange = useCallback(async (clienteId: string, newStatus: ClienteStatus) => {
-    await updateCliente({ id: clienteId, status: newStatus });
-    // Update local state
-    if (selectedCliente?.id === clienteId) {
-      setSelectedCliente(prev => prev ? { ...prev, status: newStatus } : null);
+  const handleAssignInline = useCallback(async (agentId: string | null) => {
+    if (selectedCliente) {
+      await assignCliente({ id: selectedCliente.id, agentId });
+      setSelectedCliente(prev => prev ? { ...prev, assigned_to: agentId } : null);
     }
-  }, [updateCliente, selectedCliente]);
+  }, [selectedCliente, assignCliente]);
 
   const handleOrderChange = useCallback(async (
     items: { id: string; display_order: number; status?: ClienteStatus }[]
@@ -61,12 +62,6 @@ export function ClientiPage() {
     await updateCliente({ id: clienteId, emoji });
   }, [updateCliente]);
 
-  const handleAssign = useCallback(async (agentId: string | null) => {
-    if (selectedCliente) {
-      await assignCliente({ id: selectedCliente.id, agentId });
-      setSelectedCliente(prev => prev ? { ...prev, assigned_to: agentId } : null);
-    }
-  }, [selectedCliente, assignCliente]);
 
   const handleAddComment = useCallback(async (comment: string) => {
     if (selectedCliente) {
@@ -106,15 +101,21 @@ export function ClientiPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Clienti Acquirenti</h1>
+          <h1 className="text-2xl font-bold">Buyers Dashboard</h1>
           <p className="text-sm text-muted-foreground">
             Gestisci i clienti internazionali in cerca di immobili
           </p>
         </div>
-        <Button onClick={() => setAddDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Aggiungi
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-2" />
+            Importa CSV
+          </Button>
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Aggiungi
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -133,7 +134,9 @@ export function ClientiPage() {
         groupBy={groupBy}
         agents={agents}
         onCardClick={handleCardClick}
-        onStatusChange={handleStatusChange}
+        onStatusChange={async (clienteId, status) => {
+          await updateCliente({ id: clienteId, status });
+        }}
         onOrderChange={handleOrderChange}
         onColorChange={handleColorChange}
         onEmojiChange={handleEmojiChange}
@@ -145,8 +148,7 @@ export function ClientiPage() {
         open={detailOpen}
         onOpenChange={setDetailOpen}
         agents={agents}
-        onStatusChange={(status) => selectedCliente && handleStatusChange(selectedCliente.id, status)}
-        onAssign={handleAssign}
+        onAssign={handleAssignInline}
         onAddComment={handleAddComment}
         onDelete={handleDelete}
       />
@@ -157,6 +159,15 @@ export function ClientiPage() {
         onOpenChange={setAddDialogOpen}
         onAdd={async (data) => { await createCliente(data); }}
         isLoading={isCreating}
+      />
+
+      {/* Import Dialog */}
+      <ImportTallyDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onSuccess={() => {
+          setImportDialogOpen(false);
+        }}
       />
     </div>
   );
