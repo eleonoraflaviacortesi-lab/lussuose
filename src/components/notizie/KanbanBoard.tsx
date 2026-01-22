@@ -245,8 +245,8 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
           >
             {notizia.emoji || <span className="text-[10px] text-muted-foreground">+</span>}
           </button>
-          <div className="flex-1 min-w-0">
-            <p className={cn("font-medium text-sm leading-tight", isDark ? "text-white" : "text-foreground")}>{notizia.name}</p>
+          <div className="flex-1">
+            <p className={cn("font-medium text-sm leading-tight break-words", isDark ? "text-white" : "text-foreground")}>{notizia.name}</p>
             {notizia.zona && (
               <span className={cn("text-[10px]", isDark ? "text-white/70" : "text-muted-foreground")}>{notizia.zona}</span>
             )}
