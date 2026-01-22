@@ -246,7 +246,14 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
             {notizia.emoji || <span className="text-[10px] text-muted-foreground">+</span>}
           </button>
           <div className="flex-1">
-            <p className={cn("font-medium text-sm leading-tight break-words", isDark ? "text-white" : "text-foreground")}>{notizia.name}</p>
+            <p
+              className={cn(
+                "font-medium text-sm leading-tight break-words whitespace-normal",
+                isDark ? "text-white" : "text-foreground"
+              )}
+            >
+              {notizia.name}
+            </p>
             {notizia.zona && (
               <span className={cn("text-[10px]", isDark ? "text-white/70" : "text-muted-foreground")}>{notizia.zona}</span>
             )}
@@ -335,7 +342,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex gap-3 pb-4 overflow-x-auto lg:h-full lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
         {columns.map(({ key, label, style }) => (
-          <div key={key} className="flex flex-col min-w-[180px] max-w-[240px] lg:flex-1 lg:min-w-0 lg:max-w-none">
+          <div
+            key={key}
+            className="flex flex-col w-[240px] min-w-[240px] max-w-[240px] lg:w-[260px] lg:min-w-[260px] lg:max-w-[260px]"
+          >
             <div className="flex items-center gap-2 mb-2 lg:mb-3">
               <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-md', style)}>
                 {label}
