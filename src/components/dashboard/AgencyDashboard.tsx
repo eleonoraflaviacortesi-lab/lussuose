@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useKPIs } from '@/hooks/useKPIs';
-import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
+import { useNotizie, Notizia } from '@/hooks/useNotizie';
 import { Progress } from '@/components/ui/progress';
-import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard } from 'lucide-react';
+import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard, Clock } from 'lucide-react';
 import SedeTargetsDialog from './SedeTargetsDialog';
 import { cn } from '@/lib/utils';
 
@@ -16,7 +16,7 @@ const AgencyDashboard = () => {
   
   const { kpis, isLoading } = useKPIs(period);
   const { targets } = useSedeTargets();
-  const { profiles } = useProfiles(true);
+  const { notizieByStatus, isLoading: notizieLoading } = useNotizie();
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -189,6 +189,35 @@ const AgencyDashboard = () => {
         </div>
       </div>
 
+      {/* In attesa di rogito section */}
+      {notizieByStatus.credit.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-500" />
+            <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
+              IN ATTESA DI ROGITO ({notizieByStatus.credit.length})
+            </h3>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {notizieByStatus.credit.map((notizia: Notizia) => (
+              <div 
+                key={notizia.id}
+                className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800"
+              >
+                <div className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center text-sm">
+                  {notizia.emoji || '🏠'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{notizia.name}</p>
+                  {notizia.zona && (
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider truncate">{notizia.zona}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <SedeTargetsDialog open={showTargetsDialog} onOpenChange={setShowTargetsDialog} />
     </div>

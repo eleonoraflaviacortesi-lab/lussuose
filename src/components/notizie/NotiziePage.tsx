@@ -62,6 +62,7 @@ const NotiziePage = () => {
       done: filter(notizieByStatus.done),
       on_shot: filter(notizieByStatus.on_shot),
       taken: filter(notizieByStatus.taken),
+      credit: filter(notizieByStatus.credit),
       no: filter(notizieByStatus.no),
       sold: filter(notizieByStatus.sold),
     };

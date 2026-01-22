@@ -40,6 +40,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
   done: 'Done',
   on_shot: 'On Shot',
   taken: 'Taken',
+  credit: 'Credit',
   no: 'No',
   sold: 'Sold',
 };

@@ -4,7 +4,7 @@ import { useAuth } from './useAuth';
 import { toast } from './use-toast';
 import { Json } from '@/integrations/supabase/types';
 
-export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'no' | 'sold';
+export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'credit' | 'no' | 'sold';
 
 export interface NotiziaComment {
   id: string;
@@ -176,6 +176,7 @@ export const useNotizie = () => {
     done: notizie?.filter(n => n.status === 'done').sort((a, b) => a.display_order - b.display_order) || [],
     on_shot: notizie?.filter(n => n.status === 'on_shot').sort((a, b) => a.display_order - b.display_order) || [],
     taken: notizie?.filter(n => n.status === 'taken').sort((a, b) => a.display_order - b.display_order) || [],
+    credit: notizie?.filter(n => n.status === 'credit').sort((a, b) => a.display_order - b.display_order) || [],
     no: notizie?.filter(n => n.status === 'no').sort((a, b) => a.display_order - b.display_order) || [],
     sold: notizie?.filter(n => n.status === 'sold').sort((a, b) => a.display_order - b.display_order) || [],
   };

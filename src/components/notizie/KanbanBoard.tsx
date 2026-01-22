@@ -19,6 +19,7 @@ const columns: { key: NotiziaStatus; label: string; style: string }[] = [
   { key: 'done', label: 'Done', style: 'bg-orange-400 text-orange-950' },
   { key: 'on_shot', label: 'On shot', style: 'bg-red-400 text-red-950' },
   { key: 'taken', label: 'Taken', style: 'bg-green-200 text-green-900' },
+  { key: 'credit', label: 'Credit', style: 'bg-blue-400 text-white' },
   { key: 'no', label: 'No', style: 'bg-zinc-900 text-white' },
   { key: 'sold', label: 'Sold', style: 'bg-zinc-600 text-white' },
 ];
