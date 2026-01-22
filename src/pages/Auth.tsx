@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 import logoLarge from '@/assets/le_lussuose_large.svg';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
 
 interface DemoAccount {
   email: string;
@@ -13,11 +11,11 @@ interface DemoAccount {
   avatar_emoji: string;
 }
 
-// Demo account emails (order matters for display)
-const DEMO_EMAILS = [
-  'eleonoraflaviacortesi@gmail.com',
-  'dalila@lelussuose.it',
-  'elisa@lelussuose.it',
+// Demo accounts with hardcoded data (RLS blocks profile access when not logged in)
+const DEMO_ACCOUNTS: DemoAccount[] = [
+  { email: 'eleonoraflaviacortesi@gmail.com', full_name: 'Eleonora', avatar_emoji: '🖤' },
+  { email: 'dalila@lelussuose.it', full_name: 'Dalila', avatar_emoji: '💎' },
+  { email: 'elisa@lelussuose.it', full_name: 'Elisa', avatar_emoji: '🌸' },
 ];
 
 // Shared demo password (not exposed in UI)
@@ -26,55 +24,8 @@ const DEMO_PASSWORD = 'lussuose2025!';
 
 const Auth = () => {
   const [loading, setLoading] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<DemoAccount[]>([]);
-  const [loadingAccounts, setLoadingAccounts] = useState(true);
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
-
-  // Fetch demo accounts from database - match by name patterns
-  useEffect(() => {
-    const fetchAccounts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('full_name, avatar_emoji, user_id');
-
-        if (error) throw error;
-
-        // Match profiles to emails by first name
-        const accountsWithEmails: DemoAccount[] = DEMO_EMAILS.map((email) => {
-          const emailPrefix = email.split('@')[0].toLowerCase();
-          
-          // Find matching profile - check if email prefix starts with first name
-          const matchedProfile = data?.find(profile => {
-            const firstName = profile.full_name.toLowerCase().split(' ')[0];
-            // eleonoraflaviacortesi includes "eleonora", dalila includes "dalila", elisa includes "elisa"
-            return emailPrefix.startsWith(firstName) || emailPrefix.includes(firstName);
-          });
-          
-          return {
-            email,
-            full_name: matchedProfile?.full_name || email.split('@')[0],
-            avatar_emoji: matchedProfile?.avatar_emoji || '🖤',
-          };
-        });
-
-        setAccounts(accountsWithEmails);
-      } catch (err) {
-        console.error('Error fetching accounts:', err);
-        // Fallback to demo emails only
-        setAccounts(DEMO_EMAILS.map(email => ({
-          email,
-          full_name: email.split('@')[0],
-          avatar_emoji: '🖤',
-        })));
-      } finally {
-        setLoadingAccounts(false);
-      }
-    };
-
-    fetchAccounts();
-  }, []);
 
   // If already logged in, redirect
   useEffect(() => {
@@ -96,8 +47,7 @@ const Auth = () => {
           variant: 'destructive',
         });
       } else {
-        const firstName = account.full_name.split(' ')[0];
-        toast({ title: `Benvenuta, ${firstName}!` });
+        toast({ title: `Benvenuta, ${account.full_name}!` });
         navigate('/');
       }
     } catch (err) {
@@ -129,42 +79,34 @@ const Auth = () => {
           </h2>
 
           {/* Account Selection */}
-          {loadingAccounts ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {accounts.map((account, index) => (
-                <button
-                  key={account.email}
-                  onClick={() => handleSelectAccount(account)}
-                  disabled={loading !== null}
-                  className={cn(
-                    "w-full flex items-center gap-4 p-4 rounded-2xl transition-all shadow-lg",
-                    "bg-card border border-border/30",
-                    "hover:scale-[1.02] hover:shadow-xl",
-                    "active:scale-[0.98]",
-                    "disabled:opacity-50 disabled:cursor-not-allowed",
-                    loading === account.email && "ring-2 ring-foreground"
-                  )}
-                >
-                  <div className={cn(
-                    "w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-muted",
-                  )}>
-                    {account.avatar_emoji}
-                  </div>
-                  <div className="flex-1 text-left">
-                    <p className="font-semibold text-foreground tracking-tight">{account.full_name}</p>
-                    <p className="text-xs text-muted-foreground tracking-wide">Tocca per accedere</p>
-                  </div>
-                  {loading === account.email && (
-                    <div className="w-5 h-5 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-                  )}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="space-y-3">
+            {DEMO_ACCOUNTS.map((account) => (
+              <button
+                key={account.email}
+                onClick={() => handleSelectAccount(account)}
+                disabled={loading !== null}
+                className={cn(
+                  "w-full flex items-center gap-4 p-4 rounded-2xl transition-all shadow-lg",
+                  "bg-card border border-border/30",
+                  "hover:scale-[1.02] hover:shadow-xl",
+                  "active:scale-[0.98]",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  loading === account.email && "ring-2 ring-foreground"
+                )}
+              >
+                <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl bg-muted">
+                  {account.avatar_emoji}
+                </div>
+                <div className="flex-1 text-left">
+                  <p className="font-semibold text-foreground tracking-tight">{account.full_name}</p>
+                  <p className="text-xs text-muted-foreground tracking-wide">Tocca per accedere</p>
+                </div>
+                {loading === account.email && (
+                  <div className="w-5 h-5 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+                )}
+              </button>
+            ))}
+          </div>
 
           <p className="text-center text-[10px] text-muted-foreground/60 mt-8 tracking-[0.2em] uppercase">
             ACCESSO RISERVATO AL TEAM
