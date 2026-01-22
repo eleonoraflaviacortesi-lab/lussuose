@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Users, Zap, Award, Gift, TrendingUp } from 'lucide-react';
 import IncarchiWidget from './IncarchiWidget';
 import DailyQuote from './DailyQuote';
+import AcquisitionChart from './AcquisitionChart';
 import { celebrateGoal } from '@/lib/confetti';
 
 const PerformanceCharts = lazy(() => import('./PerformanceCharts'));
@@ -122,6 +123,9 @@ const PersonalDashboard = () => {
           </p>
         </div>
       </div>
+
+      {/* Focus Acquisizione Chart */}
+      <AcquisitionChart />
 
       <Suspense
         fallback={
