@@ -33,11 +33,16 @@ const NotiziePage = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [quickAddStatus, setQuickAddStatus] = useState<NotiziaStatus | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleNotiziaClick = useCallback((notizia: Notizia) => {
     setSelectedNotizia(notizia);
     setDetailOpen(true);
+  }, []);
+
+  const handleQuickAdd = useCallback((status: NotiziaStatus) => {
+    setQuickAddStatus(status);
   }, []);
 
   useEffect(() => {
@@ -93,6 +98,7 @@ const NotiziePage = () => {
               notizieByStatus={filteredNotizieByStatus}
               onNotiziaClick={handleNotiziaClick}
               onStatusChange={handleStatusChange}
+              onQuickAdd={handleQuickAdd}
             />
           </Suspense>
         )}
@@ -133,6 +139,16 @@ const NotiziePage = () => {
       </div>
 
       <NotiziaDetail notizia={selectedNotizia} open={detailOpen} onOpenChange={setDetailOpen} />
+      
+      {/* Quick Add Dialog */}
+      {quickAddStatus && (
+        <AddNotiziaDialog
+          defaultStatus={quickAddStatus}
+          open={true}
+          onOpenChange={(open) => !open && setQuickAddStatus(null)}
+          showTrigger={false}
+        />
+      )}
     </div>
   );
 };

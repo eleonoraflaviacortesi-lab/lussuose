@@ -2,7 +2,7 @@ import { memo, useCallback, useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
-import { MessageCircle, X } from 'lucide-react';
+import { MessageCircle, X, Plus } from 'lucide-react';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
@@ -11,6 +11,7 @@ interface KanbanBoardProps {
   notizieByStatus: Record<NotiziaStatus, Notizia[]>;
   onNotiziaClick: (notizia: Notizia) => void;
   onStatusChange: (id: string, status: NotiziaStatus) => void;
+  onQuickAdd?: (status: NotiziaStatus) => void;
 }
 
 const columns: { key: NotiziaStatus; label: string; style: string }[] = [
@@ -281,7 +282,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
 });
 Card.displayName = 'Card';
 
-const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: KanbanBoardProps) => {
+const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQuickAdd }: KanbanBoardProps) => {
   const { updateNotizia, updateOrder } = useNotizie();
   
   const handleDragEnd = useCallback((result: DropResult) => {
@@ -340,6 +341,14 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
                 {label}
               </span>
               <span className="text-xs text-muted-foreground">{notizieByStatus[key].length}</span>
+              {onQuickAdd && (
+                <button
+                  onClick={() => onQuickAdd(key)}
+                  className="ml-auto w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/80 transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                </button>
+              )}
             </div>
             <Droppable droppableId={key}>
               {(provided, snapshot) => (
