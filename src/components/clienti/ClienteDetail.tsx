@@ -103,21 +103,21 @@ export function ClienteDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg w-[95vw] max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-3xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <span className="text-3xl">{cliente.emoji}</span>
-            <div className="flex-1">
+            <span className="text-2xl">{cliente.emoji}</span>
+            <div className="flex-1 min-w-0">
               <InlineEditText
                 value={cliente.nome}
                 onSave={(value) => onUpdate({ nome: value })}
-                className="text-xl font-semibold"
+                className="text-lg font-semibold"
                 placeholder="Nome cliente"
               />
               <InlineEditText
                 value={cliente.paese}
                 onSave={(value) => onUpdate({ paese: value })}
-                className="text-sm text-muted-foreground"
+                className="text-xs text-muted-foreground"
                 placeholder="Paese"
                 prefix={<MapPin className="h-3 w-3" />}
               />
@@ -125,7 +125,7 @@ export function ClienteDetail({
           </div>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
+        <div className="space-y-4 mt-3">
           {/* Assignment */}
           <div>
             <label className="text-xs text-muted-foreground uppercase tracking-wide">Assegnato a</label>
@@ -159,36 +159,36 @@ export function ClienteDetail({
             </Select>
           </div>
 
-          {/* Contact Info - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-            <h3 className="font-medium text-sm mb-3">Contatti</h3>
+          {/* Contact Info - Liquid glass card */}
+          <div className="bg-white rounded-2xl shadow-lg p-3 space-y-1.5">
+            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Contatti</h3>
             <InlineEditText
               value={cliente.telefono}
               onSave={(value) => onUpdate({ telefono: value })}
               placeholder="Aggiungi telefono"
-              prefix={<Phone className="w-4 h-4 text-muted-foreground" />}
+              prefix={<Phone className="w-3.5 h-3.5 text-muted-foreground" />}
               className="text-sm"
             />
             <InlineEditText
               value={cliente.email}
               onSave={(value) => onUpdate({ email: value })}
               placeholder="Aggiungi email"
-              prefix={<Mail className="w-4 h-4 text-muted-foreground" />}
+              prefix={<Mail className="w-3.5 h-3.5 text-muted-foreground" />}
               className="text-sm"
             />
           </div>
 
-          {/* Budget & Timeline - Editable */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h3 className="font-medium text-sm mb-2 flex items-center gap-2">
-                <Euro className="w-4 h-4" /> Budget
+          {/* Budget & Timeline - Liquid glass cards side by side */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white rounded-2xl shadow-lg p-3">
+              <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
+                <Euro className="w-3 h-3" /> Budget
               </h3>
               <InlineEditNumber
                 value={cliente.budget_max}
                 onSave={(value) => onUpdate({ budget_max: value })}
-                placeholder="Imposta budget"
-                className="text-lg font-semibold"
+                placeholder="€..."
+                className="text-base font-semibold"
                 formatDisplay={formatBudget}
               />
               <InlineEditSelect
@@ -196,76 +196,74 @@ export function ClienteDetail({
                 options={YES_NO_OPTIONS}
                 onSave={(value) => onUpdate({ mutuo: value })}
                 placeholder="Mutuo?"
-                className="text-xs text-muted-foreground mt-1"
-                prefix={<span className="text-muted-foreground">Mutuo:</span>}
+                className="text-[10px] text-muted-foreground"
+                prefix={<span>Mutuo:</span>}
               />
             </div>
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h3 className="font-medium text-sm mb-2 flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> Timeline
+            <div className="bg-white rounded-2xl shadow-lg p-3">
+              <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> Timeline
               </h3>
               <InlineEditText
                 value={cliente.tempo_ricerca}
                 onSave={(value) => onUpdate({ tempo_ricerca: value })}
-                placeholder="Tempo di ricerca"
+                placeholder="Tempo"
                 className="text-sm"
               />
               <InlineEditBoolean
                 value={cliente.ha_visitato}
                 onSave={(value) => onUpdate({ ha_visitato: value })}
-                labelTrue="Ha già visitato"
-                labelFalse="Non ha ancora visitato"
-                className="text-xs mt-1"
+                labelTrue="Ha visitato"
+                labelFalse="Non visitato"
+                className="text-[10px]"
               />
             </div>
           </div>
 
-          {/* Location Preferences - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> Preferenze Località
+          {/* Location Preferences - Liquid glass */}
+          <div className="bg-white rounded-2xl shadow-lg p-3">
+            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> Località
             </h3>
             <InlineEditBadges
               values={cliente.regioni}
               onSave={(values) => onUpdate({ regioni: values })}
-              placeholder="Aggiungi regioni"
+              placeholder="Regioni"
               variant="secondary"
             />
-            <div className="mt-2">
-              <InlineEditBadges
-                values={cliente.contesto}
-                onSave={(values) => onUpdate({ contesto: values })}
-                placeholder="Aggiungi contesto (es. campagna, collina)"
-                variant="outline"
-              />
-            </div>
+            <InlineEditBadges
+              values={cliente.contesto}
+              onSave={(values) => onUpdate({ contesto: values })}
+              placeholder="Contesto"
+              variant="outline"
+            />
             <InlineEditBoolean
               value={cliente.vicinanza_citta}
               onSave={(value) => onUpdate({ vicinanza_citta: value })}
-              labelTrue="Vicino a città/aeroporti"
-              labelFalse="Non necessario vicino città"
-              className="text-xs mt-2"
+              labelTrue="Vicino città"
+              labelFalse="Non vicino città"
+              className="text-[10px] mt-1"
             />
           </div>
 
-          {/* Property Preferences - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-              <Home className="w-4 h-4" /> Tipologia Ricercata
+          {/* Property Preferences - Compact liquid glass */}
+          <div className="bg-white rounded-2xl shadow-lg p-3">
+            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
+              <Home className="w-3 h-3" /> Tipologia
             </h3>
             <InlineEditBadges
               values={cliente.tipologia}
               onSave={(values) => onUpdate({ tipologia: values })}
-              placeholder="Aggiungi tipologie"
+              placeholder="Tipologie"
               variant="outline"
             />
-            <div className="grid grid-cols-2 gap-2 text-xs mt-3">
+            <div className="grid grid-cols-2 gap-1.5 text-[10px] mt-2">
               <div className="flex items-center gap-1">
                 <span className="text-muted-foreground">Stile:</span>
                 <InlineEditText
                   value={cliente.stile}
                   onSave={(value) => onUpdate({ stile: value })}
-                  placeholder="Non specificato"
+                  placeholder="-"
                 />
               </div>
               <div className="flex items-center gap-1">
@@ -273,7 +271,7 @@ export function ClienteDetail({
                 <InlineEditText
                   value={cliente.camere}
                   onSave={(value) => onUpdate({ camere: value })}
-                  placeholder="Non specificato"
+                  placeholder="-"
                 />
               </div>
               <div className="flex items-center gap-1">
@@ -281,124 +279,104 @@ export function ClienteDetail({
                 <InlineEditNumber
                   value={cliente.bagni}
                   onSave={(value) => onUpdate({ bagni: value })}
-                  placeholder="Non specificato"
+                  placeholder="-"
                 />
               </div>
               <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Layout:</span>
-                <InlineEditText
-                  value={cliente.layout}
-                  onSave={(value) => onUpdate({ layout: value })}
-                  placeholder="Non specificato"
-                />
-              </div>
-              <div className="flex items-center gap-1 col-span-2">
-                <span className="text-muted-foreground">Dimensioni:</span>
+                <span className="text-muted-foreground">mq:</span>
                 <InlineEditNumber
                   value={cliente.dimensioni_min}
                   onSave={(value) => onUpdate({ dimensioni_min: value })}
-                  placeholder="min"
-                  suffix=" mq"
+                  placeholder="-"
                 />
                 <span>-</span>
                 <InlineEditNumber
                   value={cliente.dimensioni_max}
                   onSave={(value) => onUpdate({ dimensioni_max: value })}
-                  placeholder="max"
-                  suffix=" mq"
+                  placeholder="-"
                 />
               </div>
             </div>
           </div>
 
-          {/* Features - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-3">Caratteristiche</h3>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex items-center gap-2">
-                <Droplets className="w-4 h-4 text-blue-500" />
+          {/* Features - Compact row */}
+          <div className="bg-white rounded-2xl shadow-lg p-3">
+            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Caratteristiche</h3>
+            <div className="flex flex-wrap gap-2 text-xs">
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50">
+                <Droplets className="w-3 h-3 text-blue-500" />
                 <InlineEditSelect
                   value={cliente.piscina}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ piscina: value })}
-                  placeholder="Piscina?"
-                  className="text-sm"
+                  placeholder="Piscina"
+                  className="text-[10px]"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <Trees className="w-4 h-4 text-green-500" />
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-50">
+                <Trees className="w-3 h-3 text-green-500" />
                 <InlineEditSelect
                   value={cliente.terreno}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ terreno: value })}
-                  placeholder="Terreno?"
-                  className="text-sm"
+                  placeholder="Terreno"
+                  className="text-[10px]"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <Home className="w-4 h-4 text-purple-500" />
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50">
+                <Home className="w-3 h-3 text-purple-500" />
                 <InlineEditSelect
                   value={cliente.dependance}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ dependance: value })}
-                  placeholder="Dependance?"
-                  className="text-sm"
+                  placeholder="Dep."
+                  className="text-[10px]"
                 />
               </div>
             </div>
-          </div>
-
-          {/* Usage - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-2">Utilizzo Previsto</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Uso:</span>
+            <div className="flex flex-wrap gap-2 mt-2 text-[10px]">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Uso:</span>
                 <InlineEditText
                   value={cliente.uso}
                   onSave={(value) => onUpdate({ uso: value })}
-                  placeholder="Non specificato"
-                  className="text-sm"
+                  placeholder="-"
                 />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Interesse affitto:</span>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Affitto:</span>
                 <InlineEditSelect
                   value={cliente.interesse_affitto}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ interesse_affitto: value })}
-                  placeholder="Non specificato"
-                  className="text-sm"
+                  placeholder="-"
                 />
               </div>
             </div>
           </div>
 
-          {/* Notes - Editable */}
-          <div className="bg-muted/50 rounded-lg p-4">
-            <h3 className="font-medium text-sm mb-2">Note</h3>
+          {/* Notes - Collapsible */}
+          <div className="bg-white rounded-2xl shadow-lg p-3">
+            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Note</h3>
             <InlineEditText
               value={cliente.descrizione}
               onSave={(value) => onUpdate({ descrizione: value })}
-              placeholder="Aggiungi descrizione..."
+              placeholder="Descrizione..."
               multiline
-              className="text-sm"
+              className="text-xs"
             />
-            <div className="mt-2">
-              <span className="text-xs text-muted-foreground">Note extra:</span>
-              <InlineEditText
-                value={cliente.note_extra}
-                onSave={(value) => onUpdate({ note_extra: value })}
-                placeholder="Aggiungi note extra..."
-                multiline
-                className="text-sm text-muted-foreground"
-              />
-            </div>
+            <InlineEditText
+              value={cliente.note_extra}
+              onSave={(value) => onUpdate({ note_extra: value })}
+              placeholder="Note extra..."
+              multiline
+              className="text-xs text-muted-foreground mt-1"
+            />
           </div>
 
           {/* Property Matches Section */}
           <Separator />
-          <PropertyMatchesSection clienteId={cliente.id} />
+          <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} />
 
           {/* Comments */}
           <div className="border-t pt-4">
