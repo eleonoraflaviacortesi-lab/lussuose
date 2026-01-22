@@ -37,6 +37,7 @@ export interface PropertyMatch {
   suggested_at: string | null;
   suggested_by: string | null;
   notes: string | null;
+  reaction: 'liked' | 'disliked' | null;
   created_at: string;
   updated_at: string;
   property?: Property;
@@ -180,6 +181,31 @@ export function useClientPropertyMatches(clienteId: string | undefined) {
     },
   });
 
+  // Set reaction (liked/disliked)
+  const setReactionMutation = useMutation({
+    mutationFn: async ({ matchId, reaction }: { matchId: string; reaction: 'liked' | 'disliked' | null }) => {
+      const { data, error } = await supabase
+        .from('client_property_matches')
+        .update({ reaction })
+        .eq('id', matchId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-matches', clienteId] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Errore', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
   // Add manual match
   const addManualMatchMutation = useMutation({
     mutationFn: async ({ propertyId, notes }: { propertyId: string; notes?: string }) => {
@@ -241,6 +267,7 @@ export function useClientPropertyMatches(clienteId: string | undefined) {
     calculateMatches: calculateMatchesMutation.mutateAsync,
     isCalculating: calculateMatchesMutation.isPending,
     toggleSuggested: toggleSuggestedMutation.mutateAsync,
+    setReaction: setReactionMutation.mutateAsync,
     addManualMatch: addManualMatchMutation.mutateAsync,
     removeMatch: removeMatchMutation.mutateAsync,
   };

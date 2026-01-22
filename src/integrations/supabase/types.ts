@@ -23,6 +23,7 @@ export type Database = {
           match_type: string
           notes: string | null
           property_id: string
+          reaction: string | null
           suggested: boolean | null
           suggested_at: string | null
           suggested_by: string | null
@@ -36,6 +37,7 @@ export type Database = {
           match_type?: string
           notes?: string | null
           property_id: string
+          reaction?: string | null
           suggested?: boolean | null
           suggested_at?: string | null
           suggested_by?: string | null
@@ -49,6 +51,7 @@ export type Database = {
           match_type?: string
           notes?: string | null
           property_id?: string
+          reaction?: string | null
           suggested?: boolean | null
           suggested_at?: string | null
           suggested_by?: string | null
