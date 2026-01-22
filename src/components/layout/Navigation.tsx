@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
+import { useAuth } from '@/hooks/useAuth';
 
 interface NavigationProps {
   activeTab: string;
@@ -9,12 +10,15 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const { hasReportedToday } = useTodayReportStatus();
+  const { profile } = useAuth();
+
+  const canSeeAgency = profile?.role === 'coordinatore' || profile?.role === 'admin';
   
   const tabs = [
     { id: 'numeri', icon: Home, label: 'Home' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
-    { id: 'agenzia', icon: Building2, label: 'Agenzia' },
+    ...(canSeeAgency ? [{ id: 'agenzia', icon: Building2, label: 'Agenzia' } as const] : []),
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
@@ -38,7 +42,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
-              {index === 3 && (
+              {index === (canSeeAgency ? 3 : 2) && (
                 <div className="w-px h-5 bg-border mx-0.5" />
               )}
             </div>
