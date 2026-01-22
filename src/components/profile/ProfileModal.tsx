@@ -11,6 +11,7 @@ interface ProfileModalProps {
 }
 
 const EMOJI_OPTIONS = ['👑', '👩‍💼', '📈', '🏠', '✨', '🖤', '💼', '💎', '🌸', '💅', '👠', '💄'];
+const SEDI = ['CITTÀ DI CASTELLO', 'AREZZO'] as const;
 
 const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
 
@@ -19,11 +20,13 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const [selectedEmoji, setSelectedEmoji] = useState('🖤');
   const [customEmoji, setCustomEmoji] = useState('');
   const [fullName, setFullName] = useState('');
+  const [sede, setSede] = useState<string>('AREZZO');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
+      setSede(profile.sede || 'AREZZO');
       if (profile.avatar_emoji) {
         setSelectedEmoji(profile.avatar_emoji);
       }
@@ -40,7 +43,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         .from('profiles')
         .update({ 
           full_name: fullName,
-          avatar_emoji: avatarToSave
+          avatar_emoji: avatarToSave,
+          sede: sede
         })
         .eq('user_id', user.id);
       
@@ -154,7 +158,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
             </div>
           </div>
 
-          {/* Role and Sede - Read only */}
+          {/* Role and Sede */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
@@ -168,9 +172,22 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
                 SEDE
               </p>
-              <div className="bg-muted/50 rounded-full h-10 flex items-center px-4">
-                <MapPin className="w-4 h-4 text-muted-foreground mr-2" />
-                <span className="text-sm">{profile?.sede || 'AREZZO'}</span>
+              <div className="flex gap-1">
+                {SEDI.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setSede(s)}
+                    className={cn(
+                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center gap-1",
+                      sede === s
+                        ? "bg-foreground text-background"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <MapPin className="w-3 h-3" />
+                    {s === 'CITTÀ DI CASTELLO' ? 'CDT' : 'AR'}
+                  </button>
+                ))}
               </div>
             </div>
           </div>
