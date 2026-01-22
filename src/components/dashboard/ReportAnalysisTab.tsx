@@ -487,6 +487,8 @@ const ReportAnalysisTab = () => {
                   <EditField label="Contatti Reali" field="contatti_reali" />
                   <EditField label="Notizie Acquisite" field="notizie_reali" />
                   <EditField label="Appuntamenti Vendita" field="appuntamenti_vendita" />
+                  <EditField label="Incarichi Presi" field="incarichi_vendita" />
+                  <EditField label="Valutazioni Fatte" field="valutazioni_fatte" />
                   <EditField label="Nuove Trattative" field="nuove_trattative" />
                   <EditField label="Trattative Chiuse" field="trattative_chiuse" />
                   <EditField label="Fatturato a Credito (€)" field="fatturato_a_credito" />
@@ -516,6 +518,8 @@ const ReportAnalysisTab = () => {
                   <DetailRow label="Contatti Reali" value={selectedReport.contatti_reali} />
                   <DetailRow label="Notizie Acquisite" value={selectedReport.notizie_reali} />
                   <DetailRow label="Appuntamenti Vendita" value={selectedReport.appuntamenti_vendita} />
+                  <DetailRow label="Incarichi Presi" value={selectedReport.incarichi_vendita || 0} />
+                  <DetailRow label="Valutazioni Fatte" value={(selectedReport as any).valutazioni_fatte || 0} />
                   <DetailRow label="Nuove Trattative" value={selectedReport.nuove_trattative || 0} />
                   <DetailRow label="Trattative Chiuse" value={selectedReport.trattative_chiuse || 0} />
                   <DetailRow label="Fatturato a Credito" value={Number(selectedReport.fatturato_a_credito) || 0} isCurrency />
