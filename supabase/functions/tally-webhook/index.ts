@@ -115,6 +115,10 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Get sede from query param (e.g. ?sede=AREZZO or ?sede=CITTA%20DI%20CASTELLO)
+    const url = new URL(req.url);
+    const sedeParam = url.searchParams.get("sede")?.toUpperCase() || "AREZZO";
+
     // Parse Tally webhook payload
     const payload: TallySubmission = await req.json();
     
@@ -173,9 +177,8 @@ Deno.serve(async (req) => {
       note_extra: String(getFieldValue(fields, "more") || getFieldValue(fields, "additional") || ""),
       
       // Management
-      // IMPORTANT: status must NOT come from Tally (and we avoid sending it altogether)
-      // so the database default is always applied.
-      sede: "AREZZO", // Default sede - can be configured
+      // Management – sede comes from query param, status uses DB default
+      sede: sedeParam,
       emoji: "🏠",
       
       // Tally metadata
