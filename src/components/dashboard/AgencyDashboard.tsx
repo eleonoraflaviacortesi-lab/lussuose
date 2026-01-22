@@ -6,6 +6,7 @@ import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
 import { Phone, FileText, Gift, Euro, BarChart3, Settings } from 'lucide-react';
 import SedeTargetsDialog from './SedeTargetsDialog';
+import AcquisitionChart from './AcquisitionChart';
 
 const AgencyDashboard = () => {
   const { profile: currentProfile } = useAuth();
@@ -143,6 +144,9 @@ const AgencyDashboard = () => {
           <p className="text-xs text-muted-foreground">GOAL: {formatCurrency(fatturatoTarget)}</p>
         </div>
       </div>
+
+      {/* Acquisition Chart */}
+      <AcquisitionChart />
 
       {/* Team Ranking */}
       {profiles && profiles.length > 0 && (
