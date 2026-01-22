@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LayoutGrid, PlusCircle, Users, Settings, BarChart3, Check, Newspaper } from 'lucide-react';
+import { Home, ClipboardList, Building2, Settings, TrendingUp, Check, FileText } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
 interface NavigationProps {
@@ -11,11 +11,11 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const { hasReportedToday } = useTodayReportStatus();
   
   const tabs = [
-    { id: 'numeri', icon: LayoutGrid, label: 'I miei numeri' },
-    { id: 'notizie', icon: Newspaper, label: 'Notizie' },
-    { id: 'inserisci', icon: PlusCircle, label: 'Report giornaliero' },
-    { id: 'analisi', icon: BarChart3, label: 'Analisi Report' },
-    { id: 'agenzia', icon: Users, label: 'Agenzia' },
+    { id: 'numeri', icon: Home, label: 'Home' },
+    { id: 'notizie', icon: FileText, label: 'Notizie' },
+    { id: 'inserisci', icon: ClipboardList, label: 'Report giornaliero' },
+    { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
+    { id: 'agenzia', icon: Building2, label: 'Agenzia' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
