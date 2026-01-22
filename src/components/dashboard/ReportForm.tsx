@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard } from 'lucide-react';
+import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
 const ReportForm = () => {
@@ -9,6 +9,7 @@ const ReportForm = () => {
     notizie_reali: 0,
     appuntamenti_vendita: 0,
     incarichi_vendita: 0,
+    valutazioni_fatte: 0,
     vendite_numero: 0,
     vendite_valore: 0,
     nuove_trattative: 0,
@@ -28,6 +29,7 @@ const ReportForm = () => {
           notizie_reali: existingEntry.notizie_reali,
           appuntamenti_vendita: existingEntry.appuntamenti_vendita,
           incarichi_vendita: existingEntry.incarichi_vendita || 0,
+          valutazioni_fatte: (existingEntry as any).valutazioni_fatte || 0,
           vendite_numero: existingEntry.vendite_numero,
           vendite_valore: Number(existingEntry.vendite_valore),
           nuove_trattative: existingEntry.nuove_trattative || 0,
@@ -40,6 +42,7 @@ const ReportForm = () => {
           notizie_reali: 0,
           appuntamenti_vendita: 0,
           incarichi_vendita: 0,
+          valutazioni_fatte: 0,
           vendite_numero: 0,
           vendite_valore: 0,
           nuove_trattative: 0,
@@ -188,14 +191,12 @@ const ReportForm = () => {
             </p>
           </div>
         </div>
-        <div className="relative">
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="bg-muted border-0 rounded-xl px-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+        <input
+          type="date"
+          value={date}
+          onChange={(e) => setDate(e.target.value)}
+          className="bg-muted border-0 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary w-[120px] shrink-0"
+        />
       </div>
 
       {/* Three Column Layout */}
@@ -230,6 +231,20 @@ const ReportForm = () => {
             ideal={1}
             icon={CalendarDays}
           />
+          
+          <CounterField
+            label="INCARICHI PRESI"
+            value={formData.incarichi_vendita}
+            field="incarichi_vendita"
+            icon={Handshake}
+          />
+          
+          <CounterField
+            label="VALUTAZIONI FATTE"
+            value={formData.valutazioni_fatte}
+            field="valutazioni_fatte"
+            icon={ClipboardCheck}
+          />
         </div>
 
         {/* Trattative */}
@@ -253,13 +268,6 @@ const ReportForm = () => {
             field="trattative_chiuse"
             ideal={1}
             icon={CheckCircle}
-          />
-
-          <CounterField
-            label="INCARICHI PRESI"
-            value={formData.incarichi_vendita}
-            field="incarichi_vendita"
-            icon={Handshake}
           />
 
           <CurrencyField
@@ -298,10 +306,10 @@ const ReportForm = () => {
       <button
         onClick={handleSave}
         disabled={saveDailyData.isPending}
-        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
+        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-2 font-medium text-sm tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
       >
-        {saveDailyData.isPending ? 'SALVATAGGIO...' : 'SALVA REPORT PERFORMANCE'}
-        <Check className="w-5 h-5" />
+        <span>{saveDailyData.isPending ? 'SALVATAGGIO...' : 'SALVA REPORT'}</span>
+        <Check className="w-4 h-4" />
       </button>
     </div>
   );
