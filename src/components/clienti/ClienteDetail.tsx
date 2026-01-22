@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { 
   Phone, 
   Mail, 
@@ -30,7 +31,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import { PropertyMatchesSection } from './PropertyMatchesSection';
 
 interface ClienteDetailProps {
   cliente: Cliente | null;
@@ -265,6 +266,10 @@ export function ClienteDetail({
               )}
             </div>
           )}
+
+          {/* Property Matches Section */}
+          <Separator />
+          <PropertyMatchesSection clienteId={cliente.id} />
 
           {/* Comments */}
           <div className="border-t pt-4">

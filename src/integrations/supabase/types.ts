@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_property_matches: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          id: string
+          match_score: number | null
+          match_type: string
+          notes: string | null
+          property_id: string
+          suggested: boolean | null
+          suggested_at: string | null
+          suggested_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          match_type?: string
+          notes?: string | null
+          property_id: string
+          suggested?: boolean | null
+          suggested_at?: string | null
+          suggested_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          id?: string
+          match_score?: number | null
+          match_type?: string
+          notes?: string | null
+          property_id?: string
+          suggested?: boolean | null
+          suggested_at?: string | null
+          suggested_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_property_matches_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_property_matches_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clienti: {
         Row: {
           assigned_to: string | null
@@ -364,6 +421,78 @@ export type Database = {
           sede?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      properties: {
+        Row: {
+          active: boolean | null
+          bathrooms: number | null
+          created_at: string
+          description: string | null
+          features: Json | null
+          has_land: boolean | null
+          has_pool: boolean | null
+          id: string
+          image_url: string | null
+          land_hectares: number | null
+          location: string | null
+          price: number | null
+          property_type: string | null
+          ref_number: string | null
+          region: string | null
+          rooms: number | null
+          scraped_at: string
+          surface_mq: number | null
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean | null
+          bathrooms?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          has_land?: boolean | null
+          has_pool?: boolean | null
+          id?: string
+          image_url?: string | null
+          land_hectares?: number | null
+          location?: string | null
+          price?: number | null
+          property_type?: string | null
+          ref_number?: string | null
+          region?: string | null
+          rooms?: number | null
+          scraped_at?: string
+          surface_mq?: number | null
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          active?: boolean | null
+          bathrooms?: number | null
+          created_at?: string
+          description?: string | null
+          features?: Json | null
+          has_land?: boolean | null
+          has_pool?: boolean | null
+          id?: string
+          image_url?: string | null
+          land_hectares?: number | null
+          location?: string | null
+          price?: number | null
+          property_type?: string | null
+          ref_number?: string | null
+          region?: string | null
+          rooms?: number | null
+          scraped_at?: string
+          surface_mq?: number | null
+          title?: string
+          updated_at?: string
+          url?: string
         }
         Relationships: []
       }
