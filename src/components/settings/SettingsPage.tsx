@@ -67,9 +67,21 @@ const SettingsPage = () => {
     }
   }, [settings]);
 
-  // Calculate projections
-  const fatturatoNetto = localSettings.obbiettivo_fatturato * (localSettings.percentuale_personale / 100);
-  const venditeTotali = Math.ceil(localSettings.obbiettivo_fatturato / (localSettings.prezzo_medio_vendita * (localSettings.provvigione_agenzia / 100)));
+  // Calcoli corretti:
+  // obbiettivo_fatturato = obiettivo provvigionale personale (ciò che vuoi guadagnare)
+  // percentuale_personale = la tua % sulla provvigione dell'agenzia
+  // provvigione_agenzia = % che l'agenzia guadagna sulla vendita
+  
+  const fatturatoNetto = localSettings.obbiettivo_fatturato; // È già il tuo obiettivo personale
+  
+  // Per guadagnare €50.000, se prendi il 10% dell'agenzia, l'agenzia deve fatturare €500.000
+  const fatturatoAgenziaNeeded = localSettings.obbiettivo_fatturato / (localSettings.percentuale_personale / 100);
+  
+  // Se l'agenzia prende il 4% sulle vendite, il volume vendite deve essere €12.500.000
+  const volumeVenditeNeeded = fatturatoAgenziaNeeded / (localSettings.provvigione_agenzia / 100);
+  
+  // Numero vendite = volume / prezzo medio
+  const venditeTotali = Math.ceil(volumeVenditeNeeded / localSettings.prezzo_medio_vendita);
   const mediaVenditeMese = (venditeTotali / 11).toFixed(1);
 
   const handleChange = useCallback((field: string, value: number) => {
