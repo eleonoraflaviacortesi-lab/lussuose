@@ -173,7 +173,8 @@ Deno.serve(async (req) => {
       note_extra: String(getFieldValue(fields, "more") || getFieldValue(fields, "additional") || ""),
       
       // Management
-      status: "new",
+      // IMPORTANT: status must NOT come from Tally (and we avoid sending it altogether)
+      // so the database default is always applied.
       sede: "AREZZO", // Default sede - can be configured
       emoji: "🏠",
       
