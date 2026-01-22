@@ -336,8 +336,8 @@
     @apply bg-dashboard-card text-white rounded-xl p-4;
   }
 
-  /* Ticker animation */
-  @keyframes ticker {
+  /* Ticker animation - smooth and fluid */
+  @keyframes ticker-smooth {
     0% {
       transform: translateX(0);
     }
@@ -346,8 +346,14 @@
     }
   }
 
+  .ticker-smooth {
+    animation: ticker-smooth 20s linear infinite;
+    will-change: transform;
+  }
+
   .animate-ticker {
-    animation: ticker 8s linear infinite;
+    animation: ticker-smooth 20s linear infinite;
+    will-change: transform;
   }
 }
 
