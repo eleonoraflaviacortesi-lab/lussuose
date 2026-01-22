@@ -63,7 +63,7 @@ const AgencyDashboard = () => {
   const venditeDelta = vendite - venditeTarget;
 
   const fatturato = kpis?.fatturato?.value || 0;
-  const fatturatoTarget = Math.max(0, Number(targets.fatturato_target || 0));
+  const fatturatoTarget = Math.max(0, Number(targets.fatturato_target || 0) * operationalMultiplier);
   const fatturatoDelta = fatturato - fatturatoTarget;
 
   const trattativeChiuse = kpis?.trattativeChiuse?.value || 0;

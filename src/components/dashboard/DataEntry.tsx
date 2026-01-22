@@ -1,33 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Calendar, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
+const defaultFormData = {
+  contatti_reali: 0,
+  contatti_ideali: 25,
+  notizie_reali: 0,
+  notizie_ideali: 3,
+  clienti_gestiti: 0,
+  appuntamenti_vendita: 0,
+  acquisizioni: 0,
+  incarichi_vendita: 0,
+  vendite_numero: 0,
+  vendite_valore: 0,
+  affitti_numero: 0,
+  affitti_valore: 0,
+  nuove_trattative: 0,
+  nuove_trattative_ideali: 2,
+  trattative_chiuse: 0,
+  trattative_chiuse_ideali: 1,
+  fatturato_a_credito: 0,
+};
+
 const DataEntry = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [formData, setFormData] = useState({
-    contatti_reali: 0,
-    contatti_ideali: 25,
-    notizie_reali: 0,
-    notizie_ideali: 3,
-    clienti_gestiti: 0,
-    appuntamenti_vendita: 0,
-    acquisizioni: 0,
-    incarichi_vendita: 0,
-    vendite_numero: 0,
-    vendite_valore: 0,
-    affitti_numero: 0,
-    affitti_valore: 0,
-    nuove_trattative: 0,
-    nuove_trattative_ideali: 2,
-    trattative_chiuse: 0,
-    trattative_chiuse_ideali: 1,
-    fatturato_a_credito: 0,
-  });
+  const [formData, setFormData] = useState(defaultFormData);
 
-  const { saveDailyData } = useDailyData();
+  const { myData, saveDailyData } = useDailyData();
+
+  // Pre-populate form when date changes and data exists
+  useEffect(() => {
+    if (myData) {
+      const existingRecord = myData.find(d => d.date === date);
+      if (existingRecord) {
+        setFormData({
+          contatti_reali: existingRecord.contatti_reali || 0,
+          contatti_ideali: existingRecord.contatti_ideali || 25,
+          notizie_reali: existingRecord.notizie_reali || 0,
+          notizie_ideali: existingRecord.notizie_ideali || 3,
+          clienti_gestiti: existingRecord.clienti_gestiti || 0,
+          appuntamenti_vendita: existingRecord.appuntamenti_vendita || 0,
+          acquisizioni: existingRecord.acquisizioni || 0,
+          incarichi_vendita: existingRecord.incarichi_vendita || 0,
+          vendite_numero: existingRecord.vendite_numero || 0,
+          vendite_valore: Number(existingRecord.vendite_valore) || 0,
+          affitti_numero: existingRecord.affitti_numero || 0,
+          affitti_valore: Number(existingRecord.affitti_valore) || 0,
+          nuove_trattative: existingRecord.nuove_trattative || 0,
+          nuove_trattative_ideali: existingRecord.nuove_trattative_ideali || 2,
+          trattative_chiuse: existingRecord.trattative_chiuse || 0,
+          trattative_chiuse_ideali: existingRecord.trattative_chiuse_ideali || 1,
+          fatturato_a_credito: Number(existingRecord.fatturato_a_credito) || 0,
+        });
+      } else {
+        setFormData(defaultFormData);
+      }
+    }
+  }, [date, myData]);
 
   const handleChange = (field: string, value: number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

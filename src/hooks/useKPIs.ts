@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import { useDailyData } from './useDailyData';
 import { useOperations } from './useOperations';
+import { useSedeTargets } from './useSedeTargets';
 
 export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
   const { allData, isLoading: dataLoading } = useDailyData();
   const { operations, isLoading: opsLoading } = useOperations();
+  const { targets: sedeTargets, isLoading: targetsLoading } = useSedeTargets();
 
   const kpis = useMemo(() => {
     if (!allData) return null;
@@ -54,18 +56,20 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
       }
     );
 
-    // Default targets
+    // Dynamic targets from sede_targets, scaled by period
+    const multiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
+    
     const targets = {
-      contatti: 0,
-      notizie: 0,
-      clienti: 0,
-      appuntamenti: 0,
-      acquisizioni: 0,
-      incarichi: 0,
-      vendite: 4,
-      fatturato: 100000,
-      trattativeChiuse: 0,
-      fatturatoCredito: 0,
+      contatti: Math.round((sedeTargets?.contatti_target || 0) * multiplier),
+      notizie: Math.round((sedeTargets?.notizie_target || 0) * multiplier),
+      clienti: 0, // No sede target for clienti
+      appuntamenti: Math.round((sedeTargets?.appuntamenti_target || 0) * multiplier),
+      acquisizioni: Math.round((sedeTargets?.acquisizioni_target || 0) * multiplier),
+      incarichi: Math.round((sedeTargets?.incarichi_target || 0) * multiplier),
+      vendite: Math.round((sedeTargets?.vendite_target || 4) * multiplier),
+      fatturato: Number(sedeTargets?.fatturato_target || 100000) * multiplier,
+      trattativeChiuse: Math.round((sedeTargets?.trattative_chiuse_target || 0) * multiplier),
+      fatturatoCredito: 0, // No target for this
     };
 
     return {
@@ -80,7 +84,7 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
       trattativeChiuse: { value: totals.trattativeChiuse, target: targets.trattativeChiuse, delta: totals.trattativeChiuse - targets.trattativeChiuse },
       fatturatoCredito: { value: totals.fatturatoCredito, target: targets.fatturatoCredito, delta: totals.fatturatoCredito - targets.fatturatoCredito },
     };
-  }, [allData, period]);
+  }, [allData, period, sedeTargets]);
 
   const chartData = useMemo(() => {
     if (!allData) return [];
@@ -105,6 +109,6 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
   return {
     kpis,
     chartData,
-    isLoading: dataLoading || opsLoading,
+    isLoading: dataLoading || opsLoading || targetsLoading,
   };
 };
