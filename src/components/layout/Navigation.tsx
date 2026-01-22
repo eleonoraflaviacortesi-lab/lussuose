@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Home, ClipboardList, Building2, Settings, TrendingUp, Check, FileText } from 'lucide-react';
+import { Home, Megaphone, ClipboardList, Building2, Settings, TrendingUp, Check } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
 interface NavigationProps {
@@ -12,7 +12,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   
   const tabs = [
     { id: 'numeri', icon: Home, label: 'Home' },
-    { id: 'notizie', icon: FileText, label: 'Notizie' },
+    { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'inserisci', icon: ClipboardList, label: 'Report giornaliero' },
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
     { id: 'agenzia', icon: Building2, label: 'Agenzia' },
