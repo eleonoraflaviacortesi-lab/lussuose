@@ -14,6 +14,7 @@ export interface DailyDataInput {
   appuntamenti_vendita: number;
   acquisizioni: number;
   incarichi_vendita: number;
+  valutazioni_fatte: number;
   vendite_numero: number;
   vendite_valore: number;
   affitti_numero: number;

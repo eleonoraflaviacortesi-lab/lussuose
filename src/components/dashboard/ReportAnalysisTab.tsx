@@ -160,6 +160,8 @@ const ReportAnalysisTab = () => {
       contatti_reali: selectedReport.contatti_reali,
       notizie_reali: selectedReport.notizie_reali,
       appuntamenti_vendita: selectedReport.appuntamenti_vendita,
+      incarichi_vendita: selectedReport.incarichi_vendita || 0,
+      valutazioni_fatte: (selectedReport as any).valutazioni_fatte || 0,
       nuove_trattative: selectedReport.nuove_trattative || 0,
       trattative_chiuse: selectedReport.trattative_chiuse || 0,
       fatturato_a_credito: Number(selectedReport.fatturato_a_credito) || 0,
@@ -186,7 +188,7 @@ const ReportAnalysisTab = () => {
       clienti_gestiti: 0,
       appuntamenti_vendita: editFormData.appuntamenti_vendita,
       acquisizioni: 0,
-      incarichi_vendita: selectedReport.incarichi_vendita || 0,
+      incarichi_vendita: editFormData.incarichi_vendita || 0,
       vendite_numero: editFormData.vendite_numero,
       vendite_valore: editFormData.vendite_valore,
       affitti_numero: 0,
@@ -196,6 +198,7 @@ const ReportAnalysisTab = () => {
       trattative_chiuse: editFormData.trattative_chiuse,
       trattative_chiuse_ideali: 1,
       fatturato_a_credito: editFormData.fatturato_a_credito,
+      valutazioni_fatte: editFormData.valutazioni_fatte || 0,
     };
     
     saveDailyData.mutate(input, {
