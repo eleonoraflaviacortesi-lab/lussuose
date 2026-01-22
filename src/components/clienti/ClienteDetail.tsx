@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Cliente, ClienteStatus } from '@/types';
+import { Cliente } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -24,14 +24,9 @@ import {
   Home, 
   Calendar,
   MessageSquare,
-  User,
   Trash2,
-  Clock,
-  CheckCircle,
-  XCircle,
   Droplets,
   Trees,
-  Users,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -42,32 +37,17 @@ interface ClienteDetailProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   agents: Array<{ user_id: string; full_name: string; avatar_emoji: string }>;
-  onStatusChange: (status: ClienteStatus) => void;
   onAssign: (agentId: string | null) => void;
   onAddComment: (comment: string) => void;
   onDelete: () => void;
 }
 
-const statusConfig: Record<ClienteStatus, { label: string; color: string; icon: React.ElementType }> = {
-  new: { label: 'Nuovo', color: 'bg-yellow-500', icon: Clock },
-  contacted: { label: 'Contattato', color: 'bg-blue-400', icon: Phone },
-  qualified: { label: 'Qualificato', color: 'bg-blue-600', icon: CheckCircle },
-  proposal: { label: 'Proposta', color: 'bg-orange-500', icon: Home },
-  negotiation: { label: 'Trattativa', color: 'bg-red-500', icon: Users },
-  closed_won: { label: 'Chiuso ✓', color: 'bg-green-500', icon: CheckCircle },
-  closed_lost: { label: 'Perso', color: 'bg-gray-500', icon: XCircle },
-};
-
-const allStatuses: ClienteStatus[] = [
-  'new', 'contacted', 'qualified', 'proposal', 'negotiation', 'closed_won', 'closed_lost'
-];
 
 export function ClienteDetail({
   cliente,
   open,
   onOpenChange,
   agents,
-  onStatusChange,
   onAssign,
   onAddComment,
   onDelete,
@@ -94,7 +74,6 @@ export function ClienteDetail({
   };
 
   const assignedAgent = agents.find(a => a.user_id === cliente.assigned_to);
-  const StatusIcon = statusConfig[cliente.status].icon;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,65 +91,37 @@ export function ClienteDetail({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Status & Assignment */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-xs text-muted-foreground uppercase tracking-wide">Stato</label>
-              <Select
-                value={cliente.status}
-                onValueChange={(v) => onStatusChange(v as ClienteStatus)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue>
+          {/* Assignment Only */}
+          <div>
+            <label className="text-xs text-muted-foreground uppercase tracking-wide">Assegnato a</label>
+            <Select
+              value={cliente.assigned_to || 'unassigned'}
+              onValueChange={(v) => onAssign(v === 'unassigned' ? null : v)}
+            >
+              <SelectTrigger className="mt-1">
+                <SelectValue>
+                  {assignedAgent ? (
                     <div className="flex items-center gap-2">
-                      <div className={cn("w-2 h-2 rounded-full", statusConfig[cliente.status].color)} />
-                      {statusConfig[cliente.status].label}
+                      <span>{assignedAgent.avatar_emoji}</span>
+                      {assignedAgent.full_name}
                     </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {allStatuses.map(s => (
-                    <SelectItem key={s} value={s}>
-                      <div className="flex items-center gap-2">
-                        <div className={cn("w-2 h-2 rounded-full", statusConfig[s].color)} />
-                        {statusConfig[s].label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-xs text-muted-foreground uppercase tracking-wide">Assegnato a</label>
-              <Select
-                value={cliente.assigned_to || 'unassigned'}
-                onValueChange={(v) => onAssign(v === 'unassigned' ? null : v)}
-              >
-                <SelectTrigger className="mt-1">
-                  <SelectValue>
-                    {assignedAgent ? (
-                      <div className="flex items-center gap-2">
-                        <span>{assignedAgent.avatar_emoji}</span>
-                        {assignedAgent.full_name}
-                      </div>
-                    ) : (
-                      'Non assegnato'
-                    )}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Non assegnato</SelectItem>
-                  {agents.map(a => (
-                    <SelectItem key={a.user_id} value={a.user_id}>
-                      <div className="flex items-center gap-2">
-                        <span>{a.avatar_emoji}</span>
-                        {a.full_name}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  ) : (
+                    'Non assegnato'
+                  )}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Non assegnato</SelectItem>
+                {agents.map(a => (
+                  <SelectItem key={a.user_id} value={a.user_id}>
+                    <div className="flex items-center gap-2">
+                      <span>{a.avatar_emoji}</span>
+                      {a.full_name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Contact Info */}
