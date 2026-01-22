@@ -20,8 +20,8 @@ const DEFAULT_TARGETS: SedeTargets = {
   incarichi_target: 4,
   acquisizioni_target: 8,
   appuntamenti_target: 40,
-  vendite_target: 4,
-  fatturato_target: 150000,
+  vendite_target: 48,  // Annual: 4 per month
+  fatturato_target: 500000,  // Annual target
   trattative_chiuse_target: 4,
 };
 
