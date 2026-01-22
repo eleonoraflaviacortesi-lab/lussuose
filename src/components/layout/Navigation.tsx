@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Home, Megaphone, ClipboardList, Building2, Settings, TrendingUp, Check } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
 interface NavigationProps {
@@ -13,7 +13,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const tabs = [
     { id: 'numeri', icon: Home, label: 'Home' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
-    { id: 'inserisci', icon: ClipboardList, label: 'Report giornaliero' },
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
     { id: 'agenzia', icon: Building2, label: 'Agenzia' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
@@ -39,7 +38,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
-              {index === 4 && (
+              {index === 3 && (
                 <div className="w-px h-5 bg-border mx-0.5" />
               )}
             </div>
@@ -61,7 +60,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
             <span>Fatto</span>
           </>
         ) : (
-          'CICLO PRODUTTIVO'
+          <>
+            <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+            <span>CICLO PRODUTTIVO</span>
+          </>
         )}
       </button>
     </nav>
