@@ -31,7 +31,7 @@ interface TallySubmission {
 // Helper to find field value by label (case-insensitive partial match)
 function getFieldValue(fields: TallyField[], labelPattern: string): unknown {
   const field = fields.find(f => 
-    f.label.toLowerCase().includes(labelPattern.toLowerCase())
+    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
   );
   return field?.value ?? null;
 }
@@ -39,7 +39,7 @@ function getFieldValue(fields: TallyField[], labelPattern: string): unknown {
 // Helper to get array values from checkboxes or multi-select
 function getArrayValue(fields: TallyField[], labelPattern: string): string[] {
   const field = fields.find(f => 
-    f.label.toLowerCase().includes(labelPattern.toLowerCase())
+    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
   );
   
   if (!field?.value) return [];
