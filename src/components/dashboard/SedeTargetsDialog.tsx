@@ -35,7 +35,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg mx-auto p-0 rounded-3xl border-0 bg-white/95 backdrop-blur-2xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.25)] overflow-hidden">
+      <DialogContent className="max-w-lg mx-auto p-0 rounded-3xl border-0 bg-white/95 backdrop-blur-2xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.25)] overflow-hidden [&>button]:hidden">
         {/* Header */}
         <div className="flex items-start gap-4 p-6 pb-4">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
