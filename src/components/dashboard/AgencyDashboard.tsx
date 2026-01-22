@@ -4,7 +4,7 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
-import { Phone, FileText, Users, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard } from 'lucide-react';
+import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard } from 'lucide-react';
 import SedeTargetsDialog from './SedeTargetsDialog';
 import { cn } from '@/lib/utils';
 
@@ -46,10 +46,6 @@ const AgencyDashboard = () => {
   const notizieTarget = Math.max(0, Math.round((targets.notizie_target || 0) * operationalMultiplier));
   const notizieDelta = notizie - notizieTarget;
 
-  const clienti = kpis?.clienti?.value || 0;
-  const clientiTarget = Math.max(0, Math.round((targets.clienti_target || 0) * operationalMultiplier));
-  const clientiDelta = clienti - clientiTarget;
-
   const appuntamenti = kpis?.appuntamenti?.value || 0;
   const appuntamentiTarget = Math.max(0, Math.round((targets.appuntamenti_target || 0) * operationalMultiplier));
   const appuntamentiDelta = appuntamenti - appuntamentiTarget;
@@ -71,6 +67,9 @@ const AgencyDashboard = () => {
   const fatturatoDelta = fatturato - fatturatoTarget;
 
   const trattativeChiuse = kpis?.trattativeChiuse?.value || 0;
+  const trattativeChiuseTarget = Math.max(0, Math.round((targets.trattative_chiuse_target || 0) * operationalMultiplier));
+  const trattativeChiuseDelta = trattativeChiuse - trattativeChiuseTarget;
+
   const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
 
   // KPI Card component
@@ -172,13 +171,12 @@ const AgencyDashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KPICard title="Contatti" value={contatti} target={contattiTarget} delta={contattiDelta} icon={Phone} />
         <KPICard title="Notizie Vendita" value={notizie} target={notizieTarget} delta={notizieDelta} icon={FileText} />
-        <KPICard title="Clienti Gestiti" value={clienti} target={clientiTarget} delta={clientiDelta} icon={Users} />
         <KPICard title="Appuntamenti Vendita" value={appuntamenti} target={appuntamentiTarget} delta={appuntamentiDelta} icon={Calendar} />
         <KPICard title="Acquisizioni" value={acquisizioni} target={acquisizioniTarget} delta={acquisizioniDelta} icon={Building} />
         <KPICard title="Incarichi" value={incarichi} target={incarichiTarget} delta={incarichiDelta} icon={Briefcase} />
         <KPICard title="Vendite (Rogiti)" value={vendite} target={venditeTarget} delta={venditeDelta} icon={Home} />
         <KPICard title="Fatturato" value={fatturato} target={fatturatoTarget} delta={fatturatoDelta} icon={Euro} format="currency" />
-        <KPICard title="Trattative Chiuse" value={trattativeChiuse} target={0} delta={trattativeChiuse} icon={TrendingDown} />
+        <KPICard title="Trattative Chiuse" value={trattativeChiuse} target={trattativeChiuseTarget} delta={trattativeChiuseDelta} icon={TrendingDown} />
         {/* Fatturato a Credito - no target, just value */}
         <div className="bg-card rounded-2xl shadow-lg p-4">
           <div className="flex items-center justify-between mb-2">

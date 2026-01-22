@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useSedeTargets, SedeTargets } from '@/hooks/useSedeTargets';
 import { useAuth } from '@/hooks/useAuth';
-import { X, Target, Phone, FileText, Users, Gift, Home, Euro, ShoppingBag, Save } from 'lucide-react';
+import { X, Target, Phone, FileText, Calendar, Briefcase, Building, Home, Euro, ShoppingBag, Save, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SedeTargetsDialogProps {
@@ -154,7 +154,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Users className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5" />
                   App. Vendita Totali
                 </label>
                 <input
@@ -170,7 +170,23 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Gift className="w-3.5 h-3.5" />
+                  <Building className="w-3.5 h-3.5" />
+                  Acquisizioni Totali
+                </label>
+                <input
+                  type="number"
+                  value={formData.acquisizioni_target}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    acquisizioni_target: Number(e.target.value) || 0,
+                  }))}
+                  className={inputClass}
+                  placeholder="0"
+                />
+              </div>
+              <div>
+                <label className={labelClass}>
+                  <Briefcase className="w-3.5 h-3.5" />
                   Incarichi Totali
                 </label>
                 <input
@@ -186,15 +202,15 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Home className="w-3.5 h-3.5" />
-                  Acquisizioni Totali
+                  <TrendingDown className="w-3.5 h-3.5" />
+                  Trattative Chiuse
                 </label>
                 <input
                   type="number"
-                  value={formData.acquisizioni_target}
+                  value={formData.trattative_chiuse_target}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
-                    acquisizioni_target: Number(e.target.value) || 0,
+                    trattative_chiuse_target: Number(e.target.value) || 0,
                   }))}
                   className={inputClass}
                   placeholder="0"
