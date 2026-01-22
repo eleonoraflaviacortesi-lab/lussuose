@@ -3,6 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
+import { useSedeTargets } from '@/hooks/useSedeTargets';
 import logo from '@/assets/le_lussuose_large.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 
@@ -13,6 +14,7 @@ interface HeaderProps {
 const Header = ({ onOpenProfile }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
+  const { targets } = useSedeTargets();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
 
@@ -28,7 +30,8 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     }).format(value);
   };
 
-  const target = 500000;
+  // Use fatturato_target from sede_targets (annual value)
+  const target = targets.fatturato_target || 500000;
   const current = kpis?.fatturato?.value || 0;
   const remaining = Math.max(0, target - current);
 

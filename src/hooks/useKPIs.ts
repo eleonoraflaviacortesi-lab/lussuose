@@ -56,19 +56,22 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
       }
     );
 
-    // Dynamic targets from sede_targets, scaled by period
-    const multiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
+    // Dynamic targets from sede_targets
+    // IMPORTANT: fatturato_target and vendite_target are ANNUAL values in the DB
+    // Operational targets (contatti, notizie, etc.) are MONTHLY values in the DB
+    const operationalMultiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
+    const annualMultiplier = period === 'year' ? 1 : period === 'month' ? (1/12) : (1/52);
     
     const targets = {
-      contatti: Math.round((sedeTargets?.contatti_target || 0) * multiplier),
-      notizie: Math.round((sedeTargets?.notizie_target || 0) * multiplier),
+      contatti: Math.round((sedeTargets?.contatti_target || 0) * operationalMultiplier),
+      notizie: Math.round((sedeTargets?.notizie_target || 0) * operationalMultiplier),
       clienti: 0, // No sede target for clienti
-      appuntamenti: Math.round((sedeTargets?.appuntamenti_target || 0) * multiplier),
-      acquisizioni: Math.round((sedeTargets?.acquisizioni_target || 0) * multiplier),
-      incarichi: Math.round((sedeTargets?.incarichi_target || 0) * multiplier),
-      vendite: Math.round((sedeTargets?.vendite_target || 4) * multiplier),
-      fatturato: Number(sedeTargets?.fatturato_target || 100000) * multiplier,
-      trattativeChiuse: Math.round((sedeTargets?.trattative_chiuse_target || 0) * multiplier),
+      appuntamenti: Math.round((sedeTargets?.appuntamenti_target || 0) * operationalMultiplier),
+      acquisizioni: Math.round((sedeTargets?.acquisizioni_target || 0) * operationalMultiplier),
+      incarichi: Math.round((sedeTargets?.incarichi_target || 0) * operationalMultiplier),
+      vendite: Math.round(Number(sedeTargets?.vendite_target || 0) * annualMultiplier),
+      fatturato: Number(sedeTargets?.fatturato_target || 0) * annualMultiplier,
+      trattativeChiuse: Math.round((sedeTargets?.trattative_chiuse_target || 0) * operationalMultiplier),
       fatturatoCredito: 0, // No target for this
     };
 
