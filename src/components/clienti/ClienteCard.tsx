@@ -46,15 +46,15 @@ const ColorPicker = memo(({ onSelect, onClose }: {
   onClose: () => void;
 }) => (
   <div 
-    className="absolute top-full left-0 mt-1 z-50 bg-card border rounded-lg shadow-lg p-2 flex gap-1 flex-wrap max-w-[140px]"
+    className="absolute top-full left-0 mt-1 z-50 bg-white rounded-lg shadow-lg p-2 flex gap-1 flex-wrap max-w-[140px]"
     onClick={e => e.stopPropagation()}
   >
     {cardColors.map((color, i) => (
       <button
         key={i}
         className={cn(
-          "w-6 h-6 rounded-full border-2 transition-transform hover:scale-110",
-          color === null ? "bg-card border-dashed" : "border-transparent"
+          "w-6 h-6 rounded-full transition-transform hover:scale-110",
+          color === null ? "bg-muted" : ""
         )}
         style={{ backgroundColor: color || undefined }}
         onClick={() => { onSelect(color); onClose(); }}
@@ -69,7 +69,7 @@ const EmojiPicker = memo(({ onSelect, onClose }: {
   onClose: () => void;
 }) => (
   <div 
-    className="absolute top-full left-0 mt-1 z-50 bg-card border rounded-lg shadow-lg p-2 flex gap-1 flex-wrap max-w-[180px]"
+    className="absolute top-full left-0 mt-1 z-50 bg-white rounded-lg shadow-lg p-2 flex gap-1 flex-wrap max-w-[180px]"
     onClick={e => e.stopPropagation()}
   >
     {quickEmojis.map(emoji => (
@@ -126,10 +126,10 @@ export const ClienteCard = memo(({
   return (
     <div
       className={cn(
-        "relative rounded-xl p-3 cursor-pointer transition-all",
-        "border hover:shadow-md",
+        "relative rounded-xl p-3 cursor-pointer transition-all shadow-lg",
+        "hover:shadow-xl",
         isDragging && "opacity-70 rotate-2 shadow-xl",
-        !cliente.card_color && "bg-card",
+        !cliente.card_color && "bg-white",
         textColor
       )}
       style={{ backgroundColor: cliente.card_color || undefined }}
@@ -177,7 +177,7 @@ export const ClienteCard = memo(({
       )}
 
       {/* Footer: Agent + Urgency */}
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-current/10">
+      <div className="flex items-center justify-between mt-2 pt-2">
         {showAgent && (
           <div className="flex items-center gap-1 text-xs opacity-70">
             <User className="w-3 h-3" />

@@ -464,7 +464,7 @@ export function ClienteDetail({
           <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} />
 
           {/* Comments */}
-          <div className="border-t pt-4">
+          <div className="bg-white rounded-2xl shadow-lg p-3 mt-3">
             <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
               <MessageSquare className="w-4 h-4" /> Commenti Interni
             </h3>
@@ -499,7 +499,7 @@ export function ClienteDetail({
           </div>
 
           {/* Metadata */}
-          <div className="text-xs text-muted-foreground border-t pt-4 space-y-1">
+          <div className="text-xs text-muted-foreground bg-white rounded-2xl shadow-lg p-3 mt-3 space-y-1">
             <p>Creato: {format(new Date(cliente.created_at), 'dd MMM yyyy HH:mm', { locale: it })}</p>
             {cliente.data_submission && (
               <p>Submission: {format(new Date(cliente.data_submission), 'dd MMM yyyy HH:mm', { locale: it })}</p>
@@ -510,7 +510,7 @@ export function ClienteDetail({
           </div>
 
           {/* Delete */}
-          <div className="border-t pt-4">
+          <div className="mt-3">
             {!showDeleteConfirm ? (
               <Button 
                 variant="outline" 
