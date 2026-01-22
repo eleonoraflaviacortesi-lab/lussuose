@@ -14,6 +14,7 @@ const funnelSteps: { key: NotiziaStatus; label: string; color: string }[] = [
   { key: 'in_progress', label: 'In Progress', color: 'bg-yellow-400 text-yellow-950' },
   { key: 'done', label: 'Done', color: 'bg-orange-400 text-orange-950' },
   { key: 'taken', label: 'Taken', color: 'bg-green-300 text-green-900' },
+  { key: 'credit', label: 'Credit', color: 'bg-blue-400 text-white' },
   { key: 'sold', label: 'Sold', color: 'bg-zinc-600 text-white' },
 ];
 
