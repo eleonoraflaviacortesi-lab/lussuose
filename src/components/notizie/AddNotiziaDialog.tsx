@@ -45,7 +45,7 @@ const AddNotiziaDialog = ({
     type: '',
     notes: '',
     status: defaultStatus as NotiziaStatus,
-    emoji: '📋',
+    emoji: '',
     reminder_date: null as Date | null,
     reminder_time: '09:00',
     created_date: null as Date | null,
@@ -90,7 +90,7 @@ const AddNotiziaDialog = ({
       type: '',
       notes: '',
       status: defaultStatus,
-      emoji: '📋',
+      emoji: '',
       reminder_date: null,
       reminder_time: '09:00',
       created_date: null,
@@ -151,20 +151,39 @@ const AddNotiziaDialog = ({
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-3">
-              {/* Emoji + Name row */}
-              <div className="flex gap-2">
-                <div>
-                  <Label className="text-xs font-medium mb-1.5 block">Emoji</Label>
+              {/* Name row with optional emoji */}
+              <div>
+                <Label htmlFor="name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
+                <div className="flex gap-2">
+                  <input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    placeholder="Es: Villa Serenity"
+                    required
+                    className={cn(pillInputClass, "flex-1")}
+                  />
+                  {/* Emoji button - shows + when empty, emoji when set */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <button 
                         type="button"
-                        className="w-12 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg active:scale-95 transition-transform"
+                        className="w-10 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg active:scale-95 transition-transform"
                       >
-                        {formData.emoji}
+                        {formData.emoji || <Plus className="w-4 h-4 text-muted-foreground" />}
                       </button>
                     </PopoverTrigger>
-                    <PopoverContent className={cn(liquidGlassPopover, "w-auto p-3")} align="start">
+                    <PopoverContent className={cn(liquidGlassPopover, "w-auto p-3")} align="end">
+                      {/* Remove emoji option */}
+                      {formData.emoji && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, emoji: '' })}
+                          className="w-full mb-2 px-3 py-1.5 text-xs text-muted-foreground hover:bg-muted rounded-lg flex items-center gap-2"
+                        >
+                          <X className="w-3 h-3" /> Rimuovi emoji
+                        </button>
+                      )}
                       {/* Custom emoji input */}
                       <div className="flex gap-2 mb-3">
                         <input
@@ -198,17 +217,6 @@ const AddNotiziaDialog = ({
                       </div>
                     </PopoverContent>
                   </Popover>
-                </div>
-                <div className="flex-1">
-                  <Label htmlFor="name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
-                  <input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Es: Villa Serenity"
-                    required
-                    className={pillInputClass}
-                  />
                 </div>
               </div>
               
@@ -256,12 +264,15 @@ const AddNotiziaDialog = ({
                   <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className={cn(liquidGlassPopover, "rounded-xl")}>
+                <SelectContent className={cn(liquidGlassPopover, "rounded-xl")}>
                     <SelectItem value="new">New</SelectItem>
                     <SelectItem value="in_progress">In Progress</SelectItem>
                     <SelectItem value="done">Done</SelectItem>
                     <SelectItem value="on_shot">On Shot</SelectItem>
                     <SelectItem value="taken">Taken</SelectItem>
+                    <SelectItem value="credit">Credit</SelectItem>
+                    <SelectItem value="no">No</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

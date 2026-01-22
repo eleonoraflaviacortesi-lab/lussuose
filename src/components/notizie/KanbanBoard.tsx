@@ -344,9 +344,9 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               {onQuickAdd && (
                 <button
                   onClick={() => onQuickAdd(key)}
-                  className="ml-auto w-5 h-5 rounded-full bg-foreground text-background flex items-center justify-center hover:bg-foreground/80 transition-colors"
+                  className="ml-auto text-foreground hover:opacity-60 transition-opacity"
                 >
-                  <Plus className="w-3 h-3" />
+                  <Plus className="w-4 h-4" />
                 </button>
               )}
             </div>
