@@ -36,6 +36,7 @@ export type Database = {
           trattative_chiuse_ideali: number
           updated_at: string
           user_id: string
+          valutazioni_fatte: number
           vendite_numero: number
           vendite_valore: number
         }
@@ -60,6 +61,7 @@ export type Database = {
           trattative_chiuse_ideali?: number
           updated_at?: string
           user_id: string
+          valutazioni_fatte?: number
           vendite_numero?: number
           vendite_valore?: number
         }
@@ -84,6 +86,7 @@ export type Database = {
           trattative_chiuse_ideali?: number
           updated_at?: string
           user_id?: string
+          valutazioni_fatte?: number
           vendite_numero?: number
           vendite_valore?: number
         }
