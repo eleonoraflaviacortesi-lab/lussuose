@@ -90,7 +90,8 @@ export const useDailyData = () => {
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['daily-data'] });
+      // Invalidate the exact user-scoped query so dashboards refresh immediately
+      queryClient.invalidateQueries({ queryKey: ['daily-data', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['daily-data-all'] });
       toast({ title: '✓ Report salvato con successo!' });
       celebrateSuccess();
@@ -117,7 +118,7 @@ export const useDailyData = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['daily-data'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-data', user?.id] });
       queryClient.invalidateQueries({ queryKey: ['daily-data-all'] });
       toast({ title: '✓ Report eliminato!' });
     },
