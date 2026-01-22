@@ -13,6 +13,7 @@ const statusConfig: { key: NotiziaStatus; label: string; color: string }[] = [
   { key: 'done', label: 'Done', color: 'bg-orange-400' },
   { key: 'on_shot', label: 'On Shot', color: 'bg-red-400' },
   { key: 'taken', label: 'Taken', color: 'bg-green-300' },
+  { key: 'credit', label: 'Credit', color: 'bg-blue-400' },
   { key: 'no', label: 'No', color: 'bg-zinc-800' },
   { key: 'sold', label: 'Sold', color: 'bg-zinc-500' },
 ];

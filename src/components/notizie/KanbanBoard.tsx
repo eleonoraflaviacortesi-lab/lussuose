@@ -1,4 +1,4 @@
-import { memo, useCallback, useState, useRef } from 'react';
+import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
@@ -291,6 +291,29 @@ Card.displayName = 'Card';
 
 const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQuickAdd }: KanbanBoardProps) => {
   const { updateNotizia, updateOrder } = useNotizie();
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+  const [scrollWidth, setScrollWidth] = useState(0);
+
+  // Sync scroll between top and main scrollbars
+  useEffect(() => {
+    const mainEl = mainScrollRef.current;
+    const topEl = topScrollRef.current;
+    if (!mainEl || !topEl) return;
+
+    setScrollWidth(mainEl.scrollWidth);
+
+    const syncTop = () => { if (mainEl) mainEl.scrollLeft = topEl.scrollLeft; };
+    const syncMain = () => { if (topEl) topEl.scrollLeft = mainEl.scrollLeft; };
+
+    topEl.addEventListener('scroll', syncTop);
+    mainEl.addEventListener('scroll', syncMain);
+
+    return () => {
+      topEl.removeEventListener('scroll', syncTop);
+      mainEl.removeEventListener('scroll', syncMain);
+    };
+  }, [notizieByStatus]);
   
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
@@ -340,7 +363,21 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 pb-4 overflow-x-auto lg:h-full lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
+      <div className="lg:h-full lg:flex lg:flex-col">
+        {/* Top scrollbar (desktop only) */}
+        <div
+          ref={topScrollRef}
+          className="hidden lg:block overflow-x-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40 mb-1"
+          style={{ height: '12px' }}
+        >
+          <div style={{ width: scrollWidth, height: '1px' }} />
+        </div>
+        
+        {/* Main scrollable content */}
+        <div 
+          ref={mainScrollRef}
+          className="flex gap-3 pb-4 overflow-x-auto lg:flex-1 lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+        >
         {columns.map(({ key, label, style }) => (
           <div
             key={key}
@@ -395,6 +432,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
             </Droppable>
           </div>
         ))}
+        </div>
       </div>
     </DragDropContext>
   );
