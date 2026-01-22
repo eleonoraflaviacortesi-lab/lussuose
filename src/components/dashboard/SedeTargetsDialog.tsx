@@ -29,33 +29,33 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
   };
 
   const inputClass = cn(
-    "w-full bg-white rounded-xl px-4 py-3 text-sm font-medium",
+    "w-full bg-white rounded-xl px-4 py-3.5 text-base font-medium",
     "border border-border/50 shadow-sm",
     "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30",
     "placeholder:text-muted-foreground/50"
   );
 
-  const labelClass = "flex items-center gap-2 text-[10px] font-semibold tracking-[0.15em] uppercase text-muted-foreground mb-2";
+  const labelClass = "flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-foreground mb-2 min-h-[32px]";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg mx-auto p-0 rounded-3xl border-0 bg-white/95 backdrop-blur-2xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.25)] overflow-hidden [&>button]:hidden">
+      <DialogContent className="max-w-md mx-auto p-0 rounded-3xl border-0 bg-white/95 backdrop-blur-2xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.25)] overflow-hidden [&>button]:hidden">
         {/* Header */}
         <div className="flex items-start gap-4 p-6 pb-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-            <Target className="w-6 h-6 text-primary-foreground" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg flex-shrink-0">
+            <Target className="w-7 h-7 text-primary-foreground" />
           </div>
-          <div className="flex-1">
-            <h2 className="text-lg font-bold tracking-tight">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-lg font-bold tracking-tight leading-tight">
               Obiettivi Sede: {profile?.sede || 'Sede'}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mt-1">
               Definisci la strategia globale dell'agenzia.
             </p>
           </div>
           <button 
             onClick={() => onOpenChange(false)}
-            className="text-muted-foreground hover:text-foreground transition-colors"
+            className="text-muted-foreground hover:text-foreground transition-colors p-1 -m-1 flex-shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
@@ -66,7 +66,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h3 className="text-sm font-bold tracking-wide uppercase">
+              <h3 className="text-xs font-bold tracking-wide uppercase">
                 Obiettivi Economici (Annuali)
               </h3>
             </div>
@@ -74,12 +74,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className={labelClass}>
-                  <Euro className="w-3.5 h-3.5" />
-                  Fatturato Agenzia Obiettivo (€)
+                  <Euro className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Fatturato Agenzia (€)</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.fatturato_target}
+                  inputMode="numeric"
+                  value={formData.fatturato_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     fatturato_target: Number(e.target.value) || 0,
@@ -90,12 +91,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <ShoppingBag className="w-3.5 h-3.5" />
-                  Vendite Annuali Obiettivo
+                  <ShoppingBag className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Vendite Annuali</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.vendite_target}
+                  inputMode="numeric"
+                  value={formData.vendite_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     vendite_target: Number(e.target.value) || 0,
@@ -107,27 +109,28 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
             </div>
           </div>
 
-          {/* Obiettivi Operativi (Settimanali) */}
+          {/* Obiettivi Operativi (Mensili) */}
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-1 h-5 bg-primary rounded-full" />
-              <h3 className="text-sm font-bold tracking-wide uppercase">
+              <h3 className="text-xs font-bold tracking-wide uppercase">
                 Obiettivi Operativi (Mensili)
               </h3>
             </div>
             <p className="text-xs text-muted-foreground mb-4 ml-3">
-              Inserisci i volumi totali che l'intera sede deve produrre al mese.
+              Volumi totali che la sede deve produrre al mese.
             </p>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className={labelClass}>
-                  <Phone className="w-3.5 h-3.5" />
-                  Contatti Totali
+                  <Phone className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Contatti</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.contatti_target}
+                  inputMode="numeric"
+                  value={formData.contatti_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     contatti_target: Number(e.target.value) || 0,
@@ -138,12 +141,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <FileText className="w-3.5 h-3.5" />
-                  Notizie Totali
+                  <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Notizie</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.notizie_target}
+                  inputMode="numeric"
+                  value={formData.notizie_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     notizie_target: Number(e.target.value) || 0,
@@ -154,12 +158,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Calendar className="w-3.5 h-3.5" />
-                  App. Vendita Totali
+                  <Calendar className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Appuntamenti</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.appuntamenti_target}
+                  inputMode="numeric"
+                  value={formData.appuntamenti_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     appuntamenti_target: Number(e.target.value) || 0,
@@ -170,12 +175,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Building className="w-3.5 h-3.5" />
-                  Acquisizioni Totali
+                  <Building className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Acquisizioni</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.acquisizioni_target}
+                  inputMode="numeric"
+                  value={formData.acquisizioni_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     acquisizioni_target: Number(e.target.value) || 0,
@@ -186,12 +192,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <Briefcase className="w-3.5 h-3.5" />
-                  Incarichi Totali
+                  <Briefcase className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Incarichi</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.incarichi_target}
+                  inputMode="numeric"
+                  value={formData.incarichi_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     incarichi_target: Number(e.target.value) || 0,
@@ -202,12 +209,13 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               </div>
               <div>
                 <label className={labelClass}>
-                  <TrendingDown className="w-3.5 h-3.5" />
-                  Trattative Chiuse
+                  <TrendingDown className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Trattative</span>
                 </label>
                 <input
                   type="number"
-                  value={formData.trattative_chiuse_target}
+                  inputMode="numeric"
+                  value={formData.trattative_chiuse_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
                     trattative_chiuse_target: Number(e.target.value) || 0,
@@ -223,14 +231,14 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
           <div className="flex justify-end gap-3 pt-2">
             <button
               onClick={() => onOpenChange(false)}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium border border-border/50 text-muted-foreground hover:bg-muted/50 transition-colors"
+              className="px-5 py-2.5 rounded-xl text-sm font-medium border border-border/50 text-muted-foreground hover:bg-muted/50 transition-colors"
             >
               Annulla
             </button>
             <button
               onClick={handleSave}
               disabled={updateTargets.isPending}
-              className="px-6 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {updateTargets.isPending ? 'Salvando...' : 'Salva Strategia'}
