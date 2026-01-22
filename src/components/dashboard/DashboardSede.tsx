@@ -1,12 +1,15 @@
 import { useKPIs } from '@/hooks/useKPIs';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useAuth } from '@/hooks/useAuth';
 import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 
 const DashboardSede = () => {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const { kpis, isLoading } = useKPIs(period);
-  const { profiles } = useProfiles();
+  const { profile } = useAuth();
+  // Filtra profili solo per la sede dell'utente
+  const { profiles } = useProfiles(true);
   
   const currentMonth = new Date().toLocaleDateString('it-IT', { month: 'long' }).toUpperCase();
 
@@ -49,11 +52,12 @@ const DashboardSede = () => {
         </div>
       </div>
 
-      {/* Month Header */}
-      <div className="text-center">
-        <h2 className="text-xs font-medium tracking-[0.3em] uppercase text-muted-foreground">
+      {/* Sede and Month Header */}
+      <div className="text-center space-y-1">
+        <h2 className="text-sm font-bold tracking-tight uppercase">{profile?.sede}</h2>
+        <p className="text-xs font-medium tracking-[0.3em] uppercase text-muted-foreground">
           {currentMonth}
-        </h2>
+        </p>
       </div>
 
       {/* Fatturato Card */}
