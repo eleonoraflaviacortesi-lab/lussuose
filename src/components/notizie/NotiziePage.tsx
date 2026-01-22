@@ -68,7 +68,7 @@ const NotiziePage = () => {
   }, [notizieByStatus, searchQuery]);
 
   const handleStatusChange = useCallback((id: string, newStatus: NotiziaStatus) => {
-    updateNotizia.mutate({ id, status: newStatus });
+    updateNotizia.mutate({ id, status: newStatus, silent: true });
   }, [updateNotizia]);
 
   return (

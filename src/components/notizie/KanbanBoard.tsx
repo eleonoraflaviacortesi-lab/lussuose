@@ -322,11 +322,11 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
   }, [notizieByStatus, onStatusChange, updateOrder]);
 
   const handleColorChange = useCallback((id: string, color: string | null) => {
-    updateNotizia.mutate({ id, card_color: color });
+    updateNotizia.mutate({ id, card_color: color, silent: true });
   }, [updateNotizia]);
 
   const handleEmojiChange = useCallback((id: string, emoji: string | null) => {
-    updateNotizia.mutate({ id, emoji: emoji });
+    updateNotizia.mutate({ id, emoji: emoji, silent: true });
   }, [updateNotizia]);
 
   return (
