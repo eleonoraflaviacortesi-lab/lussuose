@@ -49,6 +49,7 @@ function PropertyCard({
   onToggleSuggested: (matchId: string, suggested: boolean) => void;
   onSetReaction: (matchId: string, reaction: 'liked' | 'disliked' | null) => void;
 }) {
+  const { toast } = useToast();
   const property = match.property;
   if (!property) return null;
 
@@ -189,7 +190,26 @@ function PropertyCard({
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
                 title="Invia su WhatsApp"
-                onClick={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // In Lovable preview (iframe) WhatsApp is blocked; prevent navigation and guide user.
+                  try {
+                    if (window.self !== window.top) {
+                      e.preventDefault();
+                      toast({
+                        title: 'WhatsApp bloccato in anteprima',
+                        description: 'Apri l’app pubblicata (o una nuova scheda fuori dalla preview) per inviare il messaggio.',
+                      });
+                    }
+                  } catch {
+                    // If cross-origin blocks window.top access, be safe and prevent iframe navigation.
+                    e.preventDefault();
+                    toast({
+                      title: 'WhatsApp bloccato in anteprima',
+                      description: 'Apri l’app pubblicata per inviare il messaggio.',
+                    });
+                  }
+                }}
               >
                 <WhatsAppIcon className="h-3.5 w-3.5" />
               </a>
