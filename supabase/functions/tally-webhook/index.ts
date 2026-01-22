@@ -116,12 +116,12 @@ function getSedeFromRegions(regioni: string[]): string {
     r.includes("umbri")
   );
   
-  // Only Umbria → CITTÀ DI CASTELLO
+  // Only Umbria (no Toscana) → CITTÀ DI CASTELLO (with accent!)
   if (hasUmbria && !hasToscana) {
     return "CITTÀ DI CASTELLO";
   }
   
-  // Only Toscana OR both → AREZZO
+  // Toscana (with or without Umbria), or other regions → AREZZO
   return "AREZZO";
 }
 
