@@ -37,6 +37,7 @@ const DataEntry = () => {
     const input: DailyDataInput = {
       date,
       ...formData,
+      valutazioni_fatte: 0,
     };
     saveDailyData.mutate(input);
   };
