@@ -103,6 +103,28 @@ function parseSizeRange(value: unknown): { min: number | null; max: number | nul
   return { min: null, max: null };
 }
 
+// Determine sede based on regions searched
+function getSedeFromRegions(regioni: string[]): string {
+  if (!regioni || regioni.length === 0) return "AREZZO"; // default
+  
+  const normalizedRegions = regioni.map(r => r.toLowerCase().trim());
+  
+  const hasToscana = normalizedRegions.some(r => 
+    r.includes("toscan") || r.includes("tuscan")
+  );
+  const hasUmbria = normalizedRegions.some(r => 
+    r.includes("umbri")
+  );
+  
+  // Only Umbria → CITTÀ DI CASTELLO
+  if (hasUmbria && !hasToscana) {
+    return "CITTÀ DI CASTELLO";
+  }
+  
+  // Only Toscana OR both → AREZZO
+  return "AREZZO";
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === "OPTIONS") {
@@ -115,10 +137,6 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get sede from query param (e.g. ?sede=AREZZO or ?sede=CITTA%20DI%20CASTELLO)
-    const url = new URL(req.url);
-    const sedeParam = url.searchParams.get("sede")?.toUpperCase() || "AREZZO";
-
     // Parse Tally webhook payload
     const payload: TallySubmission = await req.json();
     
@@ -129,6 +147,12 @@ Deno.serve(async (req) => {
     }
 
     const fields = payload.data.fields;
+    
+    // Extract regions first to determine sede
+    const regioni = getArrayValue(fields, "region");
+    const sede = getSedeFromRegions(regioni);
+    
+    console.log("Regions:", regioni, "→ Sede:", sede);
     
     // Map Tally fields to database columns
     const sizeRange = parseSizeRange(getFieldValue(fields, "size"));
@@ -149,7 +173,7 @@ Deno.serve(async (req) => {
       ha_visitato: parseBoolean(getFieldValue(fields, "visited")),
       
       // Location
-      regioni: getArrayValue(fields, "region"),
+      regioni: regioni,
       vicinanza_citta: parseBoolean(getFieldValue(fields, "prox") || getFieldValue(fields, "cities")),
       motivo_zona: getArrayValue(fields, "why"),
       
@@ -176,9 +200,8 @@ Deno.serve(async (req) => {
       descrizione: String(getFieldValue(fields, "description") || getFieldValue(fields, "property description") || ""),
       note_extra: String(getFieldValue(fields, "more") || getFieldValue(fields, "additional") || ""),
       
-      // Management
-      // Management – sede comes from query param, status uses DB default
-      sede: sedeParam,
+      // Management – sede determined by regions, status uses DB default
+      sede: sede,
       emoji: "🏠",
       
       // Tally metadata
