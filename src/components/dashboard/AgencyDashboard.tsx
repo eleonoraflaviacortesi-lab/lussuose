@@ -179,7 +179,16 @@ const AgencyDashboard = () => {
         <KPICard title="Vendite (Rogiti)" value={vendite} target={venditeTarget} delta={venditeDelta} icon={Home} />
         <KPICard title="Fatturato" value={fatturato} target={fatturatoTarget} delta={fatturatoDelta} icon={Euro} format="currency" />
         <KPICard title="Trattative Chiuse" value={trattativeChiuse} target={0} delta={trattativeChiuse} icon={TrendingDown} />
-        <KPICard title="Fatturato a Credito" value={fatturatoCredito} target={0} delta={fatturatoCredito} icon={CreditCard} format="currency" />
+        {/* Fatturato a Credito - no target, just value */}
+        <div className="bg-card rounded-2xl shadow-lg p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] font-medium tracking-[0.1em] uppercase text-muted-foreground truncate pr-2">
+              Fatturato a Credito
+            </p>
+            <CreditCard className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+          </div>
+          <p className="text-2xl font-bold text-foreground">{formatCurrency(fatturatoCredito)}</p>
+        </div>
       </div>
 
       {/* Team Ranking */}
