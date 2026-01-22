@@ -13,7 +13,7 @@ const AgencyDashboard = () => {
   const [showTargetsDialog, setShowTargetsDialog] = useState(false);
   // La sede è fissa in base all'account - non modificabile
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
-  const canManageTargets = currentProfile?.role === 'coordinatore' || currentProfile?.role === 'admin';
+  
   const { kpis, isLoading } = useKPIs(period);
   const { targets } = useSedeTargets();
   // Filtra profili solo per la sede dell'utente
@@ -34,31 +34,6 @@ const AgencyDashboard = () => {
       </div>
     );
   }
-
-  if (!canManageTargets) {
-    return (
-      <div className="px-6 pb-8 space-y-4 animate-fade-in">
-        <div className="bg-card rounded-3xl shadow-lg p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-              <BarChart3 className="w-7 h-7" />
-            </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold tracking-tight">{userSede}</h2>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-                DASHBOARD AGENZIA
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 text-sm text-muted-foreground">
-            Questa sezione è disponibile solo per i coordinatori.
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
 
   // Targets sono salvati come valori mensili (operativi).
