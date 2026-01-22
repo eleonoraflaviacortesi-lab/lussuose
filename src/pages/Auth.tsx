@@ -41,16 +41,15 @@ const Auth = () => {
 
         if (error) throw error;
 
-        // Match profiles to emails by name pattern
+        // Match profiles to emails by first name
         const accountsWithEmails: DemoAccount[] = DEMO_EMAILS.map((email) => {
           const emailPrefix = email.split('@')[0].toLowerCase();
           
-          // Find matching profile by checking if the name contains part of the email
+          // Find matching profile - check if email prefix starts with first name
           const matchedProfile = data?.find(profile => {
-            const fullNameLower = profile.full_name.toLowerCase();
-            // Check if first name matches email prefix
-            const firstName = fullNameLower.split(' ')[0];
-            return emailPrefix.includes(firstName) || firstName.includes(emailPrefix.slice(0, 4));
+            const firstName = profile.full_name.toLowerCase().split(' ')[0];
+            // eleonoraflaviacortesi includes "eleonora", dalila includes "dalila", elisa includes "elisa"
+            return emailPrefix.startsWith(firstName) || emailPrefix.includes(firstName);
           });
           
           return {
