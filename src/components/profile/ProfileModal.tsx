@@ -21,12 +21,14 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const [customEmoji, setCustomEmoji] = useState('');
   const [fullName, setFullName] = useState('');
   const [sede, setSede] = useState<string>('AREZZO');
+  const [role, setRole] = useState<string>('agente');
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
       setSede(profile.sede || 'AREZZO');
+      setRole(profile.role || 'agente');
       if (profile.avatar_emoji) {
         setSelectedEmoji(profile.avatar_emoji);
       }
@@ -44,7 +46,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         .update({ 
           full_name: fullName,
           avatar_emoji: avatarToSave,
-          sede: sede
+          sede: sede,
+          role: role
         })
         .eq('user_id', user.id);
       
@@ -164,8 +167,21 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
                 RUOLO
               </p>
-              <div className="bg-muted/50 rounded-full h-10 flex items-center px-4">
-                <span className="text-sm capitalize">{profile?.role || 'Agente'}</span>
+              <div className="flex gap-1">
+                {(['agente', 'coordinatore'] as const).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => setRole(r)}
+                    className={cn(
+                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center capitalize",
+                      role === r
+                        ? "bg-foreground text-background"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    {r === 'coordinatore' ? 'Coord.' : 'Agente'}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="space-y-2">
