@@ -4,19 +4,18 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
-import { Phone, FileText, Gift, Euro, BarChart3, Settings } from 'lucide-react';
+import { Phone, FileText, Users, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard } from 'lucide-react';
 import SedeTargetsDialog from './SedeTargetsDialog';
+import { cn } from '@/lib/utils';
 
 const AgencyDashboard = () => {
   const { profile: currentProfile } = useAuth();
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [showTargetsDialog, setShowTargetsDialog] = useState(false);
-  // La sede è fissa in base all'account - non modificabile
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
   
   const { kpis, isLoading } = useKPIs(period);
   const { targets } = useSedeTargets();
-  // Filtra profili solo per la sede dell'utente
   const { profiles } = useProfiles(true);
 
   const formatCurrency = (value: number) => {
@@ -34,143 +33,175 @@ const AgencyDashboard = () => {
       </div>
     );
   }
-  const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
 
-  // Targets sono salvati come valori mensili (operativi).
-  // Per la vista anno, moltiplichiamo per 12. Per la settimana, dividiamo per 4.
+  const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
   const operationalMultiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
 
+  // KPI values from hook
   const contatti = kpis?.contatti?.value || 0;
   const contattiTarget = Math.max(0, Math.round((targets.contatti_target || 0) * operationalMultiplier));
-  const contattiPercent = contattiTarget > 0 ? Math.min(100, Math.round((contatti / contattiTarget) * 100)) : 0;
+  const contattiDelta = contatti - contattiTarget;
 
   const notizie = kpis?.notizie?.value || 0;
   const notizieTarget = Math.max(0, Math.round((targets.notizie_target || 0) * operationalMultiplier));
-  const notiziePercent = notizieTarget > 0 ? Math.min(100, Math.round((notizie / notizieTarget) * 100)) : 0;
+  const notizieDelta = notizie - notizieTarget;
+
+  const clienti = kpis?.clienti?.value || 0;
+  const clientiTarget = Math.max(0, Math.round((targets.clienti_target || 0) * operationalMultiplier));
+  const clientiDelta = clienti - clientiTarget;
+
+  const appuntamenti = kpis?.appuntamenti?.value || 0;
+  const appuntamentiTarget = Math.max(0, Math.round((targets.appuntamenti_target || 0) * operationalMultiplier));
+  const appuntamentiDelta = appuntamenti - appuntamentiTarget;
+
+  const acquisizioni = kpis?.acquisizioni?.value || 0;
+  const acquisizioniTarget = Math.max(0, Math.round((targets.acquisizioni_target || 0) * operationalMultiplier));
+  const acquisizioniDelta = acquisizioni - acquisizioniTarget;
 
   const incarichi = kpis?.incarichi?.value || 0;
   const incarichiTarget = Math.max(0, Math.round((targets.incarichi_target || 0) * operationalMultiplier));
-  const incarichiPercent = incarichiTarget > 0 ? Math.min(100, Math.round((incarichi / incarichiTarget) * 100)) : 0;
+  const incarichiDelta = incarichi - incarichiTarget;
+
+  const vendite = kpis?.vendite?.value || 0;
+  const venditeTarget = Math.max(0, Math.round((targets.vendite_target || 0) * operationalMultiplier));
+  const venditeDelta = vendite - venditeTarget;
 
   const fatturato = kpis?.fatturato?.value || 0;
-  // Il target fatturato è annuale
   const fatturatoTarget = Math.max(0, Number(targets.fatturato_target || 0));
-  const fatturatoPercent = fatturatoTarget > 0 ? Math.min(100, Math.round((fatturato / fatturatoTarget) * 100)) : 0;
+  const fatturatoDelta = fatturato - fatturatoTarget;
+
+  const trattativeChiuse = kpis?.trattativeChiuse?.value || 0;
+  const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
+
+  // KPI Card component
+  const KPICard = ({ 
+    title, 
+    value, 
+    target, 
+    delta, 
+    icon: Icon, 
+    format = 'number' 
+  }: { 
+    title: string; 
+    value: number; 
+    target: number; 
+    delta: number; 
+    icon: React.ElementType; 
+    format?: 'number' | 'currency';
+  }) => {
+    const percent = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
+    const formatValue = (val: number) => format === 'currency' ? formatCurrency(val) : val.toString();
+    const formatDelta = (d: number) => {
+      const prefix = d > 0 ? '+' : '';
+      return format === 'currency' ? `Δ ${prefix}${formatCurrency(d)}` : `Δ ${prefix}${d}`;
+    };
+
+    return (
+      <div className="bg-card rounded-2xl shadow-lg p-4">
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-[10px] font-medium tracking-[0.1em] uppercase text-muted-foreground truncate pr-2">
+            {title}
+          </p>
+          <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        </div>
+        <p className={cn(
+          "font-bold text-foreground mb-2",
+          format === 'currency' ? "text-2xl" : "text-3xl"
+        )}>
+          {formatValue(value)}
+        </p>
+        <Progress value={percent} className="h-1 bg-muted mb-2" />
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="text-muted-foreground">Target: {formatValue(target)}</span>
+          <span className={cn(
+            'font-medium',
+            delta > 0 ? 'text-green-500' : delta < 0 ? 'text-orange-500' : 'text-muted-foreground'
+          )}>
+            {formatDelta(delta)}
+          </span>
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <div className="px-6 pb-8 space-y-6 animate-fade-in">
+    <div className="px-4 pb-8 space-y-4 animate-fade-in">
       {/* Header with Period Toggle */}
-      <div className="bg-card rounded-3xl shadow-lg p-6">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-            <BarChart3 className="w-7 h-7" />
+      <div className="bg-card rounded-2xl shadow-lg p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center">
+            <BarChart3 className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold tracking-tight">{userSede}</h2>
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+            <h2 className="text-lg font-bold tracking-tight">{userSede}</h2>
+            <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
               {periodLabel}
             </p>
           </div>
           <button 
             onClick={() => setShowTargetsDialog(true)}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
           >
             <Settings className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-full sm:w-auto justify-center">
+        <div className="flex items-center gap-1 bg-muted rounded-full p-1 justify-center">
           {(['week', 'month', 'year'] as const).map((p) => (
             <button
               key={p}
               onClick={() => setPeriod(p)}
-              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
+              className={`flex-1 px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
                 period === p 
                   ? 'bg-foreground text-background' 
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {p === 'week' ? 'SETT' : p === 'month' ? 'MESE' : 'ANNO'}
+              {p === 'week' ? 'S' : p === 'month' ? 'M' : 'A'}
             </button>
           ))}
         </div>
       </div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-2 gap-4">
-        {/* Contatti Sede */}
-        <div className="bg-card rounded-2xl shadow-lg p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              CONTATTI SEDE
-            </p>
-            <Phone className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-4xl font-light text-foreground mb-3">{contatti}</p>
-          <Progress value={contattiPercent} className="h-1 bg-muted mb-2" />
-          <p className="text-xs text-muted-foreground">GOAL: {contattiTarget}</p>
-        </div>
+      {/* Performance Generale Header */}
+      <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground px-1">
+        PERFORMANCE GENERALE (SOMMA AGENTI)
+      </p>
 
-        {/* Notizie Acquisite */}
-        <div className="bg-card rounded-2xl shadow-lg p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              NOTIZIE ACQUISITE
-            </p>
-            <FileText className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-4xl font-light text-foreground mb-3">{notizie}</p>
-          <Progress value={notiziePercent} className="h-1 bg-muted mb-2" />
-          <p className="text-xs text-muted-foreground">GOAL: {notizieTarget}</p>
-        </div>
-
-        {/* Incarichi Totali */}
-        <div className="bg-card rounded-2xl shadow-lg p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              INCARICHI TOTALI
-            </p>
-            <Gift className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-4xl font-light text-foreground mb-3">{incarichi}</p>
-          <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
-          <p className="text-xs text-muted-foreground">GOAL: {incarichiTarget}</p>
-        </div>
-
-        {/* Fatturato Rogitato */}
-        <div className="bg-card rounded-2xl shadow-lg p-5">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              FATTURATO ROGITATO
-            </p>
-            <Euro className="w-4 h-4 text-muted-foreground" />
-          </div>
-          <p className="text-3xl font-light text-foreground mb-3">{formatCurrency(fatturato)}</p>
-          <Progress value={fatturatoPercent} className="h-1 bg-muted mb-2" />
-          <p className="text-xs text-muted-foreground">GOAL: {formatCurrency(fatturatoTarget)}</p>
-        </div>
+      {/* KPI Grid - 4 columns on larger screens, 2 on mobile */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <KPICard title="Contatti" value={contatti} target={contattiTarget} delta={contattiDelta} icon={Phone} />
+        <KPICard title="Notizie Vendita" value={notizie} target={notizieTarget} delta={notizieDelta} icon={FileText} />
+        <KPICard title="Clienti Gestiti" value={clienti} target={clientiTarget} delta={clientiDelta} icon={Users} />
+        <KPICard title="Appuntamenti Vendita" value={appuntamenti} target={appuntamentiTarget} delta={appuntamentiDelta} icon={Calendar} />
+        <KPICard title="Acquisizioni" value={acquisizioni} target={acquisizioniTarget} delta={acquisizioniDelta} icon={Building} />
+        <KPICard title="Incarichi" value={incarichi} target={incarichiTarget} delta={incarichiDelta} icon={Briefcase} />
+        <KPICard title="Vendite (Rogiti)" value={vendite} target={venditeTarget} delta={venditeDelta} icon={Home} />
+        <KPICard title="Fatturato" value={fatturato} target={fatturatoTarget} delta={fatturatoDelta} icon={Euro} format="currency" />
+        <KPICard title="Trattative Chiuse" value={trattativeChiuse} target={0} delta={trattativeChiuse} icon={TrendingDown} />
+        <KPICard title="Fatturato a Credito" value={fatturatoCredito} target={0} delta={fatturatoCredito} icon={CreditCard} format="currency" />
       </div>
 
       {/* Team Ranking */}
       {profiles && profiles.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-center text-muted-foreground">
+        <div className="space-y-3">
+          <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-center text-muted-foreground">
             CLASSIFICA TEAM
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {profiles.filter(p => p.role === 'agente').slice(0, 5).map((agent, index) => (
               <div 
                 key={agent.id}
-                className="flex items-center gap-4 p-4 bg-card rounded-2xl shadow-lg"
+                className="flex items-center gap-3 p-3 bg-card rounded-xl shadow-lg"
               >
-                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
                   index === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                 }`}>
                   {index + 1}
                 </span>
                 <div className="flex-1">
                   <p className="text-sm font-medium text-foreground">{agent.full_name}</p>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">{agent.sede}</p>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{agent.sede}</p>
                 </div>
               </div>
             ))}

@@ -37,6 +37,8 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
         incarichi: acc.incarichi + (d.incarichi_vendita || 0),
         vendite: acc.vendite + (d.vendite_numero || 0),
         fatturato: acc.fatturato + Number(d.vendite_valore || 0),
+        trattativeChiuse: acc.trattativeChiuse + (d.trattative_chiuse || 0),
+        fatturatoCredito: acc.fatturatoCredito + Number(d.fatturato_a_credito || 0),
       }),
       {
         contatti: 0,
@@ -47,6 +49,8 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
         incarichi: 0,
         vendite: 0,
         fatturato: 0,
+        trattativeChiuse: 0,
+        fatturatoCredito: 0,
       }
     );
 
@@ -60,6 +64,8 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
       incarichi: 0,
       vendite: 4,
       fatturato: 100000,
+      trattativeChiuse: 0,
+      fatturatoCredito: 0,
     };
 
     return {
@@ -71,6 +77,8 @@ export const useKPIs = (period: 'week' | 'month' | 'year' = 'month') => {
       incarichi: { value: totals.incarichi, target: targets.incarichi, delta: totals.incarichi - targets.incarichi },
       vendite: { value: totals.vendite, target: targets.vendite, delta: totals.vendite - targets.vendite },
       fatturato: { value: totals.fatturato, target: targets.fatturato, delta: totals.fatturato - targets.fatturato },
+      trattativeChiuse: { value: totals.trattativeChiuse, target: targets.trattativeChiuse, delta: totals.trattativeChiuse - targets.trattativeChiuse },
+      fatturatoCredito: { value: totals.fatturatoCredito, target: targets.fatturatoCredito, delta: totals.fatturatoCredito - targets.fatturatoCredito },
     };
   }, [allData, period]);
 
