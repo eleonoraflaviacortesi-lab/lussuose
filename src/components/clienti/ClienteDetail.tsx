@@ -103,7 +103,7 @@ export function ClienteDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg w-[95vw] max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-3xl">
+      <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 rounded-3xl">
         <DialogHeader>
           <div className="flex items-center gap-3">
             <span className="text-2xl">{cliente.emoji}</span>
@@ -111,34 +111,26 @@ export function ClienteDetail({
               <InlineEditText
                 value={cliente.nome}
                 onSave={(value) => onUpdate({ nome: value })}
-                className="text-lg font-semibold"
+                className="text-lg font-semibold break-words"
                 placeholder="Nome cliente"
-              />
-              <InlineEditText
-                value={cliente.paese}
-                onSave={(value) => onUpdate({ paese: value })}
-                className="text-xs text-muted-foreground"
-                placeholder="Paese"
-                prefix={<MapPin className="h-3 w-3" />}
               />
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 mt-3">
+        <div className="space-y-3 mt-2">
           {/* Assignment */}
-          <div>
-            <label className="text-xs text-muted-foreground uppercase tracking-wide">Assegnato a</label>
+          <div className="bg-white rounded-2xl shadow-lg p-3">
             <Select
               value={cliente.assigned_to || 'unassigned'}
               onValueChange={(v) => onAssign(v === 'unassigned' ? null : v)}
             >
-              <SelectTrigger className="mt-1">
+              <SelectTrigger className="h-8 text-sm">
                 <SelectValue>
                   {assignedAgent ? (
                     <div className="flex items-center gap-2">
                       <span>{assignedAgent.avatar_emoji}</span>
-                      {assignedAgent.full_name}
+                      <span className="truncate">{assignedAgent.full_name}</span>
                     </div>
                   ) : (
                     'Non assegnato'
@@ -159,223 +151,315 @@ export function ClienteDetail({
             </Select>
           </div>
 
-          {/* Contact Info - Liquid glass card */}
-          <div className="bg-white rounded-2xl shadow-lg p-3 space-y-1.5">
-            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Contatti</h3>
-            <InlineEditText
-              value={cliente.telefono}
-              onSave={(value) => onUpdate({ telefono: value })}
-              placeholder="Aggiungi telefono"
-              prefix={<Phone className="w-3.5 h-3.5 text-muted-foreground" />}
-              className="text-sm"
-            />
-            <InlineEditText
-              value={cliente.email}
-              onSave={(value) => onUpdate({ email: value })}
-              placeholder="Aggiungi email"
-              prefix={<Mail className="w-3.5 h-3.5 text-muted-foreground" />}
-              className="text-sm"
-            />
-          </div>
-
-          {/* Budget & Timeline - Liquid glass cards side by side */}
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-white rounded-2xl shadow-lg p-3">
-              <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
-                <Euro className="w-3 h-3" /> Budget
-              </h3>
-              <InlineEditNumber
-                value={cliente.budget_max}
-                onSave={(value) => onUpdate({ budget_max: value })}
-                placeholder="€..."
-                className="text-base font-semibold"
-                formatDisplay={formatBudget}
-              />
-              <InlineEditSelect
-                value={cliente.mutuo}
-                options={YES_NO_OPTIONS}
-                onSave={(value) => onUpdate({ mutuo: value })}
-                placeholder="Mutuo?"
-                className="text-[10px] text-muted-foreground"
-                prefix={<span>Mutuo:</span>}
-              />
+          {/* ALL FORM FIELDS - Vertical layout with clear labels */}
+          <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
+            {/* Personal Info */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Dati Personali</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Paese di provenienza</label>
+                <InlineEditText
+                  value={cliente.paese}
+                  onSave={(value) => onUpdate({ paese: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Telefono</label>
+                <InlineEditText
+                  value={cliente.telefono}
+                  onSave={(value) => onUpdate({ telefono: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Email</label>
+                <InlineEditText
+                  value={cliente.email}
+                  onSave={(value) => onUpdate({ email: value })}
+                  placeholder="Non specificato"
+                  className="text-sm break-all"
+                />
+              </div>
             </div>
-            <div className="bg-white rounded-2xl shadow-lg p-3">
-              <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-1 flex items-center gap-1">
-                <Calendar className="w-3 h-3" /> Timeline
-              </h3>
-              <InlineEditText
-                value={cliente.tempo_ricerca}
-                onSave={(value) => onUpdate({ tempo_ricerca: value })}
-                placeholder="Tempo"
-                className="text-sm"
-              />
-              <InlineEditBoolean
-                value={cliente.ha_visitato}
-                onSave={(value) => onUpdate({ ha_visitato: value })}
-                labelTrue="Ha visitato"
-                labelFalse="Non visitato"
-                className="text-[10px]"
-              />
+
+            {/* Budget Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Budget e Finanziamento</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Budget massimo</label>
+                <InlineEditNumber
+                  value={cliente.budget_max}
+                  onSave={(value) => onUpdate({ budget_max: value })}
+                  placeholder="Non specificato"
+                  className="text-sm font-medium"
+                  formatDisplay={formatBudget}
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Ha bisogno di mutuo?</label>
+                <InlineEditSelect
+                  value={cliente.mutuo}
+                  options={YES_NO_OPTIONS}
+                  onSave={(value) => onUpdate({ mutuo: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Location Preferences - Liquid glass */}
-          <div className="bg-white rounded-2xl shadow-lg p-3">
-            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-              <MapPin className="w-3 h-3" /> Località
-            </h3>
-            <InlineEditBadges
-              values={cliente.regioni}
-              onSave={(values) => onUpdate({ regioni: values })}
-              placeholder="Regioni"
-              variant="secondary"
-            />
-            <InlineEditBadges
-              values={cliente.contesto}
-              onSave={(values) => onUpdate({ contesto: values })}
-              placeholder="Contesto"
-              variant="outline"
-            />
-            <InlineEditBoolean
-              value={cliente.vicinanza_citta}
-              onSave={(value) => onUpdate({ vicinanza_citta: value })}
-              labelTrue="Vicino città"
-              labelFalse="Non vicino città"
-              className="text-[10px] mt-1"
-            />
-          </div>
+            {/* Timeline Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tempistiche</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Quando vuole acquistare?</label>
+                <InlineEditText
+                  value={cliente.tempo_ricerca}
+                  onSave={(value) => onUpdate({ tempo_ricerca: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Ha già visitato la zona?</label>
+                <InlineEditBoolean
+                  value={cliente.ha_visitato}
+                  onSave={(value) => onUpdate({ ha_visitato: value })}
+                  labelTrue="Sì, ha visitato"
+                  labelFalse="No, non ancora"
+                  className="text-sm"
+                />
+              </div>
+            </div>
 
-          {/* Property Preferences - Compact liquid glass */}
-          <div className="bg-white rounded-2xl shadow-lg p-3">
-            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2 flex items-center gap-1">
-              <Home className="w-3 h-3" /> Tipologia
-            </h3>
-            <InlineEditBadges
-              values={cliente.tipologia}
-              onSave={(values) => onUpdate({ tipologia: values })}
-              placeholder="Tipologie"
-              variant="outline"
-            />
-            <div className="grid grid-cols-2 gap-1.5 text-[10px] mt-2">
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Stile:</span>
+            {/* Location Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Località Preferite</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Regioni di interesse</label>
+                <InlineEditBadges
+                  values={cliente.regioni}
+                  onSave={(values) => onUpdate({ regioni: values })}
+                  placeholder="Nessuna specificata"
+                  variant="secondary"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Contesto desiderato (campagna, collina, mare...)</label>
+                <InlineEditBadges
+                  values={cliente.contesto}
+                  onSave={(values) => onUpdate({ contesto: values })}
+                  placeholder="Non specificato"
+                  variant="outline"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Perché questa zona?</label>
+                <div className="flex flex-wrap gap-1">
+                  {cliente.motivo_zona && cliente.motivo_zona.length > 0 ? (
+                    cliente.motivo_zona.map((m, i) => (
+                      <Badge key={i} variant="outline" className="text-[10px]">{m}</Badge>
+                    ))
+                  ) : (
+                    <span className="text-sm text-muted-foreground italic">Non specificato</span>
+                  )}
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Deve essere vicino a città/aeroporti?</label>
+                <InlineEditBoolean
+                  value={cliente.vicinanza_citta}
+                  onSave={(value) => onUpdate({ vicinanza_citta: value })}
+                  labelTrue="Sì, importante"
+                  labelFalse="No, non necessario"
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Property Type Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tipologia Immobile</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Tipo di proprietà cercata</label>
+                <InlineEditBadges
+                  values={cliente.tipologia}
+                  onSave={(values) => onUpdate({ tipologia: values })}
+                  placeholder="Non specificato"
+                  variant="outline"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Stile preferito (rustico, moderno...)</label>
                 <InlineEditText
                   value={cliente.stile}
                   onSave={(value) => onUpdate({ stile: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Camere:</span>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Numero camere da letto</label>
                 <InlineEditText
                   value={cliente.camere}
                   onSave={(value) => onUpdate({ camere: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Bagni:</span>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Numero bagni</label>
                 <InlineEditNumber
                   value={cliente.bagni}
                   onSave={(value) => onUpdate({ bagni: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">mq:</span>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Preferenza layout (un piano, più piani...)</label>
+                <InlineEditText
+                  value={cliente.layout}
+                  onSave={(value) => onUpdate({ layout: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Dimensioni minime (mq)</label>
                 <InlineEditNumber
                   value={cliente.dimensioni_min}
                   onSave={(value) => onUpdate({ dimensioni_min: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
+                  suffix=" mq"
                 />
-                <span>-</span>
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Dimensioni massime (mq)</label>
                 <InlineEditNumber
                   value={cliente.dimensioni_max}
                   onSave={(value) => onUpdate({ dimensioni_max: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
+                  suffix=" mq"
                 />
               </div>
             </div>
-          </div>
 
-          {/* Features - Compact row */}
-          <div className="bg-white rounded-2xl shadow-lg p-3">
-            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Caratteristiche</h3>
-            <div className="flex flex-wrap gap-2 text-xs">
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-blue-50">
-                <Droplets className="w-3 h-3 text-blue-500" />
+            {/* Features Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Caratteristiche Extra</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Vuole la piscina?</label>
                 <InlineEditSelect
                   value={cliente.piscina}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ piscina: value })}
-                  placeholder="Piscina"
-                  className="text-[10px]"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-50">
-                <Trees className="w-3 h-3 text-green-500" />
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Vuole terreno?</label>
                 <InlineEditSelect
                   value={cliente.terreno}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ terreno: value })}
-                  placeholder="Terreno"
-                  className="text-[10px]"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-purple-50">
-                <Home className="w-3 h-3 text-purple-500" />
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Vuole dependance?</label>
                 <InlineEditSelect
                   value={cliente.dependance}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ dependance: value })}
-                  placeholder="Dep."
-                  className="text-[10px]"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 mt-2 text-[10px]">
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Uso:</span>
+
+            {/* Usage Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Utilizzo</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Come userà la proprietà?</label>
                 <InlineEditText
                   value={cliente.uso}
                   onSave={(value) => onUpdate({ uso: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
                 />
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">Affitto:</span>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Interessato ad affittare?</label>
                 <InlineEditSelect
                   value={cliente.interesse_affitto}
                   options={YES_NO_OPTIONS}
                   onSave={(value) => onUpdate({ interesse_affitto: value })}
-                  placeholder="-"
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+            </div>
+
+            {/* Notes Section */}
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Note</h3>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Descrizione richiesta</label>
+                <InlineEditText
+                  value={cliente.descrizione}
+                  onSave={(value) => onUpdate({ descrizione: value })}
+                  placeholder="Non specificato"
+                  multiline
+                  className="text-sm break-words whitespace-pre-wrap"
+                />
+              </div>
+              
+              <div>
+                <label className="text-[10px] text-muted-foreground block mb-0.5">Note aggiuntive</label>
+                <InlineEditText
+                  value={cliente.note_extra}
+                  onSave={(value) => onUpdate({ note_extra: value })}
+                  placeholder="Non specificato"
+                  multiline
+                  className="text-sm break-words whitespace-pre-wrap"
                 />
               </div>
             </div>
           </div>
 
-          {/* Notes - Collapsible */}
-          <div className="bg-white rounded-2xl shadow-lg p-3">
-            <h3 className="font-medium text-xs text-muted-foreground uppercase tracking-wide mb-2">Note</h3>
-            <InlineEditText
-              value={cliente.descrizione}
-              onSave={(value) => onUpdate({ descrizione: value })}
-              placeholder="Descrizione..."
-              multiline
-              className="text-xs"
-            />
-            <InlineEditText
-              value={cliente.note_extra}
-              onSave={(value) => onUpdate({ note_extra: value })}
-              placeholder="Note extra..."
-              multiline
-              className="text-xs text-muted-foreground mt-1"
-            />
-          </div>
-
           {/* Property Matches Section */}
-          <Separator />
           <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} />
 
           {/* Comments */}
