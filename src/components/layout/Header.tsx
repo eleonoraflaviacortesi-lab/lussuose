@@ -38,11 +38,11 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         {/* iOS Safe Area Background */}
         <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-primary" />
         
-        {/* Ticker Banner - Compact */}
-        <div className="bg-primary text-primary-foreground pt-[env(safe-area-inset-top)] pb-1.5 overflow-hidden">
-          <div className="flex animate-ticker whitespace-nowrap pt-1.5">
-            {[...Array(6)].map((_, i) => (
-              <span key={i} className="flex items-center gap-4 mx-4 text-xs font-bold tracking-[0.15em] uppercase">
+        {/* Ticker Banner - Fuchsia with smooth scroll */}
+        <div className="bg-banner text-banner-foreground pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
+          <div className="flex ticker-smooth whitespace-nowrap pt-2">
+            {[...Array(8)].map((_, i) => (
+              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
                 <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
                 <span>★</span>
                 <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>

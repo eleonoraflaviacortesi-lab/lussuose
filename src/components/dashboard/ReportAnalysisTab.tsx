@@ -390,6 +390,7 @@ const ReportAnalysisTab = () => {
           <StatCard label="Contatti" value={aggregatedData.contatti_reali} />
           <StatCard label="Notizie" value={aggregatedData.notizie_reali} />
           <StatCard label="Appuntamenti" value={aggregatedData.appuntamenti_vendita} />
+          <StatCard label="Incarichi" value={aggregatedData.incarichi_vendita} />
           <StatCard label="Nuove Trattative" value={aggregatedData.nuove_trattative} />
           <StatCard label="Trattative Chiuse" value={aggregatedData.trattative_chiuse} />
           <StatCard label="Fatturato Credito" value={aggregatedData.fatturato_a_credito} isCurrency />
