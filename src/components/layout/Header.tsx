@@ -36,7 +36,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     <>
       <header className="fixed top-0 left-0 right-0 z-50">
         {/* iOS Safe Area Background */}
-        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-primary" />
+        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-banner" />
         
         {/* Ticker Banner - Fuchsia with smooth scroll */}
         <div className="bg-banner text-banner-foreground pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
