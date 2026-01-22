@@ -248,11 +248,22 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
           <div className="flex-1">
             <p
               className={cn(
-                "font-medium text-sm leading-tight break-words whitespace-normal",
+                "font-medium text-sm leading-tight whitespace-normal",
                 isDark ? "text-white" : "text-foreground"
               )}
+              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
             >
-              {notizia.name}
+              {notizia.name.split(' ').reduce((acc: string[][], word, i) => {
+                const lastGroup = acc[acc.length - 1];
+                if (lastGroup && lastGroup.length < 3) {
+                  lastGroup.push(word);
+                } else {
+                  acc.push([word]);
+                }
+                return acc;
+              }, [] as string[][]).map((group, i) => (
+                <span key={i} className="block">{group.join(' ')}</span>
+              ))}
             </p>
             {notizia.zona && (
               <span className={cn("text-[10px]", isDark ? "text-white/70" : "text-muted-foreground")}>{notizia.zona}</span>
