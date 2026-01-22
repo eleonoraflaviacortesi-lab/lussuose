@@ -1,7 +1,43 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Settings, Target, ArrowRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useUserSettings, UserSettingsInput } from '@/hooks/useUserSettings';
+
+// Moved outside component to prevent re-mount on every render
+const InputField = ({ 
+  label, 
+  value, 
+  field, 
+  suffix,
+  onChange,
+}: { 
+  label: string; 
+  value: number; 
+  field: string; 
+  suffix?: string;
+  onChange: (field: string, value: number) => void;
+}) => (
+  <div className="space-y-2">
+    <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
+      {label}
+    </span>
+    <div className="relative">
+      <Input
+        type="number"
+        inputMode="numeric"
+        value={value || ''}
+        onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+        placeholder="0"
+        className="bg-muted border-0 rounded-xl h-12 text-base pr-12"
+      />
+      {suffix && (
+        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
+          {suffix}
+        </span>
+      )}
+    </div>
+  </div>
+);
 
 const SettingsPage = () => {
   const { settings, isLoading, saveSettings, defaultSettings } = useUserSettings();
@@ -36,44 +72,13 @@ const SettingsPage = () => {
   const venditeTotali = Math.ceil(localSettings.obbiettivo_fatturato / (localSettings.prezzo_medio_vendita * (localSettings.provvigione_agenzia / 100)));
   const mediaVenditeMese = (venditeTotali / 11).toFixed(1);
 
-  const handleChange = (field: string, value: number) => {
+  const handleChange = useCallback((field: string, value: number) => {
     setLocalSettings(prev => ({ ...prev, [field]: value }));
-  };
+  }, []);
 
   const handleSave = () => {
     saveSettings.mutate(localSettings);
   };
-
-  const InputField = ({ 
-    label, 
-    value, 
-    field, 
-    suffix,
-  }: { 
-    label: string; 
-    value: number; 
-    field: string; 
-    suffix?: string;
-  }) => (
-    <div className="space-y-2">
-      <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">
-        {label}
-      </span>
-      <div className="relative">
-        <Input
-          type="number"
-          value={value}
-          onChange={(e) => handleChange(field, parseInt(e.target.value) || 0)}
-          className="bg-muted border-0 rounded-xl h-12 text-base pr-12"
-        />
-        {suffix && (
-          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">
-            {suffix}
-          </span>
-        )}
-      </div>
-    </div>
-  );
 
   if (isLoading) {
     return (
@@ -117,30 +122,35 @@ const SettingsPage = () => {
               value={localSettings.obbiettivo_fatturato}
               field="obbiettivo_fatturato"
               suffix="€"
+              onChange={handleChange}
             />
             <InputField
               label="BASE FISSA ANNUALE"
               value={localSettings.base_fissa_annuale}
               field="base_fissa_annuale"
               suffix="€"
+              onChange={handleChange}
             />
             <InputField
               label="TUA %"
               value={localSettings.percentuale_personale}
               field="percentuale_personale"
               suffix="%"
+              onChange={handleChange}
             />
             <InputField
               label="PREZZO MEDIO VENDITA"
               value={localSettings.prezzo_medio_vendita}
               field="prezzo_medio_vendita"
               suffix="€"
+              onChange={handleChange}
             />
             <InputField
               label="PROVVIGIONE AGENZIA"
               value={localSettings.provvigione_agenzia}
               field="provvigione_agenzia"
               suffix="%"
+              onChange={handleChange}
             />
           </div>
         </div>
@@ -160,60 +170,70 @@ const SettingsPage = () => {
               value={localSettings.contatti_settimana}
               field="contatti_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="NOTIZIE"
               value={localSettings.notizie_settimana}
               field="notizie_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="APPUNTAMENTI"
               value={localSettings.appuntamenti_settimana}
               field="appuntamenti_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="ACQUISIZIONI"
               value={localSettings.acquisizioni_settimana}
               field="acquisizioni_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="INCARICHI"
               value={localSettings.incarichi_settimana}
               field="incarichi_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="NUOVE TRATTATIVE"
               value={localSettings.nuove_trattative_settimana}
               field="nuove_trattative_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="TRATTATIVE CHIUSE"
               value={localSettings.trattative_chiuse_settimana}
               field="trattative_chiuse_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="VENDITE"
               value={localSettings.vendite_settimana}
               field="vendite_settimana"
               suffix="Qt"
+              onChange={handleChange}
             />
             <InputField
               label="FATTURATO A CREDITO"
               value={localSettings.fatturato_credito_settimana}
               field="fatturato_credito_settimana"
               suffix="€"
+              onChange={handleChange}
             />
             <InputField
               label="FATTURATO GENERATO"
               value={localSettings.fatturato_generato_settimana}
               field="fatturato_generato_settimana"
               suffix="€"
+              onChange={handleChange}
             />
           </div>
         </div>
