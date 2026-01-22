@@ -66,12 +66,23 @@ function PropertyCard({
   };
 
   const handleWhatsApp = () => {
-    if (!clientePhone) return;
-    const cleanPhone = clientePhone.replace(/\s+/g, '').replace(/^00/, '+');
+    // Kept for backward compatibility (not used directly anymore)
+  };
+
+  const getWhatsAppHref = () => {
+    if (!clientePhone) return null;
+    // wa.me expects digits only (country code + number)
+    const digitsOnly = clientePhone
+      .replace(/^00/, '')
+      .replace(/\D/g, '');
+
+    if (!digitsOnly) return null;
+
     const message = encodeURIComponent(
       `Ciao! Ti invio questa proprietà che potrebbe interessarti:\n\n${property.title}\n${property.url}`
     );
-    window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+
+    return `https://wa.me/${digitsOnly}?text=${message}`;
   };
 
   const handleReaction = (reaction: 'liked' | 'disliked') => {
@@ -168,15 +179,22 @@ function PropertyCard({
 
         {/* Right: WhatsApp + View */}
         <div className="flex items-center gap-1.5">
-          {clientePhone && (
-            <button
-              onClick={handleWhatsApp}
-              className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
-              title="Invia su WhatsApp"
-            >
-              <WhatsAppIcon className="h-3.5 w-3.5" />
-            </button>
-          )}
+          {(() => {
+            const href = getWhatsAppHref();
+            if (!href) return null;
+            return (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
+                title="Invia su WhatsApp"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <WhatsAppIcon className="h-3.5 w-3.5" />
+              </a>
+            );
+          })()}
           <a
             href={property.url}
             target="_blank"
