@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
 
 interface DemoAccount {
+  user_id: string;
   email: string;
   full_name: string;
   avatar_emoji: string;
@@ -32,7 +33,7 @@ const Auth = () => {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch all profiles to show as selectable accounts
+  // Fetch all profiles with their emails to show as selectable accounts
   useEffect(() => {
     const fetchProfiles = async () => {
       const { data } = await supabase
@@ -41,9 +42,17 @@ const Auth = () => {
         .order('full_name');
       
       if (data) {
-        // Get emails from auth (we'll use user_id as identifier)
+        // Map user_id to known emails (fetched from auth.users reference)
+        const emailMap: Record<string, string> = {
+          '02c5c45d-f5db-415c-9ee3-b3b517b03762': 'dalila@lelussuose.it',
+          '986533ef-e6f2-4e3a-a222-66d6abcaee58': 'eleonoraflaviacortesi@gmail.com',
+          '78477b00-31bd-44a8-8dc2-6a8fa58e8c0c': 'elisa@lelussuose.it',
+          '76b70b52-f636-4eb3-befa-b65a7751fb22': 'tizianello@lelussuose.it',
+        };
+        
         const accountList: DemoAccount[] = data.map(p => ({
-          email: `${p.user_id}`, // We'll lookup email later
+          user_id: p.user_id,
+          email: emailMap[p.user_id] || `${p.full_name.toLowerCase().replace(/\s+/g, '.')}@lelussuose.it`,
           full_name: p.full_name,
           avatar_emoji: p.avatar_emoji || '🖤',
           sede: p.sede,
@@ -62,48 +71,13 @@ const Auth = () => {
   }, [user, navigate]);
 
   const handleSelectAccount = async (account: DemoAccount) => {
-    setLoading(account.email);
+    setLoading(account.user_id);
 
     try {
-      // Try to find the user's email by their profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .eq('full_name', account.full_name)
-        .maybeSingle();
-      
-      if (!profile) {
-        toast({
-          title: 'Errore',
-          description: 'Profilo non trovato.',
-          variant: 'destructive',
-        });
-        setLoading(null);
-        return;
-      }
-
-      // Get user email from a predefined mapping or try common patterns
-      const emailPatterns = [
-        `${account.full_name.toLowerCase()}@lelussuose.it`,
-        `${account.full_name.toLowerCase().replace(' ', '.')}@lelussuose.it`,
-      ];
-
-      let loggedIn = false;
-      
-      // Try known emails first
-      const knownEmails: Record<string, string> = {
-        'Eleonora': 'eleonoraflaviacortesi@gmail.com',
-        'Dalila': 'dalila@lelussuose.it',
-        'Elisa': 'elisa@lelussuose.it',
-      };
-
-      const email = knownEmails[account.full_name] || emailPatterns[0];
-      
-      const { error } = await signIn(email, DEMO_PASSWORD);
+      const { error } = await signIn(account.email, DEMO_PASSWORD);
       
       if (!error) {
-        loggedIn = true;
-        toast({ title: `Benvenuta, ${account.full_name}!` });
+        toast({ title: `Bentornato/a, ${account.full_name}!` });
         navigate('/');
       } else {
         toast({
@@ -154,7 +128,8 @@ const Auth = () => {
           .order('full_name');
         if (data) {
           setAccounts(data.map(p => ({
-            email: `${p.user_id}`,
+            user_id: p.user_id,
+            email: `${p.full_name.toLowerCase().replace(/\s+/g, '.')}@lelussuose.it`,
             full_name: p.full_name,
             avatar_emoji: p.avatar_emoji || '🖤',
             sede: p.sede,
@@ -216,7 +191,7 @@ const Auth = () => {
                         "hover:scale-[1.02] hover:shadow-lg",
                         "active:scale-[0.98]",
                         "disabled:opacity-50 disabled:cursor-not-allowed",
-                        loading === account.email && "ring-2 ring-foreground"
+                        loading === account.user_id && "ring-2 ring-foreground"
                       )}
                     >
                       <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl bg-muted">
@@ -226,7 +201,7 @@ const Auth = () => {
                         <p className="font-semibold text-foreground tracking-tight">{account.full_name}</p>
                         <p className="text-xs text-muted-foreground">Tocca per accedere</p>
                       </div>
-                      {loading === account.email && (
+                      {loading === account.user_id && (
                         <div className="w-5 h-5 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
                       )}
                     </button>
