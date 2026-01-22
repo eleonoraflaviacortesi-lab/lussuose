@@ -51,3 +51,73 @@ export interface AgentRanking {
   fatturato: number;
   rank: number;
 }
+
+// Cliente (Buyer Client) types
+export type ClienteStatus = 
+  | 'new' 
+  | 'contacted' 
+  | 'qualified' 
+  | 'proposal' 
+  | 'negotiation' 
+  | 'closed_won' 
+  | 'closed_lost';
+
+export interface ClienteComment {
+  id: string;
+  text: string;
+  author: string;
+  authorId: string;
+  createdAt: string;
+}
+
+export interface Cliente {
+  id: string;
+  nome: string;
+  telefono: string | null;
+  email: string | null;
+  paese: string | null;
+  budget_max: number | null;
+  mutuo: string | null;
+  tempo_ricerca: string | null;
+  ha_visitato: boolean;
+  regioni: string[];
+  vicinanza_citta: boolean;
+  motivo_zona: string[];
+  tipologia: string[];
+  stile: string | null;
+  contesto: string[];
+  dimensioni_min: number | null;
+  dimensioni_max: number | null;
+  camere: string | null;
+  bagni: number | null;
+  layout: string | null;
+  dependance: string | null;
+  terreno: string | null;
+  piscina: string | null;
+  uso: string | null;
+  interesse_affitto: string | null;
+  status: ClienteStatus;
+  display_order: number;
+  assigned_to: string | null;
+  sede: string;
+  emoji: string;
+  card_color: string | null;
+  comments: ClienteComment[];
+  descrizione: string | null;
+  note_extra: string | null;
+  tally_submission_id: string | null;
+  data_submission: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ClienteGroupBy = 'status' | 'regione' | 'tipologia' | 'budget' | 'agente';
+
+export interface ClienteFilters {
+  mutuo?: string;
+  piscina?: string;
+  nonAssegnati?: boolean;
+  conTerreno?: boolean;
+  urgenti?: boolean;
+  search?: string;
+}

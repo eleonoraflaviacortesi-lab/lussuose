@@ -13,6 +13,7 @@ const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
 const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
+const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
@@ -57,6 +58,8 @@ const IndexContent = () => {
         return <ReportAnalysisTab />;
       case 'agenzia':
         return <AgencyDashboard />;
+      case 'clienti':
+        return <ClientiPage />;
       case 'impostazioni':
         return <SettingsPage />;
       default:

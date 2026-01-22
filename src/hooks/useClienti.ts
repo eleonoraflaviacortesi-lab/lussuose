@@ -1,0 +1,309 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters, ClienteComment } from '@/types';
+import { useToast } from '@/hooks/use-toast';
+
+// Transform DB row to Cliente type
+const transformCliente = (row: any): Cliente => ({
+  ...row,
+  regioni: row.regioni || [],
+  motivo_zona: row.motivo_zona || [],
+  tipologia: row.tipologia || [],
+  contesto: row.contesto || [],
+  comments: row.comments || [],
+});
+
+// Budget ranges for grouping
+const getBudgetRange = (budget: number | null): string => {
+  if (!budget) return 'Non specificato';
+  if (budget < 200000) return '< €200k';
+  if (budget < 400000) return '€200k - €400k';
+  if (budget < 600000) return '€400k - €600k';
+  if (budget < 1000000) return '€600k - €1M';
+  return '> €1M';
+};
+
+// Check if client is urgent (searching < 3 months)
+const isUrgent = (tempoRicerca: string | null): boolean => {
+  if (!tempoRicerca) return false;
+  const lower = tempoRicerca.toLowerCase();
+  return lower.includes('less than 3') || lower.includes('< 3') || lower.includes('1 month');
+};
+
+export function useClienti(options?: {
+  groupBy?: ClienteGroupBy;
+  filters?: ClienteFilters;
+}) {
+  const { profile } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { groupBy = 'status', filters = {} } = options || {};
+
+  // Fetch clienti
+  const { data: clienti = [], isLoading, error } = useQuery({
+    queryKey: ['clienti', profile?.sede],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clienti')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      return (data || []).map(transformCliente);
+    },
+    enabled: !!profile,
+  });
+
+  // Apply filters
+  const filteredClienti = clienti.filter(cliente => {
+    if (filters.mutuo && cliente.mutuo !== filters.mutuo) return false;
+    if (filters.piscina && cliente.piscina !== filters.piscina) return false;
+    if (filters.nonAssegnati && cliente.assigned_to) return false;
+    if (filters.conTerreno && cliente.terreno?.toLowerCase() !== 'yes') return false;
+    if (filters.urgenti && !isUrgent(cliente.tempo_ricerca)) return false;
+    if (filters.search) {
+      const searchLower = filters.search.toLowerCase();
+      const matchesSearch = 
+        cliente.nome.toLowerCase().includes(searchLower) ||
+        cliente.telefono?.toLowerCase().includes(searchLower) ||
+        cliente.paese?.toLowerCase().includes(searchLower) ||
+        cliente.regioni.some(r => r.toLowerCase().includes(searchLower));
+      if (!matchesSearch) return false;
+    }
+    return true;
+  });
+
+  // Group clienti based on groupBy option
+  const groupClienti = (items: Cliente[]): Map<string, Cliente[]> => {
+    const groups = new Map<string, Cliente[]>();
+
+    items.forEach(cliente => {
+      let keys: string[] = [];
+
+      switch (groupBy) {
+        case 'status':
+          keys = [cliente.status];
+          break;
+        case 'regione':
+          // Duplicate card for each region
+          keys = cliente.regioni.length > 0 ? cliente.regioni : ['Non specificata'];
+          break;
+        case 'tipologia':
+          // Duplicate card for each property type
+          keys = cliente.tipologia.length > 0 ? cliente.tipologia : ['Non specificata'];
+          break;
+        case 'budget':
+          keys = [getBudgetRange(cliente.budget_max)];
+          break;
+        case 'agente':
+          keys = [cliente.assigned_to || 'non_assegnato'];
+          break;
+        default:
+          keys = [cliente.status];
+      }
+
+      keys.forEach(key => {
+        if (!groups.has(key)) {
+          groups.set(key, []);
+        }
+        groups.get(key)!.push(cliente);
+      });
+    });
+
+    return groups;
+  };
+
+  const clientiGrouped = groupClienti(filteredClienti);
+
+  // Fetch agents for assignment dropdown
+  const { data: agents = [] } = useQuery({
+    queryKey: ['agents', profile?.sede],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_emoji')
+        .eq('sede', profile?.sede || '')
+        .order('full_name');
+
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!profile?.sede,
+  });
+
+  // Create cliente
+  const createMutation = useMutation({
+    mutationFn: async (clienteData: Partial<Cliente>) => {
+      const insertData = {
+        nome: clienteData.nome || 'Unknown',
+        telefono: clienteData.telefono,
+        email: clienteData.email,
+        paese: clienteData.paese,
+        budget_max: clienteData.budget_max,
+        regioni: clienteData.regioni,
+        tipologia: clienteData.tipologia,
+        descrizione: clienteData.descrizione,
+        status: clienteData.status || 'new',
+        sede: profile?.sede || 'AREZZO',
+        comments: JSON.stringify(clienteData.comments || []),
+      };
+      
+      const { data, error } = await supabase
+        .from('clienti')
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+      toast({ title: 'Cliente aggiunto' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Update cliente
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, comments, ...updates }: Partial<Cliente> & { id: string }) => {
+      const updateData: Record<string, unknown> = { ...updates };
+      if (comments !== undefined) {
+        updateData.comments = JSON.stringify(comments);
+      }
+      
+      const { data, error } = await supabase
+        .from('clienti')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Delete cliente
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('clienti')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+      toast({ title: 'Cliente eliminato' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Assign cliente to agent
+  const assignMutation = useMutation({
+    mutationFn: async ({ id, agentId }: { id: string; agentId: string | null }) => {
+      const { data, error } = await supabase
+        .from('clienti')
+        .update({ assigned_to: agentId })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+      toast({ title: 'Cliente assegnato' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  // Update order (for drag-drop)
+  const updateOrderMutation = useMutation({
+    mutationFn: async (items: { id: string; display_order: number; status?: ClienteStatus }[]) => {
+      // Update each item individually
+      for (const item of items) {
+        const updateData: Record<string, unknown> = { display_order: item.display_order };
+        if (item.status) updateData.status = item.status;
+        
+        const { error } = await supabase
+          .from('clienti')
+          .update(updateData)
+          .eq('id', item.id);
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+    },
+  });
+
+  // Add comment
+  const addCommentMutation = useMutation({
+    mutationFn: async ({ id, comment }: { id: string; comment: string }) => {
+      const cliente = clienti.find(c => c.id === id);
+      if (!cliente) throw new Error('Cliente non trovato');
+
+      const newComment: ClienteComment = {
+        id: crypto.randomUUID(),
+        text: comment,
+        author: profile?.full_name || 'Unknown',
+        authorId: profile?.user_id || '',
+        createdAt: new Date().toISOString(),
+      };
+
+      const updatedComments = [...(cliente.comments || []), newComment];
+
+      const { data, error } = await supabase
+        .from('clienti')
+        .update({ comments: JSON.stringify(updatedComments) })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+      toast({ title: 'Commento aggiunto' });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
+  return {
+    clienti: filteredClienti,
+    clientiGrouped,
+    agents,
+    isLoading,
+    error,
+    createCliente: createMutation.mutateAsync,
+    updateCliente: updateMutation.mutateAsync,
+    deleteCliente: deleteMutation.mutateAsync,
+    assignCliente: assignMutation.mutateAsync,
+    updateOrder: updateOrderMutation.mutateAsync,
+    addComment: addCommentMutation.mutateAsync,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+  };
+}
