@@ -189,32 +189,6 @@ const AgencyDashboard = () => {
         </div>
       </div>
 
-      {/* Team Ranking */}
-      {profiles && profiles.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-center text-muted-foreground">
-            CLASSIFICA TEAM
-          </h3>
-          <div className="space-y-2">
-            {profiles.filter(p => p.role === 'agente').slice(0, 5).map((agent, index) => (
-              <div 
-                key={agent.id}
-                className="flex items-center gap-3 p-3 bg-card rounded-xl shadow-lg"
-              >
-                <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
-                  index === 0 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                }`}>
-                  {index + 1}
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-foreground">{agent.full_name}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{agent.sede}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       <SedeTargetsDialog open={showTargetsDialog} onOpenChange={setShowTargetsDialog} />
     </div>
