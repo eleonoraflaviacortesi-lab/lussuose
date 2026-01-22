@@ -91,7 +91,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               <div>
                 <label className={labelClass}>
                   <ShoppingBag className="w-3.5 h-3.5" />
-                  Numero Vendite Obiettivo
+                  Vendite Annuali Obiettivo
                 </label>
                 <input
                   type="number"

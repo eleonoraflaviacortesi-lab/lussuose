@@ -93,24 +93,27 @@ const SettingsPage = () => {
         <div>
           <h2 className="text-xl font-bold tracking-tight">IMPOSTAZIONI</h2>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-            CONFIGURA I TUOI TARGET
+            I TUOI OBIETTIVI PERSONALI
           </p>
         </div>
       </div>
 
       <div className="space-y-6">
-        {/* Piano Finanziario */}
+        {/* Piano Finanziario Personale */}
         <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
           <div className="flex items-center gap-2 pb-3 border-b border-muted">
             <Target className="w-4 h-4 text-muted-foreground" />
             <h3 className="text-sm font-bold tracking-wider uppercase">
-              PIANO FINANZIARIO ANNUALE
+              IL TUO PIANO FINANZIARIO
             </h3>
           </div>
+          <p className="text-xs text-muted-foreground -mt-2">
+            Questi sono i tuoi obiettivi personali per calcolare le proiezioni del tuo reddito.
+          </p>
 
           <div className="space-y-4">
             <InputField
-              label="OBIETTIVO FATTURATO"
+              label="TUO OBIETTIVO PROVVIGIONALE"
               value={localSettings.obbiettivo_fatturato}
               field="obbiettivo_fatturato"
               suffix="€"
