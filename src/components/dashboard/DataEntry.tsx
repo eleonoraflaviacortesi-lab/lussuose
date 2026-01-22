@@ -56,7 +56,7 @@ const DataEntry = () => {
     ]},
     { section: 'ACQUISIZIONI', fields: [
       { key: 'acquisizioni', label: 'Acquisizioni' },
-      { key: 'incarichi_vendita', label: 'Incarichi' },
+      { key: 'incarichi_vendita', label: 'Incarichi Presi' },
     ]},
   ];
 
