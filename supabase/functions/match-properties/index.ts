@@ -77,27 +77,27 @@ function normalizeType(type: string): string {
 
 function calculateMatchScore(cliente: Cliente, property: Property): number {
   let score = 0;
-  let factors = 0;
+  let maxScore = 0;
 
-  // Budget check (30 points) - property price should be within budget
+  // Budget check (30 points) - allow up to €100k over budget for negotiation
   if (cliente.budget_max && property.price) {
-    factors++;
+    maxScore += 30;
+    const budgetWithMargin = cliente.budget_max + 100000; // €100k negotiation margin
+    
     if (property.price <= cliente.budget_max) {
-      // Full points if under budget, partial if slightly over
-      const ratio = property.price / cliente.budget_max;
-      if (ratio <= 1) {
-        score += 30;
-      } else if (ratio <= 1.1) {
-        score += 20; // Within 10% over budget
-      } else if (ratio <= 1.2) {
-        score += 10; // Within 20% over budget
-      }
+      score += 30; // Perfect - under budget
+    } else if (property.price <= budgetWithMargin) {
+      // Gradual decrease: full points at budget, 15 points at budget+100k
+      const overBudget = property.price - cliente.budget_max;
+      const penalty = (overBudget / 100000) * 15;
+      score += Math.max(15, 30 - penalty);
     }
+    // Over budget+100k = 0 points
   }
 
   // Region match (25 points)
   if (cliente.regioni.length > 0 && property.region) {
-    factors++;
+    maxScore += 25;
     const normalizedPropertyRegion = normalizeRegion(property.region);
     const clienteRegionsNormalized = cliente.regioni.map(r => normalizeRegion(r));
     
@@ -106,60 +106,105 @@ function calculateMatchScore(cliente: Cliente, property: Property): number {
     }
   }
 
-  // Property type match (20 points)
+  // Property type match (20 points) - flexible matching
   if (cliente.tipologia.length > 0 && property.property_type) {
-    factors++;
+    maxScore += 20;
     const normalizedPropertyType = normalizeType(property.property_type);
     const clienteTypesNormalized = cliente.tipologia.map(t => normalizeType(t));
     
+    // Full match
     if (clienteTypesNormalized.some(t => 
       t === normalizedPropertyType || 
       normalizedPropertyType.toLowerCase().includes(t.toLowerCase())
     )) {
       score += 20;
+    } else {
+      // Partial match for similar types (e.g., Villa ~ Country House)
+      const similarTypes: Record<string, string[]> = {
+        'Villa': ['Country House', 'Estate', 'Mansion'],
+        'Farmhouse': ['Country House', 'Cottage', 'Estate'],
+        'Apartment': ['Flat'],
+        'Estate': ['Villa', 'Mansion', 'Farmhouse'],
+      };
+      
+      for (const clienteType of clienteTypesNormalized) {
+        const similar = similarTypes[clienteType] || [];
+        if (similar.includes(normalizedPropertyType)) {
+          score += 12; // Partial credit for similar types
+          break;
+        }
+      }
     }
   }
 
-  // Pool preference (10 points)
+  // Pool preference (10 points) - flexible
   if (cliente.piscina) {
-    factors++;
+    maxScore += 10;
     const wantsPool = cliente.piscina.toLowerCase().includes('yes') || 
                       cliente.piscina.toLowerCase().includes('sì');
     if (wantsPool && property.has_pool) {
       score += 10;
-    } else if (!wantsPool) {
-      score += 10; // No preference is fine
+    } else if (wantsPool && !property.has_pool) {
+      score += 3; // Pool can often be added
+    } else {
+      score += 10; // No preference or doesn't want pool
     }
   }
 
   // Land preference (10 points)
   if (cliente.terreno) {
-    factors++;
+    maxScore += 10;
     const wantsLand = cliente.terreno.toLowerCase().includes('yes') || 
                       cliente.terreno.toLowerCase().includes('sì');
     if (wantsLand && property.has_land) {
       score += 10;
     } else if (!wantsLand) {
-      score += 10; // No preference is fine
+      score += 10;
     }
   }
 
-  // Size match (5 points)
+  // Rooms match (5 points) - flexible: allow ±2 rooms
+  if (cliente.camere && property.rooms) {
+    maxScore += 5;
+    const wantedRooms = parseInt(cliente.camere) || 0;
+    if (wantedRooms > 0) {
+      const diff = Math.abs(property.rooms - wantedRooms);
+      if (diff === 0) {
+        score += 5;
+      } else if (diff <= 1) {
+        score += 4; // 1 room difference
+      } else if (diff <= 2) {
+        score += 3; // 2 rooms difference
+      } else if (diff <= 3) {
+        score += 1; // 3 rooms difference
+      }
+    }
+  }
+
+  // Size match (5 points) - flexible with 20% tolerance
   if ((cliente.dimensioni_min || cliente.dimensioni_max) && property.surface_mq) {
-    factors++;
-    const minOk = !cliente.dimensioni_min || property.surface_mq >= cliente.dimensioni_min;
-    const maxOk = !cliente.dimensioni_max || property.surface_mq <= cliente.dimensioni_max;
-    if (minOk && maxOk) {
+    maxScore += 5;
+    const tolerance = 0.2; // 20% tolerance
+    const minWithTolerance = cliente.dimensioni_min ? cliente.dimensioni_min * (1 - tolerance) : 0;
+    const maxWithTolerance = cliente.dimensioni_max ? cliente.dimensioni_max * (1 + tolerance) : Infinity;
+    
+    if (property.surface_mq >= minWithTolerance && property.surface_mq <= maxWithTolerance) {
       score += 5;
+    } else {
+      // Partial credit if close
+      const minOk = !cliente.dimensioni_min || property.surface_mq >= cliente.dimensioni_min * 0.7;
+      const maxOk = !cliente.dimensioni_max || property.surface_mq <= cliente.dimensioni_max * 1.4;
+      if (minOk && maxOk) {
+        score += 2;
+      }
     }
   }
 
   // If no factors were compared, return 0
-  if (factors === 0) return 0;
+  if (maxScore === 0) return 0;
 
-  // Normalize score to 0-100 based on factors that were actually compared
-  const maxPossibleScore = factors * (100 / 6); // 6 total factors
-  return Math.round((score / maxPossibleScore) * 100);
+  // Calculate percentage
+  return Math.round((score / maxScore) * 100);
 }
 
 Deno.serve(async (req) => {

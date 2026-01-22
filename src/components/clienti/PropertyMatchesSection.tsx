@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useClientPropertyMatches, useProperties, PropertyMatch, Property } from '@/hooks/useProperties';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   Home, 
   RefreshCw, 
@@ -19,7 +22,10 @@ import {
   BedDouble,
   Droplets,
   Trees,
-  Calculator
+  Calculator,
+  Search,
+  Link,
+  Loader2,
 } from 'lucide-react';
 
 interface PropertyMatchesSectionProps {
@@ -175,23 +181,90 @@ function AddPropertyDialog({
   existingPropertyIds,
   properties,
   onAdd,
+  onSyncComplete,
 }: {
   clienteId: string;
   existingPropertyIds: string[];
   properties: Property[];
   onAdd: (propertyId: string) => void;
+  onSyncComplete: () => void;
 }) {
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [urlToImport, setUrlToImport] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>('search');
 
   const availableProperties = properties.filter(p => !existingPropertyIds.includes(p.id));
+  
+  // Filter properties by search query
+  const filteredProperties = useMemo(() => {
+    if (!searchQuery.trim()) return availableProperties;
+    const query = searchQuery.toLowerCase();
+    return availableProperties.filter(p => 
+      p.title.toLowerCase().includes(query) ||
+      p.ref_number?.toLowerCase().includes(query) ||
+      p.location?.toLowerCase().includes(query) ||
+      p.region?.toLowerCase().includes(query) ||
+      p.property_type?.toLowerCase().includes(query)
+    );
+  }, [availableProperties, searchQuery]);
 
-  const handleAdd = () => {
-    if (selectedPropertyId) {
-      onAdd(selectedPropertyId);
-      setSelectedPropertyId('');
-      setOpen(false);
+  const handleSelectProperty = (propertyId: string) => {
+    onAdd(propertyId);
+    setOpen(false);
+    setSearchQuery('');
+  };
+
+  const handleImportFromUrl = async () => {
+    if (!urlToImport.trim()) return;
+    
+    // Validate URL is from the right domain
+    if (!urlToImport.includes('cortesiluxuryrealestate.com')) {
+      toast({
+        title: 'URL non valido',
+        description: 'Inserisci un URL dal sito cortesiluxuryrealestate.com',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    setIsImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('import-single-property', {
+        body: { url: urlToImport },
+      });
+
+      if (error) throw error;
+
+      if (data.success && data.propertyId) {
+        toast({ title: 'Proprietà importata!' });
+        onAdd(data.propertyId);
+        setUrlToImport('');
+        setOpen(false);
+        onSyncComplete(); // Refresh properties list
+      } else {
+        throw new Error(data.error || 'Importazione fallita');
+      }
+    } catch (err: any) {
+      toast({
+        title: 'Errore importazione',
+        description: err.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const formatPrice = (price: number | null) => {
+    if (!price) return '';
+    return new Intl.NumberFormat('it-IT', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(price);
   };
 
   return (
@@ -202,27 +275,104 @@ function AddPropertyDialog({
           Aggiungi manualmente
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Aggiungi proprietà</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <Select value={selectedPropertyId} onValueChange={setSelectedPropertyId}>
-            <SelectTrigger>
-              <SelectValue placeholder="Seleziona una proprietà..." />
-            </SelectTrigger>
-            <SelectContent>
-              {availableProperties.map(property => (
-                <SelectItem key={property.id} value={property.id}>
-                  {property.title} - {property.ref_number || 'No ref'}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button onClick={handleAdd} disabled={!selectedPropertyId} className="w-full">
-            Aggiungi
-          </Button>
-        </div>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="search">
+              <Search className="h-4 w-4 mr-1" />
+              Cerca
+            </TabsTrigger>
+            <TabsTrigger value="import">
+              <Link className="h-4 w-4 mr-1" />
+              Importa da URL
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="search" className="space-y-3 mt-3">
+            <Input
+              placeholder="Cerca per nome, ref, località..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full"
+            />
+            
+            {filteredProperties.length === 0 ? (
+              <div className="text-center py-6 text-muted-foreground">
+                <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">
+                  {availableProperties.length === 0 
+                    ? 'Nessuna proprietà disponibile. Sincronizza prima le proprietà.'
+                    : 'Nessun risultato trovato'}
+                </p>
+              </div>
+            ) : (
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  {filteredProperties.map(property => (
+                    <div 
+                      key={property.id}
+                      className="p-3 rounded-lg border hover:border-primary cursor-pointer transition-colors"
+                      onClick={() => handleSelectProperty(property.id)}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{property.title}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {property.ref_number} • {property.location || property.region}
+                          </p>
+                        </div>
+                        <span className="text-sm font-medium text-primary ml-2">
+                          {formatPrice(property.price)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                        {property.rooms && <span>{property.rooms} camere</span>}
+                        {property.surface_mq && <span>{property.surface_mq} mq</span>}
+                        {property.has_pool && <Droplets className="h-3 w-3 text-blue-500" />}
+                        {property.has_land && <Trees className="h-3 w-3 text-green-500" />}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="import" className="space-y-4 mt-3">
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">
+                Incolla l'URL di una proprietà dal sito cortesiluxuryrealestate.com
+              </p>
+              <Input
+                placeholder="https://cortesiluxuryrealestate.com/property/..."
+                value={urlToImport}
+                onChange={(e) => setUrlToImport(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <Button 
+              onClick={handleImportFromUrl} 
+              disabled={!urlToImport.trim() || isImporting}
+              className="w-full"
+            >
+              {isImporting ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Importando...
+                </>
+              ) : (
+                <>
+                  <Link className="h-4 w-4 mr-2" />
+                  Importa proprietà
+                </>
+              )}
+            </Button>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
@@ -238,7 +388,7 @@ export function PropertyMatchesSection({ clienteId }: PropertyMatchesSectionProp
     addManualMatch,
   } = useClientPropertyMatches(clienteId);
 
-  const { properties, syncProperties, isSyncing } = useProperties();
+  const { properties, syncProperties, isSyncing, refetchProperties } = useProperties();
 
   const suggestedCount = matches.filter(m => m.suggested).length;
   const existingPropertyIds = matches.map(m => m.property_id);
@@ -339,6 +489,7 @@ export function PropertyMatchesSection({ clienteId }: PropertyMatchesSectionProp
         existingPropertyIds={existingPropertyIds}
         properties={properties}
         onAdd={handleAddManual}
+        onSyncComplete={refetchProperties}
       />
     </div>
   );
