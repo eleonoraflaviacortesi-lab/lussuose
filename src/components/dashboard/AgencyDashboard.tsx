@@ -3,23 +3,16 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { Progress } from '@/components/ui/progress';
-import { ChevronDown, Settings, Phone, FileText, Gift, Euro, BarChart3 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-const SEDI = ['Città di Castello', 'AREZZO', 'PERUGIA'];
+import { Phone, FileText, Gift, Euro, BarChart3 } from 'lucide-react';
 
 const AgencyDashboard = () => {
-  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
-  const [selectedSede, setSelectedSede] = useState('Città di Castello');
-  const { kpis, isLoading } = useKPIs(period);
-  const { profiles } = useProfiles();
   const { profile: currentProfile } = useAuth();
+  const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
+  // La sede è fissa in base all'account - non modificabile
+  const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
+  const { kpis, isLoading } = useKPIs(period);
+  // Filtra profili solo per la sede dell'utente
+  const { profiles } = useProfiles(true);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
@@ -55,55 +48,34 @@ const AgencyDashboard = () => {
 
   return (
     <div className="px-6 pb-8 space-y-6 animate-fade-in">
-      {/* Header with Sede Selector and Period Toggle */}
+      {/* Header with Period Toggle */}
       <div className="bg-card rounded-3xl shadow-lg p-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
             <BarChart3 className="w-7 h-7" />
           </div>
           <div className="flex-1">
-            <h2 className="text-xl font-bold tracking-tight">{selectedSede}</h2>
+            <h2 className="text-xl font-bold tracking-tight">{userSede}</h2>
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
               MESE PERFORMANCE
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Select value={selectedSede} onValueChange={setSelectedSede}>
-              <SelectTrigger className="flex-1 sm:w-40 glass-select-trigger border-0 rounded-2xl h-10 text-sm font-medium">
-                <SelectValue placeholder="Seleziona sede" />
-              </SelectTrigger>
-              <SelectContent className="glass-select-content border-0 rounded-2xl overflow-hidden">
-                {SEDI.map((sede) => (
-                  <SelectItem key={sede} value={sede} className="glass-select-item rounded-xl">
-                    {sede}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            <button className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors shrink-0">
-              <Settings className="w-4 h-4" />
+        <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-full sm:w-auto justify-center">
+          {(['week', 'month', 'year'] as const).map((p) => (
+            <button
+              key={p}
+              onClick={() => setPeriod(p)}
+              className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
+                period === p 
+                  ? 'bg-foreground text-background' 
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {p === 'week' ? 'SETT' : p === 'month' ? 'MESE' : 'ANNO'}
             </button>
-          </div>
-
-          <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-full sm:w-auto justify-center">
-            {(['week', 'month', 'year'] as const).map((p) => (
-              <button
-                key={p}
-                onClick={() => setPeriod(p)}
-                className={`flex-1 sm:flex-none px-3 sm:px-4 py-2 text-xs font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
-                  period === p 
-                    ? 'bg-foreground text-background' 
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {p === 'week' ? 'SETT' : p === 'month' ? 'MESE' : 'ANNO'}
-              </button>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
 

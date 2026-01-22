@@ -48,19 +48,21 @@ export const useDailyData = () => {
     gcTime: 1000 * 60 * 5, // 5 minutes garbage collection
   });
 
+  // Query for all data filtered by user's sede
   const { data: allData, isLoading: allDataLoading } = useQuery({
-    queryKey: ['daily-data-all'],
+    queryKey: ['daily-data-all', profile?.sede],
     queryFn: async () => {
-      if (!user) return [];
+      if (!user || !profile?.sede) return [];
       const { data, error } = await supabase
         .from('daily_data')
         .select('*, profiles!inner(full_name, sede)')
+        .eq('profiles.sede', profile.sede)
         .order('date', { ascending: false });
       
       if (error) throw error;
       return data;
     },
-    enabled: !!user && profile?.role !== 'agente',
+    enabled: !!user && !!profile?.sede && profile?.role !== 'agente',
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
   });
