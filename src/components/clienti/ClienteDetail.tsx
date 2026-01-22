@@ -28,10 +28,18 @@ import {
   Trash2,
   Droplets,
   Trees,
+  User,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { PropertyMatchesSection } from './PropertyMatchesSection';
+import { 
+  InlineEditText, 
+  InlineEditNumber, 
+  InlineEditBadges, 
+  InlineEditSelect,
+  InlineEditBoolean 
+} from './InlineEdit';
 
 interface ClienteDetailProps {
   cliente: Cliente | null;
@@ -41,8 +49,25 @@ interface ClienteDetailProps {
   onAssign: (agentId: string | null) => void;
   onAddComment: (comment: string) => void;
   onDelete: () => void;
+  onUpdate: (updates: Partial<Cliente>) => void;
 }
 
+const REGION_OPTIONS = [
+  'Tuscany', 'Umbria', 'Marche', 'Lazio', 'Emilia-Romagna', 
+  'Liguria', 'Piemonte', 'Lombardia', 'Veneto', 'Sardegna'
+];
+
+const PROPERTY_TYPE_OPTIONS = [
+  'Villa', 'Farmhouse', 'Apartment', 'Castle', 'Estate', 
+  'Cottage', 'Mansion', 'Country House', 'Palace'
+];
+
+const YES_NO_OPTIONS = [
+  { value: 'Yes', label: 'Sì' },
+  { value: 'No', label: 'No' },
+  { value: 'Open to it', label: 'Aperto' },
+  { value: 'Not sure', label: 'Non sicuro' },
+];
 
 export function ClienteDetail({
   cliente,
@@ -52,6 +77,7 @@ export function ClienteDetail({
   onAssign,
   onAddComment,
   onDelete,
+  onUpdate,
 }: ClienteDetailProps) {
   const [newComment, setNewComment] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -65,8 +91,7 @@ export function ClienteDetail({
     }
   };
 
-  const formatBudget = (budget: number | null) => {
-    if (!budget) return 'Non specificato';
+  const formatBudget = (budget: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
       currency: 'EUR',
@@ -82,17 +107,26 @@ export function ClienteDetail({
         <DialogHeader>
           <div className="flex items-center gap-3">
             <span className="text-3xl">{cliente.emoji}</span>
-            <div>
-              <DialogTitle className="text-xl">{cliente.nome}</DialogTitle>
-              {cliente.paese && (
-                <p className="text-sm text-muted-foreground">{cliente.paese}</p>
-              )}
+            <div className="flex-1">
+              <InlineEditText
+                value={cliente.nome}
+                onSave={(value) => onUpdate({ nome: value })}
+                className="text-xl font-semibold"
+                placeholder="Nome cliente"
+              />
+              <InlineEditText
+                value={cliente.paese}
+                onSave={(value) => onUpdate({ paese: value })}
+                className="text-sm text-muted-foreground"
+                placeholder="Paese"
+                prefix={<MapPin className="h-3 w-3" />}
+              />
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
-          {/* Assignment Only */}
+          {/* Assignment */}
           <div>
             <label className="text-xs text-muted-foreground uppercase tracking-wide">Assegnato a</label>
             <Select
@@ -125,147 +159,242 @@ export function ClienteDetail({
             </Select>
           </div>
 
-          {/* Contact Info */}
+          {/* Contact Info - Editable */}
           <div className="bg-muted/50 rounded-lg p-4 space-y-2">
             <h3 className="font-medium text-sm mb-3">Contatti</h3>
-            {cliente.telefono && (
-              <a 
-                href={`tel:${cliente.telefono}`} 
-                className="flex items-center gap-2 text-sm hover:text-primary"
-              >
-                <Phone className="w-4 h-4" />
-                {cliente.telefono}
-              </a>
-            )}
-            {cliente.email && (
-              <a 
-                href={`mailto:${cliente.email}`} 
-                className="flex items-center gap-2 text-sm hover:text-primary"
-              >
-                <Mail className="w-4 h-4" />
-                {cliente.email}
-              </a>
-            )}
+            <InlineEditText
+              value={cliente.telefono}
+              onSave={(value) => onUpdate({ telefono: value })}
+              placeholder="Aggiungi telefono"
+              prefix={<Phone className="w-4 h-4 text-muted-foreground" />}
+              className="text-sm"
+            />
+            <InlineEditText
+              value={cliente.email}
+              onSave={(value) => onUpdate({ email: value })}
+              placeholder="Aggiungi email"
+              prefix={<Mail className="w-4 h-4 text-muted-foreground" />}
+              className="text-sm"
+            />
           </div>
 
-          {/* Budget & Timeline */}
+          {/* Budget & Timeline - Editable */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-muted/50 rounded-lg p-4">
               <h3 className="font-medium text-sm mb-2 flex items-center gap-2">
                 <Euro className="w-4 h-4" /> Budget
               </h3>
-              <p className="text-lg font-semibold">{formatBudget(cliente.budget_max)}</p>
-              {cliente.mutuo && (
-                <p className="text-xs text-muted-foreground mt-1">
-                  Mutuo: {cliente.mutuo}
-                </p>
-              )}
+              <InlineEditNumber
+                value={cliente.budget_max}
+                onSave={(value) => onUpdate({ budget_max: value })}
+                placeholder="Imposta budget"
+                className="text-lg font-semibold"
+                formatDisplay={formatBudget}
+              />
+              <InlineEditSelect
+                value={cliente.mutuo}
+                options={YES_NO_OPTIONS}
+                onSave={(value) => onUpdate({ mutuo: value })}
+                placeholder="Mutuo?"
+                className="text-xs text-muted-foreground mt-1"
+                prefix={<span className="text-muted-foreground">Mutuo:</span>}
+              />
             </div>
             <div className="bg-muted/50 rounded-lg p-4">
               <h3 className="font-medium text-sm mb-2 flex items-center gap-2">
                 <Calendar className="w-4 h-4" /> Timeline
               </h3>
-              <p className="text-sm">{cliente.tempo_ricerca || 'Non specificato'}</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {cliente.ha_visitato ? '✓ Ha già visitato' : 'Non ha ancora visitato'}
-              </p>
+              <InlineEditText
+                value={cliente.tempo_ricerca}
+                onSave={(value) => onUpdate({ tempo_ricerca: value })}
+                placeholder="Tempo di ricerca"
+                className="text-sm"
+              />
+              <InlineEditBoolean
+                value={cliente.ha_visitato}
+                onSave={(value) => onUpdate({ ha_visitato: value })}
+                labelTrue="Ha già visitato"
+                labelFalse="Non ha ancora visitato"
+                className="text-xs mt-1"
+              />
             </div>
           </div>
 
-          {/* Location Preferences */}
+          {/* Location Preferences - Editable */}
           <div className="bg-muted/50 rounded-lg p-4">
             <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
               <MapPin className="w-4 h-4" /> Preferenze Località
             </h3>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {cliente.regioni.map(r => (
-                <Badge key={r} variant="secondary">{r}</Badge>
-              ))}
+            <InlineEditBadges
+              values={cliente.regioni}
+              onSave={(values) => onUpdate({ regioni: values })}
+              placeholder="Aggiungi regioni"
+              variant="secondary"
+            />
+            <div className="mt-2">
+              <InlineEditBadges
+                values={cliente.contesto}
+                onSave={(values) => onUpdate({ contesto: values })}
+                placeholder="Aggiungi contesto (es. campagna, collina)"
+                variant="outline"
+              />
             </div>
-            {cliente.contesto.length > 0 && (
-              <p className="text-xs text-muted-foreground">
-                Contesto: {cliente.contesto.join(', ')}
-              </p>
-            )}
-            {cliente.vicinanza_citta && (
-              <p className="text-xs text-muted-foreground mt-1">
-                ✓ Vicino a città/aeroporti
-              </p>
-            )}
+            <InlineEditBoolean
+              value={cliente.vicinanza_citta}
+              onSave={(value) => onUpdate({ vicinanza_citta: value })}
+              labelTrue="Vicino a città/aeroporti"
+              labelFalse="Non necessario vicino città"
+              className="text-xs mt-2"
+            />
           </div>
 
-          {/* Property Preferences */}
+          {/* Property Preferences - Editable */}
           <div className="bg-muted/50 rounded-lg p-4">
             <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
               <Home className="w-4 h-4" /> Tipologia Ricercata
             </h3>
-            <div className="flex flex-wrap gap-2 mb-3">
-              {cliente.tipologia.map(t => (
-                <Badge key={t} variant="outline">{t}</Badge>
-              ))}
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {cliente.stile && <p>Stile: {cliente.stile}</p>}
-              {cliente.camere && <p>Camere: {cliente.camere}</p>}
-              {cliente.bagni && <p>Bagni: {cliente.bagni}</p>}
-              {cliente.layout && <p>Layout: {cliente.layout}</p>}
-              {(cliente.dimensioni_min || cliente.dimensioni_max) && (
-                <p>
-                  Dimensioni: {cliente.dimensioni_min || '?'} - {cliente.dimensioni_max || '?'} mq
-                </p>
-              )}
+            <InlineEditBadges
+              values={cliente.tipologia}
+              onSave={(values) => onUpdate({ tipologia: values })}
+              placeholder="Aggiungi tipologie"
+              variant="outline"
+            />
+            <div className="grid grid-cols-2 gap-2 text-xs mt-3">
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Stile:</span>
+                <InlineEditText
+                  value={cliente.stile}
+                  onSave={(value) => onUpdate({ stile: value })}
+                  placeholder="Non specificato"
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Camere:</span>
+                <InlineEditText
+                  value={cliente.camere}
+                  onSave={(value) => onUpdate({ camere: value })}
+                  placeholder="Non specificato"
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Bagni:</span>
+                <InlineEditNumber
+                  value={cliente.bagni}
+                  onSave={(value) => onUpdate({ bagni: value })}
+                  placeholder="Non specificato"
+                />
+              </div>
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Layout:</span>
+                <InlineEditText
+                  value={cliente.layout}
+                  onSave={(value) => onUpdate({ layout: value })}
+                  placeholder="Non specificato"
+                />
+              </div>
+              <div className="flex items-center gap-1 col-span-2">
+                <span className="text-muted-foreground">Dimensioni:</span>
+                <InlineEditNumber
+                  value={cliente.dimensioni_min}
+                  onSave={(value) => onUpdate({ dimensioni_min: value })}
+                  placeholder="min"
+                  suffix=" mq"
+                />
+                <span>-</span>
+                <InlineEditNumber
+                  value={cliente.dimensioni_max}
+                  onSave={(value) => onUpdate({ dimensioni_max: value })}
+                  placeholder="max"
+                  suffix=" mq"
+                />
+              </div>
             </div>
           </div>
 
-          {/* Features */}
-          <div className="flex flex-wrap gap-3">
-            {cliente.piscina && (
-              <div className="flex items-center gap-1.5 text-sm bg-blue-100 text-blue-800 rounded-full px-3 py-1">
-                <Droplets className="w-3.5 h-3.5" />
-                Piscina: {cliente.piscina}
+          {/* Features - Editable */}
+          <div className="bg-muted/50 rounded-lg p-4">
+            <h3 className="font-medium text-sm mb-3">Caratteristiche</h3>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="flex items-center gap-2">
+                <Droplets className="w-4 h-4 text-blue-500" />
+                <InlineEditSelect
+                  value={cliente.piscina}
+                  options={YES_NO_OPTIONS}
+                  onSave={(value) => onUpdate({ piscina: value })}
+                  placeholder="Piscina?"
+                  className="text-sm"
+                />
               </div>
-            )}
-            {cliente.terreno && (
-              <div className="flex items-center gap-1.5 text-sm bg-green-100 text-green-800 rounded-full px-3 py-1">
-                <Trees className="w-3.5 h-3.5" />
-                Terreno: {cliente.terreno}
+              <div className="flex items-center gap-2">
+                <Trees className="w-4 h-4 text-green-500" />
+                <InlineEditSelect
+                  value={cliente.terreno}
+                  options={YES_NO_OPTIONS}
+                  onSave={(value) => onUpdate({ terreno: value })}
+                  placeholder="Terreno?"
+                  className="text-sm"
+                />
               </div>
-            )}
-            {cliente.dependance && (
-              <div className="flex items-center gap-1.5 text-sm bg-purple-100 text-purple-800 rounded-full px-3 py-1">
-                <Home className="w-3.5 h-3.5" />
-                Dependance: {cliente.dependance}
+              <div className="flex items-center gap-2">
+                <Home className="w-4 h-4 text-purple-500" />
+                <InlineEditSelect
+                  value={cliente.dependance}
+                  options={YES_NO_OPTIONS}
+                  onSave={(value) => onUpdate({ dependance: value })}
+                  placeholder="Dependance?"
+                  className="text-sm"
+                />
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Usage */}
-          {(cliente.uso || cliente.interesse_affitto) && (
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h3 className="font-medium text-sm mb-2">Utilizzo Previsto</h3>
-              {cliente.uso && <p className="text-sm">Uso: {cliente.uso}</p>}
-              {cliente.interesse_affitto && (
-                <p className="text-xs text-muted-foreground">
-                  Interesse affitto: {cliente.interesse_affitto}
-                </p>
-              )}
+          {/* Usage - Editable */}
+          <div className="bg-muted/50 rounded-lg p-4">
+            <h3 className="font-medium text-sm mb-2">Utilizzo Previsto</h3>
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Uso:</span>
+                <InlineEditText
+                  value={cliente.uso}
+                  onSave={(value) => onUpdate({ uso: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Interesse affitto:</span>
+                <InlineEditSelect
+                  value={cliente.interesse_affitto}
+                  options={YES_NO_OPTIONS}
+                  onSave={(value) => onUpdate({ interesse_affitto: value })}
+                  placeholder="Non specificato"
+                  className="text-sm"
+                />
+              </div>
             </div>
-          )}
+          </div>
 
-          {/* Notes from form */}
-          {(cliente.descrizione || cliente.note_extra) && (
-            <div className="bg-muted/50 rounded-lg p-4">
-              <h3 className="font-medium text-sm mb-2">Note dal Form</h3>
-              {cliente.descrizione && (
-                <p className="text-sm whitespace-pre-wrap">{cliente.descrizione}</p>
-              )}
-              {cliente.note_extra && (
-                <p className="text-sm mt-2 text-muted-foreground whitespace-pre-wrap">
-                  {cliente.note_extra}
-                </p>
-              )}
+          {/* Notes - Editable */}
+          <div className="bg-muted/50 rounded-lg p-4">
+            <h3 className="font-medium text-sm mb-2">Note</h3>
+            <InlineEditText
+              value={cliente.descrizione}
+              onSave={(value) => onUpdate({ descrizione: value })}
+              placeholder="Aggiungi descrizione..."
+              multiline
+              className="text-sm"
+            />
+            <div className="mt-2">
+              <span className="text-xs text-muted-foreground">Note extra:</span>
+              <InlineEditText
+                value={cliente.note_extra}
+                onSave={(value) => onUpdate({ note_extra: value })}
+                placeholder="Aggiungi note extra..."
+                multiline
+                className="text-sm text-muted-foreground"
+              />
             </div>
-          )}
+          </div>
 
           {/* Property Matches Section */}
           <Separator />

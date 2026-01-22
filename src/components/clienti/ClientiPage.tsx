@@ -150,6 +150,11 @@ export function ClientiPage() {
         onAssign={handleAssignInline}
         onAddComment={handleAddComment}
         onDelete={handleDelete}
+        onUpdate={async (updates) => {
+          if (selectedCliente) {
+            await updateCliente({ id: selectedCliente.id, ...updates });
+          }
+        }}
       />
 
       {/* Add Dialog */}
