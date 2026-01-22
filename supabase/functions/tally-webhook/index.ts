@@ -36,6 +36,26 @@ function getFieldValue(fields: TallyField[], labelPattern: string): unknown {
   return field?.value ?? null;
 }
 
+// Helper to get the TEXT of a selected option (for dropdowns/radio buttons)
+// Tally sends option ID as value, we need to look up the text
+function getOptionText(fields: TallyField[], labelPattern: string): string {
+  const field = fields.find(f => 
+    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
+  );
+  
+  if (!field?.value) return "";
+  
+  // If field has options, look up the text by ID
+  if (field.options && field.options.length > 0) {
+    const valueId = String(field.value);
+    const option = field.options.find(opt => opt.id === valueId);
+    return option?.text || "";
+  }
+  
+  // Otherwise return raw value as string
+  return String(field.value);
+}
+
 // Helper to get array values from checkboxes or multi-select
 function getArrayValue(fields: TallyField[], labelPattern: string): string[] {
   const field = fields.find(f => 
@@ -166,7 +186,7 @@ Deno.serve(async (req) => {
       
       // Budget
       budget_max: parseBudget(getFieldValue(fields, "budget")),
-      mutuo: String(getFieldValue(fields, "mutuo") || getFieldValue(fields, "mortgage") || ""),
+      mutuo: getOptionText(fields, "mutuo") || getOptionText(fields, "mortgage"),
       
       // Timeline
       tempo_ricerca: String(getFieldValue(fields, "old") || getFieldValue(fields, "searching") || ""),
@@ -179,7 +199,7 @@ Deno.serve(async (req) => {
       
       // Property Type
       tipologia: getArrayValue(fields, "property type"),
-      stile: String(getFieldValue(fields, "style") || ""),
+      stile: getOptionText(fields, "style"),
       contesto: getArrayValue(fields, "setting"),
       
       // Features
@@ -187,10 +207,10 @@ Deno.serve(async (req) => {
       dimensioni_max: sizeRange.max,
       camere: String(getFieldValue(fields, "bedroom") || ""),
       bagni: parseInteger(getFieldValue(fields, "bathroom")),
-      layout: String(getFieldValue(fields, "layout") || ""),
-      dependance: String(getFieldValue(fields, "guesthouse") || getFieldValue(fields, "annex") || ""),
-      terreno: String(getFieldValue(fields, "land") || ""),
-      piscina: String(getFieldValue(fields, "pool") || getFieldValue(fields, "swimming") || ""),
+      layout: getOptionText(fields, "layout"),
+      dependance: getOptionText(fields, "guesthouse") || getOptionText(fields, "annex"),
+      terreno: getOptionText(fields, "land"),
+      piscina: getOptionText(fields, "pool") || getOptionText(fields, "swimming"),
       
       // Usage
       uso: String(getFieldValue(fields, "use") || ""),
