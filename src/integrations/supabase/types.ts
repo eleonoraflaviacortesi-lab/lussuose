@@ -132,6 +132,7 @@ export type Database = {
           card_color: string | null
           comments: Json | null
           created_at: string
+          display_order: number
           emoji: string | null
           id: string
           name: string
@@ -148,6 +149,7 @@ export type Database = {
           card_color?: string | null
           comments?: Json | null
           created_at?: string
+          display_order?: number
           emoji?: string | null
           id?: string
           name: string
@@ -164,6 +166,7 @@ export type Database = {
           card_color?: string | null
           comments?: Json | null
           created_at?: string
+          display_order?: number
           emoji?: string | null
           id?: string
           name?: string
