@@ -9,9 +9,9 @@ export interface SedeTargets {
   incarichi_target: number;
   acquisizioni_target: number;
   appuntamenti_target: number;
-  clienti_target: number;
   vendite_target: number;
   fatturato_target: number;
+  trattative_chiuse_target: number;
 }
 
 const DEFAULT_TARGETS: SedeTargets = {
@@ -20,9 +20,9 @@ const DEFAULT_TARGETS: SedeTargets = {
   incarichi_target: 4,
   acquisizioni_target: 8,
   appuntamenti_target: 40,
-  clienti_target: 20,
   vendite_target: 4,
   fatturato_target: 150000,
+  trattative_chiuse_target: 4,
 };
 
 export const useSedeTargets = () => {
@@ -55,9 +55,9 @@ export const useSedeTargets = () => {
         incarichi_target: data.incarichi_target ?? DEFAULT_TARGETS.incarichi_target,
         acquisizioni_target: data.acquisizioni_target ?? DEFAULT_TARGETS.acquisizioni_target,
         appuntamenti_target: data.appuntamenti_target ?? DEFAULT_TARGETS.appuntamenti_target,
-        clienti_target: data.clienti_target ?? DEFAULT_TARGETS.clienti_target,
         vendite_target: data.vendite_target ?? DEFAULT_TARGETS.vendite_target,
         fatturato_target: data.fatturato_target ?? DEFAULT_TARGETS.fatturato_target,
+        trattative_chiuse_target: data.trattative_chiuse_target ?? DEFAULT_TARGETS.trattative_chiuse_target,
       } as SedeTargets;
     },
     enabled: !!user && !!profile?.sede,

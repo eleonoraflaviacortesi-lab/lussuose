@@ -257,6 +257,7 @@ export type Database = {
           month: number
           notizie_target: number | null
           sede: string
+          trattative_chiuse_target: number | null
           updated_at: string
           vendite_target: number | null
           year: number
@@ -273,6 +274,7 @@ export type Database = {
           month: number
           notizie_target?: number | null
           sede: string
+          trattative_chiuse_target?: number | null
           updated_at?: string
           vendite_target?: number | null
           year: number
@@ -289,6 +291,7 @@ export type Database = {
           month?: number
           notizie_target?: number | null
           sede?: string
+          trattative_chiuse_target?: number | null
           updated_at?: string
           vendite_target?: number | null
           year?: number
