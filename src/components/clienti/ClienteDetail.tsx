@@ -103,8 +103,8 @@ export function ClienteDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[95vw] max-h-[90vh] overflow-y-auto overflow-x-hidden p-4 rounded-3xl">
-        <DialogHeader>
+      <DialogContent className="max-w-md w-[95vw] h-[90vh] flex flex-col p-0 rounded-3xl overflow-hidden">
+        <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{cliente.emoji}</span>
             <div className="flex-1 min-w-0">
@@ -118,7 +118,8 @@ export function ClienteDetail({
           </div>
         </DialogHeader>
 
-        <div className="space-y-3 mt-2">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
+        <div className="space-y-3">
           {/* Assignment */}
           <div className="bg-white rounded-2xl shadow-lg p-3">
             <Select
@@ -539,6 +540,7 @@ export function ClienteDetail({
               </div>
             )}
           </div>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
