@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useAuth } from '@/hooks/useAuth';
-import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { useNotizie, Notizia } from '@/hooks/useNotizie';
 import { Progress } from '@/components/ui/progress';
 import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard, Clock } from 'lucide-react';
@@ -15,7 +14,6 @@ const AgencyDashboard = () => {
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
   
   const { kpis, isLoading } = useKPIs(period);
-  const { targets } = useSedeTargets();
   const { notizieByStatus, isLoading: notizieLoading } = useNotizie();
 
   const formatCurrency = (value: number) => {
@@ -35,40 +33,39 @@ const AgencyDashboard = () => {
   }
 
   const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
-  const operationalMultiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
 
-  // KPI values from hook
+  // Use KPI values directly from hook - targets are already calculated there
   const contatti = kpis?.contatti?.value || 0;
-  const contattiTarget = Math.max(0, Math.round((targets.contatti_target || 0) * operationalMultiplier));
-  const contattiDelta = contatti - contattiTarget;
+  const contattiTarget = kpis?.contatti?.target || 0;
+  const contattiDelta = kpis?.contatti?.delta || 0;
 
   const notizie = kpis?.notizie?.value || 0;
-  const notizieTarget = Math.max(0, Math.round((targets.notizie_target || 0) * operationalMultiplier));
-  const notizieDelta = notizie - notizieTarget;
+  const notizieTarget = kpis?.notizie?.target || 0;
+  const notizieDelta = kpis?.notizie?.delta || 0;
 
   const appuntamenti = kpis?.appuntamenti?.value || 0;
-  const appuntamentiTarget = Math.max(0, Math.round((targets.appuntamenti_target || 0) * operationalMultiplier));
-  const appuntamentiDelta = appuntamenti - appuntamentiTarget;
+  const appuntamentiTarget = kpis?.appuntamenti?.target || 0;
+  const appuntamentiDelta = kpis?.appuntamenti?.delta || 0;
 
   const acquisizioni = kpis?.acquisizioni?.value || 0;
-  const acquisizioniTarget = Math.max(0, Math.round((targets.acquisizioni_target || 0) * operationalMultiplier));
-  const acquisizioniDelta = acquisizioni - acquisizioniTarget;
+  const acquisizioniTarget = kpis?.acquisizioni?.target || 0;
+  const acquisizioniDelta = kpis?.acquisizioni?.delta || 0;
 
   const incarichi = kpis?.incarichi?.value || 0;
-  const incarichiTarget = Math.max(0, Math.round((targets.incarichi_target || 0) * operationalMultiplier));
-  const incarichiDelta = incarichi - incarichiTarget;
+  const incarichiTarget = kpis?.incarichi?.target || 0;
+  const incarichiDelta = kpis?.incarichi?.delta || 0;
 
   const vendite = kpis?.vendite?.value || 0;
-  const venditeTarget = Math.max(0, Math.round((targets.vendite_target || 0) * operationalMultiplier));
-  const venditeDelta = vendite - venditeTarget;
+  const venditeTarget = kpis?.vendite?.target || 0;
+  const venditeDelta = kpis?.vendite?.delta || 0;
 
   const fatturato = kpis?.fatturato?.value || 0;
-  const fatturatoTarget = Math.max(0, Number(targets.fatturato_target || 0) * operationalMultiplier);
-  const fatturatoDelta = fatturato - fatturatoTarget;
+  const fatturatoTarget = kpis?.fatturato?.target || 0;
+  const fatturatoDelta = kpis?.fatturato?.delta || 0;
 
   const trattativeChiuse = kpis?.trattativeChiuse?.value || 0;
-  const trattativeChiuseTarget = Math.max(0, Math.round((targets.trattative_chiuse_target || 0) * operationalMultiplier));
-  const trattativeChiuseDelta = trattativeChiuse - trattativeChiuseTarget;
+  const trattativeChiuseTarget = kpis?.trattativeChiuse?.target || 0;
+  const trattativeChiuseDelta = kpis?.trattativeChiuse?.delta || 0;
 
   const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
 
