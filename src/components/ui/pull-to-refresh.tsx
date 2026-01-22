@@ -11,7 +11,6 @@ interface PullToRefreshProps {
 const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) => {
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const isPulling = useRef(false);
 
@@ -19,11 +18,14 @@ const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) =
   const maxPull = 120;
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const container = containerRef.current;
-    if (!container || isRefreshing) return;
-    
-    // Only start pull if at top of scroll
-    if (container.scrollTop === 0) {
+    if (isRefreshing) return;
+
+    // Don't interfere with typing / form interactions
+    const target = e.target as HTMLElement | null;
+    if (target?.closest('input, textarea, select, [contenteditable="true"]')) return;
+
+    // Only start pull if page is at top
+    if (window.scrollY === 0) {
       startY.current = e.touches[0].clientY;
       isPulling.current = true;
     }
@@ -31,9 +33,9 @@ const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) =
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
     if (!isPulling.current || isRefreshing) return;
-    
-    const container = containerRef.current;
-    if (!container || container.scrollTop > 0) {
+
+    // If user scrolled down, stop pulling
+    if (window.scrollY > 0) {
       isPulling.current = false;
       setPullDistance(0);
       return;
@@ -79,8 +81,7 @@ const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) =
 
   return (
     <div
-      ref={containerRef}
-      className={cn("relative overflow-auto", className)}
+      className={cn("relative", className)}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
