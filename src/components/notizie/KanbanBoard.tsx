@@ -2,7 +2,10 @@ import { memo, useCallback, useState, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, X } from 'lucide-react';
+
+// Common emojis for quick selection
+const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
 
 interface KanbanBoardProps {
   notizieByStatus: Record<NotiziaStatus, Notizia[]>;
@@ -102,15 +105,72 @@ const ColorPickerPill = memo(({
     </>
   );
 });
-ColorPickerPill.displayName = 'ColorPickerPill';
+// Emoji picker pill component
+const EmojiPickerPill = memo(({ 
+  position, 
+  currentEmoji, 
+  onSelect, 
+  onClose 
+}: { 
+  position: { x: number; y: number }; 
+  currentEmoji: string | null;
+  onSelect: (emoji: string | null) => void;
+  onClose: () => void;
+}) => {
+  return (
+    <>
+      {/* Backdrop */}
+      <div 
+        className="fixed inset-0 z-50" 
+        onClick={onClose}
+      />
+      {/* Pill */}
+      <div
+        className="fixed z-50 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[200px]"
+        style={{
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 210),
+          top: Math.min(position.y, window.innerHeight - 80),
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Remove emoji button */}
+        {currentEmoji && (
+          <button
+            onClick={() => { onSelect(null); onClose(); }}
+            className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+            title="Rimuovi emoji"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+        {/* Quick emojis */}
+        {QUICK_EMOJIS.map((emoji) => (
+          <button
+            key={emoji}
+            onClick={() => { onSelect(emoji); onClose(); }}
+            className={cn(
+              "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+              currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
+            )}
+          >
+            {emoji}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+});
+EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card with long-press and right-click color support
-const Card = memo(({ notizia, onClick, onColorChange }: { 
+const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: { 
   notizia: Notizia; 
   onClick: () => void;
   onColorChange: (color: string | null) => void;
+  onEmojiChange: (emoji: string | null) => void;
 }) => {
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isDark = isDarkColor(notizia.card_color);
@@ -120,18 +180,17 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
     e.preventDefault();
     e.stopPropagation();
     setPickerPos({ x: e.clientX - 100, y: e.clientY - 50 });
-    setPickerOpen(true);
+    setColorPickerOpen(true);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
-      // Haptic feedback on mobile
       if (navigator.vibrate) {
         navigator.vibrate(15);
       }
       setPickerPos({ x: touch.clientX - 100, y: touch.clientY - 60 });
-      setPickerOpen(true);
+      setColorPickerOpen(true);
     }, 500);
   };
 
@@ -147,6 +206,13 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+  };
+
+  const handleEmojiClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setPickerPos({ x: rect.left, y: rect.bottom + 5 });
+    setEmojiPickerOpen(true);
   };
   
   return (
@@ -167,7 +233,16 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
         onTouchMove={handleTouchMove}
       >
         <div className="flex items-start gap-2">
-          {notizia.emoji && <span className={cn("text-sm shrink-0", isDark && "drop-shadow-sm")}>{notizia.emoji}</span>}
+          {/* Clickable emoji or add emoji button */}
+          <button
+            onClick={handleEmojiClick}
+            className={cn(
+              "text-sm shrink-0 w-5 h-5 flex items-center justify-center rounded hover:bg-black/10 transition-colors",
+              isDark && "drop-shadow-sm hover:bg-white/20"
+            )}
+          >
+            {notizia.emoji || <span className="text-[10px] text-muted-foreground">+</span>}
+          </button>
           <div className="flex-1 min-w-0">
             <p className={cn("font-medium text-sm leading-tight", isDark ? "text-white" : "text-foreground")}>{notizia.name}</p>
             {notizia.zona && (
@@ -183,12 +258,21 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
         </div>
       </div>
 
-      {pickerOpen && (
+      {colorPickerOpen && (
         <ColorPickerPill
           position={pickerPos}
           currentColor={notizia.card_color}
           onSelect={(color) => onColorChange(color)}
-          onClose={() => setPickerOpen(false)}
+          onClose={() => setColorPickerOpen(false)}
+        />
+      )}
+
+      {emojiPickerOpen && (
+        <EmojiPickerPill
+          position={pickerPos}
+          currentEmoji={notizia.emoji}
+          onSelect={(emoji) => onEmojiChange(emoji)}
+          onClose={() => setEmojiPickerOpen(false)}
         />
       )}
     </>
@@ -241,6 +325,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
     updateNotizia.mutate({ id, card_color: color });
   }, [updateNotizia]);
 
+  const handleEmojiChange = useCallback((id: string, emoji: string | null) => {
+    updateNotizia.mutate({ id, emoji: emoji });
+  }, [updateNotizia]);
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       <div className="flex gap-3 pb-4 overflow-x-auto lg:h-full lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
@@ -275,6 +363,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: K
                             notizia={notizia} 
                             onClick={() => onNotiziaClick(notizia)} 
                             onColorChange={(color) => handleColorChange(notizia.id, color)}
+                            onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
                           />
                         </div>
                       )}
