@@ -83,7 +83,7 @@ const ColorPickerPill = memo(({
             title={c.label}
           />
         ))}
-        {/* Custom color picker */}
+        {/* Custom color picker - white circle with shadow and black + */}
         <div className="relative">
           <input
             type="color"
@@ -93,8 +93,7 @@ const ColorPickerPill = memo(({
             className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
           />
           <div 
-            className="w-7 h-7 rounded-full border-2 border-dashed border-muted-foreground/40 flex items-center justify-center text-[10px] font-bold text-muted-foreground"
-            style={{ background: `linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3)` }}
+            className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black"
           >
             +
           </div>
@@ -198,13 +197,45 @@ const Card = memo(({ notizia, onClick, onColorChange }: {
 Card.displayName = 'Card';
 
 const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange }: KanbanBoardProps) => {
-  const { updateNotizia } = useNotizie();
+  const { updateNotizia, updateOrder } = useNotizie();
   
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
-    const newStatus = result.destination.droppableId as NotiziaStatus;
-    onStatusChange(result.draggableId, newStatus);
-  }, [onStatusChange]);
+    
+    const sourceStatus = result.source.droppableId as NotiziaStatus;
+    const destStatus = result.destination.droppableId as NotiziaStatus;
+    const sourceIndex = result.source.index;
+    const destIndex = result.destination.index;
+    
+    // Get the items in the destination column
+    const destItems = [...notizieByStatus[destStatus]];
+    const sourceItems = sourceStatus === destStatus ? destItems : [...notizieByStatus[sourceStatus]];
+    
+    // Remove from source
+    const [movedItem] = sourceItems.splice(sourceIndex, 1);
+    
+    // Insert at destination
+    if (sourceStatus === destStatus) {
+      destItems.splice(destIndex, 0, movedItem);
+    } else {
+      destItems.splice(destIndex, 0, movedItem);
+    }
+    
+    // Build update array with new order
+    const updates = destItems.map((item, index) => ({
+      id: item.id,
+      display_order: index,
+      ...(item.id === movedItem.id && sourceStatus !== destStatus ? { status: destStatus } : {}),
+    }));
+    
+    // If moving between columns, also update the moved item's status
+    if (sourceStatus !== destStatus) {
+      onStatusChange(result.draggableId, destStatus);
+    }
+    
+    // Save the new order
+    updateOrder.mutate(updates);
+  }, [notizieByStatus, onStatusChange, updateOrder]);
 
   const handleColorChange = useCallback((id: string, color: string | null) => {
     updateNotizia.mutate({ id, card_color: color });

@@ -27,6 +27,7 @@ export interface Notizia {
   updated_at: string;
   comments: NotiziaComment[];
   card_color: string | null;
+  display_order: number;
 }
 
 export interface NotiziaInput {
@@ -41,6 +42,7 @@ export interface NotiziaInput {
   created_at?: string;
   comments?: NotiziaComment[];
   card_color?: string | null;
+  display_order?: number;
 }
 
 // Helper to parse comments from JSON
@@ -63,7 +65,8 @@ export const useNotizie = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
-        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order')
+        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
       
       if (error) throw error;
@@ -162,16 +165,36 @@ export const useNotizie = () => {
     },
   });
 
-  // Group notizie by status
+  // Group notizie by status, maintaining display_order
   const notizieByStatus = {
-    new: notizie?.filter(n => n.status === 'new') || [],
-    in_progress: notizie?.filter(n => n.status === 'in_progress') || [],
-    done: notizie?.filter(n => n.status === 'done') || [],
-    on_shot: notizie?.filter(n => n.status === 'on_shot') || [],
-    taken: notizie?.filter(n => n.status === 'taken') || [],
-    no: notizie?.filter(n => n.status === 'no') || [],
-    sold: notizie?.filter(n => n.status === 'sold') || [],
+    new: notizie?.filter(n => n.status === 'new').sort((a, b) => a.display_order - b.display_order) || [],
+    in_progress: notizie?.filter(n => n.status === 'in_progress').sort((a, b) => a.display_order - b.display_order) || [],
+    done: notizie?.filter(n => n.status === 'done').sort((a, b) => a.display_order - b.display_order) || [],
+    on_shot: notizie?.filter(n => n.status === 'on_shot').sort((a, b) => a.display_order - b.display_order) || [],
+    taken: notizie?.filter(n => n.status === 'taken').sort((a, b) => a.display_order - b.display_order) || [],
+    no: notizie?.filter(n => n.status === 'no').sort((a, b) => a.display_order - b.display_order) || [],
+    sold: notizie?.filter(n => n.status === 'sold').sort((a, b) => a.display_order - b.display_order) || [],
   };
+
+  // Batch update order for multiple notizie
+  const updateOrder = useMutation({
+    mutationFn: async (updates: { id: string; display_order: number; status?: NotiziaStatus }[]) => {
+      if (!user) throw new Error('Non autenticato');
+      
+      // Update each item
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('notizie')
+          .update({ display_order: update.display_order, ...(update.status && { status: update.status }) })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notizie'] });
+    },
+  });
 
   return {
     notizie,
@@ -180,5 +203,6 @@ export const useNotizie = () => {
     addNotizia,
     updateNotizia,
     deleteNotizia,
+    updateOrder,
   };
 };
