@@ -17,22 +17,47 @@ const liquidGlassPopover = "bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10
 
 const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆', '🌊', '🏖️', '🌅', '🌄', '🏔️', '🌲', '🌴', '🌷', '🌹', '💐', '🎨', '🎭', '🎪', '🎢', '🎡'];
 
-const AddNotiziaDialog = () => {
+interface AddNotiziaDialogProps {
+  defaultStatus?: NotiziaStatus;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  showTrigger?: boolean;
+}
+
+const AddNotiziaDialog = ({ 
+  defaultStatus = 'new', 
+  open: controlledOpen, 
+  onOpenChange: controlledOnOpenChange,
+  showTrigger = true 
+}: AddNotiziaDialogProps) => {
   const { addNotizia } = useNotizie();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [customEmoji, setCustomEmoji] = useState('');
+  
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? (controlledOnOpenChange || (() => {})) : setInternalOpen;
+  
   const [formData, setFormData] = useState({
     name: '',
     zona: '',
     phone: '',
     type: '',
     notes: '',
-    status: 'new' as NotiziaStatus,
+    status: defaultStatus as NotiziaStatus,
     emoji: '📋',
     reminder_date: null as Date | null,
     reminder_time: '09:00',
     created_date: null as Date | null,
   });
+
+  // Reset form when opening with a new defaultStatus
+  const handleOpen = (newOpen: boolean) => {
+    if (newOpen) {
+      setFormData(prev => ({ ...prev, status: defaultStatus }));
+    }
+    setOpen(newOpen);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,14 +89,14 @@ const AddNotiziaDialog = () => {
       phone: '',
       type: '',
       notes: '',
-      status: 'new',
+      status: defaultStatus,
       emoji: '📋',
       reminder_date: null,
       reminder_time: '09:00',
       created_date: null,
     });
     setCustomEmoji('');
-    setOpen(false);
+    handleOpen(false);
   };
 
   const handleCustomEmojiSubmit = () => {
@@ -83,18 +108,20 @@ const AddNotiziaDialog = () => {
 
   return (
     <>
-      <button 
-        onClick={() => setOpen(true)}
-        className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg active:scale-95 transition-transform"
-      >
-        <Plus className="w-5 h-5" />
-      </button>
+      {showTrigger && (
+        <button 
+          onClick={() => handleOpen(true)}
+          className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      )}
 
       {/* Liquid Glass Overlay */}
       {open && (
         <div 
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => setOpen(false)}
+          onClick={() => handleOpen(false)}
         >
           {/* Blur backdrop */}
           <div className="absolute inset-0 bg-black/10 backdrop-blur-md" />
