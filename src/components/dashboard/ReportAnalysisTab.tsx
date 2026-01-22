@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 import { Calendar, ChevronLeft, ChevronRight, Edit2, Trash2, X, Check, TrendingUp } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, BarChart, Bar } from 'recharts';
@@ -20,6 +20,31 @@ import {
 } from '@/components/ui/alert-dialog';
 
 type FilterPeriod = 'week' | 'month' | '6months' | 'year';
+
+// Moved outside component to prevent re-mount on every render
+const EditField = ({ 
+  label, 
+  field, 
+  value,
+  onChange,
+}: { 
+  label: string; 
+  field: string;
+  value: number;
+  onChange: (field: string, value: number) => void;
+}) => (
+  <div className="flex items-center justify-between py-3 border-b border-muted last:border-0">
+    <span className="text-sm text-muted-foreground">{label}</span>
+    <input
+      type="number"
+      inputMode="numeric"
+      value={value || ''}
+      onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+      placeholder="0"
+      className="w-24 bg-muted rounded-lg px-3 py-2 text-right text-sm font-medium"
+    />
+  </div>
+);
 
 const ReportAnalysisTab = () => {
   const { myData, saveDailyData, deleteDailyData } = useDailyData();
@@ -210,6 +235,10 @@ const ReportAnalysisTab = () => {
     });
   };
 
+  const handleEditChange = useCallback((field: string, value: number) => {
+    setEditFormData((prev: any) => ({ ...prev, [field]: value }));
+  }, []);
+
   const handleDelete = () => {
     if (!deleteConfirmId) return;
     deleteDailyData.mutate(deleteConfirmId, {
@@ -238,17 +267,6 @@ const ReportAnalysisTab = () => {
     </div>
   );
 
-  const EditField = ({ label, field }: { label: string; field: string }) => (
-    <div className="flex items-center justify-between py-3 border-b border-muted last:border-0">
-      <span className="text-sm text-muted-foreground">{label}</span>
-      <input
-        type="number"
-        value={editFormData[field]}
-        onChange={(e) => setEditFormData({ ...editFormData, [field]: parseInt(e.target.value) || 0 })}
-        className="w-24 bg-muted rounded-lg px-3 py-2 text-right text-sm font-medium"
-      />
-    </div>
-  );
 
   return (
     <div className="px-6 pb-8 animate-fade-in">
@@ -488,16 +506,16 @@ const ReportAnalysisTab = () => {
 
               {isEditing && editFormData ? (
                 <div className="space-y-1">
-                  <EditField label="Contatti Reali" field="contatti_reali" />
-                  <EditField label="Notizie Acquisite" field="notizie_reali" />
-                  <EditField label="Appuntamenti Vendita" field="appuntamenti_vendita" />
-                  <EditField label="Incarichi Presi" field="incarichi_vendita" />
-                  <EditField label="Valutazioni Fatte" field="valutazioni_fatte" />
-                  <EditField label="Nuove Trattative" field="nuove_trattative" />
-                  <EditField label="Trattative Chiuse" field="trattative_chiuse" />
-                  <EditField label="Fatturato a Credito (€)" field="fatturato_a_credito" />
-                  <EditField label="Numero Vendite" field="vendite_numero" />
-                  <EditField label="Fatturato (€)" field="vendite_valore" />
+                  <EditField label="Contatti Reali" field="contatti_reali" value={editFormData.contatti_reali} onChange={handleEditChange} />
+                  <EditField label="Notizie Acquisite" field="notizie_reali" value={editFormData.notizie_reali} onChange={handleEditChange} />
+                  <EditField label="Appuntamenti Vendita" field="appuntamenti_vendita" value={editFormData.appuntamenti_vendita} onChange={handleEditChange} />
+                  <EditField label="Incarichi Presi" field="incarichi_vendita" value={editFormData.incarichi_vendita} onChange={handleEditChange} />
+                  <EditField label="Valutazioni Fatte" field="valutazioni_fatte" value={editFormData.valutazioni_fatte} onChange={handleEditChange} />
+                  <EditField label="Nuove Trattative" field="nuove_trattative" value={editFormData.nuove_trattative} onChange={handleEditChange} />
+                  <EditField label="Trattative Chiuse" field="trattative_chiuse" value={editFormData.trattative_chiuse} onChange={handleEditChange} />
+                  <EditField label="Fatturato a Credito (€)" field="fatturato_a_credito" value={editFormData.fatturato_a_credito} onChange={handleEditChange} />
+                  <EditField label="Numero Vendite" field="vendite_numero" value={editFormData.vendite_numero} onChange={handleEditChange} />
+                  <EditField label="Fatturato (€)" field="vendite_valore" value={editFormData.vendite_valore} onChange={handleEditChange} />
                   
                   <div className="flex gap-3 pt-4">
                     <button
