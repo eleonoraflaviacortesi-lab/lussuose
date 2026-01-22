@@ -1,8 +1,10 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
+import PullToRefresh from '@/components/ui/pull-to-refresh';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
@@ -16,12 +18,20 @@ const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
   const { user, loading } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
     }
   }, [user, loading, navigate]);
+
+  const handleRefresh = useCallback(async () => {
+    // Invalidate all queries to refetch fresh data
+    await queryClient.invalidateQueries();
+    // Small delay for visual feedback
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }, [queryClient]);
 
   if (loading) {
     return (
@@ -55,7 +65,10 @@ const IndexContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <PullToRefresh 
+      onRefresh={handleRefresh}
+      className="min-h-screen bg-background"
+    >
       <Header />
       <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
@@ -70,7 +83,7 @@ const IndexContent = () => {
           {renderContent()}
         </Suspense>
       </main>
-    </div>
+    </PullToRefresh>
   );
 };
 
