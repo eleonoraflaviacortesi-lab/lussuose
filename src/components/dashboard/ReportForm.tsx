@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Check, Minus, Plus, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
+import { Calendar, Check, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
 const ReportForm = () => {
@@ -109,26 +109,14 @@ const ReportForm = () => {
           </span>
         )}
       </div>
-      <div className="flex items-center rounded-xl border border-border bg-background">
-        <button
-          onClick={() => handleDecrement(field)}
-          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
-        <input
-          type="number"
-          value={value}
-          onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
-          className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
-        />
-        <button
-          onClick={() => handleIncrement(field)}
-          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </div>
+      <input
+        type="number"
+        inputMode="numeric"
+        value={value || ''}
+        onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
+        placeholder="0"
+        className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+      />
     </div>
   );
 
@@ -150,28 +138,16 @@ const ReportForm = () => {
           {label}
         </span>
       </div>
-      <div className="flex items-center rounded-xl border border-border bg-background">
-        <button
-          onClick={() => handleValueChange(field, value - 1000)}
-          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Minus className="w-4 h-4" />
-        </button>
-        <div className="flex-1 flex items-center justify-center">
-          <span className="text-muted-foreground mr-2">€</span>
-          <input
-            type="number"
-            value={value}
-            onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
-            className="w-24 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
-          />
-        </div>
-        <button
-          onClick={() => handleValueChange(field, value + 1000)}
-          className="w-12 h-12 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+      <div className="flex items-center rounded-xl border border-border bg-background h-12 px-3">
+        <span className="text-muted-foreground mr-2">€</span>
+        <input
+          type="number"
+          inputMode="numeric"
+          value={value || ''}
+          onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
+          placeholder="0"
+          className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
+        />
       </div>
     </div>
   );
