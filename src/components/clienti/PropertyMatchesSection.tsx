@@ -135,7 +135,7 @@ function PropertyCard({
       </div>
 
       {/* Action bar */}
-      <div className="flex items-center justify-between mt-2.5 pt-2 border-t border-muted/30">
+      <div className="flex items-center justify-between mt-2.5 pt-2">
         {/* Left: reactions */}
         <div className="flex items-center gap-1">
           {/* Proposed tick */}
@@ -338,7 +338,7 @@ function AddPropertyDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="w-full">
+        <Button size="sm" className="w-full bg-black text-white hover:bg-black/80">
           <Plus className="h-4 w-4 mr-1" />
           Cerca sul sito
         </Button>
@@ -355,9 +355,13 @@ function AddPropertyDialog({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleKeyDown}
-              className="flex-1"
+              className="flex-1 border-0 shadow-lg rounded-xl bg-white"
             />
-            <Button onClick={handleSearch} disabled={isSearching || searchQuery.length < 2}>
+            <Button 
+              onClick={handleSearch} 
+              disabled={isSearching || searchQuery.length < 2}
+              className="bg-black text-white hover:bg-black/80"
+            >
               {isSearching ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
@@ -381,7 +385,7 @@ function AddPropertyDialog({
                 {searchResults.map((result, idx) => (
                   <div 
                     key={idx}
-                    className="p-3 rounded-lg border hover:border-primary transition-colors"
+                    className="p-3 rounded-2xl bg-white shadow-lg"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
@@ -413,6 +417,7 @@ function AddPropertyDialog({
                         size="sm"
                         onClick={() => handleImportAndAdd(result)}
                         disabled={isImporting !== null}
+                        className="bg-black text-white hover:bg-black/80"
                       >
                         {isImporting === result.url ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
