@@ -1,10 +1,100 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Check, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
+type ReportFormData = {
+  contatti_reali: number;
+  notizie_reali: number;
+  appuntamenti_vendita: number;
+  incarichi_vendita: number;
+  valutazioni_fatte: number;
+  vendite_numero: number;
+  vendite_valore: number;
+  nuove_trattative: number;
+  trattative_chiuse: number;
+  fatturato_a_credito: number;
+};
+
+type FieldKey = keyof ReportFormData;
+
+const CounterField = ({
+  label,
+  value,
+  field,
+  ideal,
+  icon: Icon,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  field: FieldKey;
+  ideal?: number;
+  icon: any;
+  onChange: (field: FieldKey, value: number) => void;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+        <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
+          {label}
+        </span>
+      </div>
+      {ideal !== undefined && (
+        <span className="text-xs text-muted-foreground flex items-center gap-1">
+          <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
+          IDEALE: {ideal}
+        </span>
+      )}
+    </div>
+    <input
+      type="number"
+      inputMode="numeric"
+      value={value || ''}
+      onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+      placeholder="0"
+      className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary"
+    />
+  </div>
+);
+
+const CurrencyField = ({
+  label,
+  value,
+  field,
+  icon: Icon,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  field: FieldKey;
+  icon: any;
+  onChange: (field: FieldKey, value: number) => void;
+}) => (
+  <div className="space-y-2">
+    <div className="flex items-center gap-2">
+      <Icon className="w-4 h-4 text-muted-foreground" />
+      <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
+        {label}
+      </span>
+    </div>
+    <div className="flex items-center rounded-xl border border-border bg-background h-12 px-3">
+      <span className="text-muted-foreground mr-2">€</span>
+      <input
+        type="number"
+        inputMode="numeric"
+        value={value || ''}
+        onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+        placeholder="0"
+        className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
+      />
+    </div>
+  </div>
+);
+
 const ReportForm = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ReportFormData>({
     contatti_reali: 0,
     notizie_reali: 0,
     appuntamenti_vendita: 0,
@@ -53,17 +143,9 @@ const ReportForm = () => {
     }
   }, [date, myData]);
 
-  const handleIncrement = (field: keyof typeof formData) => {
-    setFormData(prev => ({ ...prev, [field]: prev[field] + 1 }));
-  };
-
-  const handleDecrement = (field: keyof typeof formData) => {
-    setFormData(prev => ({ ...prev, [field]: Math.max(0, prev[field] - 1) }));
-  };
-
-  const handleValueChange = (field: keyof typeof formData, value: number) => {
+  const handleValueChange = useCallback((field: FieldKey, value: number) => {
     setFormData(prev => ({ ...prev, [field]: Math.max(0, value) }));
-  };
+  }, []);
 
   const handleSave = () => {
     const input: DailyDataInput = {
@@ -80,77 +162,6 @@ const ReportForm = () => {
     };
     saveDailyData.mutate(input);
   };
-
-  const CounterField = ({ 
-    label, 
-    value, 
-    field, 
-    ideal,
-    icon: Icon 
-  }: { 
-    label: string; 
-    value: number; 
-    field: keyof typeof formData; 
-    ideal?: number;
-    icon: any;
-  }) => (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Icon className="w-4 h-4 text-muted-foreground" />
-          <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-            {label}
-          </span>
-        </div>
-        {ideal !== undefined && (
-          <span className="text-xs text-muted-foreground flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
-            IDEALE: {ideal}
-          </span>
-        )}
-      </div>
-      <input
-        type="number"
-        inputMode="numeric"
-        value={value || ''}
-        onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
-        placeholder="0"
-        className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-      />
-    </div>
-  );
-
-  const CurrencyField = ({
-    label,
-    value,
-    field,
-    icon: Icon,
-  }: {
-    label: string;
-    value: number;
-    field: keyof typeof formData;
-    icon: any;
-  }) => (
-    <div className="space-y-2">
-      <div className="flex items-center gap-2">
-        <Icon className="w-4 h-4 text-muted-foreground" />
-        <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-          {label}
-        </span>
-      </div>
-      <div className="flex items-center rounded-xl border border-border bg-background h-12 px-3">
-        <span className="text-muted-foreground mr-2">€</span>
-        <input
-          type="number"
-          inputMode="numeric"
-          value={value || ''}
-          onChange={(e) => handleValueChange(field, parseInt(e.target.value) || 0)}
-          placeholder="0"
-          className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
-        />
-      </div>
-    </div>
-  );
 
   return (
     <div className="px-6 pb-8 animate-fade-in">
@@ -190,6 +201,7 @@ const ReportForm = () => {
             field="contatti_reali"
             ideal={5}
             icon={Phone}
+            onChange={handleValueChange}
           />
           
           <CounterField
@@ -198,6 +210,7 @@ const ReportForm = () => {
             field="notizie_reali"
             ideal={2}
             icon={FileText}
+            onChange={handleValueChange}
           />
           
           <CounterField
@@ -206,6 +219,7 @@ const ReportForm = () => {
             field="appuntamenti_vendita"
             ideal={1}
             icon={CalendarDays}
+            onChange={handleValueChange}
           />
           
           <CounterField
@@ -213,6 +227,7 @@ const ReportForm = () => {
             value={formData.incarichi_vendita}
             field="incarichi_vendita"
             icon={Handshake}
+            onChange={handleValueChange}
           />
           
           <CounterField
@@ -220,6 +235,7 @@ const ReportForm = () => {
             value={formData.valutazioni_fatte}
             field="valutazioni_fatte"
             icon={ClipboardCheck}
+            onChange={handleValueChange}
           />
         </div>
 
@@ -236,6 +252,7 @@ const ReportForm = () => {
             field="nuove_trattative"
             ideal={2}
             icon={Handshake}
+            onChange={handleValueChange}
           />
           
           <CounterField
@@ -244,6 +261,7 @@ const ReportForm = () => {
             field="trattative_chiuse"
             ideal={1}
             icon={CheckCircle}
+            onChange={handleValueChange}
           />
 
           <CurrencyField
@@ -251,6 +269,7 @@ const ReportForm = () => {
             value={formData.fatturato_a_credito}
             field="fatturato_a_credito"
             icon={CreditCard}
+            onChange={handleValueChange}
           />
         </div>
 
@@ -267,6 +286,7 @@ const ReportForm = () => {
             field="vendite_numero"
             ideal={0.1}
             icon={Check}
+            onChange={handleValueChange}
           />
           
           <CurrencyField
@@ -274,6 +294,7 @@ const ReportForm = () => {
             value={formData.vendite_valore}
             field="vendite_valore"
             icon={Euro}
+            onChange={handleValueChange}
           />
         </div>
       </div>
