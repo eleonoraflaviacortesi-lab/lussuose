@@ -101,19 +101,18 @@ export function ClientiPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Buyers Dashboard</h1>
+          <h1 className="text-2xl font-bold">✱</h1>
           <p className="text-sm text-muted-foreground">
             Gestisci i clienti internazionali in cerca di immobili
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Importa CSV
+            <Upload className="w-4 h-4 mr-1.5" />
+            CSV
           </Button>
           <Button onClick={() => setAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Aggiungi
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
       </div>
@@ -158,6 +157,7 @@ export function ClientiPage() {
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
         onAdd={async (data) => { await createCliente(data); }}
+        agents={agents}
         isLoading={isCreating}
       />
 

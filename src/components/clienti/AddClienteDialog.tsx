@@ -23,6 +23,7 @@ interface AddClienteDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onAdd: (cliente: Partial<Cliente>) => Promise<void>;
+  agents: Array<{ user_id: string; full_name: string; avatar_emoji: string }>;
   isLoading?: boolean;
 }
 
@@ -33,6 +34,7 @@ export function AddClienteDialog({
   open,
   onOpenChange,
   onAdd,
+  agents,
   isLoading,
 }: AddClienteDialogProps) {
   const [formData, setFormData] = useState({
@@ -44,6 +46,7 @@ export function AddClienteDialog({
     regione: '',
     tipologia: '',
     descrizione: '',
+    assigned_to: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +61,7 @@ export function AddClienteDialog({
       regioni: formData.regione ? [formData.regione] : [],
       tipologia: formData.tipologia ? [formData.tipologia] : [],
       descrizione: formData.descrizione || null,
+      assigned_to: formData.assigned_to || null,
       status: 'new',
     });
 
@@ -70,6 +74,7 @@ export function AddClienteDialog({
       regione: '',
       tipologia: '',
       descrizione: '',
+      assigned_to: '',
     });
     onOpenChange(false);
   };
@@ -169,6 +174,29 @@ export function AddClienteDialog({
                 </SelectContent>
               </Select>
             </div>
+          </div>
+
+          <div>
+            <Label>Assegna a</Label>
+            <Select
+              value={formData.assigned_to}
+              onValueChange={v => setFormData({ ...formData, assigned_to: v })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Non assegnato" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Non assegnato</SelectItem>
+                {agents.map(a => (
+                  <SelectItem key={a.user_id} value={a.user_id}>
+                    <div className="flex items-center gap-2">
+                      <span>{a.avatar_emoji}</span>
+                      {a.full_name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
