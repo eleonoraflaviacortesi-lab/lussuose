@@ -2,15 +2,19 @@ import { useState } from 'react';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
+import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
-import { Phone, FileText, Gift, Euro, BarChart3 } from 'lucide-react';
+import { Phone, FileText, Gift, Euro, BarChart3, Settings } from 'lucide-react';
+import SedeTargetsDialog from './SedeTargetsDialog';
 
 const AgencyDashboard = () => {
   const { profile: currentProfile } = useAuth();
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
+  const [showTargetsDialog, setShowTargetsDialog] = useState(false);
   // La sede è fissa in base all'account - non modificabile
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
   const { kpis, isLoading } = useKPIs(period);
+  const { targets } = useSedeTargets();
   // Filtra profili solo per la sede dell'utente
   const { profiles } = useProfiles(true);
 
@@ -31,19 +35,19 @@ const AgencyDashboard = () => {
   }
 
   const contatti = kpis?.contatti?.value || 0;
-  const contattiTarget = 108;
+  const contattiTarget = targets.contatti_target;
   const contattiPercent = Math.min(100, Math.round((contatti / contattiTarget) * 100));
 
   const notizie = kpis?.notizie?.value || 0;
-  const notizieTarget = 43;
+  const notizieTarget = targets.notizie_target;
   const notiziePercent = Math.min(100, Math.round((notizie / notizieTarget) * 100));
 
   const incarichi = kpis?.incarichi?.value || 0;
-  const incarichiTarget = 4;
+  const incarichiTarget = targets.incarichi_target;
   const incarichiPercent = Math.min(100, Math.round((incarichi / incarichiTarget) * 100));
 
   const fatturato = kpis?.fatturato?.value || 0;
-  const fatturatoTarget = 145455;
+  const fatturatoTarget = targets.fatturato_target;
   const fatturatoPercent = Math.min(100, Math.round((fatturato / fatturatoTarget) * 100));
 
   return (
@@ -60,6 +64,12 @@ const AgencyDashboard = () => {
               MESE PERFORMANCE
             </p>
           </div>
+          <button 
+            onClick={() => setShowTargetsDialog(true)}
+            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
         </div>
 
         <div className="flex items-center gap-1 bg-muted rounded-full p-1 w-full sm:w-auto justify-center">
@@ -160,6 +170,8 @@ const AgencyDashboard = () => {
           </div>
         </div>
       )}
+
+      <SedeTargetsDialog open={showTargetsDialog} onOpenChange={setShowTargetsDialog} />
     </div>
   );
 };
