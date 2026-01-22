@@ -86,12 +86,17 @@ export function useProperties() {
     },
   });
 
+  const refetchProperties = () => {
+    queryClient.invalidateQueries({ queryKey: ['properties'] });
+  };
+
   return {
     properties,
     isLoading,
     error,
     syncProperties: syncMutation.mutateAsync,
     isSyncing: syncMutation.isPending,
+    refetchProperties,
   };
 }
 
