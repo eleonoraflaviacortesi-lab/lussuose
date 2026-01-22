@@ -113,7 +113,7 @@ export const useNotizie = () => {
   });
 
   const updateNotizia = useMutation({
-    mutationFn: async ({ id, comments, ...input }: Partial<NotiziaInput> & { id: string }) => {
+    mutationFn: async ({ id, comments, silent, ...input }: Partial<NotiziaInput> & { id: string; silent?: boolean }) => {
       if (!user) throw new Error('Non autenticato');
       
       const updateData: Record<string, unknown> = { ...input };
@@ -127,10 +127,14 @@ export const useNotizie = () => {
         .eq('id', id);
       
       if (error) throw error;
+      return { silent };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['notizie'] });
-      toast({ title: 'Notizia aggiornata!' });
+      // Only show toast if not silent
+      if (!data?.silent) {
+        toast({ title: 'Notizia aggiornata!' });
+      }
     },
     onError: (error) => {
       toast({
