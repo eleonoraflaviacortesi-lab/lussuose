@@ -14,6 +14,129 @@ export type Database = {
   }
   public: {
     Tables: {
+      clienti: {
+        Row: {
+          assigned_to: string | null
+          bagni: number | null
+          budget_max: number | null
+          camere: string | null
+          card_color: string | null
+          comments: Json | null
+          contesto: string[] | null
+          created_at: string
+          data_submission: string | null
+          dependance: string | null
+          descrizione: string | null
+          dimensioni_max: number | null
+          dimensioni_min: number | null
+          display_order: number
+          email: string | null
+          emoji: string | null
+          ha_visitato: boolean | null
+          id: string
+          interesse_affitto: string | null
+          layout: string | null
+          motivo_zona: string[] | null
+          mutuo: string | null
+          nome: string
+          note_extra: string | null
+          paese: string | null
+          piscina: string | null
+          regioni: string[] | null
+          sede: string
+          status: string
+          stile: string | null
+          tally_submission_id: string | null
+          telefono: string | null
+          tempo_ricerca: string | null
+          terreno: string | null
+          tipologia: string[] | null
+          updated_at: string
+          uso: string | null
+          vicinanza_citta: boolean | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          bagni?: number | null
+          budget_max?: number | null
+          camere?: string | null
+          card_color?: string | null
+          comments?: Json | null
+          contesto?: string[] | null
+          created_at?: string
+          data_submission?: string | null
+          dependance?: string | null
+          descrizione?: string | null
+          dimensioni_max?: number | null
+          dimensioni_min?: number | null
+          display_order?: number
+          email?: string | null
+          emoji?: string | null
+          ha_visitato?: boolean | null
+          id?: string
+          interesse_affitto?: string | null
+          layout?: string | null
+          motivo_zona?: string[] | null
+          mutuo?: string | null
+          nome: string
+          note_extra?: string | null
+          paese?: string | null
+          piscina?: string | null
+          regioni?: string[] | null
+          sede?: string
+          status?: string
+          stile?: string | null
+          tally_submission_id?: string | null
+          telefono?: string | null
+          tempo_ricerca?: string | null
+          terreno?: string | null
+          tipologia?: string[] | null
+          updated_at?: string
+          uso?: string | null
+          vicinanza_citta?: boolean | null
+        }
+        Update: {
+          assigned_to?: string | null
+          bagni?: number | null
+          budget_max?: number | null
+          camere?: string | null
+          card_color?: string | null
+          comments?: Json | null
+          contesto?: string[] | null
+          created_at?: string
+          data_submission?: string | null
+          dependance?: string | null
+          descrizione?: string | null
+          dimensioni_max?: number | null
+          dimensioni_min?: number | null
+          display_order?: number
+          email?: string | null
+          emoji?: string | null
+          ha_visitato?: boolean | null
+          id?: string
+          interesse_affitto?: string | null
+          layout?: string | null
+          motivo_zona?: string[] | null
+          mutuo?: string | null
+          nome?: string
+          note_extra?: string | null
+          paese?: string | null
+          piscina?: string | null
+          regioni?: string[] | null
+          sede?: string
+          status?: string
+          stile?: string | null
+          tally_submission_id?: string | null
+          telefono?: string | null
+          tempo_ricerca?: string | null
+          terreno?: string | null
+          tipologia?: string[] | null
+          updated_at?: string
+          uso?: string | null
+          vicinanza_citta?: boolean | null
+        }
+        Relationships: []
+      }
       daily_data: {
         Row: {
           acquisizioni: number

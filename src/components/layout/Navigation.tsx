@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
-import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus, Users } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
+import { useAuth } from '@/hooks/useAuth';
 
 
 interface NavigationProps {
@@ -10,12 +11,15 @@ interface NavigationProps {
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const { hasReportedToday } = useTodayReportStatus();
+  const { profile } = useAuth();
+  const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
   
   const tabs = [
     { id: 'numeri', icon: Home, label: 'Home' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
     { id: 'agenzia', icon: Building2, label: 'Agenzia' },
+    ...(isCoordinator ? [{ id: 'clienti', icon: Users, label: 'Clienti' }] : []),
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
