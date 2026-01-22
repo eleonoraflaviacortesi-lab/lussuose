@@ -13,6 +13,7 @@ const AgencyDashboard = () => {
   const [showTargetsDialog, setShowTargetsDialog] = useState(false);
   // La sede è fissa in base all'account - non modificabile
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
+  const canManageTargets = currentProfile?.role === 'coordinatore' || currentProfile?.role === 'admin';
   const { kpis, isLoading } = useKPIs(period);
   const { targets } = useSedeTargets();
   // Filtra profili solo per la sede dell'utente
@@ -34,21 +35,52 @@ const AgencyDashboard = () => {
     );
   }
 
+  if (!canManageTargets) {
+    return (
+      <div className="px-6 pb-8 space-y-4 animate-fade-in">
+        <div className="bg-card rounded-3xl shadow-lg p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
+              <BarChart3 className="w-7 h-7" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-bold tracking-tight">{userSede}</h2>
+              <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
+                DASHBOARD AGENZIA
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-4 text-sm text-muted-foreground">
+            Questa sezione è disponibile solo per i coordinatori.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
+
+  // Targets sono salvati come valori mensili (operativi).
+  // Per la vista anno, moltiplichiamo per 12. Per la settimana, dividiamo per 4.
+  const operationalMultiplier = period === 'year' ? 12 : period === 'week' ? 0.25 : 1;
+
   const contatti = kpis?.contatti?.value || 0;
-  const contattiTarget = targets.contatti_target;
-  const contattiPercent = Math.min(100, Math.round((contatti / contattiTarget) * 100));
+  const contattiTarget = Math.max(0, Math.round((targets.contatti_target || 0) * operationalMultiplier));
+  const contattiPercent = contattiTarget > 0 ? Math.min(100, Math.round((contatti / contattiTarget) * 100)) : 0;
 
   const notizie = kpis?.notizie?.value || 0;
-  const notizieTarget = targets.notizie_target;
-  const notiziePercent = Math.min(100, Math.round((notizie / notizieTarget) * 100));
+  const notizieTarget = Math.max(0, Math.round((targets.notizie_target || 0) * operationalMultiplier));
+  const notiziePercent = notizieTarget > 0 ? Math.min(100, Math.round((notizie / notizieTarget) * 100)) : 0;
 
   const incarichi = kpis?.incarichi?.value || 0;
-  const incarichiTarget = targets.incarichi_target;
-  const incarichiPercent = Math.min(100, Math.round((incarichi / incarichiTarget) * 100));
+  const incarichiTarget = Math.max(0, Math.round((targets.incarichi_target || 0) * operationalMultiplier));
+  const incarichiPercent = incarichiTarget > 0 ? Math.min(100, Math.round((incarichi / incarichiTarget) * 100)) : 0;
 
   const fatturato = kpis?.fatturato?.value || 0;
-  const fatturatoTarget = targets.fatturato_target;
-  const fatturatoPercent = Math.min(100, Math.round((fatturato / fatturatoTarget) * 100));
+  // Il target fatturato è annuale
+  const fatturatoTarget = Math.max(0, Number(targets.fatturato_target || 0));
+  const fatturatoPercent = fatturatoTarget > 0 ? Math.min(100, Math.round((fatturato / fatturatoTarget) * 100)) : 0;
 
   return (
     <div className="px-6 pb-8 space-y-6 animate-fade-in">
@@ -61,7 +93,7 @@ const AgencyDashboard = () => {
           <div className="flex-1">
             <h2 className="text-xl font-bold tracking-tight">{userSede}</h2>
             <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-              MESE PERFORMANCE
+              {periodLabel}
             </p>
           </div>
           <button 

@@ -19,9 +19,16 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
     setFormData(targets);
   }, [targets]);
 
-  const handleSave = () => {
-    updateTargets.mutate(formData);
-    onOpenChange(false);
+  const canManageTargets = profile?.role === 'coordinatore' || profile?.role === 'admin';
+
+  const handleSave = async () => {
+    if (!canManageTargets) return;
+    try {
+      await updateTargets.mutateAsync(formData);
+      onOpenChange(false);
+    } catch {
+      // toast handled inside the hook
+    }
   };
 
   const inputClass = cn(
@@ -209,13 +216,19 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
             </button>
             <button
               onClick={handleSave}
-              disabled={updateTargets.isPending}
+              disabled={updateTargets.isPending || !canManageTargets}
               className="px-6 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               {updateTargets.isPending ? 'Salvando...' : 'Salva Strategia'}
             </button>
           </div>
+
+          {!canManageTargets && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              Solo i coordinatori possono modificare gli obiettivi di sede.
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>
