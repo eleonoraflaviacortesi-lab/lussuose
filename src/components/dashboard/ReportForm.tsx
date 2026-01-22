@@ -8,6 +8,7 @@ const ReportForm = () => {
     contatti_reali: 0,
     notizie_reali: 0,
     appuntamenti_vendita: 0,
+    incarichi_vendita: 0,
     vendite_numero: 0,
     vendite_valore: 0,
     nuove_trattative: 0,
@@ -26,6 +27,7 @@ const ReportForm = () => {
           contatti_reali: existingEntry.contatti_reali,
           notizie_reali: existingEntry.notizie_reali,
           appuntamenti_vendita: existingEntry.appuntamenti_vendita,
+          incarichi_vendita: existingEntry.incarichi_vendita || 0,
           vendite_numero: existingEntry.vendite_numero,
           vendite_valore: Number(existingEntry.vendite_valore),
           nuove_trattative: existingEntry.nuove_trattative || 0,
@@ -37,6 +39,7 @@ const ReportForm = () => {
           contatti_reali: 0,
           notizie_reali: 0,
           appuntamenti_vendita: 0,
+          incarichi_vendita: 0,
           vendite_numero: 0,
           vendite_valore: 0,
           nuove_trattative: 0,
@@ -67,7 +70,6 @@ const ReportForm = () => {
       notizie_ideali: 3,
       clienti_gestiti: 0,
       acquisizioni: 0,
-      incarichi_vendita: 0,
       affitti_numero: 0,
       affitti_valore: 0,
       nuove_trattative_ideali: 2,
@@ -251,6 +253,13 @@ const ReportForm = () => {
             field="trattative_chiuse"
             ideal={1}
             icon={CheckCircle}
+          />
+
+          <CounterField
+            label="INCARICHI PRESI"
+            value={formData.incarichi_vendita}
+            field="incarichi_vendita"
+            icon={Handshake}
           />
 
           <CurrencyField
