@@ -48,15 +48,28 @@ export const useDailyData = () => {
     gcTime: 1000 * 60 * 5, // 5 minutes garbage collection
   });
 
-  // Query for all data filtered by user's sede
+  // Query for all data filtered by user's sede (using subquery for user_ids)
   const { data: allData, isLoading: allDataLoading } = useQuery({
     queryKey: ['daily-data-all', profile?.sede],
     queryFn: async () => {
       if (!user || !profile?.sede) return [];
+      
+      // First get all user_ids for this sede
+      const { data: sedeProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('sede', profile.sede);
+      
+      if (profilesError) throw profilesError;
+      if (!sedeProfiles || sedeProfiles.length === 0) return [];
+      
+      const userIds = sedeProfiles.map(p => p.user_id);
+      
+      // Then get daily_data for those users
       const { data, error } = await supabase
         .from('daily_data')
-        .select('*, profiles!inner(full_name, sede)')
-        .eq('profiles.sede', profile.sede)
+        .select('*')
+        .in('user_id', userIds)
         .order('date', { ascending: false });
       
       if (error) throw error;
