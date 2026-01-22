@@ -181,20 +181,27 @@ export const useNotizie = () => {
     sold: notizie?.filter(n => n.status === 'sold').sort((a, b) => a.display_order - b.display_order) || [],
   };
 
-  // Batch update order for multiple notizie
+  // Batch update order for multiple notizie using Promise.all for performance
   const updateOrder = useMutation({
     mutationFn: async (updates: { id: string; display_order: number; status?: NotiziaStatus }[]) => {
       if (!user) throw new Error('Non autenticato');
       
-      // Update each item
-      for (const update of updates) {
-        const { error } = await supabase
-          .from('notizie')
-          .update({ display_order: update.display_order, ...(update.status && { status: update.status }) })
-          .eq('id', update.id);
-        
-        if (error) throw error;
-      }
+      // Execute all updates in parallel for better performance
+      const results = await Promise.all(
+        updates.map(update =>
+          supabase
+            .from('notizie')
+            .update({ 
+              display_order: update.display_order, 
+              ...(update.status && { status: update.status }) 
+            })
+            .eq('id', update.id)
+        )
+      );
+      
+      // Check for any errors
+      const errorResult = results.find(r => r.error);
+      if (errorResult?.error) throw errorResult.error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notizie'] });

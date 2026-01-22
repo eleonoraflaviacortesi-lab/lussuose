@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { Progress } from '@/components/ui/progress';
 import { Users, Zap, Award, Gift, TrendingUp } from 'lucide-react';
 import IncarchiWidget from './IncarchiWidget';
@@ -21,8 +22,12 @@ const PersonalDashboard = () => {
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
+  const { settings } = useUserSettings();
 
-  const annualTarget = 25;
+  // Dynamic annual target from user settings (weekly * 52 weeks)
+  const annualTarget = settings?.vendite_settimana 
+    ? Math.round(settings.vendite_settimana * 52) 
+    : 25;
   const currentSales = kpis?.vendite?.value || 0;
   const completionPercent = Math.min(100, Math.round((currentSales / annualTarget) * 100));
   const fatturato = kpis?.fatturato?.value || 0;

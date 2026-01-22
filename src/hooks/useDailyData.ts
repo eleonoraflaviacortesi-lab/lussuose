@@ -84,25 +84,15 @@ export const useDailyData = () => {
     mutationFn: async (input: DailyDataInput) => {
       if (!user) throw new Error('Non autenticato');
 
-      const { data: existing } = await supabase
+      // Use upsert with the unique constraint on (user_id, date)
+      const { error } = await supabase
         .from('daily_data')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('date', input.date)
-        .maybeSingle();
-
-      if (existing) {
-        const { error } = await supabase
-          .from('daily_data')
-          .update({ ...input, user_id: user.id })
-          .eq('id', existing.id);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('daily_data')
-          .insert({ ...input, user_id: user.id });
-        if (error) throw error;
-      }
+        .upsert(
+          { ...input, user_id: user.id },
+          { onConflict: 'user_id,date' }
+        );
+      
+      if (error) throw error;
     },
     onSuccess: () => {
       // Invalidate the exact user-scoped query so dashboards refresh immediately
