@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus, Users } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 
@@ -20,6 +21,11 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
+  const handleTabChange = (tabId: string) => {
+    triggerHaptic('selection');
+    onTabChange(tabId);
+  };
+
   return (
     <nav className="flex flex-col items-center gap-4 py-4">
       {/* Pill Navigation */}
@@ -31,7 +37,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
           return (
             <div key={tab.id} className="flex items-center">
               <button
-                onClick={() => onTabChange(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={cn(
                   'pill-nav-item',
                   isActive && 'active'
@@ -50,7 +56,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
       {/* Ciclo Produttivo Button - Dynamic State */}
       <button 
-        onClick={() => onTabChange('inserisci')}
+        onClick={() => {
+          triggerHaptic('medium');
+          onTabChange('inserisci');
+        }}
         className={cn(
           'btn-report flex items-center gap-2',
           hasReportedToday ? 'completed' : 'pending'
