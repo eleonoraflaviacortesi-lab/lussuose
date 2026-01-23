@@ -61,16 +61,12 @@ const NotiziePage = () => {
         n.zona?.toLowerCase().includes(q)
       );
 
-    return {
-      new: filter(notizieByStatus.new),
-      in_progress: filter(notizieByStatus.in_progress),
-      done: filter(notizieByStatus.done),
-      on_shot: filter(notizieByStatus.on_shot),
-      taken: filter(notizieByStatus.taken),
-      credit: filter(notizieByStatus.credit),
-      no: filter(notizieByStatus.no),
-      sold: filter(notizieByStatus.sold),
-    };
+    // Filter all status groups dynamically
+    const filtered: Record<string, Notizia[]> = {};
+    Object.keys(notizieByStatus).forEach(key => {
+      filtered[key] = filter(notizieByStatus[key] || []);
+    });
+    return filtered;
   }, [notizieByStatus, searchQuery]);
 
   const handleStatusChange = useCallback((id: string, newStatus: NotiziaStatus) => {

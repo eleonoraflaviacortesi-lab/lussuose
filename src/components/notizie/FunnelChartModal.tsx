@@ -1,25 +1,27 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { NotiziaStatus } from '@/hooks/useNotizie';
+import { useKanbanColumns } from '@/hooks/useKanbanColumns';
 import { ArrowDown } from 'lucide-react';
 
 interface FunnelChartModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  notizieByStatus: Record<NotiziaStatus, { length: number }>;
+  notizieByStatus: Record<string, { length: number }>;
 }
 
-const funnelSteps: { key: NotiziaStatus; label: string; color: string }[] = [
-  { key: 'new', label: 'New', color: 'bg-yellow-200 text-yellow-900' },
-  { key: 'in_progress', label: 'In Progress', color: 'bg-yellow-400 text-yellow-950' },
-  { key: 'done', label: 'Done', color: 'bg-orange-400 text-orange-950' },
-  { key: 'taken', label: 'Taken', color: 'bg-green-300 text-green-900' },
-  { key: 'credit', label: 'Credit', color: 'bg-blue-400 text-white' },
-  { key: 'sold', label: 'Sold', color: 'bg-zinc-600 text-white' },
-];
+const isDarkColor = (color: string): boolean => {
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.5;
+};
 
 const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelChartModalProps) => {
   const [animated, setAnimated] = useState(false);
+  const { columns } = useKanbanColumns();
 
   // Trigger animation after modal opens
   useEffect(() => {
@@ -32,14 +34,15 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
   }, [open]);
 
   const funnelData = useMemo(() => {
-    const steps = funnelSteps.map(s => ({
-      ...s,
-      count: notizieByStatus[s.key]?.length || 0,
+    const steps = columns.map(col => ({
+      key: col.key,
+      label: col.label,
+      color: col.color,
+      count: notizieByStatus[col.key]?.length || 0,
     }));
 
-    // Calculate cumulative totals for funnel (each step includes items that progressed further)
+    // Calculate cumulative totals for funnel
     const cumulativeCounts = steps.map((step, i) => {
-      // Sum this step + all steps after it (items that passed through this stage)
       const cumulativeCount = steps.slice(i).reduce((sum, s) => sum + s.count, 0);
       return { ...step, cumulativeCount };
     });
@@ -56,13 +59,16 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
         conversionRate,
         widthPercent,
         isFirst: i === 0,
+        textColor: isDarkColor(step.color) ? 'text-white' : 'text-black',
       };
     });
-  }, [notizieByStatus]);
+  }, [notizieByStatus, columns]);
 
-  const totalNew = notizieByStatus.new?.length || 0;
-  const totalSold = notizieByStatus.sold?.length || 0;
-  const overallConversion = totalNew > 0 ? Math.round((totalSold / totalNew) * 100) : 0;
+  const firstColumn = columns[0];
+  const lastColumn = columns[columns.length - 1];
+  const totalFirst = firstColumn ? (notizieByStatus[firstColumn.key]?.length || 0) : 0;
+  const totalLast = lastColumn ? (notizieByStatus[lastColumn.key]?.length || 0) : 0;
+  const overallConversion = totalFirst > 0 ? Math.round((totalLast / totalFirst) * 100) : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -86,8 +92,9 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
             >
               {/* Funnel bar */}
               <div
-                className={`${step.color} rounded-lg py-2.5 px-4 flex items-center justify-center gap-3 overflow-hidden`}
+                className={`${step.textColor} rounded-lg py-2.5 px-4 flex items-center justify-center gap-3 overflow-hidden`}
                 style={{ 
+                  backgroundColor: step.color,
                   width: animated ? `${step.widthPercent}%` : '15%',
                   minWidth: '100px',
                   transition: `width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${i * 0.1 + 0.1}s`
@@ -140,7 +147,7 @@ const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelCh
             {overallConversion}%
           </p>
           <p className="text-xs text-muted-foreground mt-1">
-            {totalNew} New → {totalSold} Sold
+            {totalFirst} {firstColumn?.label || 'Start'} → {totalLast} {lastColumn?.label || 'End'}
           </p>
         </div>
       </DialogContent>
