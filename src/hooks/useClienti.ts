@@ -215,6 +215,8 @@ export function useClienti(options?: {
   // Assign cliente to agent
   const assignMutation = useMutation({
     mutationFn: async ({ id, agentId }: { id: string; agentId: string | null }) => {
+      const cliente = clienti.find(c => c.id === id);
+      
       const { data, error } = await supabase
         .from('clienti')
         .update({ assigned_to: agentId })
@@ -223,6 +225,19 @@ export function useClienti(options?: {
         .single();
 
       if (error) throw error;
+      
+      // Send notification to the assigned agent
+      if (agentId && cliente) {
+        const agent = agents.find(a => a.user_id === agentId);
+        await supabase.from('notifications').insert({
+          user_id: agentId,
+          type: 'assignment',
+          title: 'Nuovo cliente assegnato',
+          message: `Ti è stato assegnato ${cliente.nome}${cliente.paese ? ` (${cliente.paese})` : ''}`,
+          reference_id: id,
+        });
+      }
+      
       return transformCliente(data);
     },
     onSuccess: () => {
