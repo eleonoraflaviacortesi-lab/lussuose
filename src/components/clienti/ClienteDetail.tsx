@@ -104,7 +104,7 @@ export function ClienteDetail({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[95vw] h-[90vh] flex flex-col p-0 rounded-3xl overflow-hidden">
-        <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0">
+        <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{cliente.emoji}</span>
             <div className="flex-1 min-w-0">
