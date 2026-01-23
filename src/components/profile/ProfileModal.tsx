@@ -190,12 +190,15 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
                 {(['agente', 'coordinatore'] as const).map((r) => (
                   <button
                     key={r}
-                    onClick={() => setRole(r)}
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setRole(r);
+                    }}
                     className={cn(
-                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center capitalize",
+                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center capitalize active:scale-95",
                       role === r
                         ? "bg-foreground text-background"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        : "bg-muted/50 text-muted-foreground"
                     )}
                   >
                     {r === 'coordinatore' ? 'Coord.' : 'Agente'}
