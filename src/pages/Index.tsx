@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -18,6 +18,7 @@ const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
+  const [pendingClienteId, setPendingClienteId] = useState<string | null>(null);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -34,6 +35,19 @@ const IndexContent = () => {
     // Small delay for visual feedback
     await new Promise(resolve => setTimeout(resolve, 300));
   }, [queryClient]);
+
+  const handleOpenCliente = useCallback((clienteId: string) => {
+    // Navigate to clienti tab and set pending cliente to open
+    setPendingClienteId(clienteId);
+    setActiveTab('clienti');
+  }, []);
+
+  // Clear pending cliente when leaving clienti tab
+  useEffect(() => {
+    if (activeTab !== 'clienti') {
+      setPendingClienteId(null);
+    }
+  }, [activeTab]);
 
   if (loading) {
     return (
@@ -60,7 +74,7 @@ const IndexContent = () => {
       case 'agenzia':
         return <AgencyDashboard />;
       case 'clienti':
-        return <ClientiPage />;
+        return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'impostazioni':
         return <SettingsPage />;
       default:
@@ -89,7 +103,7 @@ const IndexContent = () => {
       </main>
       
       {/* Fixed Notification Bell */}
-      <NotificationBell />
+      <NotificationBell onOpenCliente={handleOpenCliente} />
     </PullToRefresh>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useClienti } from '@/hooks/useClienti';
 import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
@@ -10,7 +10,12 @@ import { ImportTallyDialog } from './ImportTallyDialog';
 import { Button } from '@/components/ui/button';
 import { Plus, Loader2, Upload } from 'lucide-react';
 
-export function ClientiPage() {
+interface ClientiPageProps {
+  initialClienteId?: string | null;
+  onClienteOpened?: () => void;
+}
+
+export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPageProps) {
   const { profile } = useAuth();
   const [groupBy, setGroupBy] = useState<ClienteGroupBy>('status');
   const [filters, setFilters] = useState<Filters>({});
@@ -35,6 +40,18 @@ export function ClientiPage() {
 
   // Check if user is coordinator/admin
   const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
+
+  // Handle opening cliente from notification
+  useEffect(() => {
+    if (initialClienteId && clienti.length > 0) {
+      const cliente = clienti.find(c => c.id === initialClienteId);
+      if (cliente) {
+        setSelectedCliente(cliente);
+        setDetailOpen(true);
+        onClienteOpened?.();
+      }
+    }
+  }, [initialClienteId, clienti, onClienteOpened]);
 
   const handleCardClick = useCallback((cliente: Cliente) => {
     setSelectedCliente(cliente);

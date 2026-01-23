@@ -1,24 +1,34 @@
 import { useState } from 'react';
-import { Bell, Check, Users } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
+import { Bell, Check, Users, ExternalLink } from 'lucide-react';
+import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-export function NotificationBell() {
+interface NotificationBellProps {
+  onOpenCliente?: (clienteId: string) => void;
+}
+
+export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
 
-  const handleNotificationClick = async (id: string) => {
-    await markAsRead(id);
+  const handleNotificationClick = async (notification: Notification) => {
+    await markAsRead(notification.id);
+    
+    // If it's an assignment notification with a reference, open the client
+    if (notification.type === 'assignment' && notification.reference_id && onOpenCliente) {
+      setOpen(false);
+      onOpenCliente(notification.reference_id);
+    }
   };
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'assignment':
-        return <Users className="w-4 h-4 text-primary" />;
+        return <Users className="w-4 h-4 text-[hsl(var(--banner))]" />;
       default:
         return <Bell className="w-4 h-4" />;
     }
@@ -37,7 +47,7 @@ export function NotificationBell() {
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[hsl(var(--banner))] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
@@ -73,10 +83,10 @@ export function NotificationBell() {
               notifications.map((notification) => (
                 <button
                   key={notification.id}
-                  onClick={() => handleNotificationClick(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                   className={cn(
                     "w-full text-left p-3 hover:bg-muted/50 transition-colors flex gap-3",
-                    !notification.read && "bg-primary/5"
+                    !notification.read && "bg-[hsl(var(--banner))]/5"
                   )}
                 >
                   <div className="shrink-0 mt-0.5">
@@ -101,9 +111,14 @@ export function NotificationBell() {
                       })}
                     </p>
                   </div>
-                  {!notification.read && (
-                    <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-2" />
-                  )}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {notification.type === 'assignment' && notification.reference_id && (
+                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                    )}
+                    {!notification.read && (
+                      <div className="w-2 h-2 bg-[hsl(var(--banner))] rounded-full" />
+                    )}
+                  </div>
                 </button>
               ))
             )}
