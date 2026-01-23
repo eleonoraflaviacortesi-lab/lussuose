@@ -310,6 +310,39 @@ export type Database = {
           },
         ]
       }
+      kanban_columns: {
+        Row: {
+          color: string | null
+          created_at: string
+          display_order: number
+          id: string
+          key: string
+          label: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          key: string
+          label: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          key?: string
+          label?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

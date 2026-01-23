@@ -4,7 +4,8 @@ import { useAuth } from './useAuth';
 import { toast } from './use-toast';
 import { Json } from '@/integrations/supabase/types';
 
-export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'credit' | 'no' | 'sold';
+// Default statuses + any custom status string
+export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'credit' | 'no' | 'sold' | string;
 
 export interface NotiziaComment {
   id: string;
@@ -169,17 +170,20 @@ export const useNotizie = () => {
     },
   });
 
-  // Group notizie by status, maintaining display_order
-  const notizieByStatus = {
-    new: notizie?.filter(n => n.status === 'new').sort((a, b) => a.display_order - b.display_order) || [],
-    in_progress: notizie?.filter(n => n.status === 'in_progress').sort((a, b) => a.display_order - b.display_order) || [],
-    done: notizie?.filter(n => n.status === 'done').sort((a, b) => a.display_order - b.display_order) || [],
-    on_shot: notizie?.filter(n => n.status === 'on_shot').sort((a, b) => a.display_order - b.display_order) || [],
-    taken: notizie?.filter(n => n.status === 'taken').sort((a, b) => a.display_order - b.display_order) || [],
-    credit: notizie?.filter(n => n.status === 'credit').sort((a, b) => a.display_order - b.display_order) || [],
-    no: notizie?.filter(n => n.status === 'no').sort((a, b) => a.display_order - b.display_order) || [],
-    sold: notizie?.filter(n => n.status === 'sold').sort((a, b) => a.display_order - b.display_order) || [],
-  };
+  // Group notizie by status dynamically (supports custom columns)
+  const notizieByStatus = (notizie || []).reduce((acc, notizia) => {
+    const status = notizia.status;
+    if (!acc[status]) {
+      acc[status] = [];
+    }
+    acc[status].push(notizia);
+    return acc;
+  }, {} as Record<string, Notizia[]>);
+  
+  // Sort each group by display_order
+  Object.keys(notizieByStatus).forEach(key => {
+    notizieByStatus[key].sort((a, b) => a.display_order - b.display_order);
+  });
 
   // Batch update order for multiple notizie using Promise.all for performance
   const updateOrder = useMutation({

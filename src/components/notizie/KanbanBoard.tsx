@@ -1,29 +1,25 @@
 import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
+import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
-import { MessageCircle, X, Plus } from 'lucide-react';
+import { MessageCircle, X, Plus, GripVertical, Trash2 } from 'lucide-react';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
 
+// Preset colors for columns
+const COLUMN_COLORS = [
+  '#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', 
+  '#06b6d4', '#ec4899', '#1f2937', '#6b7280', '#84cc16'
+];
+
 interface KanbanBoardProps {
-  notizieByStatus: Record<NotiziaStatus, Notizia[]>;
+  notizieByStatus: Record<string, Notizia[]>;
   onNotiziaClick: (notizia: Notizia) => void;
   onStatusChange: (id: string, status: NotiziaStatus) => void;
   onQuickAdd?: (status: NotiziaStatus) => void;
 }
-
-const columns: { key: NotiziaStatus; label: string; style: string }[] = [
-  { key: 'new', label: 'NEW!', style: 'bg-yellow-200 text-yellow-900' },
-  { key: 'in_progress', label: 'In progress', style: 'bg-yellow-400 text-yellow-950' },
-  { key: 'done', label: 'Done', style: 'bg-orange-400 text-orange-950' },
-  { key: 'on_shot', label: 'On shot', style: 'bg-red-400 text-red-950' },
-  { key: 'taken', label: 'Taken', style: 'bg-green-200 text-green-900' },
-  { key: 'credit', label: 'Credit', style: 'bg-blue-400 text-white' },
-  { key: 'no', label: 'No', style: 'bg-zinc-900 text-white' },
-  { key: 'sold', label: 'Sold', style: 'bg-zinc-600 text-white' },
-];
 
 // Preset colors for cards
 const cardColors = [
@@ -38,12 +34,130 @@ const cardColors = [
 const isDarkColor = (color: string | null): boolean => {
   if (!color) return false;
   const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
   const r = parseInt(hex.substr(0, 2), 16);
   const g = parseInt(hex.substr(2, 2), 16);
   const b = parseInt(hex.substr(4, 2), 16);
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance < 0.5;
 };
+
+// Editable column header
+const ColumnHeader = memo(({ 
+  column, 
+  count, 
+  onUpdate, 
+  onDelete, 
+  onQuickAdd,
+  isDragging 
+}: { 
+  column: KanbanColumn;
+  count: number;
+  onUpdate: (updates: Partial<KanbanColumn>) => void;
+  onDelete: () => void;
+  onQuickAdd?: () => void;
+  isDragging?: boolean;
+}) => {
+  const [editing, setEditing] = useState(false);
+  const [label, setLabel] = useState(column.label);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editing]);
+
+  const handleSave = () => {
+    if (label.trim() && label !== column.label) {
+      onUpdate({ label: label.trim() });
+    }
+    setEditing(false);
+  };
+
+  const handleColorSelect = (color: string) => {
+    onUpdate({ color });
+    setShowColorPicker(false);
+  };
+
+  return (
+    <div className={cn(
+      "flex items-center gap-2 mb-2 lg:mb-3 group",
+      isDragging && "opacity-50"
+    )}>
+      <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0" />
+      
+      {editing ? (
+        <input
+          ref={inputRef}
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          onBlur={handleSave}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSave();
+            if (e.key === 'Escape') { setLabel(column.label); setEditing(false); }
+          }}
+          className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white shadow-lg outline-none w-24"
+        />
+      ) : (
+        <button
+          onClick={() => setShowColorPicker(!showColorPicker)}
+          onDoubleClick={() => setEditing(true)}
+          className="text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform hover:scale-105"
+          style={{ 
+            backgroundColor: column.color,
+            color: isDarkColor(column.color) ? 'white' : 'black'
+          }}
+          title="Doppio click per modificare nome, click per colore"
+        >
+          {column.label}
+        </button>
+      )}
+      
+      <span className="text-xs text-muted-foreground">{count}</span>
+      
+      {onQuickAdd && (
+        <button
+          onClick={onQuickAdd}
+          className="ml-auto text-foreground hover:opacity-60 transition-opacity"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      )}
+      
+      <button
+        onClick={onDelete}
+        className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+        title="Elimina colonna"
+      >
+        <Trash2 className="w-3.5 h-3.5" />
+      </button>
+
+      {/* Color picker dropdown */}
+      {showColorPicker && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)} />
+          <div className="absolute top-8 left-0 z-50 flex gap-1 p-2 bg-white rounded-xl shadow-lg">
+            {COLUMN_COLORS.map((color) => (
+              <button
+                key={color}
+                onClick={() => handleColorSelect(color)}
+                className={cn(
+                  "w-6 h-6 rounded-full transition-transform hover:scale-110",
+                  column.color === color && "ring-2 ring-foreground ring-offset-1"
+                )}
+                style={{ backgroundColor: color }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+});
+ColumnHeader.displayName = 'ColumnHeader';
 
 // Color picker pill component
 const ColorPickerPill = memo(({ 
@@ -61,13 +175,11 @@ const ColorPickerPill = memo(({
   
   return (
     <>
-      {/* Backdrop */}
       <div 
         className="fixed inset-0 z-50" 
         onClick={onClose}
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
-      {/* Pill */}
       <div
         className="fixed z-50 flex items-center gap-1.5 px-2 py-1.5 bg-white/90 backdrop-blur-xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
         style={{
@@ -88,7 +200,6 @@ const ColorPickerPill = memo(({
             title={c.label}
           />
         ))}
-        {/* Custom color picker - white circle with shadow and black + */}
         <div className="relative">
           <input
             type="color"
@@ -97,9 +208,7 @@ const ColorPickerPill = memo(({
             onBlur={() => { onSelect(customColor); onClose(); }}
             className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
           />
-          <div 
-            className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black"
-          >
+          <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
             +
           </div>
         </div>
@@ -107,6 +216,8 @@ const ColorPickerPill = memo(({
     </>
   );
 });
+ColorPickerPill.displayName = 'ColorPickerPill';
+
 // Emoji picker pill component
 const EmojiPickerPill = memo(({ 
   position, 
@@ -121,12 +232,7 @@ const EmojiPickerPill = memo(({
 }) => {
   return (
     <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-50" 
-        onClick={onClose}
-      />
-      {/* Pill */}
+      <div className="fixed inset-0 z-50" onClick={onClose} />
       <div
         className="fixed z-50 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[200px]"
         style={{
@@ -135,7 +241,6 @@ const EmojiPickerPill = memo(({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Remove emoji button */}
         {currentEmoji && (
           <button
             onClick={() => { onSelect(null); onClose(); }}
@@ -145,7 +250,6 @@ const EmojiPickerPill = memo(({
             <X className="w-3.5 h-3.5" />
           </button>
         )}
-        {/* Quick emojis */}
         {QUICK_EMOJIS.map((emoji) => (
           <button
             key={emoji}
@@ -164,7 +268,7 @@ const EmojiPickerPill = memo(({
 });
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
-// Card with long-press and right-click color support
+// Card component
 const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: { 
   notizia: Notizia; 
   onClick: () => void;
@@ -188,22 +292,13 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
   const handleTouchStart = (e: React.TouchEvent) => {
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
-      if (navigator.vibrate) {
-        navigator.vibrate(15);
-      }
+      if (navigator.vibrate) navigator.vibrate(15);
       setPickerPos({ x: touch.clientX - 100, y: touch.clientY - 60 });
       setColorPickerOpen(true);
     }, 500);
   };
 
   const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
-
-  const handleTouchMove = () => {
     if (longPressTimer.current) {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
@@ -232,10 +327,9 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchMove}
+        onTouchMove={handleTouchEnd}
       >
         <div className="flex items-start gap-2">
-          {/* Clickable emoji or add emoji button */}
           <button
             onClick={handleEmojiClick}
             className={cn(
@@ -246,24 +340,11 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
             {notizia.emoji || <span className="text-[10px] text-muted-foreground">+</span>}
           </button>
           <div className="flex-1">
-            <p
-              className={cn(
-                "font-medium text-sm leading-tight whitespace-normal",
-                isDark ? "text-white" : "text-foreground"
-              )}
-              style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
-            >
-              {notizia.name.split(' ').reduce((acc: string[][], word, i) => {
-                const lastGroup = acc[acc.length - 1];
-                if (lastGroup && lastGroup.length < 3) {
-                  lastGroup.push(word);
-                } else {
-                  acc.push([word]);
-                }
-                return acc;
-              }, [] as string[][]).map((group, i) => (
-                <span key={i} className="block">{group.join(' ')}</span>
-              ))}
+            <p className={cn(
+              "font-medium text-sm leading-tight whitespace-normal",
+              isDark ? "text-white" : "text-foreground"
+            )} style={{ wordBreak: 'break-word' }}>
+              {notizia.name}
             </p>
             {notizia.zona && (
               <span className={cn("text-[10px]", isDark ? "text-white/70" : "text-muted-foreground")}>{notizia.zona}</span>
@@ -282,7 +363,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
         <ColorPickerPill
           position={pickerPos}
           currentColor={notizia.card_color}
-          onSelect={(color) => onColorChange(color)}
+          onSelect={onColorChange}
           onClose={() => setColorPickerOpen(false)}
         />
       )}
@@ -291,7 +372,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
         <EmojiPickerPill
           position={pickerPos}
           currentEmoji={notizia.emoji}
-          onSelect={(emoji) => onEmojiChange(emoji)}
+          onSelect={onEmojiChange}
           onClose={() => setEmojiPickerOpen(false)}
         />
       )}
@@ -300,8 +381,21 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
 });
 Card.displayName = 'Card';
 
+// Add Column Button
+const AddColumnButton = memo(({ onAdd }: { onAdd: () => void }) => (
+  <button
+    onClick={onAdd}
+    className="flex flex-col items-center justify-center w-[240px] min-w-[240px] h-24 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-muted-foreground"
+  >
+    <Plus className="w-6 h-6 mb-1" />
+    <span className="text-xs">Aggiungi colonna</span>
+  </button>
+));
+AddColumnButton.displayName = 'AddColumnButton';
+
 const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQuickAdd }: KanbanBoardProps) => {
   const { updateNotizia, updateOrder } = useNotizie();
+  const { columns, updateColumn, addColumn, deleteColumn, reorderColumns, isLoading } = useKanbanColumns();
   const topScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
@@ -324,45 +418,46 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
       topEl.removeEventListener('scroll', syncTop);
       mainEl.removeEventListener('scroll', syncMain);
     };
-  }, [notizieByStatus]);
+  }, [notizieByStatus, columns]);
   
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
     
+    const { type } = result;
+    
+    // Handle column reordering
+    if (type === 'COLUMN') {
+      const newOrder = [...columns];
+      const [removed] = newOrder.splice(result.source.index, 1);
+      newOrder.splice(result.destination.index, 0, removed);
+      reorderColumns(newOrder.map(c => c.id));
+      return;
+    }
+    
+    // Handle card reordering
     const sourceStatus = result.source.droppableId as NotiziaStatus;
     const destStatus = result.destination.droppableId as NotiziaStatus;
     const sourceIndex = result.source.index;
     const destIndex = result.destination.index;
     
-    // Get the items in the destination column
-    const destItems = [...notizieByStatus[destStatus]];
-    const sourceItems = sourceStatus === destStatus ? destItems : [...notizieByStatus[sourceStatus]];
+    const destItems = [...(notizieByStatus[destStatus] || [])];
+    const sourceItems = sourceStatus === destStatus ? destItems : [...(notizieByStatus[sourceStatus] || [])];
     
-    // Remove from source
     const [movedItem] = sourceItems.splice(sourceIndex, 1);
+    destItems.splice(destIndex, 0, movedItem);
     
-    // Insert at destination
-    if (sourceStatus === destStatus) {
-      destItems.splice(destIndex, 0, movedItem);
-    } else {
-      destItems.splice(destIndex, 0, movedItem);
-    }
-    
-    // Build update array with new order
     const updates = destItems.map((item, index) => ({
       id: item.id,
       display_order: index,
       ...(item.id === movedItem.id && sourceStatus !== destStatus ? { status: destStatus } : {}),
     }));
     
-    // If moving between columns, also update the moved item's status
     if (sourceStatus !== destStatus) {
       onStatusChange(result.draggableId, destStatus);
     }
     
-    // Save the new order
     updateOrder.mutate(updates);
-  }, [notizieByStatus, onStatusChange, updateOrder]);
+  }, [columns, notizieByStatus, onStatusChange, updateOrder, reorderColumns]);
 
   const handleColorChange = useCallback((id: string, color: string | null) => {
     updateNotizia.mutate({ id, card_color: color, silent: true });
@@ -371,6 +466,35 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   const handleEmojiChange = useCallback((id: string, emoji: string | null) => {
     updateNotizia.mutate({ id, emoji: emoji, silent: true });
   }, [updateNotizia]);
+
+  const handleAddColumn = useCallback(() => {
+    addColumn({ label: 'Nuova', color: '#6b7280' });
+  }, [addColumn]);
+
+  const handleDeleteColumn = useCallback(async (columnId: string, columnKey: string) => {
+    // Move all notizie in this column to 'new' status first
+    const notizieToMove = notizieByStatus[columnKey] || [];
+    for (const notizia of notizieToMove) {
+      await updateNotizia.mutateAsync({ id: notizia.id, status: 'new' as NotiziaStatus, silent: true });
+    }
+    deleteColumn(columnId);
+  }, [notizieByStatus, updateNotizia, deleteColumn]);
+
+  if (isLoading || columns.length === 0) {
+    return (
+      <div className="flex gap-4 pb-4 overflow-x-auto animate-pulse">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="w-[240px] min-w-[240px]">
+            <div className="h-6 w-20 bg-muted rounded-md mb-3" />
+            <div className="space-y-2">
+              <div className="h-16 bg-muted rounded-xl" />
+              <div className="h-16 bg-muted rounded-xl" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
@@ -384,66 +508,85 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
           <div style={{ width: scrollWidth, height: '1px' }} />
         </div>
         
-        {/* Main scrollable content */}
-        <div 
-          ref={mainScrollRef}
-          className="flex gap-3 pb-4 overflow-x-auto lg:flex-1 lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
-        >
-        {columns.map(({ key, label, style }) => (
-          <div
-            key={key}
-            className="flex flex-col w-[240px] min-w-[240px] max-w-[240px] lg:w-[260px] lg:min-w-[260px] lg:max-w-[260px]"
-          >
-            <div className="flex items-center gap-2 mb-2 lg:mb-3">
-              <span className={cn('text-[11px] font-semibold px-2 py-0.5 rounded-md', style)}>
-                {label}
-              </span>
-              <span className="text-xs text-muted-foreground">{notizieByStatus[key].length}</span>
-              {onQuickAdd && (
-                <button
-                  onClick={() => onQuickAdd(key)}
-                  className="ml-auto text-foreground hover:opacity-60 transition-opacity"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-            <Droppable droppableId={key}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={cn(
-                    "flex flex-col gap-1.5 min-h-[80px] rounded-lg p-1.5 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
-                    snapshot.isDraggingOver && "bg-accent/20"
-                  )}
-                >
-                  {notizieByStatus[key].map((notizia, index) => (
-                    <Draggable key={notizia.id} draggableId={notizia.id} index={index}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={cn(snapshot.isDragging && "scale-105 shadow-lg rotate-1")}
-                        >
-                          <Card 
-                            notizia={notizia} 
-                            onClick={() => onNotiziaClick(notizia)} 
-                            onColorChange={(color) => handleColorChange(notizia.id, color)}
-                            onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
-                          />
-                        </div>
+        {/* Columns container with horizontal drag */}
+        <Droppable droppableId="columns" type="COLUMN" direction="horizontal">
+          {(provided) => (
+            <div 
+              ref={(el) => {
+                provided.innerRef(el);
+                if (mainScrollRef.current !== el) {
+                  (mainScrollRef as any).current = el;
+                }
+              }}
+              {...provided.droppableProps}
+              className="flex gap-3 pb-4 overflow-x-auto lg:flex-1 lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+            >
+              {columns.map((column, columnIndex) => (
+                <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
+                  {(columnProvided, columnSnapshot) => (
+                    <div
+                      ref={columnProvided.innerRef}
+                      {...columnProvided.draggableProps}
+                      className={cn(
+                        "flex flex-col w-[240px] min-w-[240px] max-w-[240px] lg:w-[260px] lg:min-w-[260px] lg:max-w-[260px] relative",
+                        columnSnapshot.isDragging && "z-50"
                       )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-        ))}
-        </div>
+                    >
+                      <div {...columnProvided.dragHandleProps}>
+                        <ColumnHeader
+                          column={column}
+                          count={(notizieByStatus[column.key] || []).length}
+                          onUpdate={(updates) => updateColumn({ id: column.id, ...updates })}
+                          onDelete={() => handleDeleteColumn(column.id, column.key)}
+                          onQuickAdd={onQuickAdd ? () => onQuickAdd(column.key as NotiziaStatus) : undefined}
+                          isDragging={columnSnapshot.isDragging}
+                        />
+                      </div>
+                      
+                      <Droppable droppableId={column.key} type="CARD">
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.droppableProps}
+                            className={cn(
+                              "flex flex-col gap-1.5 min-h-[80px] rounded-lg p-1.5 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
+                              snapshot.isDraggingOver && "bg-accent/20"
+                            )}
+                          >
+                            {(notizieByStatus[column.key] || []).map((notizia, index) => (
+                              <Draggable key={notizia.id} draggableId={notizia.id} index={index}>
+                                {(provided, snapshot) => (
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    className={cn(snapshot.isDragging && "scale-105 shadow-lg rotate-1")}
+                                  >
+                                    <Card 
+                                      notizia={notizia} 
+                                      onClick={() => onNotiziaClick(notizia)} 
+                                      onColorChange={(color) => handleColorChange(notizia.id, color)}
+                                      onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
+                                    />
+                                  </div>
+                                )}
+                              </Draggable>
+                            ))}
+                            {provided.placeholder}
+                          </div>
+                        )}
+                      </Droppable>
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+              
+              {/* Add column button */}
+              <AddColumnButton onAdd={handleAddColumn} />
+            </div>
+          )}
+        </Droppable>
       </div>
     </DragDropContext>
   );
