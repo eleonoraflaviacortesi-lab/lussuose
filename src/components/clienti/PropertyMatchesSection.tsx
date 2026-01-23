@@ -237,6 +237,10 @@ interface WebSearchResult {
   ref_number: string | null;
   price: number | null;
   image_url: string | null;
+  rooms: number | null;
+  bathrooms: number | null;
+  surface: number | null;
+  location: string | null;
 }
 
 function AddPropertyDialog({ 
@@ -415,8 +419,28 @@ function AddPropertyDialog({
                     {/* Content */}
                     <div className="p-3">
                       <p className="font-medium text-sm line-clamp-2">{result.title}</p>
+                      
+                      {/* Property details row */}
+                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                        {result.location && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {result.location}
+                          </span>
+                        )}
+                        {result.surface && (
+                          <span>{result.surface} mq</span>
+                        )}
+                        {result.rooms && (
+                          <span>{result.rooms} cam</span>
+                        )}
+                        {result.bathrooms && (
+                          <span>{result.bathrooms} bagni</span>
+                        )}
+                      </div>
+                      
                       {result.ref_number && (
-                        <p className="text-xs text-muted-foreground">{result.ref_number}</p>
+                        <p className="text-[10px] text-muted-foreground/70 mt-1">{result.ref_number}</p>
                       )}
                       
                       <div className="flex items-center justify-between mt-3">
