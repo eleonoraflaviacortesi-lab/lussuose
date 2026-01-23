@@ -435,6 +435,7 @@ export type Database = {
           id: string
           role: string
           sede: string
+          sedi: string[] | null
           updated_at: string
           user_id: string
         }
@@ -445,6 +446,7 @@ export type Database = {
           id?: string
           role?: string
           sede?: string
+          sedi?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -455,6 +457,7 @@ export type Database = {
           id?: string
           role?: string
           sede?: string
+          sedi?: string[] | null
           updated_at?: string
           user_id?: string
         }
