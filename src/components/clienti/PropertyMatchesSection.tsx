@@ -386,64 +386,54 @@ function AddPropertyDialog({
             </div>
           ) : (
             <ScrollArea className="h-[400px]">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {searchResults.map((result, idx) => (
                   <div 
                     key={idx}
-                    className="rounded-2xl bg-white shadow-lg overflow-hidden"
+                    className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg"
                   >
-                    {/* Property Image + Price overlay */}
-                    <div className="relative">
+                    {/* Thumbnail */}
+                    <div className="flex-shrink-0">
                       {result.image_url ? (
                         <img 
                           src={result.image_url} 
                           alt={result.title}
-                          className="w-full h-32 object-cover"
+                          className="w-20 h-20 rounded-xl object-cover"
                           onError={(e) => {
-                            (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).src = '';
+                            (e.target as HTMLImageElement).className = 'w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center';
                           }}
                         />
                       ) : (
-                        <div className="w-full h-24 bg-muted/30 flex items-center justify-center">
-                          <Home className="w-8 h-8 text-muted-foreground/50" />
-                        </div>
-                      )}
-                      {/* Price badge overlay */}
-                      {result.price && (
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-3 py-1 rounded-full text-sm font-bold">
-                          {formatPrice(result.price)}
+                        <div className="w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center">
+                          <Home className="w-6 h-6 text-muted-foreground/50" />
                         </div>
                       )}
                     </div>
                     
                     {/* Content */}
-                    <div className="p-3">
-                      <p className="font-medium text-sm line-clamp-2">{result.title}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
                       
-                      {/* Property details row */}
-                      <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
+                      {/* Location + details */}
+                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                         {result.location && (
-                          <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-0.5">
                             <MapPin className="w-3 h-3" />
                             {result.location}
                           </span>
                         )}
-                        {result.surface && (
-                          <span>{result.surface} mq</span>
-                        )}
-                        {result.rooms && (
-                          <span>{result.rooms} cam</span>
-                        )}
-                        {result.bathrooms && (
-                          <span>{result.bathrooms} bagni</span>
-                        )}
+                        {result.surface && <span>{result.surface} mq</span>}
+                        {result.rooms && <span>{result.rooms} cam</span>}
                       </div>
                       
-                      {result.ref_number && (
-                        <p className="text-[10px] text-muted-foreground/70 mt-1">{result.ref_number}</p>
+                      {/* Price */}
+                      {result.price && (
+                        <p className="font-bold text-base mt-1">{formatPrice(result.price)}</p>
                       )}
                       
-                      <div className="flex items-center justify-between mt-3">
+                      {/* Actions */}
+                      <div className="flex items-center justify-between mt-2">
                         <a
                           href={result.url}
                           target="_blank"
@@ -451,13 +441,13 @@ function AddPropertyDialog({
                           className="text-xs text-muted-foreground flex items-center gap-1 active:scale-95"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          Vedi sul sito <ExternalLink className="h-3 w-3" />
+                          <ExternalLink className="h-3 w-3" />
                         </a>
                         <Button
                           size="sm"
                           onClick={() => handleImportAndAdd(result)}
                           disabled={isImporting !== null}
-                          className="bg-black text-white hover:bg-black/80 active:scale-95"
+                          className="bg-black text-white hover:bg-black/80 active:scale-95 h-8 px-3"
                         >
                           {isImporting === result.url ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
