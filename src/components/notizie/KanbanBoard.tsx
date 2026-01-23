@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2 } from 'lucide-react';
 
 // Common emojis for quick selection
@@ -316,14 +317,17 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
     <>
       <div
         className={cn(
-          "rounded-xl p-2.5 cursor-pointer active:scale-[0.98] transition-all shadow-sm select-none",
+          "rounded-xl p-2.5 cursor-pointer transition-all duration-100 shadow-sm select-none active:scale-[0.97] active:shadow-md",
           notizia.card_color ? "backdrop-blur-sm" : "bg-card"
         )}
         style={notizia.card_color ? { 
           backgroundColor: notizia.card_color,
           boxShadow: '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4)'
         } : undefined}
-        onClick={onClick}
+        onClick={() => {
+          triggerHaptic('light');
+          onClick();
+        }}
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -422,6 +426,9 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
+    
+    // Haptic feedback on drop
+    triggerHaptic('medium');
     
     const { type } = result;
     

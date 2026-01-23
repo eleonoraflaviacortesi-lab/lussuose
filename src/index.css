@@ -178,6 +178,58 @@
     font-family: var(--font-sans);
   }
 
+  /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
+  
+  /* Replace hover with active states for touch */
+  .touch-scale {
+    @apply transition-transform duration-150 active:scale-95;
+  }
+  
+  .touch-scale-sm {
+    @apply transition-transform duration-100 active:scale-[0.98];
+  }
+  
+  .touch-opacity {
+    @apply transition-opacity duration-150 active:opacity-70;
+  }
+  
+  .touch-highlight {
+    @apply transition-colors duration-100;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  .touch-highlight:active {
+    @apply bg-muted/50;
+  }
+
+  /* Disable hover on touch devices, enable active states */
+  @media (hover: none) and (pointer: coarse) {
+    .hover\:bg-muted:hover,
+    .hover\:bg-accent:hover,
+    .hover\:opacity-80:hover,
+    .hover\:scale-105:hover {
+      background: inherit;
+      opacity: inherit;
+      transform: none;
+    }
+    
+    /* Active states for touch */
+    button, 
+    [role="button"],
+    a,
+    .clickable {
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
+    
+    button:active:not(:disabled),
+    [role="button"]:active,
+    .clickable:active {
+      transform: scale(0.97);
+      opacity: 0.9;
+    }
+  }
+
   /* Liquid Glass Effect */
   .glass-header {
     background: linear-gradient(
@@ -204,13 +256,14 @@
     box-shadow: 
       0 2px 8px rgba(0, 0, 0, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .glass-button:hover {
+  .glass-button:active {
+    transform: scale(0.97);
     background: rgba(255, 255, 255, 0.9);
     box-shadow: 
-      0 4px 12px rgba(0, 0, 0, 0.08),
+      0 1px 4px rgba(0, 0, 0, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
@@ -230,20 +283,17 @@
       0 8px 32px rgba(0, 0, 0, 0.04),
       inset 0 1px 1px rgba(255, 255, 255, 0.9),
       inset 0 -1px 2px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .glass-select-trigger:hover {
+  .glass-select-trigger:active {
+    transform: scale(0.98);
     background: linear-gradient(
       145deg,
       rgba(255, 255, 255, 0.95) 0%,
       rgba(255, 255, 255, 0.75) 50%,
       rgba(255, 255, 255, 0.9) 100%
     );
-    box-shadow: 
-      0 6px 20px rgba(0, 0, 0, 0.08),
-      0 12px 40px rgba(0, 0, 0, 0.05),
-      inset 0 1px 1px rgba(255, 255, 255, 1);
   }
 
   .glass-select-content {
@@ -262,15 +312,15 @@
   }
 
   .glass-select-item {
-    transition: all 0.15s ease;
+    transition: all 0.1s ease;
   }
 
-  .glass-select-item:hover,
+  .glass-select-item:active,
   .glass-select-item[data-highlighted] {
-    background: rgba(0, 0, 0, 0.04);
+    background: rgba(0, 0, 0, 0.06);
   }
 
-  /* Pill Navigation - Minimal */
+  /* Pill Navigation - Minimal with touch */
   .pill-nav {
     background: white;
     @apply rounded-full px-1.5 py-1.5 flex items-center gap-1;
@@ -280,11 +330,12 @@
   }
 
   .pill-nav-item {
-    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-150;
+    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100;
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .pill-nav-item:not(.active):hover {
-    @apply scale-110;
+  .pill-nav-item:active:not(.active) {
+    @apply scale-90 bg-muted/30;
   }
 
   .pill-nav-item.active {
@@ -292,13 +343,14 @@
   }
 
   .pill-nav-item:not(.active) {
-    @apply text-muted-foreground hover:text-foreground;
+    @apply text-muted-foreground;
   }
 
-  /* Report Button - Dynamic States */
+  /* Report Button - Dynamic States with touch */
   .btn-report {
     @apply rounded-full px-6 py-2.5 font-medium uppercase tracking-widest text-xs;
-    transition: all 0.15s ease;
+    transition: all 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .btn-report.pending {
@@ -313,8 +365,8 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
-  .btn-report:hover {
-    transform: translateY(-1px);
+  .btn-report:active {
+    transform: scale(0.97);
   }
 
   @keyframes pulse-glow {
