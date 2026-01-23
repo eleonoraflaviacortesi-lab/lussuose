@@ -236,6 +236,7 @@ interface WebSearchResult {
   description: string;
   ref_number: string | null;
   price: number | null;
+  image_url: string | null;
 }
 
 function AddPropertyDialog({ 
@@ -380,54 +381,70 @@ function AddPropertyDialog({
               <p className="text-sm">Inserisci un termine e clicca cerca</p>
             </div>
           ) : (
-            <ScrollArea className="h-[350px]">
-              <div className="space-y-2">
+            <ScrollArea className="h-[400px]">
+              <div className="space-y-3">
                 {searchResults.map((result, idx) => (
                   <div 
                     key={idx}
-                    className="p-3 rounded-2xl bg-white shadow-lg"
+                    className="rounded-2xl bg-white shadow-lg overflow-hidden"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-medium text-sm line-clamp-2">{result.title}</p>
-                        {result.ref_number && (
-                          <p className="text-xs text-muted-foreground">{result.ref_number}</p>
-                        )}
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                          {result.description}
-                        </p>
-                      </div>
+                    {/* Property Image + Price overlay */}
+                    <div className="relative">
+                      {result.image_url ? (
+                        <img 
+                          src={result.image_url} 
+                          alt={result.title}
+                          className="w-full h-32 object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-full h-24 bg-muted/30 flex items-center justify-center">
+                          <Home className="w-8 h-8 text-muted-foreground/50" />
+                        </div>
+                      )}
+                      {/* Price badge overlay */}
                       {result.price && (
-                        <span className="text-sm font-medium text-primary whitespace-nowrap">
+                        <div className="absolute bottom-2 right-2 bg-black/80 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {formatPrice(result.price)}
-                        </span>
+                        </div>
                       )}
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <a
-                        href={result.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-primary hover:underline flex items-center gap-1"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        Vedi sul sito <ExternalLink className="h-3 w-3" />
-                      </a>
-                      <Button
-                        size="sm"
-                        onClick={() => handleImportAndAdd(result)}
-                        disabled={isImporting !== null}
-                        className="bg-black text-white hover:bg-black/80"
-                      >
-                        {isImporting === result.url ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <>
-                            <Plus className="h-4 w-4 mr-1" />
-                            Importa
-                          </>
-                        )}
-                      </Button>
+                    
+                    {/* Content */}
+                    <div className="p-3">
+                      <p className="font-medium text-sm line-clamp-2">{result.title}</p>
+                      {result.ref_number && (
+                        <p className="text-xs text-muted-foreground">{result.ref_number}</p>
+                      )}
+                      
+                      <div className="flex items-center justify-between mt-3">
+                        <a
+                          href={result.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-muted-foreground flex items-center gap-1 active:scale-95"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Vedi sul sito <ExternalLink className="h-3 w-3" />
+                        </a>
+                        <Button
+                          size="sm"
+                          onClick={() => handleImportAndAdd(result)}
+                          disabled={isImporting !== null}
+                          className="bg-black text-white hover:bg-black/80 active:scale-95"
+                        >
+                          {isImporting === result.url ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <>
+                              <Plus className="h-4 w-4 mr-1" />
+                              Importa
+                            </>
+                          )}
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}

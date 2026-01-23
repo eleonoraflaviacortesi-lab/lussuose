@@ -58,18 +58,35 @@ Deno.serve(async (req) => {
       const url = result.url || '';
       const title = result.title || 'Unknown Property';
       const description = result.description || '';
+      const markdown = result.markdown || '';
       
       // Extract ref number from URL or title
       const refMatch = url.match(/ref[_-]?(\d+)/i) || title.match(/Ref[.\s]*(\d+)/i);
       const refNumber = refMatch ? `Ref. ${refMatch[1]}` : null;
 
-      // Try to extract price from description
-      const priceMatch = description.match(/€\s*[\d.,]+|[\d.,]+\s*€/);
+      // Try to extract price from description or markdown
+      const priceMatch = description.match(/€\s*[\d.,]+|[\d.,]+\s*€/) || 
+                         markdown.match(/€\s*[\d.,]+|[\d.,]+\s*€/);
       let price = null;
       if (priceMatch) {
         const cleaned = priceMatch[0].replace(/[€\s.]/g, '').replace(',', '.');
         price = parseFloat(cleaned);
         if (isNaN(price)) price = null;
+      }
+
+      // Extract image URL from markdown or metadata
+      let imageUrl = null;
+      // Check for og:image or similar in metadata
+      if (result.metadata?.ogImage) {
+        imageUrl = result.metadata.ogImage;
+      } else if (result.metadata?.image) {
+        imageUrl = result.metadata.image;
+      } else {
+        // Try to extract first image from markdown
+        const imgMatch = markdown.match(/!\[.*?\]\((https?:\/\/[^\s)]+)\)/);
+        if (imgMatch) {
+          imageUrl = imgMatch[1];
+        }
       }
 
       return {
@@ -78,6 +95,7 @@ Deno.serve(async (req) => {
         description: description.substring(0, 200),
         ref_number: refNumber,
         price,
+        image_url: imageUrl,
       };
     }).filter((r: any) => 
       // Filter to only property pages
