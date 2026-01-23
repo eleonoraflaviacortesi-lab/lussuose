@@ -25,81 +25,91 @@ export function NotificationBell() {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <button className="relative p-2 rounded-full hover:bg-muted transition-colors">
-          <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </span>
-          )}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent 
-        align="end" 
-        className="w-80 p-0 bg-white rounded-2xl shadow-xl"
-      >
-        <div className="flex items-center justify-between p-3 border-b">
-          <h3 className="font-semibold text-sm">Notifiche</h3>
-          {unreadCount > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-xs h-7"
-              onClick={() => markAllAsRead()}
-            >
-              <Check className="w-3 h-3 mr-1" />
-              Segna tutte lette
-            </Button>
-          )}
-        </div>
-        
-        <div className="max-h-80 overflow-y-auto">
-          {notifications.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground text-sm">
-              Nessuna notifica
-            </div>
-          ) : (
-            notifications.map((notification) => (
-              <button
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification.id)}
-                className={cn(
-                  "w-full text-left p-3 hover:bg-muted/50 transition-colors flex gap-3",
-                  !notification.read && "bg-primary/5"
-                )}
+    <div className="fixed bottom-24 left-4 z-40">
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <button 
+            className={cn(
+              "relative w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white/80 backdrop-blur-xl shadow-lg",
+              "hover:scale-105 active:scale-95 transition-transform"
+            )}
+          >
+            <Bell className="w-5 h-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent 
+          side="top"
+          align="start"
+          sideOffset={12}
+          className="w-80 p-0 bg-white rounded-2xl shadow-xl"
+        >
+          <div className="flex items-center justify-between p-3">
+            <h3 className="font-semibold text-sm">Notifiche</h3>
+            {unreadCount > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="text-xs h-7"
+                onClick={() => markAllAsRead()}
               >
-                <div className="shrink-0 mt-0.5">
-                  {getIcon(notification.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className={cn(
-                    "text-sm",
-                    !notification.read && "font-medium"
-                  )}>
-                    {notification.title}
-                  </p>
-                  {notification.message && (
-                    <p className="text-xs text-muted-foreground mt-0.5 truncate">
-                      {notification.message}
-                    </p>
+                <Check className="w-3 h-3 mr-1" />
+                Segna tutte lette
+              </Button>
+            )}
+          </div>
+          
+          <div className="max-h-80 overflow-y-auto">
+            {notifications.length === 0 ? (
+              <div className="p-6 text-center text-muted-foreground text-sm">
+                Nessuna notifica
+              </div>
+            ) : (
+              notifications.map((notification) => (
+                <button
+                  key={notification.id}
+                  onClick={() => handleNotificationClick(notification.id)}
+                  className={cn(
+                    "w-full text-left p-3 hover:bg-muted/50 transition-colors flex gap-3",
+                    !notification.read && "bg-primary/5"
                   )}
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {formatDistanceToNow(new Date(notification.created_at), { 
-                      addSuffix: true, 
-                      locale: it 
-                    })}
-                  </p>
-                </div>
-                {!notification.read && (
-                  <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-2" />
-                )}
-              </button>
-            ))
-          )}
-        </div>
-      </PopoverContent>
-    </Popover>
+                >
+                  <div className="shrink-0 mt-0.5">
+                    {getIcon(notification.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className={cn(
+                      "text-sm",
+                      !notification.read && "font-medium"
+                    )}>
+                      {notification.title}
+                    </p>
+                    {notification.message && (
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">
+                        {notification.message}
+                      </p>
+                    )}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {formatDistanceToNow(new Date(notification.created_at), { 
+                        addSuffix: true, 
+                        locale: it 
+                      })}
+                    </p>
+                  </div>
+                  {!notification.read && (
+                    <div className="w-2 h-2 bg-primary rounded-full shrink-0 mt-2" />
+                  )}
+                </button>
+              ))
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

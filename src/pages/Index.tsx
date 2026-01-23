@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
@@ -86,6 +87,9 @@ const IndexContent = () => {
           {renderContent()}
         </Suspense>
       </main>
+      
+      {/* Fixed Notification Bell */}
+      <NotificationBell />
     </PullToRefresh>
   );
 };
