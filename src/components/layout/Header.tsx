@@ -6,6 +6,7 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import logo from '@/assets/le_lussuose_large.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
+import { NotificationBell } from './NotificationBell';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
@@ -68,13 +69,16 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           {/* Brand Logo */}
           <img src={logo} alt="Le Lussuose" className="h-16" />
 
-          {/* Logout */}
-          <button 
-            onClick={handleSignOut}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          {/* Actions */}
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <button 
+              onClick={handleSignOut}
+              className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 
