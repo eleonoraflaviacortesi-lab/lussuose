@@ -40,9 +40,10 @@ export function useClienti(options?: {
   const queryClient = useQueryClient();
   const { groupBy = 'status', filters = {} } = options || {};
 
-  // Fetch clienti
+  // Fetch clienti - RLS handles filtering, but we include sedi in cache key
+  const allSedi = profile?.sede ? [profile.sede, ...((profile as any).sedi || [])] : [];
   const { data: clienti = [], isLoading, error } = useQuery({
-    queryKey: ['clienti', profile?.sede],
+    queryKey: ['clienti', profile?.sede, (profile as any)?.sedi],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('clienti')
@@ -116,16 +117,22 @@ export function useClienti(options?: {
 
   const clientiGrouped = groupClienti(filteredClienti);
 
-  // Fetch agents for assignment dropdown
+  // Fetch agents for assignment dropdown - include all sedi for coordinators
   const { data: agents = [] } = useQuery({
-    queryKey: ['agents', profile?.sede],
+    queryKey: ['agents', profile?.sede, (profile as any)?.sedi],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const sediToFetch = [profile?.sede, ...((profile as any)?.sedi || [])].filter(Boolean);
+      
+      let query = supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_emoji')
-        .eq('sede', profile?.sede || '')
+        .select('user_id, full_name, avatar_emoji, sede')
         .order('full_name');
+      
+      if (sediToFetch.length > 0) {
+        query = query.in('sede', sediToFetch);
+      }
 
+      const { data, error } = await query;
       if (error) throw error;
       return data || [];
     },
