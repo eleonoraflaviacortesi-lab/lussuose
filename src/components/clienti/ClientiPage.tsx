@@ -7,8 +7,9 @@ import { ClientiKanban } from './ClientiKanban';
 import { ClienteDetail } from './ClienteDetail';
 import { AddClienteDialog } from './AddClienteDialog';
 import { ImportTallyDialog } from './ImportTallyDialog';
+import ClientiFunnelChartModal from './ClientiFunnelChartModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Upload } from 'lucide-react';
+import { Plus, Loader2, Upload, TrendingDown } from 'lucide-react';
 
 interface ClientiPageProps {
   initialClienteId?: string | null;
@@ -23,6 +24,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [detailOpen, setDetailOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [funnelOpen, setFunnelOpen] = useState(false);
 
   const {
     clienti,
@@ -140,6 +142,14 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         </div>
         {isCoordinator && (
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="icon"
+              onClick={() => setFunnelOpen(true)}
+              title="Funnel Conversione"
+            >
+              <TrendingDown className="w-4 h-4" />
+            </Button>
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <Upload className="w-4 h-4 mr-1.5" />
               CSV
@@ -209,6 +219,13 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         onSuccess={() => {
           setImportDialogOpen(false);
         }}
+      />
+
+      {/* Funnel Chart Modal */}
+      <ClientiFunnelChartModal
+        open={funnelOpen}
+        onOpenChange={setFunnelOpen}
+        clienti={clienti}
       />
     </div>
   );
