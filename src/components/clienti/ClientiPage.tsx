@@ -126,7 +126,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }
 
   return (
-    <div className="py-4 space-y-4">
+    <div className="py-4 space-y-4 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

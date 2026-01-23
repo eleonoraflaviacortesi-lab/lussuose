@@ -85,12 +85,12 @@ const IndexContent = () => {
   return (
     <PullToRefresh 
       onRefresh={handleRefresh}
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background overflow-x-hidden"
     >
       <Header />
       <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150">
+      <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150 overflow-x-hidden">
         <Suspense
           fallback={
             <div className="py-10 flex items-center justify-center">
