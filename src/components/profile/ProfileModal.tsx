@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { X, Camera, Check, User, MapPin } from 'lucide-react';
+import { X, Check, User, MapPin } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface ProfileModalProps {
   open: boolean;
@@ -21,13 +22,17 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const [customEmoji, setCustomEmoji] = useState('');
   const [fullName, setFullName] = useState('');
   const [sede, setSede] = useState<string>('AREZZO');
+  const [selectedSedi, setSelectedSedi] = useState<string[]>([]);
   const [role, setRole] = useState<string>('agente');
   const [isLoading, setIsLoading] = useState(false);
+
+  const isCoordinator = role === 'coordinatore' || role === 'admin';
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '');
       setSede(profile.sede || 'AREZZO');
+      setSelectedSedi((profile as any).sedi || []);
       setRole(profile.role || 'agente');
       if (profile.avatar_emoji) {
         setSelectedEmoji(profile.avatar_emoji);
@@ -35,28 +40,42 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
     }
   }, [profile]);
 
+  const toggleSede = (s: string) => {
+    triggerHaptic('selection');
+    setSelectedSedi(prev => 
+      prev.includes(s) 
+        ? prev.filter(x => x !== s)
+        : [...prev, s]
+    );
+  };
+
   const handleSave = async () => {
     if (!user) return;
     
     setIsLoading(true);
     try {
       const avatarToSave = customEmoji || selectedEmoji;
+      const isCoord = role === 'coordinatore' || role === 'admin';
+      
       const { error } = await supabase
         .from('profiles')
         .update({ 
           full_name: fullName,
           avatar_emoji: avatarToSave,
           sede: sede,
-          role: role
+          role: role,
+          sedi: isCoord ? selectedSedi : []
         })
         .eq('user_id', user.id);
       
       if (error) throw error;
       
+      triggerHaptic('success');
       await refetchProfile();
       toast({ title: 'Profilo aggiornato!' });
       onClose();
     } catch (error: any) {
+      triggerHaptic('error');
       toast({ 
         title: 'Errore', 
         description: error.message, 
@@ -186,18 +205,21 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
             </div>
             <div className="space-y-2">
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
-                SEDE
+                {isCoordinator ? 'SEDE PRINCIPALE' : 'SEDE'}
               </p>
               <div className="flex gap-1">
                 {SEDI.map((s) => (
                   <button
                     key={s}
-                    onClick={() => setSede(s)}
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setSede(s);
+                    }}
                     className={cn(
-                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center gap-1",
+                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center gap-1 active:scale-95",
                       sede === s
                         ? "bg-foreground text-background"
-                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                        : "bg-muted/50 text-muted-foreground"
                     )}
                   >
                     <MapPin className="w-3 h-3" />
@@ -207,6 +229,36 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
               </div>
             </div>
           </div>
+
+          {/* Multi-sede for coordinators */}
+          {isCoordinator && (
+            <div className="space-y-2">
+              <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
+                SEDI GESTITE (MULTI-SELEZIONE)
+              </p>
+              <div className="flex gap-2">
+                {SEDI.map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => toggleSede(s)}
+                    className={cn(
+                      "flex-1 h-12 rounded-2xl text-xs font-medium transition-all flex items-center justify-center gap-2 active:scale-95",
+                      selectedSedi.includes(s)
+                        ? "bg-foreground text-background shadow-lg"
+                        : "bg-muted/50 text-muted-foreground border-2 border-dashed border-muted-foreground/30"
+                    )}
+                  >
+                    <MapPin className="w-4 h-4" />
+                    {s === 'CITTÀ DI CASTELLO' ? 'Città di Castello' : 'Arezzo'}
+                    {selectedSedi.includes(s) && <Check className="w-4 h-4" />}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center">
+                Seleziona le sedi di cui vuoi vedere clienti e notizie
+              </p>
+            </div>
+          )}
 
           {/* Save Button */}
           <button
