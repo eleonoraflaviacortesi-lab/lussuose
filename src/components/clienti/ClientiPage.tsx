@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useClienti } from '@/hooks/useClienti';
 import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
@@ -80,13 +80,24 @@ export function ClientiPage() {
     }
   }, [selectedCliente, deleteCliente]);
 
-  if (!isCoordinator) {
-    return (
-      <div className="py-20 text-center text-muted-foreground">
-        <p>Solo i coordinatori possono accedere a questa sezione.</p>
-      </div>
-    );
-  }
+  // Agents see only assigned clients, coordinators see all
+  const displayClients = isCoordinator 
+    ? clienti 
+    : clienti.filter(c => c.assigned_to === profile?.user_id);
+
+  // Create grouped data for display (for agents, use only their clients)
+  const displayGrouped = useMemo(() => {
+    if (isCoordinator) return clientiGrouped;
+    
+    // Group display clients by status for agents
+    const groups = new Map<string, Cliente[]>();
+    displayClients.forEach(cliente => {
+      const key = cliente.status;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(cliente);
+    });
+    return groups;
+  }, [isCoordinator, clientiGrouped, displayClients]);
 
   if (isLoading) {
     return (
@@ -101,36 +112,44 @@ export function ClientiPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">✱</h1>
+          <h1 className="text-2xl font-bold">
+            {isCoordinator ? '✱' : '👤 I Miei Clienti'}
+          </h1>
           <p className="text-sm text-muted-foreground">
-            Gestisci i clienti internazionali in cerca di immobili
+            {isCoordinator 
+              ? 'Gestisci i clienti internazionali in cerca di immobili'
+              : `${displayClients.length} clienti assegnati a te`}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-1.5" />
-            CSV
-          </Button>
-          <Button onClick={() => setAddDialogOpen(true)}>
-            <Plus className="w-4 h-4" />
-          </Button>
-        </div>
+        {isCoordinator && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="w-4 h-4 mr-1.5" />
+              CSV
+            </Button>
+            <Button onClick={() => setAddDialogOpen(true)}>
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Filters */}
-      <ClientiFilters
-        groupBy={groupBy}
-        onGroupByChange={setGroupBy}
-        filters={filters}
-        onFiltersChange={setFilters}
-        totalCount={clienti.length}
-        filteredCount={clienti.length}
-      />
+      {/* Filters - only for coordinators */}
+      {isCoordinator && (
+        <ClientiFilters
+          groupBy={groupBy}
+          onGroupByChange={setGroupBy}
+          filters={filters}
+          onFiltersChange={setFilters}
+          totalCount={clienti.length}
+          filteredCount={displayClients.length}
+        />
+      )}
 
       {/* Kanban Board */}
       <ClientiKanban
-        clientiGrouped={clientiGrouped}
-        groupBy={groupBy}
+        clientiGrouped={displayGrouped}
+        groupBy={isCoordinator ? groupBy : 'status'}
         agents={agents}
         onCardClick={handleCardClick}
         onStatusChange={async (clienteId, status) => {
