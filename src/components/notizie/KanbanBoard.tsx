@@ -87,7 +87,7 @@ const ColumnHeader = memo(({
       "flex items-center gap-2 mb-2 lg:mb-3 group",
       isDragging && "opacity-50"
     )}>
-      <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity cursor-grab shrink-0" />
+      <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
       
       {editing ? (
         <input
