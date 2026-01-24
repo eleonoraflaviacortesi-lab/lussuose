@@ -14,6 +14,8 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
   const { targets, updateTargets } = useSedeTargets();
   const { profile } = useAuth();
   const [formData, setFormData] = useState<SedeTargets>(targets);
+  
+  const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
 
   useEffect(() => {
     setFormData(targets);
@@ -32,7 +34,8 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
     "w-full bg-white rounded-xl px-4 py-3.5 text-base font-medium",
     "border border-border/50 shadow-sm",
     "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30",
-    "placeholder:text-muted-foreground/50"
+    "placeholder:text-muted-foreground/50",
+    !isCoordinator && "bg-muted/30 cursor-not-allowed"
   );
 
   const labelClass = "flex items-center gap-1.5 text-[10px] font-semibold tracking-[0.1em] uppercase text-muted-foreground mb-2 min-h-[32px]";
@@ -80,6 +83,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.fatturato_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -97,6 +101,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.vendite_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -130,6 +135,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.contatti_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -147,6 +153,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.notizie_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -164,6 +171,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.appuntamenti_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -181,6 +189,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.acquisizioni_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -198,6 +207,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.incarichi_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -215,6 +225,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
                 <input
                   type="number"
                   inputMode="numeric"
+                  readOnly={!isCoordinator}
                   value={formData.trattative_chiuse_target || ''}
                   onChange={(e) => setFormData(prev => ({
                     ...prev,
@@ -233,16 +244,18 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
               onClick={() => onOpenChange(false)}
               className="px-5 py-2.5 rounded-xl text-sm font-medium border border-border/50 text-muted-foreground hover:bg-muted/50 transition-colors"
             >
-              Annulla
+              {isCoordinator ? 'Annulla' : 'Chiudi'}
             </button>
-            <button
-              onClick={handleSave}
-              disabled={updateTargets.isPending}
-              className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
-            >
-              <Save className="w-4 h-4" />
-              {updateTargets.isPending ? 'Salvando...' : 'Salva Strategia'}
-            </button>
+            {isCoordinator && (
+              <button
+                onClick={handleSave}
+                disabled={updateTargets.isPending}
+                className="px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <Save className="w-4 h-4" />
+                {updateTargets.isPending ? 'Salvando...' : 'Salva Strategia'}
+              </button>
+            )}
           </div>
         </div>
       </DialogContent>
