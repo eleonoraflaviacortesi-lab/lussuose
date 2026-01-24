@@ -16,6 +16,8 @@ const AgencyDashboard = () => {
   const { kpis, isLoading } = useKPIs(period);
   const { notizieByStatus, isLoading: notizieLoading } = useNotizie();
 
+  const creditNotizie = notizieByStatus?.credit ?? [];
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
@@ -187,16 +189,16 @@ const AgencyDashboard = () => {
       </div>
 
       {/* In attesa di rogito section */}
-      {notizieByStatus.credit.length > 0 && (
+      {creditNotizie.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-500" />
             <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
-              IN ATTESA DI ROGITO ({notizieByStatus.credit.length})
+              IN ATTESA DI ROGITO ({creditNotizie.length})
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {notizieByStatus.credit.map((notizia: Notizia) => (
+            {creditNotizie.map((notizia: Notizia) => (
               <div 
                 key={notizia.id}
                 className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800"
