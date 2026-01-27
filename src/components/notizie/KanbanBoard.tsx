@@ -1,4 +1,4 @@
-import { memo, useCallback, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useState, useRef, useEffect, TouchEvent as ReactTouchEvent } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
@@ -234,12 +234,24 @@ const ColorStatusPickerPill = memo(({
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
   
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  // Handle touch on backdrop - important for mobile
+  const handleBackdropTouch = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleClose();
+  }, [handleClose]);
+
   return (
     <>
       <div 
-        className="fixed inset-0 z-50" 
-        onClick={onClose}
-        onContextMenu={(e) => { e.preventDefault(); onClose(); }}
+        className="fixed inset-0 z-50 touch-none" 
+        onClick={handleClose}
+        onTouchEnd={handleBackdropTouch}
+        onContextMenu={(e) => { e.preventDefault(); handleClose(); }}
       />
       <div
         className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
@@ -248,13 +260,19 @@ const ColorStatusPickerPill = memo(({
           top: Math.min(position.y, window.innerHeight - 180),
         }}
         onClick={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* Status selector - uses dynamic columns */}
         <div className="flex flex-wrap gap-1.5 max-w-[220px]">
           {columns.map((col) => (
             <button
               key={col.key}
-              onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
+              onClick={() => { onStatusChange(col.key as NotiziaStatus); handleClose(); }}
+              onTouchEnd={(e) => { 
+                e.stopPropagation(); 
+                onStatusChange(col.key as NotiziaStatus); 
+                handleClose(); 
+              }}
               className={cn(
                 "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
                 currentStatus === col.key && "ring-2 ring-foreground ring-offset-1"
@@ -279,7 +297,12 @@ const ColorStatusPickerPill = memo(({
             {cardColors.map((c) => (
               <button
                 key={c.value || 'default'}
-                onClick={() => { onColorSelect(c.value); onClose(); }}
+                onClick={() => { onColorSelect(c.value); handleClose(); }}
+                onTouchEnd={(e) => { 
+                  e.stopPropagation(); 
+                  onColorSelect(c.value); 
+                  handleClose(); 
+                }}
                 className={cn(
                   "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
                   c.color,
@@ -293,7 +316,7 @@ const ColorStatusPickerPill = memo(({
                 type="color"
                 value={customCardColor}
                 onChange={(e) => setCustomCardColor(e.target.value)}
-                onBlur={() => { onColorSelect(customCardColor); onClose(); }}
+                onBlur={() => { onColorSelect(customCardColor); handleClose(); }}
                 className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
               />
               <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
@@ -320,9 +343,23 @@ const EmojiPickerPill = memo(({
   onSelect: (emoji: string | null) => void;
   onClose: () => void;
 }) => {
+  const handleClose = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const handleBackdropTouch = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    handleClose();
+  }, [handleClose]);
+
   return (
     <>
-      <div className="fixed inset-0 z-50" onClick={onClose} />
+      <div 
+        className="fixed inset-0 z-50 touch-none" 
+        onClick={handleClose}
+        onTouchEnd={handleBackdropTouch}
+      />
       <div
         className="fixed z-50 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[200px]"
         style={{
@@ -330,10 +367,12 @@ const EmojiPickerPill = memo(({
           top: Math.min(position.y, window.innerHeight - 80),
         }}
         onClick={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {currentEmoji && (
           <button
-            onClick={() => { onSelect(null); onClose(); }}
+            onClick={() => { onSelect(null); handleClose(); }}
+            onTouchEnd={(e) => { e.stopPropagation(); onSelect(null); handleClose(); }}
             className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
             title="Rimuovi emoji"
           >
@@ -343,7 +382,8 @@ const EmojiPickerPill = memo(({
         {QUICK_EMOJIS.map((emoji) => (
           <button
             key={emoji}
-            onClick={() => { onSelect(emoji); onClose(); }}
+            onClick={() => { onSelect(emoji); handleClose(); }}
+            onTouchEnd={(e) => { e.stopPropagation(); onSelect(emoji); handleClose(); }}
             className={cn(
               "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
               currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
