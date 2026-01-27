@@ -443,7 +443,7 @@ const ReportAnalysisTab = () => {
                     <div className="flex flex-col">
                       <span className="text-sm font-medium">
                         {(entry.incarichi_vendita || 0) > 0 
-                          ? `📝 ${entry.incarichi_vendita} incarichio${entry.incarichi_vendita > 1 ? 'i' : ''}` 
+                          ? `📝 ${entry.incarichi_vendita} ${entry.incarichi_vendita === 1 ? 'incarico' : 'incarichi'}` 
                           : 'Tocca per visualizzare'}
                       </span>
                       <span className="text-xs text-muted-foreground">
