@@ -160,16 +160,32 @@ const ColumnHeader = memo(({
 });
 ColumnHeader.displayName = 'ColumnHeader';
 
-// Color picker pill component
-const ColorPickerPill = memo(({ 
+// Status options with colors
+const STATUS_OPTIONS: { key: NotiziaStatus; label: string; color: string }[] = [
+  { key: 'new', label: 'New', color: '#22c55e' },
+  { key: 'in_progress', label: 'In Progress', color: '#f59e0b' },
+  { key: 'done', label: 'Done', color: '#3b82f6' },
+  { key: 'on_shot', label: 'On Shot', color: '#8b5cf6' },
+  { key: 'taken', label: 'Taken', color: '#06b6d4' },
+  { key: 'credit', label: 'Credit', color: '#ec4899' },
+  { key: 'no', label: 'No', color: '#ef4444' },
+  { key: 'sold', label: 'Sold', color: '#1f2937' },
+];
+
+// Color and Status picker pill component
+const ColorStatusPickerPill = memo(({ 
   position, 
-  currentColor, 
-  onSelect, 
+  currentColor,
+  currentStatus,
+  onColorSelect, 
+  onStatusChange,
   onClose 
 }: { 
   position: { x: number; y: number }; 
   currentColor: string | null;
-  onSelect: (color: string | null) => void;
+  currentStatus: NotiziaStatus;
+  onColorSelect: (color: string | null) => void;
+  onStatusChange: (status: NotiziaStatus) => void;
   onClose: () => void;
 }) => {
   const [customColor, setCustomColor] = useState(currentColor || '#fef3c7');
@@ -182,42 +198,68 @@ const ColorPickerPill = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-50 flex items-center gap-1.5 px-2 py-1.5 bg-white/90 backdrop-blur-xl rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+        className="fixed z-50 flex flex-col gap-2 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
         style={{
-          left: Math.min(position.x, window.innerWidth - 200),
-          top: Math.min(position.y, window.innerHeight - 60),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 220),
+          top: Math.min(position.y, window.innerHeight - 150),
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {cardColors.map((c) => (
-          <button
-            key={c.value || 'default'}
-            onClick={() => { onSelect(c.value); onClose(); }}
-            className={cn(
-              "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
-              c.color,
-              currentColor === c.value && "ring-2 ring-foreground ring-offset-1"
-            )}
-            title={c.label}
-          />
-        ))}
-        <div className="relative">
-          <input
-            type="color"
-            value={customColor}
-            onChange={(e) => setCustomColor(e.target.value)}
-            onBlur={() => { onSelect(customColor); onClose(); }}
-            className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
-          />
-          <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
-            +
+        {/* Status selector */}
+        <div className="flex flex-wrap gap-1 max-w-[200px]">
+          {STATUS_OPTIONS.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => { onStatusChange(s.key); onClose(); }}
+              className={cn(
+                "px-2 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                currentStatus === s.key && "ring-2 ring-foreground ring-offset-1"
+              )}
+              style={{ 
+                backgroundColor: s.color,
+                color: isDarkColor(s.color) ? 'white' : 'black'
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Separator */}
+        <div className="h-px bg-muted" />
+        
+        {/* Color picker */}
+        <div className="flex items-center gap-1.5">
+          {cardColors.map((c) => (
+            <button
+              key={c.value || 'default'}
+              onClick={() => { onColorSelect(c.value); onClose(); }}
+              className={cn(
+                "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
+                c.color,
+                currentColor === c.value && "ring-2 ring-foreground ring-offset-1"
+              )}
+              title={c.label}
+            />
+          ))}
+          <div className="relative">
+            <input
+              type="color"
+              value={customColor}
+              onChange={(e) => setCustomColor(e.target.value)}
+              onBlur={() => { onColorSelect(customColor); onClose(); }}
+              className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
+            />
+            <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
+              +
+            </div>
           </div>
         </div>
       </div>
     </>
   );
 });
-ColorPickerPill.displayName = 'ColorPickerPill';
+ColorStatusPickerPill.displayName = 'ColorStatusPickerPill';
 
 // Emoji picker pill component
 const EmojiPickerPill = memo(({ 
@@ -270,13 +312,14 @@ const EmojiPickerPill = memo(({
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card component
-const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: { 
+const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange, onStatusChange }: { 
   notizia: Notizia; 
   onClick: () => void;
   onColorChange: (color: string | null) => void;
   onEmojiChange: (emoji: string | null) => void;
+  onStatusChange: (status: NotiziaStatus) => void;
 }) => {
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
@@ -287,7 +330,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
     e.preventDefault();
     e.stopPropagation();
     setPickerPos({ x: e.clientX - 100, y: e.clientY - 50 });
-    setColorPickerOpen(true);
+    setPickerOpen(true);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -295,7 +338,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
       setPickerPos({ x: touch.clientX - 100, y: touch.clientY - 60 });
-      setColorPickerOpen(true);
+      setPickerOpen(true);
     }, 500);
   };
 
@@ -363,12 +406,14 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange }: {
         </div>
       </div>
 
-      {colorPickerOpen && (
-        <ColorPickerPill
+      {pickerOpen && (
+        <ColorStatusPickerPill
           position={pickerPos}
           currentColor={notizia.card_color}
-          onSelect={onColorChange}
-          onClose={() => setColorPickerOpen(false)}
+          currentStatus={notizia.status as NotiziaStatus}
+          onColorSelect={onColorChange}
+          onStatusChange={onStatusChange}
+          onClose={() => setPickerOpen(false)}
         />
       )}
 
@@ -574,6 +619,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                       onClick={() => onNotiziaClick(notizia)} 
                                       onColorChange={(color) => handleColorChange(notizia.id, color)}
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
+                                      onStatusChange={(status) => onStatusChange(notizia.id, status)}
                                     />
                                   </div>
                                 )}

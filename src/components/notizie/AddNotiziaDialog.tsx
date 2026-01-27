@@ -48,7 +48,7 @@ const AddNotiziaDialog = ({
     emoji: '',
     reminder_date: null as Date | null,
     reminder_time: '09:00',
-    created_date: null as Date | null,
+    created_date: new Date() as Date | null,
   });
 
   // Reset form when opening with a new defaultStatus
@@ -93,7 +93,7 @@ const AddNotiziaDialog = ({
       emoji: '',
       reminder_date: null,
       reminder_time: '09:00',
-      created_date: null,
+      created_date: new Date(),
     });
     setCustomEmoji('');
     handleOpen(false);
