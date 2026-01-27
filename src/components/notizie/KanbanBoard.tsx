@@ -382,6 +382,9 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    // Don't start long press if a picker is already open
+    if (pickerOpen || emojiPickerOpen) return;
+    
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
@@ -403,6 +406,13 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
     setPickerPos({ x: rect.left, y: rect.bottom + 5 });
     setEmojiPickerOpen(true);
   };
+
+  const handleCardClick = () => {
+    // Don't open detail if a picker is open or was just closed
+    if (pickerOpen || emojiPickerOpen) return;
+    triggerHaptic('light');
+    onClick();
+  };
   
   return (
     <>
@@ -415,10 +425,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           backgroundColor: notizia.card_color,
           boxShadow: '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4)'
         } : undefined}
-        onClick={() => {
-          triggerHaptic('light');
-          onClick();
-        }}
+        onClick={handleCardClick}
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
