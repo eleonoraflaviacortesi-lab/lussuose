@@ -160,23 +160,12 @@ const ColumnHeader = memo(({
 });
 ColumnHeader.displayName = 'ColumnHeader';
 
-// Status options with colors
-const STATUS_OPTIONS: { key: NotiziaStatus; label: string; color: string }[] = [
-  { key: 'new', label: 'New', color: '#22c55e' },
-  { key: 'in_progress', label: 'In Progress', color: '#f59e0b' },
-  { key: 'done', label: 'Done', color: '#3b82f6' },
-  { key: 'on_shot', label: 'On Shot', color: '#8b5cf6' },
-  { key: 'taken', label: 'Taken', color: '#06b6d4' },
-  { key: 'credit', label: 'Credit', color: '#ec4899' },
-  { key: 'no', label: 'No', color: '#ef4444' },
-  { key: 'sold', label: 'Sold', color: '#1f2937' },
-];
-
-// Color and Status picker pill component
+// Color and Status picker pill component - uses dynamic columns
 const ColorStatusPickerPill = memo(({ 
   position, 
   currentColor,
   currentStatus,
+  columns,
   onColorSelect, 
   onStatusChange,
   onClose 
@@ -184,11 +173,12 @@ const ColorStatusPickerPill = memo(({
   position: { x: number; y: number }; 
   currentColor: string | null;
   currentStatus: NotiziaStatus;
+  columns: KanbanColumn[];
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
   onClose: () => void;
 }) => {
-  const [customColor, setCustomColor] = useState(currentColor || '#fef3c7');
+  const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
   
   return (
     <>
@@ -198,60 +188,63 @@ const ColorStatusPickerPill = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-50 flex flex-col gap-2 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 220),
-          top: Math.min(position.y, window.innerHeight - 150),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 240),
+          top: Math.min(position.y, window.innerHeight - 180),
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Status selector */}
-        <div className="flex flex-wrap gap-1 max-w-[200px]">
-          {STATUS_OPTIONS.map((s) => (
+        {/* Status selector - uses dynamic columns */}
+        <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+          {columns.map((col) => (
             <button
-              key={s.key}
-              onClick={() => { onStatusChange(s.key); onClose(); }}
+              key={col.key}
+              onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
               className={cn(
-                "px-2 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
-                currentStatus === s.key && "ring-2 ring-foreground ring-offset-1"
+                "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                currentStatus === col.key && "ring-2 ring-foreground ring-offset-1"
               )}
               style={{ 
-                backgroundColor: s.color,
-                color: isDarkColor(s.color) ? 'white' : 'black'
+                backgroundColor: col.color,
+                color: isDarkColor(col.color) ? 'white' : 'black'
               }}
             >
-              {s.label}
+              {col.label}
             </button>
           ))}
         </div>
         
         {/* Separator */}
-        <div className="h-px bg-muted" />
+        <div className="h-px bg-muted/50" />
         
-        {/* Color picker */}
-        <div className="flex items-center gap-1.5">
-          {cardColors.map((c) => (
-            <button
-              key={c.value || 'default'}
-              onClick={() => { onColorSelect(c.value); onClose(); }}
-              className={cn(
-                "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
-                c.color,
-                currentColor === c.value && "ring-2 ring-foreground ring-offset-1"
-              )}
-              title={c.label}
-            />
-          ))}
-          <div className="relative">
-            <input
-              type="color"
-              value={customColor}
-              onChange={(e) => setCustomColor(e.target.value)}
-              onBlur={() => { onColorSelect(customColor); onClose(); }}
-              className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
-            />
-            <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
-              +
+        {/* Card color picker */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
+          <div className="flex items-center gap-1.5">
+            {cardColors.map((c) => (
+              <button
+                key={c.value || 'default'}
+                onClick={() => { onColorSelect(c.value); onClose(); }}
+                className={cn(
+                  "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
+                  c.color,
+                  currentColor === c.value && "ring-2 ring-foreground ring-offset-1"
+                )}
+                title={c.label}
+              />
+            ))}
+            <div className="relative">
+              <input
+                type="color"
+                value={customCardColor}
+                onChange={(e) => setCustomCardColor(e.target.value)}
+                onBlur={() => { onColorSelect(customCardColor); onClose(); }}
+                className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
+              />
+              <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
+                +
+              </div>
             </div>
           </div>
         </div>
@@ -312,8 +305,9 @@ const EmojiPickerPill = memo(({
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card component
-const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange, onStatusChange }: { 
+const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange }: { 
   notizia: Notizia; 
+  columns: KanbanColumn[];
   onClick: () => void;
   onColorChange: (color: string | null) => void;
   onEmojiChange: (emoji: string | null) => void;
@@ -411,6 +405,7 @@ const Card = memo(({ notizia, onClick, onColorChange, onEmojiChange, onStatusCha
           position={pickerPos}
           currentColor={notizia.card_color}
           currentStatus={notizia.status as NotiziaStatus}
+          columns={columns}
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
           onClose={() => setPickerOpen(false)}
@@ -615,7 +610,8 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                     className={cn(snapshot.isDragging && "scale-105 shadow-lg rotate-1")}
                                   >
                                     <Card 
-                                      notizia={notizia} 
+                                      notizia={notizia}
+                                      columns={columns}
                                       onClick={() => onNotiziaClick(notizia)} 
                                       onColorChange={(color) => handleColorChange(notizia.id, color)}
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
