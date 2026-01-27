@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import logoLarge from '@/assets/le_lussuose_large.svg';
+import logoLarge from '@/assets/cortesi_logo.svg';
 import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
 
@@ -161,8 +161,8 @@ const Auth = () => {
       <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
         <img 
           src={logoLarge} 
-          alt="Le Lussuose" 
-          className="h-16 mx-auto dark:invert" 
+          alt="Cortesi Luxury Real Estate" 
+          className="h-16 mx-auto" 
         />
       </div>
 
