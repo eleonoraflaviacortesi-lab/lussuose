@@ -440,9 +440,16 @@ const ReportAnalysisTab = () => {
                     <div className="w-14 h-14 rounded-xl bg-muted flex items-center justify-center">
                       <span className="text-sm font-semibold">{formatShortDate(entry.date)}</span>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      Tocca per visualizzare i dettagli
-                    </p>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {(entry.incarichi_vendita || 0) > 0 
+                          ? `📝 ${entry.incarichi_vendita} incarichio${entry.incarichi_vendita > 1 ? 'i' : ''}` 
+                          : 'Tocca per visualizzare'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {entry.contatti_reali || 0} contatti · {entry.notizie_reali || 0} notizie
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <button
