@@ -84,12 +84,12 @@ const ColumnHeader = memo(({
   };
 
   const [customColor, setCustomColor] = useState(column.color);
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
   const colorInputRef = useRef<HTMLInputElement>(null);
 
-  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newColor = e.target.value;
-    setCustomColor(newColor);
-    onUpdate({ color: newColor });
+  const handleSaveCustomColor = () => {
+    onUpdate({ color: customColor });
+    setShowCustomPicker(false);
     setShowColorPicker(false);
   };
 
@@ -156,32 +156,57 @@ const ColumnHeader = memo(({
       {/* Color picker dropdown */}
       {showColorPicker && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)} />
-          <div className="absolute top-8 left-0 z-50 flex items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-lg">
-            {COLUMN_COLORS.map((color) => (
+          <div className="fixed inset-0 z-40" onClick={() => { setShowColorPicker(false); setShowCustomPicker(false); }} />
+          <div className="absolute top-8 left-0 z-50 p-2.5 bg-white shadow-lg rounded-xl min-w-[200px]">
+            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+              {COLUMN_COLORS.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => handleColorSelect(color)}
+                  className={cn(
+                    "w-7 h-7 rounded-full transition-transform hover:scale-110 active:scale-95",
+                    column.color === color && "ring-2 ring-foreground ring-offset-1"
+                  )}
+                  style={{ backgroundColor: color }}
+                />
+              ))}
+              {/* Custom color toggle */}
               <button
-                key={color}
-                onClick={() => handleColorSelect(color)}
+                onClick={() => setShowCustomPicker(!showCustomPicker)}
                 className={cn(
-                  "w-6 h-6 rounded-full transition-transform hover:scale-110",
-                  column.color === color && "ring-2 ring-foreground ring-offset-1"
+                  "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-xs font-bold text-black ring-1 ring-black/10 transition-transform hover:scale-110 active:scale-95",
+                  showCustomPicker && "ring-2 ring-foreground"
                 )}
-                style={{ backgroundColor: color }}
-              />
-            ))}
-            {/* Custom color picker */}
-            <div className="relative">
-              <input
-                ref={colorInputRef}
-                type="color"
-                value={customColor}
-                onChange={handleCustomColorChange}
-                className="absolute inset-0 w-6 h-6 opacity-0 cursor-pointer"
-              />
-              <div className="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center text-xs font-bold text-black ring-1 ring-black/10">
+              >
                 +
-              </div>
+              </button>
             </div>
+            
+            {/* Custom color picker section */}
+            {showCustomPicker && (
+              <div className="pt-2 border-t border-muted/30">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={colorInputRef}
+                    type="color"
+                    value={customColor}
+                    onChange={(e) => setCustomColor(e.target.value)}
+                    className="w-10 h-10 rounded-lg cursor-pointer border-0 p-0"
+                    style={{ WebkitAppearance: 'none' }}
+                  />
+                  <div 
+                    className="flex-1 h-10 rounded-lg"
+                    style={{ backgroundColor: customColor }}
+                  />
+                  <button
+                    onClick={handleSaveCustomColor}
+                    className="px-3 py-2 bg-foreground text-background text-xs font-medium rounded-lg active:scale-95 transition-transform"
+                  >
+                    Salva
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
