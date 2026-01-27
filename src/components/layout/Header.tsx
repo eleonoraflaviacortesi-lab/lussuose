@@ -39,10 +39,10 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     <>
       <header className="fixed top-0 left-0 right-0 z-[60]">
         {/* iOS Safe Area Background */}
-        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-banner" />
+        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black" />
         
-        {/* Ticker Banner - Fuchsia with smooth scroll */}
-        <div className="bg-banner text-banner-foreground pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
+        {/* Ticker Banner - Black with smooth scroll */}
+        <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
           <div className="flex ticker-smooth whitespace-nowrap pt-2">
             {[...Array(8)].map((_, i) => (
               <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
