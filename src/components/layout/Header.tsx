@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
-import logo from '@/assets/le_lussuose_large.svg';
+import logo from '@/assets/cortesi_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 
 interface HeaderProps {
@@ -66,7 +66,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Le Lussuose" className="h-16" />
+          <img src={logo} alt="Cortesi Luxury Real Estate" className="h-16" />
 
           {/* Logout */}
           <button 
