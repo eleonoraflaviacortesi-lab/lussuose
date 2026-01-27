@@ -83,9 +83,19 @@ const ColumnHeader = memo(({
     setShowColorPicker(false);
   };
 
+  const [customColor, setCustomColor] = useState(column.color);
+  const colorInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCustomColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newColor = e.target.value;
+    setCustomColor(newColor);
+    onUpdate({ color: newColor });
+    setShowColorPicker(false);
+  };
+
   return (
     <div className={cn(
-      "flex items-center gap-2 mb-2 lg:mb-3 group",
+      "flex items-center gap-2 mb-2 lg:mb-3 group relative",
       isDragging && "opacity-50"
     )}>
       <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
@@ -104,18 +114,25 @@ const ColumnHeader = memo(({
         />
       ) : (
         <button
-          onClick={() => setShowColorPicker(!showColorPicker)}
-          onDoubleClick={() => setEditing(true)}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform hover:scale-105"
+          onClick={() => setEditing(true)}
+          className="text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform hover:scale-105 cursor-text"
           style={{ 
             backgroundColor: column.color,
             color: isDarkColor(column.color) ? 'white' : 'black'
           }}
-          title="Doppio click per modificare nome, click per colore"
+          title="Clicca per modificare nome"
         >
           {column.label}
         </button>
       )}
+      
+      {/* Color button */}
+      <button
+        onClick={() => setShowColorPicker(!showColorPicker)}
+        className="w-4 h-4 rounded-full shrink-0 transition-transform hover:scale-110 ring-1 ring-black/10"
+        style={{ backgroundColor: column.color }}
+        title="Cambia colore"
+      />
       
       <span className="text-xs text-muted-foreground">{count}</span>
       
@@ -140,7 +157,7 @@ const ColumnHeader = memo(({
       {showColorPicker && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)} />
-          <div className="absolute top-8 left-0 z-50 flex gap-1 p-2 bg-white rounded-xl shadow-lg">
+          <div className="absolute top-8 left-0 z-50 flex items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-lg">
             {COLUMN_COLORS.map((color) => (
               <button
                 key={color}
@@ -152,6 +169,19 @@ const ColumnHeader = memo(({
                 style={{ backgroundColor: color }}
               />
             ))}
+            {/* Custom color picker */}
+            <div className="relative">
+              <input
+                ref={colorInputRef}
+                type="color"
+                value={customColor}
+                onChange={handleCustomColorChange}
+                className="absolute inset-0 w-6 h-6 opacity-0 cursor-pointer"
+              />
+              <div className="w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center text-xs font-bold text-black ring-1 ring-black/10">
+                +
+              </div>
+            </div>
           </div>
         </>
       )}
