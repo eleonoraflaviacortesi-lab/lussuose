@@ -153,19 +153,19 @@ const ColumnHeader = memo(({
         <Trash2 className="w-3.5 h-3.5" />
       </button>
 
-      {/* Color picker dropdown */}
+      {/* Color picker dropdown - Liquid Glass style */}
       {showColorPicker && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => { setShowColorPicker(false); setShowCustomPicker(false); }} />
-          <div className="absolute top-8 left-0 z-50 p-2.5 bg-white shadow-lg rounded-xl min-w-[200px]">
-            <div className="flex flex-wrap items-center gap-1.5 mb-2">
+          <div className="absolute top-8 left-0 z-50 p-3 bg-white/90 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] rounded-2xl min-w-[220px] animate-in zoom-in-95 fade-in duration-150">
+            <div className="flex flex-wrap items-center gap-2">
               {COLUMN_COLORS.map((color) => (
                 <button
                   key={color}
                   onClick={() => handleColorSelect(color)}
                   className={cn(
-                    "w-7 h-7 rounded-full transition-transform hover:scale-110 active:scale-95",
-                    column.color === color && "ring-2 ring-foreground ring-offset-1"
+                    "w-8 h-8 rounded-full transition-all active:scale-90 shadow-sm",
+                    column.color === color && "ring-2 ring-foreground ring-offset-2"
                   )}
                   style={{ backgroundColor: color }}
                 />
@@ -174,8 +174,8 @@ const ColumnHeader = memo(({
               <button
                 onClick={() => setShowCustomPicker(!showCustomPicker)}
                 className={cn(
-                  "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-xs font-bold text-black ring-1 ring-black/10 transition-transform hover:scale-110 active:scale-95",
-                  showCustomPicker && "ring-2 ring-foreground"
+                  "w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
+                  showCustomPicker && "ring-2 ring-foreground ring-offset-2"
                 )}
               >
                 +
@@ -184,23 +184,22 @@ const ColumnHeader = memo(({
             
             {/* Custom color picker section */}
             {showCustomPicker && (
-              <div className="pt-2 border-t border-muted/30">
-                <div className="flex items-center gap-2">
+              <div className="mt-3 pt-3 border-t border-black/5">
+                <div className="flex items-center gap-3">
                   <input
                     ref={colorInputRef}
                     type="color"
                     value={customColor}
                     onChange={(e) => setCustomColor(e.target.value)}
-                    className="w-10 h-10 rounded-lg cursor-pointer border-0 p-0"
-                    style={{ WebkitAppearance: 'none' }}
+                    className="w-12 h-12 rounded-xl cursor-pointer shadow-inner"
                   />
                   <div 
-                    className="flex-1 h-10 rounded-lg"
+                    className="flex-1 h-12 rounded-xl shadow-inner"
                     style={{ backgroundColor: customColor }}
                   />
                   <button
                     onClick={handleSaveCustomColor}
-                    className="px-3 py-2 bg-foreground text-background text-xs font-medium rounded-lg active:scale-95 transition-transform"
+                    className="px-4 py-2.5 bg-foreground text-background text-xs font-semibold rounded-full shadow-lg active:scale-95 transition-transform"
                   >
                     Salva
                   </button>
