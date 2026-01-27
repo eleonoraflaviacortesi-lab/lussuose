@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send } from 'lucide-react';
+import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -49,6 +49,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
   const [customEmoji, setCustomEmoji] = useState('');
   const [newComment, setNewComment] = useState('');
+  const [showSaved, setShowSaved] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [editData, setEditData] = useState({
     name: '',
     zona: '',
@@ -84,9 +86,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   if (!notizia || !open) return null;
 
-  const handleSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editData.name.trim()) return;
+  // Auto-save function
+  const performSave = useCallback(() => {
+    if (!notizia || !editData.name.trim()) return;
     
     let reminderDateTime: string | null = null;
     if (editData.reminder_date) {
@@ -108,8 +110,55 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       reminder_date: reminderDateTime,
       comments: editData.comments,
     });
-    onOpenChange(false);
-  };
+
+    // Show saved indicator
+    setShowSaved(true);
+    setTimeout(() => setShowSaved(false), 1500);
+  }, [notizia, editData, updateNotizia]);
+
+  // Debounced auto-save on field changes
+  const triggerAutoSave = useCallback(() => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+    saveTimeoutRef.current = setTimeout(() => {
+      performSave();
+    }, 500);
+  }, [performSave]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Update handler that triggers auto-save
+  const updateField = useCallback((field: string, value: any) => {
+    setEditData(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  // Trigger save on blur for text fields
+  const handleBlur = useCallback(() => {
+    triggerAutoSave();
+  }, [triggerAutoSave]);
+
+  // Immediate save for select/picker changes
+  const updateAndSave = useCallback((field: string, value: any) => {
+    setEditData(prev => {
+      const newData = { ...prev, [field]: value };
+      // Schedule save with new data
+      setTimeout(() => {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+        performSave();
+      }, 100);
+      return newData;
+    });
+  }, [performSave]);
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
@@ -118,15 +167,21 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       text: newComment.trim(),
       created_at: new Date().toISOString(),
     };
-    setEditData({ ...editData, comments: [...editData.comments, comment] });
+    const newComments = [...editData.comments, comment];
+    setEditData({ ...editData, comments: newComments });
     setNewComment('');
+    // Auto-save after adding comment
+    triggerAutoSave();
   };
 
   const handleDeleteComment = (commentId: string) => {
+    const newComments = editData.comments.filter(c => c.id !== commentId);
     setEditData({ 
       ...editData, 
-      comments: editData.comments.filter(c => c.id !== commentId) 
+      comments: newComments 
     });
+    // Auto-save after deleting comment
+    triggerAutoSave();
   };
 
   const handleDelete = () => {
@@ -142,7 +197,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   const handleCustomEmojiSubmit = () => {
     if (customEmoji.trim()) {
-      setEditData({ ...editData, emoji: customEmoji.trim() });
+      updateAndSave('emoji', customEmoji.trim());
       setCustomEmoji('');
     }
   };
@@ -174,12 +229,20 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Title */}
-        <h3 className="text-center text-base font-bold tracking-wide uppercase mb-4">
-          Modifica Notizia
-        </h3>
+        {/* Title with saved indicator */}
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <h3 className="text-center text-base font-bold tracking-wide uppercase">
+            Modifica Notizia
+          </h3>
+          {showSaved && (
+            <span className="flex items-center gap-1 text-xs text-green-600 animate-in fade-in duration-200">
+              <Check className="w-3 h-3" />
+              Salvato
+            </span>
+          )}
+        </div>
 
-        <form onSubmit={handleSave} className="space-y-3">
+        <div className="space-y-3">
           {/* Emoji + Name row */}
           <div className="flex gap-2">
             <div>
@@ -215,7 +278,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       <button
                         key={emoji}
                         type="button"
-                        onClick={() => setEditData({ ...editData, emoji })}
+                        onClick={() => updateAndSave('emoji', emoji)}
                         className={cn(
                           "w-8 h-8 flex items-center justify-center rounded-lg active:scale-95 transition-transform",
                           editData.emoji === emoji && "bg-accent"
@@ -233,9 +296,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               <input
                 id="edit-name"
                 value={editData.name}
-                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                onChange={(e) => updateField('name', e.target.value)}
+                onBlur={handleBlur}
                 placeholder="Es: Villa Serenity"
-                required
                 className={pillInputClass}
               />
             </div>
@@ -247,7 +310,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               <input
                 id="edit-zona"
                 value={editData.zona}
-                onChange={(e) => setEditData({ ...editData, zona: e.target.value })}
+                onChange={(e) => updateField('zona', e.target.value)}
+                onBlur={handleBlur}
                 placeholder="Es: Umbertide"
                 className={pillInputClass}
               />
@@ -257,7 +321,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               <input
                 id="edit-type"
                 value={editData.type}
-                onChange={(e) => setEditData({ ...editData, type: e.target.value })}
+                onChange={(e) => updateField('type', e.target.value)}
+                onBlur={handleBlur}
                 placeholder="Es: Casale"
                 className={pillInputClass}
               />
@@ -271,7 +336,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 id="edit-phone"
                 type="tel"
                 value={editData.phone}
-                onChange={(e) => setEditData({ ...editData, phone: e.target.value })}
+                onChange={(e) => updateField('phone', e.target.value)}
+                onBlur={handleBlur}
                 placeholder="+39 333 1234567"
                 className={cn(pillInputClass, "flex-1")}
               />
@@ -291,7 +357,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <Label htmlFor="edit-status" className="text-xs font-medium mb-1.5 block">Status</Label>
             <Select
               value={editData.status}
-              onValueChange={(value) => setEditData({ ...editData, status: value as NotiziaStatus })}
+              onValueChange={(value) => updateAndSave('status', value as NotiziaStatus)}
             >
               <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
                 <SelectValue />
@@ -309,7 +375,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <textarea
               id="edit-notes"
               value={editData.notes}
-              onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
+              onChange={(e) => updateField('notes', e.target.value)}
+              onBlur={handleBlur}
               placeholder="Aggiungi note..."
               rows={2}
               className={pillTextareaClass}
@@ -397,7 +464,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   <Calendar
                     mode="single"
                     selected={editData.reminder_date || undefined}
-                    onSelect={(date) => setEditData({ ...editData, reminder_date: date || null })}
+                    onSelect={(date) => updateAndSave('reminder_date', date || null)}
                     locale={it}
                     className="pointer-events-auto"
                   />
@@ -406,7 +473,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     <input
                       type="time"
                       value={editData.reminder_time}
-                      onChange={(e) => setEditData({ ...editData, reminder_time: e.target.value })}
+                      onChange={(e) => updateField('reminder_time', e.target.value)}
+                      onBlur={handleBlur}
                       className="w-full bg-white rounded-full px-4 py-2 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
                     />
                   </div>
@@ -465,18 +533,11 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           <div className="flex justify-center gap-2 pt-3">
             <Button 
               type="button" 
-              variant="ghost" 
+              variant="outline" 
               onClick={() => onOpenChange(false)}
-              className="rounded-full px-5 text-sm active:scale-[0.98] transition-transform"
+              className="rounded-full px-6 text-sm active:scale-[0.98] transition-transform"
             >
-              Annulla
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={!editData.name.trim()}
-              className="rounded-full px-5 text-sm active:scale-[0.98] transition-transform"
-            >
-              Salva
+              Chiudi
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -503,7 +564,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
