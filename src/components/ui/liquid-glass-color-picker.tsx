@@ -154,8 +154,12 @@ export const LiquidGlassColorPicker = memo(({
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      if (isDraggingSat.current) handleSaturationChange(e.touches[0].clientX, e.touches[0].clientY);
-      if (isDraggingHue.current) handleHueChange(e.touches[0].clientX);
+      if (isDraggingSat.current || isDraggingHue.current) {
+        // Prevent scrolling on iOS while dragging
+        e.preventDefault();
+        if (isDraggingSat.current) handleSaturationChange(e.touches[0].clientX, e.touches[0].clientY);
+        if (isDraggingHue.current) handleHueChange(e.touches[0].clientX);
+      }
     };
 
     const handleEnd = () => {
@@ -164,7 +168,8 @@ export const LiquidGlassColorPicker = memo(({
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
+    // CRITICAL: passive: false is required for preventDefault() to work on iOS
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('mouseup', handleEnd);
     window.addEventListener('touchend', handleEnd);
 
@@ -224,7 +229,7 @@ export const LiquidGlassColorPicker = memo(({
       {/* Saturation/Brightness Area */}
       <div
         ref={saturationRef}
-        className="relative w-full h-40 rounded-2xl cursor-crosshair overflow-hidden shadow-inner"
+        className="relative w-full h-40 rounded-2xl cursor-crosshair overflow-hidden shadow-inner touch-none"
         style={{
           background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueColorHex})`,
         }}
@@ -264,7 +269,7 @@ export const LiquidGlassColorPicker = memo(({
         {/* Hue Slider */}
         <div
           ref={hueRef}
-          className="flex-1 h-4 rounded-full cursor-pointer relative shadow-inner"
+          className="flex-1 h-4 rounded-full cursor-pointer relative shadow-inner touch-none"
           style={{
             background: 'linear-gradient(to right, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)',
           }}
