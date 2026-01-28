@@ -172,12 +172,18 @@ export const LiquidGlassColorPicker = memo(({
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
     window.addEventListener('mouseup', handleEnd);
     window.addEventListener('touchend', handleEnd);
+    // iOS Safari can fire touchcancel when gesture is interrupted (e.g. leaving popover, app switch)
+    window.addEventListener('touchcancel', handleEnd);
+    // Extra safety: if the page loses focus while dragging
+    window.addEventListener('blur', handleEnd);
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('mouseup', handleEnd);
       window.removeEventListener('touchend', handleEnd);
+      window.removeEventListener('touchcancel', handleEnd);
+      window.removeEventListener('blur', handleEnd);
     };
   }, [handleSaturationChange, handleHueChange]);
 
