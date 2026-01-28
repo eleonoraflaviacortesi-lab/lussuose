@@ -470,13 +470,41 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   />
                   <div className="p-3 bg-white/60 backdrop-blur-sm">
                     <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
-                    <input
-                      type="time"
-                      value={editData.reminder_time}
-                      onChange={(e) => updateField('reminder_time', e.target.value)}
-                      onBlur={handleBlur}
-                      className={pillInputClass}
-                    />
+                    <div className="flex gap-2">
+                      <Select
+                        value={editData.reminder_time.split(':')[0]}
+                        onValueChange={(hour) => {
+                          const mins = editData.reminder_time.split(':')[1] || '00';
+                          updateAndSave('reminder_time', `${hour}:${mins}`);
+                        }}
+                      >
+                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                          <SelectValue placeholder="Ora" />
+                        </SelectTrigger>
+                        <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
+                          {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map((hour) => (
+                            <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <span className="flex items-center text-muted-foreground font-medium">:</span>
+                      <Select
+                        value={editData.reminder_time.split(':')[1] || '00'}
+                        onValueChange={(mins) => {
+                          const hour = editData.reminder_time.split(':')[0] || '09';
+                          updateAndSave('reminder_time', `${hour}:${mins}`);
+                        }}
+                      >
+                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                          <SelectValue placeholder="Min" />
+                        </SelectTrigger>
+                        <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
+                          {['00', '15', '30', '45'].map((mins) => (
+                            <SelectItem key={mins} value={mins}>{mins}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
