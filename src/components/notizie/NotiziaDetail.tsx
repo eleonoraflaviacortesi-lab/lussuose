@@ -64,28 +64,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     comments: [] as NotiziaComment[],
   });
 
-  // Inizializza editData quando cambia la notizia
-  useEffect(() => {
-    if (notizia) {
-      const reminderDate = notizia.reminder_date ? new Date(notizia.reminder_date) : null;
-      setEditData({
-        name: notizia.name,
-        zona: notizia.zona || '',
-        phone: notizia.phone || '',
-        type: notizia.type || '',
-        notes: notizia.notes || '',
-        status: notizia.status,
-        emoji: notizia.emoji || '📋',
-        reminder_date: reminderDate,
-        reminder_time: reminderDate ? format(reminderDate, 'HH:mm') : '09:00',
-        comments: notizia.comments || [],
-      });
-      setNewComment('');
-    }
-  }, [notizia]);
-
-  if (!notizia || !open) return null;
-
   // Auto-save function
   const performSave = useCallback(() => {
     if (!notizia || !editData.name.trim()) return;
@@ -126,15 +104,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     }, 500);
   }, [performSave]);
 
-  // Cleanup timeout on unmount
-  useEffect(() => {
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-    };
-  }, []);
-
   // Update handler that triggers auto-save
   const updateField = useCallback((field: string, value: any) => {
     setEditData(prev => ({ ...prev, [field]: value }));
@@ -149,7 +118,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const updateAndSave = useCallback((field: string, value: any) => {
     setEditData(prev => {
       const newData = { ...prev, [field]: value };
-      // Schedule save with new data
       setTimeout(() => {
         if (saveTimeoutRef.current) {
           clearTimeout(saveTimeoutRef.current);
@@ -159,6 +127,38 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       return newData;
     });
   }, [performSave]);
+
+  // Inizializza editData quando cambia la notizia
+  useEffect(() => {
+    if (notizia) {
+      const reminderDate = notizia.reminder_date ? new Date(notizia.reminder_date) : null;
+      setEditData({
+        name: notizia.name,
+        zona: notizia.zona || '',
+        phone: notizia.phone || '',
+        type: notizia.type || '',
+        notes: notizia.notes || '',
+        status: notizia.status,
+        emoji: notizia.emoji || '📋',
+        reminder_date: reminderDate,
+        reminder_time: reminderDate ? format(reminderDate, 'HH:mm') : '09:00',
+        comments: notizia.comments || [],
+      });
+      setNewComment('');
+    }
+  }, [notizia]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Early return AFTER all hooks
+  if (!notizia || !open) return null;
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
