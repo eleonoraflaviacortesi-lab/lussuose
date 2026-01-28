@@ -233,6 +233,12 @@ const ColorStatusPickerPill = memo(({
   onClose: () => void;
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
+  
+  const handleSaveCustomColor = () => {
+    onColorSelect(customCardColor);
+    onClose();
+  };
   
   return (
     <>
@@ -244,10 +250,12 @@ const ColorStatusPickerPill = memo(({
       <div
         className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 240),
-          top: Math.min(position.y, window.innerHeight - 180),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
+          top: Math.min(position.y, window.innerHeight - 220),
         }}
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
       >
         {/* Status selector - uses dynamic columns */}
         <div className="flex flex-wrap gap-1.5 max-w-[220px]">
@@ -288,20 +296,42 @@ const ColorStatusPickerPill = memo(({
                 title={c.label}
               />
             ))}
-            <div className="relative">
+            {/* Custom color toggle */}
+            <button
+              onClick={() => setShowCustomPicker(!showCustomPicker)}
+              className={cn(
+                "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
+                showCustomPicker && "ring-2 ring-foreground ring-offset-1"
+              )}
+            >
+              +
+            </button>
+          </div>
+        </div>
+        
+        {/* Custom color picker section - Liquid Glass style */}
+        {showCustomPicker && (
+          <div className="pt-2 border-t border-black/5">
+            <div className="flex items-center gap-3">
               <input
                 type="color"
                 value={customCardColor}
                 onChange={(e) => setCustomCardColor(e.target.value)}
-                onBlur={() => { onColorSelect(customCardColor); onClose(); }}
-                className="absolute inset-0 w-7 h-7 opacity-0 cursor-pointer"
+                className="w-12 h-12 rounded-xl cursor-pointer shadow-inner"
               />
-              <div className="w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black">
-                +
-              </div>
+              <div 
+                className="flex-1 h-12 rounded-xl shadow-inner"
+                style={{ backgroundColor: customCardColor }}
+              />
+              <button
+                onClick={handleSaveCustomColor}
+                className="px-4 py-2.5 bg-foreground text-background text-xs font-semibold rounded-full shadow-lg active:scale-95 transition-transform"
+              >
+                Salva
+              </button>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );
