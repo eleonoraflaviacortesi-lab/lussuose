@@ -468,14 +468,14 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     locale={it}
                     className="pointer-events-auto"
                   />
-                  <div className="p-3 border-t border-muted/20">
+                  <div className="p-3 bg-white/60 backdrop-blur-sm">
                     <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
                     <input
                       type="time"
                       value={editData.reminder_time}
                       onChange={(e) => updateField('reminder_time', e.target.value)}
                       onBlur={handleBlur}
-                      className="w-full bg-white rounded-full px-4 py-2 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                      className={pillInputClass}
                     />
                   </div>
                 </PopoverContent>
