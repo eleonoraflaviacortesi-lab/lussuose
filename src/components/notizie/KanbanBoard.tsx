@@ -5,6 +5,7 @@ import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2 } from 'lucide-react';
+import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
@@ -182,28 +183,21 @@ const ColumnHeader = memo(({
               </button>
             </div>
             
-            {/* Custom color picker section */}
+            {/* Custom color picker section - NEW Liquid Glass Style */}
             {showCustomPicker && (
               <div className="mt-3 pt-3 border-t border-black/5">
-                <div className="flex items-center gap-3">
-                  <input
-                    ref={colorInputRef}
-                    type="color"
-                    value={customColor}
-                    onChange={(e) => setCustomColor(e.target.value)}
-                    className="w-12 h-12 rounded-xl cursor-pointer shadow-inner"
-                  />
-                  <div 
-                    className="flex-1 h-12 rounded-xl shadow-inner"
-                    style={{ backgroundColor: customColor }}
-                  />
-                  <button
-                    onClick={handleSaveCustomColor}
-                    className="px-4 py-2.5 bg-foreground text-background text-xs font-semibold rounded-full shadow-lg active:scale-95 transition-transform"
-                  >
-                    Salva
-                  </button>
-                </div>
+                <LiquidGlassColorPicker
+                  color={customColor}
+                  onChange={(newColor) => {
+                    setCustomColor(newColor);
+                    onUpdate({ color: newColor });
+                    setShowColorPicker(false);
+                    setShowCustomPicker(false);
+                  }}
+                  onClose={() => setShowCustomPicker(false)}
+                  showEyeDropper={true}
+                  className="shadow-none p-0 bg-transparent backdrop-blur-none"
+                />
               </div>
             )}
           </div>
@@ -309,27 +303,19 @@ const ColorStatusPickerPill = memo(({
           </div>
         </div>
         
-        {/* Custom color picker section - Liquid Glass style */}
+        {/* Custom color picker section - NEW Liquid Glass Style */}
         {showCustomPicker && (
           <div className="pt-2 border-t border-black/5">
-            <div className="flex items-center gap-3">
-              <input
-                type="color"
-                value={customCardColor}
-                onChange={(e) => setCustomCardColor(e.target.value)}
-                className="w-12 h-12 rounded-xl cursor-pointer shadow-inner"
-              />
-              <div 
-                className="flex-1 h-12 rounded-xl shadow-inner"
-                style={{ backgroundColor: customCardColor }}
-              />
-              <button
-                onClick={handleSaveCustomColor}
-                className="px-4 py-2.5 bg-foreground text-background text-xs font-semibold rounded-full shadow-lg active:scale-95 transition-transform"
-              >
-                Salva
-              </button>
-            </div>
+            <LiquidGlassColorPicker
+              color={customCardColor}
+              onChange={(newColor) => {
+                onColorSelect(newColor);
+                onClose();
+              }}
+              onClose={() => setShowCustomPicker(false)}
+              showEyeDropper={true}
+              className="shadow-none p-0 bg-transparent backdrop-blur-none"
+            />
           </div>
         )}
       </div>
