@@ -5,7 +5,8 @@ import "./index.css";
 // PWA: make sure updates take effect quickly (especially on iOS)
 import { registerSW } from "virtual:pwa-register";
 
-console.info(`[build] ${__BUILD_ID__}`);
+const BUILD_VERSION = "v2.0.0";
+console.info(`[build] ${BUILD_VERSION} - ${__BUILD_ID__}`);
 
 // If an updated SW is available, activate it and hard-reload.
 // This avoids users being stuck on an older cached build.
