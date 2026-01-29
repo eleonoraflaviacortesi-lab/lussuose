@@ -6,6 +6,10 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  // Used to verify which build is actually being served (helps debug stale caches on iOS/PWA)
+  define: {
+    __BUILD_ID__: JSON.stringify(new Date().toISOString()),
+  },
   server: {
     host: "::",
     port: 8080,
@@ -50,6 +54,10 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Ensure updated service worker activates promptly (important on iOS)
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
