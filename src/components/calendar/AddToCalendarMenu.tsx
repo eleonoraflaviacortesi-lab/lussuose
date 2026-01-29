@@ -1,0 +1,274 @@
+import { useState, useMemo } from 'react';
+import { Plus, Calendar, User, FileText, Search, X } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import {
+  Command,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@/components/ui/command';
+import { cn } from '@/lib/utils';
+import { format, setHours, setMinutes } from 'date-fns';
+import { it } from 'date-fns/locale';
+
+type AddType = 'appointment' | 'cliente' | 'notizia';
+
+type Cliente = {
+  id: string;
+  nome: string;
+  emoji?: string | null;
+  reminder_date?: string | null;
+};
+
+type Notizia = {
+  id: string;
+  name: string;
+  emoji?: string | null;
+  reminder_date?: string | null;
+};
+
+type Props = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  date: Date;
+  clienti: Cliente[];
+  notizie: Notizia[];
+  onAddAppointment: () => void;
+  onAddClienteReminder: (clienteId: string, date: Date) => void;
+  onAddNotiziaReminder: (notiziaId: string, date: Date) => void;
+};
+
+const AddToCalendarMenu = ({
+  open,
+  onOpenChange,
+  date,
+  clienti,
+  notizie,
+  onAddAppointment,
+  onAddClienteReminder,
+  onAddNotiziaReminder,
+}: Props) => {
+  const [selectedType, setSelectedType] = useState<AddType | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter clienti without reminder on this date
+  const availableClienti = useMemo(() => {
+    return clienti.filter(c => {
+      // Include all clienti, let user choose even if already has reminder
+      return c.nome.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [clienti, searchQuery]);
+
+  // Filter notizie without reminder on this date
+  const availableNotizie = useMemo(() => {
+    return notizie.filter(n => {
+      return n.name.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+  }, [notizie, searchQuery]);
+
+  const handleSelectCliente = (cliente: Cliente) => {
+    // Set reminder to 09:00 of selected date
+    const reminderDate = setMinutes(setHours(date, 9), 0);
+    onAddClienteReminder(cliente.id, reminderDate);
+    onOpenChange(false);
+    setSelectedType(null);
+    setSearchQuery('');
+  };
+
+  const handleSelectNotizia = (notizia: Notizia) => {
+    // Set reminder to 09:00 of selected date
+    const reminderDate = setMinutes(setHours(date, 9), 0);
+    onAddNotiziaReminder(notizia.id, reminderDate);
+    onOpenChange(false);
+    setSelectedType(null);
+    setSearchQuery('');
+  };
+
+  const handleClose = () => {
+    onOpenChange(false);
+    setSelectedType(null);
+    setSearchQuery('');
+  };
+
+  const handleBack = () => {
+    setSelectedType(null);
+    setSearchQuery('');
+  };
+
+  return (
+    <Sheet open={open} onOpenChange={handleClose}>
+      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl">
+        <SheetHeader className="pb-4 border-b border-muted">
+          <SheetTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {selectedType && (
+                <button
+                  onClick={handleBack}
+                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+              <div>
+                <p className="text-xl font-bold">
+                  {selectedType === 'cliente' 
+                    ? 'Seleziona Cliente' 
+                    : selectedType === 'notizia' 
+                    ? 'Seleziona Notizia' 
+                    : 'Aggiungi'}
+                </p>
+                <p className="text-sm text-muted-foreground font-normal">
+                  {format(date, 'd MMMM yyyy', { locale: it })}
+                </p>
+              </div>
+            </div>
+          </SheetTitle>
+        </SheetHeader>
+
+        <div className="py-4 overflow-y-auto max-h-[calc(70vh-120px)]">
+          {!selectedType ? (
+            // Main menu
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  onAddAppointment();
+                  handleClose();
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Nuovo Appuntamento</p>
+                  <p className="text-sm text-muted-foreground">Crea un nuovo appuntamento</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedType('cliente')}
+                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                  <User className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Cliente Esistente</p>
+                  <p className="text-sm text-muted-foreground">Imposta promemoria per un cliente</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setSelectedType('notizia')}
+                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Notizia Esistente</p>
+                  <p className="text-sm text-muted-foreground">Imposta promemoria per una notizia</p>
+                </div>
+              </button>
+            </div>
+          ) : selectedType === 'cliente' ? (
+            // Cliente search
+            <Command className="rounded-xl border-0 bg-transparent">
+              <div className="px-1 pb-3">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted">
+                  <Search className="w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Cerca cliente..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
+                  />
+                </div>
+              </div>
+              <CommandList className="max-h-[calc(70vh-220px)]">
+                {availableClienti.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">
+                    Nessun cliente trovato
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {availableClienti.map((cliente) => (
+                      <button
+                        key={cliente.id}
+                        onClick={() => handleSelectCliente(cliente)}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
+                      >
+                        <span className="text-xl">{cliente.emoji || '👤'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{cliente.nome}</p>
+                          {cliente.reminder_date && (
+                            <p className="text-xs text-muted-foreground">
+                              Ha già promemoria: {format(new Date(cliente.reminder_date), 'd MMM', { locale: it })}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CommandList>
+            </Command>
+          ) : (
+            // Notizia search
+            <Command className="rounded-xl border-0 bg-transparent">
+              <div className="px-1 pb-3">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted">
+                  <Search className="w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Cerca notizia..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
+                  />
+                </div>
+              </div>
+              <CommandList className="max-h-[calc(70vh-220px)]">
+                {availableNotizie.length === 0 ? (
+                  <div className="py-8 text-center text-muted-foreground text-sm">
+                    Nessuna notizia trovata
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {availableNotizie.map((notizia) => (
+                      <button
+                        key={notizia.id}
+                        onClick={() => handleSelectNotizia(notizia)}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
+                      >
+                        <span className="text-xl">{notizia.emoji || '📋'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{notizia.name}</p>
+                          {notizia.reminder_date && (
+                            <p className="text-xs text-muted-foreground">
+                              Ha già promemoria: {format(new Date(notizia.reminder_date), 'd MMM', { locale: it })}
+                            </p>
+                          )}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CommandList>
+            </Command>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+};
+
+export default AddToCalendarMenu;
