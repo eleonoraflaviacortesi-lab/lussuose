@@ -29,18 +29,23 @@ interface TallySubmission {
 }
 
 // Helper to find field value by label (case-insensitive partial match)
-function getFieldValue(fields: TallyField[], labelPattern: string): unknown {
+// Accepts multiple patterns to match against
+function getFieldValue(fields: TallyField[], ...patterns: string[]): unknown {
   const field = fields.find(f => 
-    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
+    f.label && patterns.some(pattern => 
+      f.label.toLowerCase().includes(pattern.toLowerCase())
+    )
   );
   return field?.value ?? null;
 }
 
 // Helper to get the TEXT of a selected option (for dropdowns/radio buttons)
 // Tally sends option ID as value, we need to look up the text
-function getOptionText(fields: TallyField[], labelPattern: string): string {
+function getOptionText(fields: TallyField[], ...patterns: string[]): string {
   const field = fields.find(f => 
-    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
+    f.label && patterns.some(pattern => 
+      f.label.toLowerCase().includes(pattern.toLowerCase())
+    )
   );
   
   if (!field?.value) return "";
@@ -49,7 +54,7 @@ function getOptionText(fields: TallyField[], labelPattern: string): string {
   if (field.options && field.options.length > 0) {
     const valueId = String(field.value);
     const option = field.options.find(opt => opt.id === valueId);
-    return option?.text || "";
+    return option?.text || String(field.value);
   }
   
   // Otherwise return raw value as string
@@ -57,9 +62,11 @@ function getOptionText(fields: TallyField[], labelPattern: string): string {
 }
 
 // Helper to get array values from checkboxes or multi-select
-function getArrayValue(fields: TallyField[], labelPattern: string): string[] {
+function getArrayValue(fields: TallyField[], ...patterns: string[]): string[] {
   const field = fields.find(f => 
-    f.label && f.label.toLowerCase().includes(labelPattern.toLowerCase())
+    f.label && patterns.some(pattern => 
+      f.label.toLowerCase().includes(pattern.toLowerCase())
+    )
   );
   
   if (!field?.value) return [];
@@ -83,7 +90,7 @@ function getArrayValue(fields: TallyField[], labelPattern: string): string[] {
   return [];
 }
 
-// Helper to parse budget from string like "€600,000" or "600000"
+// Helper to parse budget from string like "€600,000" or "€ 60000" or "60000"
 function parseBudget(value: unknown): number | null {
   if (!value) return null;
   const str = String(value).replace(/[€$,\s]/g, '');
@@ -95,7 +102,8 @@ function parseBudget(value: unknown): number | null {
 function parseBoolean(value: unknown): boolean {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
-    return value.toLowerCase() === 'yes' || value.toLowerCase() === 'true';
+    const lower = value.toLowerCase();
+    return lower === 'yes' || lower === 'true' || lower === 'sì' || lower === 'si';
   }
   return false;
 }
@@ -108,7 +116,7 @@ function parseInteger(value: unknown): number | null {
   return match ? parseInt(match[0], 10) : null;
 }
 
-// Helper to parse size range like "150-300 sqm" into min/max
+// Helper to parse size range like "sqm 100" or "150-300 sqm" into min/max
 function parseSizeRange(value: unknown): { min: number | null; max: number | null } {
   if (!value) return { min: null, max: null };
   const str = String(value);
@@ -168,59 +176,87 @@ Deno.serve(async (req) => {
 
     const fields = payload.data.fields;
     
+    // Log all field labels for debugging
+    console.log("Field labels:", fields.map(f => f.label).join(" | "));
+    
     // Extract regions first to determine sede
-    const regioni = getArrayValue(fields, "region");
+    // Matches: "Which regions of Italy are you considering?"
+    const regioni = getArrayValue(fields, "region", "regioni");
     const sede = getSedeFromRegions(regioni);
     
     console.log("Regions:", regioni, "→ Sede:", sede);
     
-    // Map Tally fields to database columns
-    const sizeRange = parseSizeRange(getFieldValue(fields, "size"));
+    // Map Tally fields to database columns using EXACT label patterns from the form
+    // "Desired size of the property:"
+    const sizeRange = parseSizeRange(getFieldValue(fields, "desired size", "size of the property", "dimensioni"));
     
     const clienteData = {
-      // Personal
-      nome: String(getFieldValue(fields, "name") || "Unknown"),
-      telefono: String(getFieldValue(fields, "phone") || ""),
+      // Personal info
+      // "Your name and surname"
+      nome: String(getFieldValue(fields, "name and surname", "name", "nome") || "Unknown"),
+      // "Phone number (including country code)"
+      telefono: String(getFieldValue(fields, "phone number", "phone", "telefono") || ""),
+      // "Email" (if exists)
       email: String(getFieldValue(fields, "email") || "") || null,
-      paese: String(getFieldValue(fields, "country") || ""),
+      // "Respondent's country"
+      paese: String(getFieldValue(fields, "respondent's country", "country", "paese") || ""),
       
-      // Budget
-      budget_max: parseBudget(getFieldValue(fields, "budget")),
-      mutuo: getOptionText(fields, "mutuo") || getOptionText(fields, "mortgage"),
+      // Budget & Mortgage
+      // "What is your estimated budget for the property purchase?"
+      budget_max: parseBudget(getFieldValue(fields, "estimated budget", "budget", "budget massimo")),
+      // "Will you require a mortgage to finance the purchase of the property?"
+      mutuo: getOptionText(fields, "require a mortgage", "mortgage", "mutuo"),
       
-      // Timeline
-      tempo_ricerca: String(getFieldValue(fields, "old") || getFieldValue(fields, "searching") || ""),
-      ha_visitato: parseBoolean(getFieldValue(fields, "visited")),
+      // Timeline & Experience
+      // "How long have you been looking for a property?"
+      tempo_ricerca: String(getFieldValue(fields, "how long have you been looking", "been looking for", "da quanto") || ""),
+      // "Have you already viewed properties?"
+      ha_visitato: parseBoolean(getFieldValue(fields, "already viewed properties", "viewed properties", "visitato")),
       
-      // Location
+      // Location preferences
       regioni: regioni,
-      vicinanza_citta: parseBoolean(getFieldValue(fields, "prox") || getFieldValue(fields, "cities")),
-      motivo_zona: getArrayValue(fields, "why"),
+      // "Is proximity to international airports or major cities a priority?"
+      vicinanza_citta: parseBoolean(getFieldValue(fields, "proximity to international", "airports or major cities", "vicinanza")),
+      // "Main reason for choosing the area:"
+      motivo_zona: getArrayValue(fields, "reason for choosing", "main reason", "motivo"),
       
-      // Property Type
-      tipologia: getArrayValue(fields, "property type"),
-      stile: getOptionText(fields, "style"),
-      contesto: getArrayValue(fields, "setting"),
+      // Property Type & Style
+      // "What type of property are you looking for?"
+      tipologia: getArrayValue(fields, "type of property are you looking", "property type", "tipologia"),
+      // "How would you describe the category or style of property you are looking for?"
+      stile: getOptionText(fields, "category or style", "style of property", "stile"),
+      // "Preferred setting:"
+      contesto: getArrayValue(fields, "preferred setting", "setting", "contesto"),
       
-      // Features
+      // Property Features
       dimensioni_min: sizeRange.min,
       dimensioni_max: sizeRange.max,
-      camere: String(getFieldValue(fields, "bedroom") || ""),
-      bagni: parseInteger(getFieldValue(fields, "bathroom")),
-      layout: getOptionText(fields, "layout"),
-      dependance: getOptionText(fields, "guesthouse") || getOptionText(fields, "annex"),
-      terreno: getOptionText(fields, "land"),
-      piscina: getOptionText(fields, "pool") || getOptionText(fields, "swimming"),
+      // "Number of bedrooms"
+      camere: String(getFieldValue(fields, "number of bedrooms", "bedroom", "camere") || ""),
+      // "Minimum number of bathrooms"
+      bagni: parseInteger(getFieldValue(fields, "number of bathrooms", "bathroom", "bagni")),
+      // "Layout preference:"
+      layout: getOptionText(fields, "layout preference", "layout"),
+      // "Guesthouse or annex required?"
+      dependance: getOptionText(fields, "guesthouse or annex", "annex required", "dependance"),
+      // "Do you require land?" / "If yes, how much land..."
+      terreno: getOptionText(fields, "do you require land", "require land", "terreno"),
+      // "Swimming pool"
+      piscina: getOptionText(fields, "swimming pool", "piscina"),
       
-      // Usage
-      uso: String(getFieldValue(fields, "use") || ""),
-      interesse_affitto: String(getFieldValue(fields, "rent") || ""),
+      // Usage & Rental
+      // "Intended use of the property:"
+      uso: String(getFieldValue(fields, "intended use", "use of the property", "uso") || ""),
+      // "Do you plan to rent the property?"
+      interesse_affitto: String(getFieldValue(fields, "plan to rent", "rent the property", "affitto") || ""),
       
-      // Notes
-      descrizione: String(getFieldValue(fields, "description") || getFieldValue(fields, "property description") || ""),
-      note_extra: String(getFieldValue(fields, "more") || getFieldValue(fields, "additional") || ""),
+      // Descriptions & Notes
+      // "How would you describe your ideal property?"
+      descrizione: String(getFieldValue(fields, "describe your ideal", "ideal property", "descrizione") || ""),
+      // "Would you like to add any additional notes, preferences, or questions?"
+      note_extra: String(getFieldValue(fields, "additional notes", "notes, preferences", "note") || ""),
       
-      // Management – sede determined by regions, status uses DB default
+      // Management
       sede: sede,
       emoji: "🏠",
       
@@ -229,7 +265,7 @@ Deno.serve(async (req) => {
       data_submission: payload.data.createdAt,
     };
 
-    console.log("Mapped cliente data:", clienteData);
+    console.log("Mapped cliente data:", JSON.stringify(clienteData, null, 2));
 
     // Upsert to avoid duplicates (based on tally_submission_id)
     const { data, error } = await supabase
