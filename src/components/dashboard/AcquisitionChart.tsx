@@ -89,7 +89,7 @@ const AcquisitionChart = () => {
             <Bar 
               dataKey="notizie" 
               name="Notizie Nuove Reali"
-              fill="hsl(var(--banner))"
+              fill="hsl(var(--accent))"
               radius={[4, 4, 0, 0]}
             />
           </BarChart>
@@ -103,7 +103,7 @@ const AcquisitionChart = () => {
           <span className="text-xs text-muted-foreground">Contatti Reali</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-sm bg-banner" />
+          <div className="w-3 h-3 rounded-sm bg-accent" />
           <span className="text-xs text-muted-foreground">Notizie Nuove Reali</span>
         </div>
       </div>
