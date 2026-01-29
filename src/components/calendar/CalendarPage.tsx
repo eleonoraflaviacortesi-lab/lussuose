@@ -413,7 +413,7 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="px-6 pb-8 animate-fade-in">
+    <div className="px-6 pt-4 pb-8 animate-fade-in">
 
       {/* Week Navigation - Mobile optimized */}
       <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6">
