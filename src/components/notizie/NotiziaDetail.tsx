@@ -488,7 +488,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     locale={it}
                     className="pointer-events-auto"
                   />
-                  <div className="p-3 bg-white/60 backdrop-blur-sm">
+                  <div className="p-3 bg-white/60 backdrop-blur-sm border-t border-muted/30">
                     <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
                     <div className="flex gap-2">
                       <Select
@@ -525,6 +525,19 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                         </SelectContent>
                       </Select>
                     </div>
+                    
+                    {/* Remove reminder button */}
+                    {editData.reminder_date && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          updateAndSave('reminder_date', null);
+                        }}
+                        className="w-full mt-3 py-2 rounded-full bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive hover:text-white transition-colors"
+                      >
+                        Rimuovi promemoria
+                      </button>
+                    )}
                   </div>
                 </PopoverContent>
               </Popover>
