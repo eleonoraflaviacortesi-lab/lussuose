@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
@@ -8,7 +9,10 @@ import { Users, Zap, Award, Gift, TrendingUp } from 'lucide-react';
 import IncarchiWidget from './IncarchiWidget';
 import DailyQuote from './DailyQuote';
 import AcquisitionChart from './AcquisitionChart';
+import TodayRemindersWidget from './TodayRemindersWidget';
 import { celebrateGoal } from '@/lib/confetti';
+import { Notizia } from '@/hooks/useNotizie';
+import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 
 const PerformanceCharts = lazy(() => import('./PerformanceCharts'));
 const KPIDetailModal = lazy(() => import('./KPIDetailModal'));
@@ -17,8 +21,10 @@ type Period = 'week' | 'month' | 'year';
 type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
 
 const PersonalDashboard = () => {
+  const navigate = useNavigate();
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
+  const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
@@ -74,8 +80,19 @@ const PersonalDashboard = () => {
   const incarichiTarget = 12;
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
+  const handleNotiziaClick = (notizia: Notizia) => {
+    navigate('/calendario');
+    // Small delay to let navigation complete, then open notizia
+    setTimeout(() => {
+      setSelectedNotizia(notizia);
+    }, 100);
+  };
+
   return (
     <div className="px-4 pb-6 space-y-4 animate-fade-in">
+      {/* Today's Reminders Widget */}
+      <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} />
+
       {/* Daily Quote */}
       <DailyQuote />
 
@@ -234,6 +251,13 @@ const PersonalDashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Notizia Detail Modal */}
+      <NotiziaDetail
+        notizia={selectedNotizia}
+        open={!!selectedNotizia}
+        onOpenChange={(open) => !open && setSelectedNotizia(null)}
+      />
     </div>
   );
 };

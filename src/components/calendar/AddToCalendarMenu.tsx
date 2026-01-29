@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Calendar, User, FileText, Search, X } from 'lucide-react';
+import { Plus, User, FileText, Search, X } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -119,9 +119,9 @@ const AddToCalendarMenu = ({
               <div>
                 <p className="text-xl font-bold">
                   {selectedType === 'cliente' 
-                    ? 'Seleziona Cliente' 
+                    ? 'Seleziona Buyer' 
                     : selectedType === 'notizia' 
-                    ? 'Seleziona Notizia' 
+                    ? 'Seleziona Seller' 
                     : 'Aggiungi'}
                 </p>
                 <p className="text-sm text-muted-foreground font-normal">
@@ -137,22 +137,6 @@ const AddToCalendarMenu = ({
             // Main menu
             <div className="space-y-3">
               <button
-                onClick={() => {
-                  onAddAppointment();
-                  handleClose();
-                }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-              >
-                <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-background" />
-                </div>
-                <div className="text-left">
-                  <p className="font-medium">Nuovo Appuntamento</p>
-                  <p className="text-sm text-muted-foreground">Crea un nuovo appuntamento</p>
-                </div>
-              </button>
-
-              <button
                 onClick={() => setSelectedType('cliente')}
                 className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
               >
@@ -160,8 +144,8 @@ const AddToCalendarMenu = ({
                   <User className="w-6 h-6 text-background" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Cliente Esistente</p>
-                  <p className="text-sm text-muted-foreground">Imposta promemoria per un cliente</p>
+                  <p className="font-medium">Buyer</p>
+                  <p className="text-sm text-muted-foreground">Imposta promemoria per un buyer</p>
                 </div>
               </button>
 
@@ -173,8 +157,8 @@ const AddToCalendarMenu = ({
                   <FileText className="w-6 h-6 text-background" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Notizia Esistente</p>
-                  <p className="text-sm text-muted-foreground">Imposta promemoria per una notizia</p>
+                  <p className="font-medium">Seller</p>
+                  <p className="text-sm text-muted-foreground">Imposta promemoria per un seller</p>
                 </div>
               </button>
             </div>
@@ -186,7 +170,7 @@ const AddToCalendarMenu = ({
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Cerca cliente..."
+                    placeholder="Cerca buyer..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
@@ -196,7 +180,7 @@ const AddToCalendarMenu = ({
               <CommandList className="max-h-[calc(70vh-220px)]">
                 {availableClienti.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground text-sm">
-                    Nessun cliente trovato
+                    Nessun buyer trovato
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -229,7 +213,7 @@ const AddToCalendarMenu = ({
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Cerca notizia..."
+                    placeholder="Cerca seller..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
@@ -239,7 +223,7 @@ const AddToCalendarMenu = ({
               <CommandList className="max-h-[calc(70vh-220px)]">
                 {availableNotizie.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground text-sm">
-                    Nessuna notizia trovata
+                    Nessun seller trovato
                   </div>
                 ) : (
                   <div className="space-y-2">
