@@ -33,7 +33,7 @@
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 10%;
+    --accent: 240 100% 50%;
     --accent-foreground: 0 0% 100%;
     
     /* Banner/highlight - mantiene il rosa */
@@ -230,22 +230,25 @@
     }
   }
 
-  /* Liquid Glass Effect */
+  /* Liquid Glass Effect - Enhanced */
   .glass-header {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.7) 0%,
-      rgba(255, 255, 255, 0.5) 50%,
-      rgba(255, 255, 255, 0.7) 100%
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.6) 25%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.6) 75%,
+      rgba(255, 255, 255, 0.85) 100%
     );
-    backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
-    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+    backdrop-filter: blur(60px) saturate(250%) brightness(1.15);
+    -webkit-backdrop-filter: blur(60px) saturate(250%) brightness(1.15);
     border: none;
     box-shadow: 
-      0 12px 40px rgba(0, 0, 0, 0.12),
-      0 20px 60px rgba(0, 0, 0, 0.08),
-      inset 0 1px 1px rgba(255, 255, 255, 0.9),
-      inset 0 -1px 1px rgba(255, 255, 255, 0.3);
+      0 20px 60px rgba(0, 0, 0, 0.15),
+      0 30px 80px rgba(0, 0, 0, 0.1),
+      0 8px 25px rgba(0, 0, 255, 0.05),
+      inset 0 2px 2px rgba(255, 255, 255, 1),
+      inset 0 -2px 4px rgba(255, 255, 255, 0.4);
   }
 
   .glass-button {
@@ -340,6 +343,7 @@
 
   .pill-nav-item.active {
     @apply bg-foreground text-background;
+    box-shadow: 0 0 0 2px hsl(240 100% 50%);
   }
 
   .pill-nav-item:not(.active) {
