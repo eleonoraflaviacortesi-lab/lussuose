@@ -121,3 +121,28 @@ export interface ClienteFilters {
   urgenti?: boolean;
   search?: string;
 }
+
+// Activity Log types
+export type ClienteActivityType = 
+  | 'call' 
+  | 'email' 
+  | 'visit' 
+  | 'proposal' 
+  | 'status_change' 
+  | 'assignment' 
+  | 'comment';
+
+export interface ClienteActivity {
+  id: string;
+  cliente_id: string;
+  activity_type: ClienteActivityType;
+  title: string;
+  description: string | null;
+  property_id: string | null;
+  created_by: string;
+  created_at: string;
+  // Joined fields
+  author_name?: string;
+  author_emoji?: string;
+  property_title?: string;
+}

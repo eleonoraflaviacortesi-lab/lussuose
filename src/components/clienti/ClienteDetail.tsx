@@ -16,7 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { 
   Phone, 
   Mail, 
@@ -29,6 +34,8 @@ import {
   Droplets,
   Trees,
   User,
+  History,
+  Bell,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -40,6 +47,11 @@ import {
   InlineEditSelect,
   InlineEditBoolean 
 } from './InlineEdit';
+import { ActivityLog } from './ActivityLog';
+import { ActivityQuickActions } from './ActivityQuickActions';
+import { ClienteReminder } from './ClienteReminder';
+import { ClientePDFExport } from './ClientePDFExport';
+import { useClienteActivities } from '@/hooks/useClienteActivities';
 
 interface ClienteDetailProps {
   cliente: Cliente | null;
@@ -82,11 +94,24 @@ export function ClienteDetail({
   const [newComment, setNewComment] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Activity log hook
+  const { 
+    activities, 
+    isLoading: activitiesLoading,
+    logCall,
+    logEmail,
+    logVisit,
+    logComment,
+    isCreating: isLoggingActivity,
+  } = useClienteActivities(cliente?.id);
+
   if (!cliente) return null;
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (newComment.trim()) {
       onAddComment(newComment.trim());
+      // Log the comment as activity
+      await logComment(cliente.id, newComment.trim());
       setNewComment('');
     }
   };
@@ -151,6 +176,59 @@ export function ClienteDetail({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Quick Actions + Reminder + PDF Export */}
+          <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
+            <h3 className="font-medium text-sm flex items-center gap-2">
+              <Phone className="w-4 h-4" /> Azioni Rapide
+            </h3>
+            <ActivityQuickActions
+              onLogCall={(desc) => logCall(cliente.id, desc)}
+              onLogEmail={(desc) => logEmail(cliente.id, desc)}
+              onLogVisit={(desc) => logVisit(cliente.id, desc)}
+              isLoading={isLoggingActivity}
+            />
+            
+            <div className="border-t pt-3">
+              <ClienteReminder
+                clienteId={cliente.id}
+                clienteName={cliente.nome}
+                clientePhone={cliente.telefono}
+                clientePaese={cliente.paese}
+                reminderDate={(cliente as any).reminder_date}
+                lastContactDate={(cliente as any).last_contact_date}
+                onUpdateReminder={(date) => onUpdate({ reminder_date: date } as any)}
+              />
+            </div>
+
+            <div className="border-t pt-3">
+              <ClientePDFExport
+                cliente={cliente}
+                activities={activities}
+                agentName={assignedAgent?.full_name}
+              />
+            </div>
+          </div>
+
+          {/* Activity Log */}
+          <Accordion type="single" collapsible defaultValue="activity">
+            <AccordionItem value="activity" className="bg-white rounded-2xl shadow-lg border-0">
+              <AccordionTrigger className="px-3 py-2 hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <History className="w-4 h-4" />
+                  <span className="font-medium text-sm">Storico Attività</span>
+                  {activities.length > 0 && (
+                    <Badge variant="secondary" className="text-[10px]">
+                      {activities.length}
+                    </Badge>
+                  )}
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="px-3 pb-3">
+                <ActivityLog activities={activities} isLoading={activitiesLoading} />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
 
           {/* ALL FORM FIELDS - Vertical layout with clear labels */}
           <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">

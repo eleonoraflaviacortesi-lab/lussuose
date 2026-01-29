@@ -74,6 +74,54 @@ export type Database = {
           },
         ]
       }
+      cliente_activities: {
+        Row: {
+          activity_type: string
+          cliente_id: string
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          property_id: string | null
+          title: string
+        }
+        Insert: {
+          activity_type: string
+          cliente_id: string
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          property_id?: string | null
+          title: string
+        }
+        Update: {
+          activity_type?: string
+          cliente_id?: string
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          property_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cliente_activities_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cliente_activities_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clienti: {
         Row: {
           assigned_to: string | null
@@ -95,6 +143,7 @@ export type Database = {
           ha_visitato: boolean | null
           id: string
           interesse_affitto: string | null
+          last_contact_date: string | null
           layout: string | null
           motivo_zona: string[] | null
           mutuo: string | null
@@ -103,6 +152,7 @@ export type Database = {
           paese: string | null
           piscina: string | null
           regioni: string[] | null
+          reminder_date: string | null
           sede: string
           status: string
           stile: string | null
@@ -135,6 +185,7 @@ export type Database = {
           ha_visitato?: boolean | null
           id?: string
           interesse_affitto?: string | null
+          last_contact_date?: string | null
           layout?: string | null
           motivo_zona?: string[] | null
           mutuo?: string | null
@@ -143,6 +194,7 @@ export type Database = {
           paese?: string | null
           piscina?: string | null
           regioni?: string[] | null
+          reminder_date?: string | null
           sede?: string
           status?: string
           stile?: string | null
@@ -175,6 +227,7 @@ export type Database = {
           ha_visitato?: boolean | null
           id?: string
           interesse_affitto?: string | null
+          last_contact_date?: string | null
           layout?: string | null
           motivo_zona?: string[] | null
           mutuo?: string | null
@@ -183,6 +236,7 @@ export type Database = {
           paese?: string | null
           piscina?: string | null
           regioni?: string[] | null
+          reminder_date?: string | null
           sede?: string
           status?: string
           stile?: string | null

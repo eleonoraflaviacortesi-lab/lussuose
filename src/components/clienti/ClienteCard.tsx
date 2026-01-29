@@ -1,10 +1,10 @@
-import { memo, useState, useCallback } from 'react';
+import { memo, useState, useCallback, useMemo } from 'react';
 import { Cliente } from '@/types';
 import { cn } from '@/lib/utils';
-import { MapPin, Euro, Home, User, Clock } from 'lucide-react';
-
+import { MapPin, Euro, Home, User, Clock, Bell } from 'lucide-react';
+import { isPast, isToday, isTomorrow } from 'date-fns';
 interface ClienteCardProps {
-  cliente: Cliente;
+  cliente: Cliente & { reminder_date?: string | null };
   onClick: () => void;
   onColorChange?: (color: string | null) => void;
   onEmojiChange?: (emoji: string) => void;
@@ -117,6 +117,16 @@ export const ClienteCard = memo(({
   const urgent = isUrgent(cliente.tempo_ricerca);
   const textColor = isDarkColor(cliente.card_color) ? 'text-white' : 'text-foreground';
 
+  // Reminder status
+  const reminderStatus = useMemo(() => {
+    if (!cliente.reminder_date) return null;
+    const date = new Date(cliente.reminder_date);
+    if (isPast(date) && !isToday(date)) return 'overdue';
+    if (isToday(date)) return 'today';
+    if (isTomorrow(date)) return 'tomorrow';
+    return null; // scheduled for later, don't show badge
+  }, [cliente.reminder_date]);
+
   const formatBudget = (budget: number | null) => {
     if (!budget) return null;
     if (budget >= 1000000) return `€${(budget / 1000000).toFixed(1)}M`;
@@ -176,8 +186,8 @@ export const ClienteCard = memo(({
         </div>
       )}
 
-      {/* Footer: Agent + Urgency */}
-      <div className="flex items-center justify-between mt-2 pt-2">
+      {/* Footer: Agent + Urgency + Reminder */}
+      <div className="flex items-center justify-between mt-2 pt-2 flex-wrap gap-1">
         {showAgent && (
           <div className="flex items-center gap-1 text-xs opacity-70">
             <User className="w-3 h-3" />
@@ -186,12 +196,27 @@ export const ClienteCard = memo(({
             </span>
           </div>
         )}
-        {urgent && (
-          <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
-            <Clock className="w-3 h-3" />
-            <span>Urgente</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {reminderStatus && (
+            <div className={cn(
+              "flex items-center gap-1 text-xs font-medium",
+              reminderStatus === 'overdue' ? 'text-red-600' : 
+              reminderStatus === 'today' ? 'text-primary' : 'text-amber-600'
+            )}>
+              <Bell className="w-3 h-3" />
+              <span>
+                {reminderStatus === 'overdue' ? 'Scaduto' : 
+                 reminderStatus === 'today' ? 'Oggi' : 'Domani'}
+              </span>
+            </div>
+          )}
+          {urgent && (
+            <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+              <Clock className="w-3 h-3" />
+              <span>Urgente</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Pickers */}
