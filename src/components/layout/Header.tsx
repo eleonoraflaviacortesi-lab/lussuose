@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
-import logo from '@/assets/cortesi_logo.svg';
+import logo from '@/assets/keipiai_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 
 interface HeaderProps {
