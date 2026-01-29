@@ -27,7 +27,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   };
 
   return (
-    <nav className="flex flex-col items-center gap-3 py-2">
+    <nav className="flex flex-col items-center gap-2 py-1">
       {/* Pill Navigation */}
       <div className="pill-nav">
         {tabs.map((tab, index) => {
