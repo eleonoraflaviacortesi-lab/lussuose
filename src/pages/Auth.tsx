@@ -175,11 +175,11 @@ const Auth = () => {
       </div>
 
       {/* Header - Liquid Glass Style */}
-      <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
+      <div className="glass-header py-0.5 text-center rounded-b-[2rem]">
         <img 
           src={logoLarge} 
           alt="Cortesi Luxury Real Estate" 
-          className="h-16 mx-auto" 
+          className="h-14 mx-auto" 
         />
       </div>
 
