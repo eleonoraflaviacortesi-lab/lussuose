@@ -2,13 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/jost/300.css";
-@import "@fontsource/jost/400.css";
-@import "@fontsource/jost/500.css";
-@import "@fontsource/jost/600.css";
-@import "@fontsource/jost/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
 
-/* Keipiai Design System - Blue Accent */
+/* Le Lussuose Design System - Pink & White Style */
 
 @layer base {
   :root {
@@ -30,11 +33,11 @@
     --muted: 0 0% 94%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 240 100% 50%;
+    --accent: 0 0% 10%;
     --accent-foreground: 0 0% 100%;
     
-    /* Banner/highlight - blu */
-    --banner: 240 100% 50%;
+    /* Banner/highlight - mantiene il rosa */
+    --banner: 326 80% 55%;
     --banner-foreground: 0 0% 100%;
 
     --success: 145 60% 40%;
@@ -55,12 +58,13 @@
     --dashboard-card-hover: 0 0% 18%;
     --dashboard-border: 0 0% 20%;
     
-    /* Blue theme (from logo) */
-    --blue: 240 100% 50%;
-    --blue-light: 240 100% 90%;
-    --blue-dark: 240 100% 40%;
+    /* Pink theme */
+    --pink: 326 80% 55%;
+    --pink-light: 326 70% 90%;
+    --pink-dark: 326 85% 45%;
 
-    --font-sans: "Jost", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
@@ -91,10 +95,10 @@
     --muted: 0 0% 18%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 240 100% 60%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 10%;
     
-    --banner: 240 100% 50%;
+    --banner: 326 80% 55%;
     --banner-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50%;
@@ -127,33 +131,33 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    font-weight: 400;
+    font-weight: 300;
     font-size: 14px;
     letter-spacing: 0.01em;
   }
 
   h1 {
     font-family: var(--font-sans);
-    @apply tracking-[0.1em] uppercase font-semibold text-xl;
+    @apply tracking-widest uppercase font-semibold text-xl;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply tracking-[0.08em] uppercase font-semibold text-lg;
+    @apply tracking-wide uppercase font-semibold text-lg;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply tracking-[0.05em] uppercase font-medium text-base;
+    @apply tracking-wide uppercase font-medium text-base;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply tracking-[0.03em] font-medium text-sm;
+    @apply tracking-wide font-medium text-sm;
   }
 
   p {
-    @apply font-normal tracking-normal;
+    @apply font-normal;
   }
 
   strong, b {
@@ -166,6 +170,10 @@
 }
 
 @layer components {
+  .font-serif {
+    font-family: var(--font-serif);
+  }
+  
   .font-sans {
     font-family: var(--font-sans);
   }
@@ -346,15 +354,15 @@
   }
 
   .btn-report.pending {
-    background: hsl(240 100% 50%);
+    background: hsl(0 0% 10%);
     color: white;
-    box-shadow: 0 4px 15px hsla(240, 100%, 50%, 0.4);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
 
   .btn-report.completed {
-    background: hsl(240 100% 70%);
+    background: hsl(0 0% 35%);
     color: white;
-    box-shadow: 0 2px 8px hsla(240, 100%, 50%, 0.2);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .btn-report:active {
@@ -364,13 +372,13 @@
   @keyframes pulse-glow {
     0%, 100% {
       box-shadow: 
-        0 4px 20px hsla(240, 100%, 50%, 0.4),
-        0 0 30px hsla(240, 100%, 50%, 0.3);
+        0 4px 20px hsla(326, 80%, 55%, 0.4),
+        0 0 30px hsla(326, 80%, 55%, 0.3);
     }
     50% {
       box-shadow: 
-        0 4px 30px hsla(240, 100%, 50%, 0.6),
-        0 0 50px hsla(240, 100%, 50%, 0.5);
+        0 4px 30px hsla(326, 80%, 55%, 0.6),
+        0 0 50px hsla(326, 80%, 55%, 0.5);
     }
   }
 
@@ -401,8 +409,8 @@
 }
 
 @layer utilities {
-  .text-gradient-blue {
-    background: linear-gradient(135deg, hsl(240 100% 50%) 0%, hsl(220 100% 60%) 100%);
+  .text-gradient-pink {
+    background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
