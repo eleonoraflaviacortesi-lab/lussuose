@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { queryClient } from '@/App';
 
 interface Profile {
   id: string;
@@ -43,8 +44,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Clear all React Query cache when user changes
+  const clearQueryCache = () => {
+    queryClient.clear();
+  };
+
   useEffect(() => {
     let isMounted = true;
+    let previousUserId: string | null = null;
 
     const initialize = async () => {
       try {
@@ -53,6 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         setSession(session);
         setUser(session?.user ?? null);
+        previousUserId = session?.user?.id ?? null;
         setLoading(false);
 
         // Load profile in background (never block the UI)
@@ -71,6 +79,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!isMounted) return;
+
+        const newUserId = session?.user?.id ?? null;
+        
+        // Clear cache when user changes (login as different user or logout)
+        if (previousUserId !== newUserId) {
+          clearQueryCache();
+          previousUserId = newUserId;
+        }
 
         setSession(session);
         setUser(session?.user ?? null);
@@ -95,6 +111,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    // Clear cache before signing in to ensure fresh data
+    clearQueryCache();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error as Error | null };
   };
@@ -122,6 +140,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
+    // Clear all cached data before signing out
+    clearQueryCache();
     await supabase.auth.signOut();
     setUser(null);
     setSession(null);
