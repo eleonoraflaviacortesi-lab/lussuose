@@ -179,7 +179,7 @@ const Auth = () => {
         <img 
           src={logoLarge} 
           alt="Keipiai" 
-          className="h-12 mx-auto" 
+          className="h-14 mx-auto" 
         />
       </div>
 
