@@ -142,26 +142,30 @@ const EventContextMenu = memo(({
         {/* Separator */}
         <div className="h-px bg-muted/50" />
 
-        {/* Status selector */}
+        {/* Status selector - colored pills like Notizie page */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Status</span>
-          <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-            {columns.map((col) => (
-              <button
-                key={col.key}
-                onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
-                className={cn(
-                  "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
-                  currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
-                )}
-                style={{ 
-                  backgroundColor: col.color,
-                  color: isDarkColor(col.color) ? 'white' : 'black'
-                }}
-              >
-                {col.label}
-              </button>
-            ))}
+          <div className="flex flex-col gap-1 max-w-[220px]">
+            {columns.map((col) => {
+              const isSelected = currentStatus === col.key;
+              return (
+                <button
+                  key={col.key}
+                  onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-all active:scale-[0.98] w-full text-left",
+                    isSelected ? "ring-0" : "hover:opacity-80"
+                  )}
+                  style={{ 
+                    backgroundColor: col.color,
+                    color: isDarkColor(col.color) ? 'white' : 'black'
+                  }}
+                >
+                  {isSelected && <Check className="w-4 h-4" />}
+                  <span>{col.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
