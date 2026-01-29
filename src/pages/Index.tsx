@@ -6,6 +6,8 @@ import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import { NotificationBell } from '@/components/layout/NotificationBell';
+import NotiziaDetail from '@/components/notizie/NotiziaDetail';
+import type { Notizia } from '@/hooks/useNotizie';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
@@ -17,9 +19,14 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 
-const IndexContent = () => {
-  const [activeTab, setActiveTab] = useState('numeri');
+type IndexContentProps = {
+  initialTab?: string;
+};
+
+const IndexContent = ({ initialTab }: IndexContentProps) => {
+  const [activeTab, setActiveTab] = useState(initialTab ?? 'numeri');
   const [pendingClienteId, setPendingClienteId] = useState<string | null>(null);
+  const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -41,6 +48,12 @@ const IndexContent = () => {
     // Navigate to clienti tab and set pending cliente to open
     setPendingClienteId(clienteId);
     setActiveTab('clienti');
+  }, []);
+
+  const handleOpenNotiziaFromReminder = useCallback((notizia: Notizia) => {
+    // Go to calendar tab and open the requested notizia
+    setActiveTab('calendario');
+    setSelectedNotizia(notizia);
   }, []);
 
   // Clear pending cliente when leaving clienti tab
@@ -65,7 +78,12 @@ const IndexContent = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'numeri':
-        return <PersonalDashboard onGoToCalendar={() => setActiveTab('calendario')} />;
+        return (
+          <PersonalDashboard
+            onGoToCalendar={() => setActiveTab('calendario')}
+            onOpenNotizia={handleOpenNotiziaFromReminder}
+          />
+        );
       case 'notizie':
         return <NotiziePage />;
       case 'inserisci':
@@ -107,6 +125,13 @@ const IndexContent = () => {
       
       {/* Fixed Notification Bell */}
       <NotificationBell onOpenCliente={handleOpenCliente} />
+
+      {/* Global Notizia Detail Modal (can be opened from any tab) */}
+      <NotiziaDetail
+        notizia={selectedNotizia}
+        open={!!selectedNotizia}
+        onOpenChange={(open) => !open && setSelectedNotizia(null)}
+      />
     </PullToRefresh>
   );
 };

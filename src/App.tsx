@@ -20,6 +20,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            {/* Backward-compatible tab routes (avoid 404s on deep links / old navigation) */}
+            <Route path="/calendario" element={<Index initialTab="calendario" />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
