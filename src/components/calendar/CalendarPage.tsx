@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Calendar, ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2 } from 'lucide-react';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
@@ -53,6 +53,7 @@ const EventContextMenu = memo(({
   onStatusChange,
   onEmojiChange,
   onUrgentToggle,
+  onRemoveReminder,
   onClose 
 }: { 
   position: { x: number; y: number }; 
@@ -62,6 +63,7 @@ const EventContextMenu = memo(({
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
   onUrgentToggle: () => void;
+  onRemoveReminder: () => void;
   onClose: () => void;
 }) => {
   // Only show for notizia reminders
@@ -162,6 +164,18 @@ const EventContextMenu = memo(({
             ))}
           </div>
         </div>
+
+        {/* Separator */}
+        <div className="h-px bg-muted/50" />
+
+        {/* Remove reminder */}
+        <button
+          onClick={() => { onRemoveReminder(); onClose(); }}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Rimuovi promemoria</span>
+        </button>
       </div>
     </>
   );
@@ -381,22 +395,13 @@ const CalendarPage = () => {
     ? notizie?.find(n => n.id === contextMenu.event.notiziaId) 
     : null;
 
+  // Handler to remove reminder from notizia
+  const handleRemoveReminder = (notiziaId: string) => {
+    updateNotizia.mutate({ id: notiziaId, reminder_date: undefined, silent: true });
+  };
+
   return (
     <div className="px-6 pb-8 animate-fade-in">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-            <Calendar className="w-7 h-7" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">CALENDARIO</h1>
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-              TASKS & REMINDER
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Week Navigation - Mobile optimized */}
       <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6">
@@ -649,6 +654,10 @@ const CalendarPage = () => {
             if (notiziaId && contextMenuNotizia) {
               handleNotiziaUrgentToggle(notiziaId, contextMenuNotizia.notes, contextMenu.event.urgent || false);
             }
+          }}
+          onRemoveReminder={() => {
+            const notiziaId = contextMenu.event.notiziaId;
+            if (notiziaId) handleRemoveReminder(notiziaId);
           }}
           onClose={() => setContextMenu(null)}
         />
