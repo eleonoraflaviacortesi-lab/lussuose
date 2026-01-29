@@ -22,6 +22,7 @@ type Props = {
   onContextMenu: (event: CalendarEvent, e: React.MouseEvent) => void;
   onTouchStart: (event: CalendarEvent, e: React.TouchEvent) => void;
   onTouchEnd: () => void;
+  onCloseAndOpenDetail?: () => void;
 };
 
 // Helper to determine if color is dark
@@ -46,9 +47,18 @@ const CalendarDayView = ({
   onAddClick,
   onContextMenu,
   onTouchStart,
-  onTouchEnd
+  onTouchEnd,
 }: Props) => {
   if (!date) return null;
+
+  const handleEventClick = (event: CalendarEvent) => {
+    // Close sheet first, then open detail
+    onOpenChange(false);
+    // Small delay to let sheet close animation complete
+    setTimeout(() => {
+      onEventClick(event);
+    }, 150);
+  };
 
   const getEventStyles = (event: CalendarEvent) => {
     // For notizia/cliente reminders, use the status color
@@ -140,12 +150,12 @@ const CalendarDayView = ({
                 <div
                   key={event.id}
                   className={cn(
-                    "rounded-xl p-4 transition-all cursor-pointer relative",
+                    "rounded-xl p-4 transition-all cursor-pointer relative active:scale-[0.98]",
                     styles.bg,
                     event.urgent && "ring-2 ring-red-500"
                   )}
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
-                  onClick={() => onEventClick(event)}
+                  onClick={() => handleEventClick(event)}
                   onContextMenu={(e) => onContextMenu(event, e)}
                   onTouchStart={(e) => onTouchStart(event, e)}
                   onTouchEnd={onTouchEnd}
