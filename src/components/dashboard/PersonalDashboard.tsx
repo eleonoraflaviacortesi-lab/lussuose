@@ -12,7 +12,6 @@ import AcquisitionChart from './AcquisitionChart';
 import TodayRemindersWidget from './TodayRemindersWidget';
 import { celebrateGoal } from '@/lib/confetti';
 import { Notizia } from '@/hooks/useNotizie';
-import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 
 const PerformanceCharts = lazy(() => import('./PerformanceCharts'));
 const KPIDetailModal = lazy(() => import('./KPIDetailModal'));
@@ -22,12 +21,12 @@ type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
 
 type PersonalDashboardProps = {
   onGoToCalendar?: () => void;
+  onOpenNotizia?: (notizia: Notizia) => void;
 };
 
-const PersonalDashboard = ({ onGoToCalendar }: PersonalDashboardProps) => {
+const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardProps) => {
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
-  const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
@@ -84,8 +83,7 @@ const PersonalDashboard = ({ onGoToCalendar }: PersonalDashboardProps) => {
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
   const handleNotiziaClick = (notizia: Notizia) => {
-    // Open notizia detail directly from dashboard
-    setSelectedNotizia(notizia);
+    onOpenNotizia?.(notizia);
   };
 
   return (
@@ -252,12 +250,6 @@ const PersonalDashboard = ({ onGoToCalendar }: PersonalDashboardProps) => {
         </div>
       </div>
 
-      {/* Notizia Detail Modal */}
-      <NotiziaDetail
-        notizia={selectedNotizia}
-        open={!!selectedNotizia}
-        onOpenChange={(open) => !open && setSelectedNotizia(null)}
-      />
     </div>
   );
 };
