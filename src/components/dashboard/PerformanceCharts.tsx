@@ -93,7 +93,7 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
               <BarChart data={performanceChartData}>
                 <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
                 <YAxis hide />
-                <Bar dataKey="incarichi" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="incarichi" fill="hsl(var(--accent))" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -112,7 +112,7 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
               <BarChart data={performanceChartData}>
                 <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
                 <YAxis hide />
-                <Bar dataKey="vendite" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="vendite" fill="hsl(var(--accent))" radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -133,8 +133,8 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
               <AreaChart data={performanceChartData}>
                 <defs>
                   <linearGradient id="fatturatoGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--foreground))" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
@@ -142,7 +142,7 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
                 <Area
                   type="monotone"
                   dataKey="fatturato"
-                  stroke="hsl(var(--foreground))"
+                  stroke="hsl(var(--accent))"
                   strokeWidth={1.5}
                   fill="url(#fatturatoGradient)"
                 />
