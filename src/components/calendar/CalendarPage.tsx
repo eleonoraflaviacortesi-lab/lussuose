@@ -456,7 +456,7 @@ const CalendarPage = () => {
         </div>
       ) : isMobile ? (
         <div 
-          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 -mx-2 px-2 scrollbar-hide"
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-hide touch-pan-x"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {weekDays.map((day) => {
