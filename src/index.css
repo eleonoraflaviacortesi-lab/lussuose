@@ -2,12 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/space-mono/400.css";
-@import "@fontsource/space-mono/700.css";
-@import "@fontsource/space-grotesk/400.css";
-@import "@fontsource/space-grotesk/500.css";
-@import "@fontsource/space-grotesk/600.css";
-@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
 
 /* Keipiai Design System - Blue Accent */
 
@@ -61,8 +60,7 @@
     --blue-light: 240 100% 90%;
     --blue-dark: 240 100% 40%;
 
-    --font-display: "Space Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-mono: "Space Mono", "SF Mono", Menlo, monospace;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
@@ -128,34 +126,34 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 13px;
-    letter-spacing: 0.02em;
+    font-size: 14px;
+    letter-spacing: 0.03em;
   }
 
   h1 {
-    font-family: var(--font-display);
-    @apply tracking-tight uppercase font-bold text-xl;
+    font-family: var(--font-sans);
+    @apply tracking-[0.2em] uppercase font-semibold text-xl;
   }
 
   h2 {
-    font-family: var(--font-display);
-    @apply tracking-tight uppercase font-semibold text-lg;
+    font-family: var(--font-sans);
+    @apply tracking-[0.15em] uppercase font-semibold text-lg;
   }
 
   h3 {
-    font-family: var(--font-display);
-    @apply tracking-tight uppercase font-medium text-base;
+    font-family: var(--font-sans);
+    @apply tracking-[0.1em] uppercase font-medium text-base;
   }
 
   h4, h5, h6 {
-    font-family: var(--font-display);
-    @apply tracking-tight font-medium text-sm;
+    font-family: var(--font-sans);
+    @apply tracking-[0.08em] font-medium text-sm;
   }
 
   p {
-    @apply font-normal;
+    @apply font-normal tracking-wide;
   }
 
   strong, b {
@@ -168,12 +166,8 @@
 }
 
 @layer components {
-  .font-display {
-    font-family: var(--font-display);
-  }
-  
-  .font-mono {
-    font-family: var(--font-mono);
+  .font-sans {
+    font-family: var(--font-sans);
   }
 
   /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
@@ -352,15 +346,15 @@
   }
 
   .btn-report.pending {
-    background: hsl(0 0% 10%);
+    background: hsl(240 100% 50%);
     color: white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 15px hsla(240, 100%, 50%, 0.4);
   }
 
   .btn-report.completed {
-    background: hsl(0 0% 35%);
+    background: hsl(240 100% 70%);
     color: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px hsla(240, 100%, 50%, 0.2);
   }
 
   .btn-report:active {
