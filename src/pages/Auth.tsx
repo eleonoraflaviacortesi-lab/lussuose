@@ -157,6 +157,23 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      {/* iOS Safe Area Background */}
+      <div className="fixed inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black z-50" />
+      
+      {/* Ticker Banner - Black with smooth scroll */}
+      <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
+        <div className="flex animate-ticker whitespace-nowrap pt-2">
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
+              <span>CORTESI LUXURY REAL ESTATE</span>
+              <span>★</span>
+              <span>LE LUSSUOSE</span>
+              <span>★</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* Header - Liquid Glass Style */}
       <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
         <img 
