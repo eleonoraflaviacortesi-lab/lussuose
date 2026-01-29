@@ -67,9 +67,9 @@ const NotiziePage = () => {
 
   return (
     <div className="space-y-4 pt-4 pb-20 lg:pt-2 lg:pb-6 lg:h-[calc(100vh-140px)] lg:flex lg:flex-col">
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold shrink-0">Le mie Notizie</h2>
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-lg font-semibold shrink-0">Notizie</h2>
+        <div className="flex items-center gap-2 shrink-0">
           <ImportCSVDialog />
           <AddNotiziaDialog />
         </div>
