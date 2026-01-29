@@ -15,7 +15,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 30 8% 89%;
     --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
@@ -27,10 +27,10 @@
     --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
+    --secondary: 30 6% 92%;
     --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 94%;
+    --muted: 30 6% 85%;
     --muted-foreground: 0 0% 45%;
 
     --accent: 0 0% 10%;
@@ -53,7 +53,7 @@
     --radius: 1rem;
 
     /* Dashboard specific */
-    --dashboard-bg: 0 0% 95%;
+    --dashboard-bg: 30 8% 87%;
     --dashboard-card: 0 0% 12%;
     --dashboard-card-hover: 0 0% 18%;
     --dashboard-border: 0 0% 20%;
