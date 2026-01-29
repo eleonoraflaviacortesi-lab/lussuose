@@ -65,7 +65,7 @@ const IndexContent = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'numeri':
-        return <PersonalDashboard />;
+        return <PersonalDashboard onGoToCalendar={() => setActiveTab('calendario')} />;
       case 'notizie':
         return <NotiziePage />;
       case 'inserisci':

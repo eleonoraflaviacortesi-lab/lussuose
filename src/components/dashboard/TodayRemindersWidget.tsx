@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Calendar, ChevronRight, User, FileText } from 'lucide-react';
@@ -10,6 +9,7 @@ import { cn } from '@/lib/utils';
 
 type TodayRemindersWidgetProps = {
   onNotiziaClick?: (notizia: Notizia) => void;
+  onGoToCalendar?: () => void;
 };
 
 const isDarkColor = (color: string | null): boolean => {
@@ -23,8 +23,7 @@ const isDarkColor = (color: string | null): boolean => {
   return luminance < 0.5;
 };
 
-const TodayRemindersWidget = ({ onNotiziaClick }: TodayRemindersWidgetProps) => {
-  const navigate = useNavigate();
+const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayRemindersWidgetProps) => {
   const { clienti } = useClienti();
   const { notizie } = useNotizie();
   const { columns } = useKanbanColumns();
@@ -83,14 +82,16 @@ const TodayRemindersWidget = ({ onNotiziaClick }: TodayRemindersWidgetProps) => 
   const handleReminderClick = (reminder: typeof todayReminders[0]) => {
     if (reminder.type === 'notizia' && onNotiziaClick) {
       onNotiziaClick(reminder.data);
-    } else {
-      // Navigate to calendar
-      navigate('/calendario');
+    } else if (onGoToCalendar) {
+      // For clienti reminders, go to calendar
+      onGoToCalendar();
     }
   };
 
   const goToCalendar = () => {
-    navigate('/calendario');
+    if (onGoToCalendar) {
+      onGoToCalendar();
+    }
   };
 
   if (todayReminders.length === 0) {
