@@ -6,12 +6,13 @@
 @import "@fontsource/playfair-display/500.css";
 @import "@fontsource/playfair-display/600.css";
 @import "@fontsource/playfair-display/700.css";
+@import "@fontsource/bebas-neue/400.css";
 @import "@fontsource/inter/300.css";
 @import "@fontsource/inter/400.css";
 @import "@fontsource/inter/500.css";
 @import "@fontsource/inter/600.css";
 
-/* Le Lussuose Design System - Pink & White Style */
+/* Le Lussuose Design System - Editorial Bold Style */
 
 @layer base {
   :root {
@@ -33,12 +34,12 @@
     --muted: 30 6% 85%;
     --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 10%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 160 25% 75%;
+    --accent-foreground: 0 0% 10%;
     
-    /* Banner/highlight - mantiene il rosa */
-    --banner: 326 80% 55%;
-    --banner-foreground: 0 0% 100%;
+    /* Banner/highlight - sage green */
+    --banner: 160 25% 75%;
+    --banner-foreground: 0 0% 10%;
 
     --success: 145 60% 40%;
     --success-foreground: 0 0% 100%;
@@ -63,6 +64,7 @@
     --pink-light: 326 70% 90%;
     --pink-dark: 326 85% 45%;
 
+    --font-display: "Bebas Neue", "Impact", sans-serif;
     --font-serif: "Playfair Display", Georgia, serif;
     --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
@@ -137,23 +139,26 @@
   }
 
   h1 {
-    font-family: var(--font-sans);
-    @apply tracking-widest uppercase font-semibold text-xl;
+    font-family: var(--font-display);
+    @apply tracking-wide uppercase text-3xl;
+    font-weight: 400;
   }
 
   h2 {
-    font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-semibold text-lg;
+    font-family: var(--font-display);
+    @apply tracking-wide uppercase text-2xl;
+    font-weight: 400;
   }
 
   h3 {
-    font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-medium text-base;
+    font-family: var(--font-display);
+    @apply tracking-wide uppercase text-xl;
+    font-weight: 400;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply tracking-wide font-medium text-sm;
+    @apply tracking-wide font-medium text-sm uppercase;
   }
 
   p {
@@ -170,6 +175,10 @@
 }
 
 @layer components {
+  .font-display {
+    font-family: var(--font-display);
+  }
+  
   .font-serif {
     font-family: var(--font-serif);
   }
