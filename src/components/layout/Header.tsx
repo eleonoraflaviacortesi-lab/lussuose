@@ -56,7 +56,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         </div>
 
         {/* Main Header - Liquid Glass Effect */}
-        <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
+        <div className="glass-header flex items-center justify-between px-4 py-0.5 rounded-b-[2rem]">
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
@@ -66,7 +66,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Cortesi Luxury Real Estate" className="h-16" />
+          <img src={logo} alt="Cortesi Luxury Real Estate" className="h-12" />
 
           {/* Logout */}
           <button 
