@@ -1,11 +1,11 @@
-import { useState, useMemo, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { Search, X } from 'lucide-react';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
 import NotizieStatsChart from './NotizieStatsChart';
-import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
 
 // Lazy load drag-drop board for faster initial render
 const KanbanBoard = lazy(() => import('./KanbanBoard'));
@@ -32,9 +32,7 @@ const NotiziePage = () => {
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const [quickAddStatus, setQuickAddStatus] = useState<NotiziaStatus | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleNotiziaClick = useCallback((notizia: Notizia) => {
     setSelectedNotizia(notizia);
@@ -44,12 +42,6 @@ const NotiziePage = () => {
   const handleQuickAdd = useCallback((status: NotiziaStatus) => {
     setQuickAddStatus(status);
   }, []);
-
-  useEffect(() => {
-    if (searchExpanded && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [searchExpanded]);
 
   const filteredNotizieByStatus = useMemo(() => {
     if (!searchQuery.trim()) return notizieByStatus;
@@ -83,6 +75,26 @@ const NotiziePage = () => {
         </div>
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Cerca per nome o zona..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9 pr-9"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
+          >
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
+      </div>
+
       <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
 
       <div className="lg:flex-1 lg:min-h-0">
@@ -97,40 +109,6 @@ const NotiziePage = () => {
               onQuickAdd={handleQuickAdd}
             />
           </Suspense>
-        )}
-      </div>
-
-      {/* Floating Search */}
-      <div className="fixed bottom-24 right-4 z-40">
-        <div
-          className={cn(
-            "flex items-center bg-white/90 backdrop-blur-xl shadow-lg transition-all duration-200",
-            searchExpanded ? "w-64 rounded-full px-4 py-2.5" : "w-11 h-11 rounded-full justify-center cursor-pointer active:scale-95"
-          )}
-          onClick={!searchExpanded ? () => setSearchExpanded(true) : undefined}
-        >
-          {searchExpanded ? (
-            <>
-              <Search className="w-4 h-4 text-foreground shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onBlur={() => !searchQuery && setSearchExpanded(false)}
-                placeholder="Cerca..."
-                className="flex-1 bg-transparent border-0 outline-none px-2 text-sm"
-              />
-              <button onClick={() => { setSearchQuery(''); setSearchExpanded(false); }} className="p-1">
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </>
-          ) : (
-            <Search className="w-5 h-5 text-foreground" />
-          )}
-        </div>
-        {searchQuery && !searchExpanded && (
-          <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-primary rounded-full" />
         )}
       </div>
 
