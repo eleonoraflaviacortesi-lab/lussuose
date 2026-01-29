@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Calendar, ChevronLeft, ChevronRight, Plus, X, Check } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle } from 'lucide-react';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
@@ -14,7 +14,6 @@ import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import { useProfiles } from '@/hooks/useProfiles';
-import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
 
 export type CalendarEvent = {
   id: string;
@@ -26,17 +25,9 @@ export type CalendarEvent = {
   notiziaId?: string;
   completed?: boolean;
   emoji?: string;
-  cardColor?: string | null;
+  statusColor?: string; // Color based on status
+  urgent?: boolean;
 };
-
-// Preset colors for cards
-const cardColors = [
-  { value: null, label: 'Default', color: 'bg-card border-2 border-muted' },
-  { value: '#fef3c7', label: 'Giallo', color: 'bg-amber-200' },
-  { value: '#fed7aa', label: 'Arancio', color: 'bg-orange-300' },
-  { value: '#fecaca', label: 'Rosso', color: 'bg-red-300' },
-  { value: '#bbf7d0', label: 'Verde', color: 'bg-green-300' },
-];
 
 // Quick emojis
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
@@ -58,26 +49,28 @@ const EventContextMenu = memo(({
   position, 
   event,
   columns,
-  onColorSelect, 
+  notizia,
   onStatusChange,
   onEmojiChange,
+  onUrgentToggle,
   onClose 
 }: { 
   position: { x: number; y: number }; 
   event: CalendarEvent;
   columns: KanbanColumn[];
-  onColorSelect: (color: string | null) => void;
+  notizia?: Notizia | null;
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
+  onUrgentToggle: () => void;
   onClose: () => void;
 }) => {
-  const [showCustomPicker, setShowCustomPicker] = useState(false);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  
   // Only show for notizia reminders
   if (event.type !== 'notizia_reminder') {
     return null;
   }
+  
+  // Get current notizia status to highlight it
+  const currentStatus = notizia?.status || 'new';
   
   return (
     <>
@@ -90,12 +83,32 @@ const EventContextMenu = memo(({
         className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
         style={{
           left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
-          top: Math.min(position.y, window.innerHeight - 300),
+          top: Math.min(position.y, window.innerHeight - 280),
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
       >
+        {/* Urgent toggle */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
+          <button
+            onClick={() => { onUrgentToggle(); onClose(); }}
+            className={cn(
+              "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
+              event.urgent 
+                ? "bg-red-500 text-white" 
+                : "bg-muted hover:bg-red-100 text-foreground"
+            )}
+          >
+            <AlertTriangle className="w-4 h-4" />
+            <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
+          </button>
+        </div>
+
+        {/* Separator */}
+        <div className="h-px bg-muted/50" />
+
         {/* Emoji picker */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
@@ -135,7 +148,10 @@ const EventContextMenu = memo(({
               <button
                 key={col.key}
                 onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
-                className="px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95"
+                className={cn(
+                  "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                  currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
+                )}
                 style={{ 
                   backgroundColor: col.color,
                   color: isDarkColor(col.color) ? 'white' : 'black'
@@ -146,53 +162,6 @@ const EventContextMenu = memo(({
             ))}
           </div>
         </div>
-        
-        {/* Separator */}
-        <div className="h-px bg-muted/50" />
-        
-        {/* Card color picker */}
-        <div>
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
-          <div className="flex items-center gap-1.5">
-            {cardColors.map((c) => (
-              <button
-                key={c.value || 'default'}
-                onClick={() => { onColorSelect(c.value); onClose(); }}
-                className={cn(
-                  "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
-                  c.color,
-                  event.cardColor === c.value && "ring-2 ring-foreground ring-offset-1"
-                )}
-                title={c.label}
-              />
-            ))}
-            <button
-              onClick={() => setShowCustomPicker(!showCustomPicker)}
-              className={cn(
-                "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
-                showCustomPicker && "ring-2 ring-foreground ring-offset-1"
-              )}
-            >
-              +
-            </button>
-          </div>
-        </div>
-        
-        {/* Custom color picker */}
-        {showCustomPicker && (
-          <div className="pt-2 border-t border-black/5">
-            <LiquidGlassColorPicker
-              color={event.cardColor || '#fef3c7'}
-              onChange={(newColor) => {
-                onColorSelect(newColor);
-                onClose();
-              }}
-              onClose={() => setShowCustomPicker(false)}
-              showEyeDropper={true}
-              className="shadow-none p-0 bg-transparent backdrop-blur-none"
-            />
-          </div>
-        )}
       </div>
     </>
   );
@@ -221,6 +190,12 @@ const CalendarPage = () => {
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
+
+  // Helper to get status color from columns
+  const getStatusColor = (status: string): string => {
+    const col = columns.find(c => c.key === status);
+    return col?.color || '#6b7280';
+  };
 
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
@@ -259,7 +234,7 @@ const CalendarPage = () => {
             clienteId: cliente.id,
             clienteName: cliente.nome,
             emoji: cliente.emoji,
-            cardColor: cliente.card_color,
+            statusColor: getStatusColor(cliente.status),
           });
         }
       });
@@ -267,6 +242,9 @@ const CalendarPage = () => {
       // Add notizia reminders
       notizie?.forEach(notizia => {
         if (notizia.reminder_date && isSameDay(parseISO(notizia.reminder_date), day)) {
+          // Check if note_extra contains "URGENT" flag (stored in notes field)
+          const isUrgent = notizia.notes?.includes('[URGENT]') || false;
+          
           events.push({
             id: `notizia-${notizia.id}`,
             title: notizia.name,
@@ -274,18 +252,23 @@ const CalendarPage = () => {
             type: 'notizia_reminder',
             notiziaId: notizia.id,
             emoji: notizia.emoji,
-            cardColor: notizia.card_color,
+            statusColor: getStatusColor(notizia.status),
+            urgent: isUrgent,
           });
         }
       });
 
-      // Sort by time
-      events.sort((a, b) => a.time.localeCompare(b.time));
+      // Sort: urgent first, then by time
+      events.sort((a, b) => {
+        if (a.urgent && !b.urgent) return -1;
+        if (!a.urgent && b.urgent) return 1;
+        return a.time.localeCompare(b.time);
+      });
       map.set(dayKey, events);
     });
 
     return map;
-  }, [weekDays, appointments, clienti, notizie]);
+  }, [weekDays, appointments, clienti, notizie, columns]);
 
   const navigateWeek = (direction: 'prev' | 'next') => {
     setCurrentWeekStart(prev => 
@@ -358,16 +341,24 @@ const CalendarPage = () => {
     }
   };
 
-  const handleNotiziaColorChange = (notiziaId: string, color: string | null) => {
-    updateNotizia.mutate({ id: notiziaId, card_color: color });
-  };
-
   const handleNotiziaStatusChange = (notiziaId: string, status: NotiziaStatus) => {
-    updateNotizia.mutate({ id: notiziaId, status });
+    updateNotizia.mutate({ id: notiziaId, status, silent: true });
   };
 
   const handleNotiziaEmojiChange = (notiziaId: string, emoji: string | null) => {
-    updateNotizia.mutate({ id: notiziaId, emoji: emoji || undefined });
+    updateNotizia.mutate({ id: notiziaId, emoji: emoji || undefined, silent: true });
+  };
+
+  const handleNotiziaUrgentToggle = (notiziaId: string, currentNotes: string | null, isCurrentlyUrgent: boolean) => {
+    let newNotes = currentNotes || '';
+    if (isCurrentlyUrgent) {
+      // Remove [URGENT] flag
+      newNotes = newNotes.replace('[URGENT]', '').trim();
+    } else {
+      // Add [URGENT] flag
+      newNotes = '[URGENT] ' + newNotes;
+    }
+    updateNotizia.mutate({ id: notiziaId, notes: newNotes, silent: true });
   };
 
   const isLoading = loadingAppointments || loadingClienti || loadingNotizie;
@@ -384,6 +375,11 @@ const CalendarPage = () => {
     full_name: p.full_name,
     avatar_emoji: p.avatar_emoji || '👤',
   })) || [];
+
+  // Get notizia for context menu
+  const contextMenuNotizia = contextMenu?.event.notiziaId 
+    ? notizie?.find(n => n.id === contextMenu.event.notiziaId) 
+    : null;
 
   return (
     <div className="px-6 pb-8 animate-fade-in">
@@ -402,23 +398,26 @@ const CalendarPage = () => {
         </div>
       </div>
 
-      {/* Week Navigation */}
-      <div className="bg-card rounded-2xl shadow-lg p-4 mb-6">
-        <div className="flex items-center justify-between">
+      {/* Week Navigation - Mobile optimized */}
+      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6">
+        <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateWeek('prev')}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-semibold">
-              {format(currentWeekStart, 'd MMM', { locale: it })} - {format(addDays(currentWeekStart, 6), 'd MMM yyyy', { locale: it })}
+          <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 flex-1 justify-center min-w-0">
+            <span className="text-sm sm:text-lg font-semibold text-center truncate">
+              {format(currentWeekStart, 'd MMM', { locale: it })} - {format(addDays(currentWeekStart, 6), 'd MMM', { locale: it })}
+            </span>
+            <span className="text-xs text-muted-foreground sm:hidden">
+              {format(currentWeekStart, 'yyyy')}
             </span>
             <button
               onClick={goToToday}
-              className="px-3 py-1.5 text-xs font-medium tracking-wider uppercase bg-muted rounded-full hover:bg-muted/80 transition-colors"
+              className="px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium tracking-wider uppercase bg-muted rounded-full hover:bg-muted/80 transition-colors shrink-0"
             >
               Oggi
             </button>
@@ -426,7 +425,7 @@ const CalendarPage = () => {
 
           <button
             onClick={() => navigateWeek('next')}
-            className="w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
@@ -451,16 +450,20 @@ const CalendarPage = () => {
             return (
               <div
                 key={dayKey}
-                className={`bg-card rounded-2xl shadow-lg p-3 min-w-[280px] snap-center flex-shrink-0 transition-all ${
-                  isToday ? 'ring-2 ring-accent' : ''
-                }`}
+                className={cn(
+                  "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] snap-center flex-shrink-0 transition-all",
+                  isToday && "ring-2 ring-foreground"
+                )}
                 onClick={() => handleDayClick(day)}
               >
                 <div className="text-center mb-3 pb-2 border-b border-muted">
                   <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                     {format(day, 'EEEE', { locale: it })}
                   </p>
-                  <p className={`text-2xl font-semibold ${isToday ? 'text-accent' : 'text-foreground'}`}>
+                  <p className={cn(
+                    "text-2xl font-semibold",
+                    isToday ? "text-foreground" : "text-foreground"
+                  )}>
                     {format(day, 'd')}
                   </p>
                 </div>
@@ -514,16 +517,17 @@ const CalendarPage = () => {
             return (
               <div
                 key={dayKey}
-                className={`bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer hover:shadow-xl ${
-                  isToday ? 'ring-2 ring-accent' : ''
-                }`}
+                className={cn(
+                  "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer hover:shadow-xl",
+                  isToday && "ring-2 ring-foreground"
+                )}
                 onClick={() => handleDayClick(day)}
               >
                 <div className="text-center mb-3 pb-2 border-b border-muted">
                   <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                     {format(day, 'EEE', { locale: it })}
                   </p>
-                  <p className={`text-xl font-semibold ${isToday ? 'text-accent' : 'text-foreground'}`}>
+                  <p className="text-xl font-semibold text-foreground">
                     {format(day, 'd')}
                   </p>
                 </div>
@@ -554,7 +558,7 @@ const CalendarPage = () => {
                     setSelectedDate(day);
                     setShowAddDialog(true);
                   }}
-                  className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-accent hover:text-accent transition-colors flex items-center justify-center gap-1"
+                  className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
                 >
                   <Plus className="w-3 h-3" />
                   <span className="text-[10px] font-medium">Aggiungi</span>
@@ -631,10 +635,7 @@ const CalendarPage = () => {
           position={contextMenu.position}
           event={contextMenu.event}
           columns={columns}
-          onColorSelect={(color) => {
-            const notiziaId = contextMenu.event.notiziaId;
-            if (notiziaId) handleNotiziaColorChange(notiziaId, color);
-          }}
+          notizia={contextMenuNotizia}
           onStatusChange={(status) => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleNotiziaStatusChange(notiziaId, status);
@@ -642,6 +643,12 @@ const CalendarPage = () => {
           onEmojiChange={(emoji) => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleNotiziaEmojiChange(notiziaId, emoji);
+          }}
+          onUrgentToggle={() => {
+            const notiziaId = contextMenu.event.notiziaId;
+            if (notiziaId && contextMenuNotizia) {
+              handleNotiziaUrgentToggle(notiziaId, contextMenuNotizia.notes, contextMenu.event.urgent || false);
+            }
           }}
           onClose={() => setContextMenu(null)}
         />
@@ -669,38 +676,37 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    if (event.cardColor) {
+    // For notizia/cliente reminders, use the status color
+    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
+      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: event.cardColor,
+        customBg: event.statusColor,
         border: 'border-transparent',
-        textClass: isDarkColor(event.cardColor) ? 'text-white' : 'text-foreground',
+        textClass: textColor,
+        timeClass: isDarkColor(event.statusColor) ? 'text-white/70' : 'text-muted-foreground',
       };
     }
     
-    switch (event.type) {
-      case 'appointment':
-        return {
-          bg: event.completed ? 'bg-muted' : 'bg-accent/10',
-          customBg: null,
-          border: event.completed ? 'border-muted' : 'border-accent/30',
-          textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
-        };
-      case 'cliente_reminder':
-        return {
-          bg: 'bg-amber-500/10',
-          customBg: null,
-          border: 'border-amber-500/30',
-          textClass: 'text-foreground',
-        };
-      case 'notizia_reminder':
-        return {
-          bg: 'bg-emerald-500/10',
-          customBg: null,
-          border: 'border-emerald-500/30',
-          textClass: 'text-foreground',
-        };
+    // Appointments use muted styles
+    if (event.type === 'appointment') {
+      return {
+        bg: event.completed ? 'bg-muted' : 'bg-muted/50',
+        customBg: null,
+        border: 'border-transparent',
+        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        timeClass: 'text-muted-foreground',
+      };
     }
+
+    // Default
+    return {
+      bg: 'bg-muted/50',
+      customBg: null,
+      border: 'border-transparent',
+      textClass: 'text-foreground',
+      timeClass: 'text-muted-foreground',
+    };
   };
 
   const styles = getEventStyles();
@@ -717,9 +723,9 @@ const EventCard = memo(({
   return (
     <div
       className={cn(
-        "rounded-lg p-2 transition-all hover:scale-[1.02] cursor-pointer border",
+        "rounded-lg p-2 transition-all hover:scale-[1.02] cursor-pointer relative",
         styles.bg,
-        styles.border
+        event.urgent && "ring-2 ring-red-500"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
       onClick={(e) => {
@@ -731,6 +737,11 @@ const EventCard = memo(({
       onTouchEnd={onTouchEnd}
       onTouchMove={onTouchEnd}
     >
+      {event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+          <AlertTriangle className="w-2.5 h-2.5 text-white" />
+        </div>
+      )}
       <div className="flex items-start gap-2">
         {canToggle ? (
           <button
@@ -738,27 +749,26 @@ const EventCard = memo(({
             className={cn(
               "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors",
               event.completed 
-                ? 'bg-accent border-accent' 
-                : 'border-muted-foreground/50 hover:border-accent'
+                ? 'bg-foreground border-foreground' 
+                : 'border-muted-foreground/50 hover:border-foreground'
             )}
           >
-            {event.completed && <Check className="w-3 h-3 text-white" />}
+            {event.completed && <Check className="w-3 h-3 text-background" />}
           </button>
         ) : event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
-          <div className={cn(
-            "w-1.5 h-1.5 rounded-full mt-1.5 shrink-0",
-            event.type === 'appointment' ? 'bg-accent' :
-            event.type === 'cliente_reminder' ? 'bg-amber-500' : 'bg-emerald-500'
-          )} />
+          <div 
+            className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+            style={{ backgroundColor: event.statusColor || '#6b7280' }}
+          />
         )}
         
         <div className="flex-1 min-w-0">
           <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
             {event.title}
           </p>
-          <span className={cn("text-[9px]", styles.customBg && isDarkColor(styles.customBg) ? 'text-white/70' : 'text-muted-foreground')}>
+          <span className={cn("text-[9px]", styles.timeClass)}>
             {event.time}
           </span>
         </div>

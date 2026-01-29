@@ -51,38 +51,41 @@ const CalendarDayView = ({
   if (!date) return null;
 
   const getEventStyles = (event: CalendarEvent) => {
-    if (event.cardColor) {
+    // For notizia/cliente reminders, use the status color
+    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
+      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
+      const label = event.type === 'notizia_reminder' ? 'Notizia' : 'Cliente';
       return {
         bg: '',
-        customBg: event.cardColor,
+        customBg: event.statusColor,
         border: 'border-transparent',
-        label: event.type === 'notizia_reminder' ? 'Notizia' : event.type === 'cliente_reminder' ? 'Cliente' : 'Appuntamento',
-        textClass: isDarkColor(event.cardColor) ? 'text-white' : 'text-foreground',
+        label,
+        textClass: textColor,
       };
     }
     
     switch (event.type) {
       case 'appointment':
         return {
-          bg: event.completed ? 'bg-muted' : 'bg-accent/10',
+          bg: event.completed ? 'bg-muted' : 'bg-muted/50',
           customBg: null,
-          border: event.completed ? 'border-muted' : 'border-accent/30',
+          border: 'border-transparent',
           label: 'Appuntamento',
-          textClass: 'text-foreground',
+          textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
         };
       case 'cliente_reminder':
         return {
-          bg: 'bg-amber-500/10',
+          bg: 'bg-muted/50',
           customBg: null,
-          border: 'border-amber-500/30',
+          border: 'border-transparent',
           label: 'Cliente',
           textClass: 'text-foreground',
         };
       case 'notizia_reminder':
         return {
-          bg: 'bg-emerald-500/10',
+          bg: 'bg-muted/50',
           customBg: null,
-          border: 'border-emerald-500/30',
+          border: 'border-transparent',
           label: 'Notizia',
           textClass: 'text-foreground',
         };
@@ -137,9 +140,9 @@ const CalendarDayView = ({
                 <div
                   key={event.id}
                   className={cn(
-                    "border rounded-xl p-4 transition-all cursor-pointer",
+                    "rounded-xl p-4 transition-all cursor-pointer relative",
                     styles.bg,
-                    styles.border
+                    event.urgent && "ring-2 ring-red-500"
                   )}
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
                   onClick={() => onEventClick(event)}
@@ -148,6 +151,11 @@ const CalendarDayView = ({
                   onTouchEnd={onTouchEnd}
                   onTouchMove={onTouchEnd}
                 >
+                  {event.urgent && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-[10px] font-bold">!</span>
+                    </div>
+                  )}
                   <div className="flex items-start gap-3">
                     {canToggle ? (
                       <button
@@ -158,27 +166,26 @@ const CalendarDayView = ({
                         className={cn(
                           "w-6 h-6 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors",
                           event.completed 
-                            ? 'bg-accent border-accent' 
-                            : 'border-muted-foreground/50 hover:border-accent'
+                            ? 'bg-foreground border-foreground' 
+                            : 'border-muted-foreground/50 hover:border-foreground'
                         )}
                       >
-                        {event.completed && <Check className="w-4 h-4 text-white" />}
+                        {event.completed && <Check className="w-4 h-4 text-background" />}
                       </button>
                     ) : event.emoji ? (
                       <span className="text-xl shrink-0">{event.emoji}</span>
                     ) : (
-                      <div className={cn(
-                        "w-3 h-3 rounded-full mt-1.5 shrink-0",
-                        event.type === 'appointment' ? 'bg-accent' :
-                        event.type === 'cliente_reminder' ? 'bg-amber-500' : 'bg-emerald-500'
-                      )} />
+                      <div 
+                        className="w-3 h-3 rounded-full mt-1.5 shrink-0"
+                        style={{ backgroundColor: event.statusColor || '#6b7280' }}
+                      />
                     )}
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full",
-                          styles.customBg ? (isDarkColor(styles.customBg) ? 'bg-white/20 text-white' : 'bg-black/10 text-black') : styles.bg
+                          styles.customBg ? (isDarkColor(styles.customBg) ? 'bg-white/20 text-white' : 'bg-black/10 text-black') : 'bg-muted'
                         )}>
                           {styles.label}
                         </span>
