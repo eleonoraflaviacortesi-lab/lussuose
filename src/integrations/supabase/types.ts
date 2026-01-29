@@ -17,6 +17,7 @@ export type Database = {
       appointments: {
         Row: {
           cliente_id: string | null
+          completed: boolean | null
           created_at: string
           description: string | null
           end_time: string
@@ -31,6 +32,7 @@ export type Database = {
         }
         Insert: {
           cliente_id?: string | null
+          completed?: boolean | null
           created_at?: string
           description?: string | null
           end_time: string
@@ -45,6 +47,7 @@ export type Database = {
         }
         Update: {
           cliente_id?: string | null
+          completed?: boolean | null
           created_at?: string
           description?: string | null
           end_time?: string
@@ -572,9 +575,6 @@ export type Database = {
           avatar_emoji: string | null
           created_at: string
           full_name: string
-          google_access_token: string | null
-          google_refresh_token: string | null
-          google_token_expiry: string | null
           id: string
           role: string
           sede: string
@@ -586,9 +586,6 @@ export type Database = {
           avatar_emoji?: string | null
           created_at?: string
           full_name: string
-          google_access_token?: string | null
-          google_refresh_token?: string | null
-          google_token_expiry?: string | null
           id?: string
           role?: string
           sede?: string
@@ -600,9 +597,6 @@ export type Database = {
           avatar_emoji?: string | null
           created_at?: string
           full_name?: string
-          google_access_token?: string | null
-          google_refresh_token?: string | null
-          google_token_expiry?: string | null
           id?: string
           role?: string
           sede?: string
