@@ -1,9 +1,7 @@
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus, Users } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Check, Plus, Users, Calendar } from 'lucide-react';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
-
-
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
@@ -18,6 +16,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'analisi', icon: TrendingUp, label: 'Analisi Report' },
     { id: 'agenzia', icon: Building2, label: 'Agenzia' },
     { id: 'clienti', icon: Users, label: 'Buyers' },
+    { id: 'calendario', icon: Calendar, label: 'Calendario' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
