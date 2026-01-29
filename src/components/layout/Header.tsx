@@ -66,7 +66,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Cortesi Luxury Real Estate" className="h-16" />
+          <img src={logo} alt="Keipiai" className="h-10" />
 
           {/* Logout */}
           <button 
