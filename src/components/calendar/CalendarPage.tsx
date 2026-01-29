@@ -10,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { triggerHaptic } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import AddAppointmentDialog from './AddAppointmentDialog';
+import AddToCalendarMenu from './AddToCalendarMenu';
 import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
@@ -188,6 +189,7 @@ const CalendarPage = () => {
     startOfWeek(new Date(), { weekStartsOn: 1 })
   );
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
   
@@ -400,6 +402,16 @@ const CalendarPage = () => {
     updateNotizia.mutate({ id: notiziaId, reminder_date: undefined, silent: true });
   };
 
+  // Handler to add reminder to existing cliente
+  const handleAddClienteReminder = (clienteId: string, date: Date) => {
+    updateCliente({ id: clienteId, reminder_date: date.toISOString() });
+  };
+
+  // Handler to add reminder to existing notizia  
+  const handleAddNotiziaReminder = (notiziaId: string, date: Date) => {
+    updateNotizia.mutate({ id: notiziaId, reminder_date: date.toISOString(), silent: true });
+  };
+
   return (
     <div className="px-6 pb-8 animate-fade-in">
 
@@ -561,7 +573,7 @@ const CalendarPage = () => {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedDate(day);
-                    setShowAddDialog(true);
+                    setShowAddMenu(true);
                   }}
                   className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
                 >
@@ -581,6 +593,23 @@ const CalendarPage = () => {
         defaultDate={selectedDate}
       />
 
+      {/* Add to Calendar Menu */}
+      {selectedDate && (
+        <AddToCalendarMenu
+          open={showAddMenu}
+          onOpenChange={setShowAddMenu}
+          date={selectedDate}
+          clienti={clienti || []}
+          notizie={notizie || []}
+          onAddAppointment={() => {
+            setShowAddMenu(false);
+            setShowAddDialog(true);
+          }}
+          onAddClienteReminder={handleAddClienteReminder}
+          onAddNotiziaReminder={handleAddNotiziaReminder}
+        />
+      )}
+
       {/* Day View Sheet (Mobile) */}
       <CalendarDayView
         open={showDayView}
@@ -591,7 +620,7 @@ const CalendarPage = () => {
         onToggle={handleToggleCompleted}
         onAddClick={() => {
           setShowDayView(false);
-          setShowAddDialog(true);
+          setShowAddMenu(true);
         }}
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}

@@ -234,7 +234,7 @@ const CalendarDayView = ({
             className="w-full bg-foreground text-background py-4 rounded-xl font-medium text-sm tracking-wider uppercase flex items-center justify-center gap-2"
           >
             <Plus className="w-5 h-5" />
-            Nuovo Appuntamento
+            Aggiungi
           </button>
         </div>
       </SheetContent>
