@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Notizia, NotiziaStatus, NotiziaComment, useNotizie } from '@/hooks/useNotizie';
+import { useKanbanColumns } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
 import { generateNotiziaCalendarUrl } from '@/lib/googleCalendar';
 import {
@@ -21,6 +22,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+// Helper to determine if color is dark
+const isDarkColor = (color: string | null): boolean => {
+  if (!color) return false;
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance < 0.5;
+};
 
 const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
 const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
@@ -47,6 +60,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
 
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
+  const { columns } = useKanbanColumns();
   const [customEmoji, setCustomEmoji] = useState('');
   const [newComment, setNewComment] = useState('');
   const [showSaved, setShowSaved] = useState(false);
@@ -354,20 +368,26 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           </div>
           
           <div>
-            <Label htmlFor="edit-status" className="text-xs font-medium mb-1.5 block">Status</Label>
-            <Select
-              value={editData.status}
-              onValueChange={(value) => updateAndSave('status', value as NotiziaStatus)}
-            >
-              <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className={cn(liquidGlassPopover, "rounded-xl")}>
-                {Object.entries(statusLabels).map(([key, label]) => (
-                  <SelectItem key={key} value={key}>{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label className="text-xs font-medium mb-1.5 block">Status</Label>
+            <div className="flex flex-wrap gap-1.5">
+              {columns.map((col) => (
+                <button
+                  key={col.key}
+                  type="button"
+                  onClick={() => updateAndSave('status', col.key as NotiziaStatus)}
+                  className={cn(
+                    "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                    editData.status === col.key && "ring-2 ring-offset-1 ring-foreground"
+                  )}
+                  style={{ 
+                    backgroundColor: col.color,
+                    color: isDarkColor(col.color) ? 'white' : 'black'
+                  }}
+                >
+                  {col.label}
+                </button>
+              ))}
+            </div>
           </div>
           
           <div>
