@@ -174,12 +174,12 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Header - Liquid Glass Style */}
-      <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
+      {/* Header - Same glass style as app */}
+      <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem]">
         <img 
           src={logoLarge} 
           alt="Keipiai" 
-          className="h-14 mx-auto" 
+          className="h-12" 
         />
       </div>
 
