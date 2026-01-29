@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
@@ -20,8 +20,11 @@ const KPIDetailModal = lazy(() => import('./KPIDetailModal'));
 type Period = 'week' | 'month' | 'year';
 type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
 
-const PersonalDashboard = () => {
-  const navigate = useNavigate();
+type PersonalDashboardProps = {
+  onGoToCalendar?: () => void;
+};
+
+const PersonalDashboard = ({ onGoToCalendar }: PersonalDashboardProps) => {
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
@@ -81,17 +84,14 @@ const PersonalDashboard = () => {
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
   const handleNotiziaClick = (notizia: Notizia) => {
-    navigate('/calendario');
-    // Small delay to let navigation complete, then open notizia
-    setTimeout(() => {
-      setSelectedNotizia(notizia);
-    }, 100);
+    // Open notizia detail directly from dashboard
+    setSelectedNotizia(notizia);
   };
 
   return (
     <div className="px-4 pb-6 space-y-4 animate-fade-in">
       {/* Today's Reminders Widget */}
-      <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} />
+      <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
 
       {/* Daily Quote */}
       <DailyQuote />
