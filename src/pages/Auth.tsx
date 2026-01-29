@@ -178,8 +178,8 @@ const Auth = () => {
       <div className="bg-card/80 backdrop-blur-xl py-4 text-center rounded-b-[2rem] shadow-lg border-b border-border/30">
         <img 
           src={logoLarge} 
-          alt="Cortesi Luxury Real Estate" 
-          className="h-16 mx-auto" 
+          alt="Keipiai" 
+          className="h-12 mx-auto" 
         />
       </div>
 
