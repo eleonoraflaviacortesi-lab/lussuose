@@ -15,6 +15,7 @@ const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalys
 const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
+const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 
 const IndexContent = () => {
   const [activeTab, setActiveTab] = useState('numeri');
@@ -75,6 +76,8 @@ const IndexContent = () => {
         return <AgencyDashboard />;
       case 'clienti':
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
+      case 'calendario':
+        return <CalendarPage />;
       case 'impostazioni':
         return <SettingsPage />;
       default:

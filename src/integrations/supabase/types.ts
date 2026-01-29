@@ -14,6 +14,59 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointments: {
+        Row: {
+          cliente_id: string | null
+          created_at: string
+          description: string | null
+          end_time: string
+          google_calendar_synced: boolean | null
+          google_event_id: string | null
+          id: string
+          location: string | null
+          start_time: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_time: string
+          google_calendar_synced?: boolean | null
+          google_event_id?: string | null
+          id?: string
+          location?: string | null
+          start_time: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string
+          google_calendar_synced?: boolean | null
+          google_event_id?: string | null
+          id?: string
+          location?: string | null
+          start_time?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_property_matches: {
         Row: {
           cliente_id: string
@@ -519,6 +572,9 @@ export type Database = {
           avatar_emoji: string | null
           created_at: string
           full_name: string
+          google_access_token: string | null
+          google_refresh_token: string | null
+          google_token_expiry: string | null
           id: string
           role: string
           sede: string
@@ -530,6 +586,9 @@ export type Database = {
           avatar_emoji?: string | null
           created_at?: string
           full_name: string
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expiry?: string | null
           id?: string
           role?: string
           sede?: string
@@ -541,6 +600,9 @@ export type Database = {
           avatar_emoji?: string | null
           created_at?: string
           full_name?: string
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expiry?: string | null
           id?: string
           role?: string
           sede?: string

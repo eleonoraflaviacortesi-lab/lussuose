@@ -107,6 +107,8 @@ export interface Cliente {
   note_extra: string | null;
   tally_submission_id: string | null;
   data_submission: string | null;
+  reminder_date: string | null;
+  last_contact_date: string | null;
   created_at: string;
   updated_at: string;
 }
