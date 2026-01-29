@@ -310,7 +310,7 @@ const ReportAnalysisTab = () => {
                         fontSize: '12px'
                       }}
                     />
-                    <Bar dataKey="contatti" fill="hsl(var(--foreground))" radius={[2, 2, 0, 0]} name="Contatti" />
+                    <Bar dataKey="contatti" fill="hsl(var(--accent))" radius={[2, 2, 0, 0]} name="Contatti" />
                     <Bar dataKey="notizie" fill="hsl(var(--muted-foreground))" radius={[2, 2, 0, 0]} name="Notizie" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -327,8 +327,8 @@ const ReportAnalysisTab = () => {
                   <AreaChart data={chartData}>
                     <defs>
                       <linearGradient id="fatturatoGradientAnalysis" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--foreground))" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="hsl(var(--foreground))" stopOpacity={0} />
+                        <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" tick={{ fontSize: 8 }} tickLine={false} axisLine={false} />
@@ -345,7 +345,7 @@ const ReportAnalysisTab = () => {
                     <Area
                       type="monotone"
                       dataKey="fatturato"
-                      stroke="hsl(var(--foreground))"
+                      stroke="hsl(var(--accent))"
                       strokeWidth={1.5}
                       fill="url(#fatturatoGradientAnalysis)"
                     />
