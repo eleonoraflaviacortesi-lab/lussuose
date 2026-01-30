@@ -141,12 +141,12 @@ export function AddClienteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col rounded-2xl mx-3 sm:mx-auto overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col rounded-2xl mx-4 sm:mx-auto overflow-hidden">
         <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle>Aggiungi Cliente Manualmente</DialogTitle>
         </DialogHeader>
 
-        <form id="add-cliente-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-5 sm:space-y-6 pb-4 px-1 pr-3">
+        <form id="add-cliente-form" onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-5 sm:space-y-6 pb-4">
             {/* Section 1: Contact Info */}
             <div className="space-y-3 sm:space-y-4">
               <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
