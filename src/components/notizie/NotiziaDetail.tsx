@@ -492,9 +492,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
                     <div className="flex gap-2">
                       <Select
-                        value={editData.reminder_time.split(':')[0]}
+                        value={editData.reminder_time?.split(':')[0] || '09'}
                         onValueChange={(hour) => {
-                          const mins = editData.reminder_time.split(':')[1] || '00';
+                          const mins = editData.reminder_time?.split(':')[1] || '00';
                           updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
@@ -509,9 +509,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       </Select>
                       <span className="flex items-center text-muted-foreground font-medium">:</span>
                       <Select
-                        value={editData.reminder_time.split(':')[1] || '00'}
+                        value={editData.reminder_time?.split(':')[1] || '00'}
                         onValueChange={(mins) => {
-                          const hour = editData.reminder_time.split(':')[0] || '09';
+                          const hour = editData.reminder_time?.split(':')[0] || '09';
                           updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
