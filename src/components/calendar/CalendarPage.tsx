@@ -413,10 +413,10 @@ const CalendarPage = () => {
   };
 
   return (
-    <div className="px-6 pt-4 pb-8 animate-fade-in">
+    <div className="pt-4 pb-8 animate-fade-in">
 
       {/* Week Navigation - Mobile optimized */}
-      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6">
+      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6 mx-6">
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateWeek('prev')}
@@ -456,7 +456,7 @@ const CalendarPage = () => {
         </div>
       ) : isMobile ? (
         <div 
-          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 scrollbar-hide touch-pan-x"
+          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide touch-pan-x"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {weekDays.map((day) => {
@@ -525,7 +525,7 @@ const CalendarPage = () => {
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-2 px-6">
           {weekDays.map((day) => {
             const dayKey = format(day, 'yyyy-MM-dd');
             const events = eventsByDay.get(dayKey) || [];
