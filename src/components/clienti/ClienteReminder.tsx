@@ -194,7 +194,7 @@ export const ClienteReminder = memo(({
                 onSelect={setSelectedDate}
                 locale={it}
                 disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                className="rounded-md border"
+                className="rounded-md border pointer-events-auto"
               />
               
               <div className="flex items-center gap-2">
@@ -234,31 +234,40 @@ export const ClienteReminder = memo(({
                   Salva
                 </Button>
               </div>
+
+              {/* Google Calendar button - inside popover for quick access */}
+              {selectedDate && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full text-xs h-8"
+                  onClick={() => {
+                    // Save first
+                    const [hours] = selectedTime.split(':').map(Number);
+                    const dateWithTime = new Date(selectedDate);
+                    dateWithTime.setHours(hours, 0, 0, 0);
+                    onUpdateReminder(dateWithTime.toISOString());
+                    
+                    // Open Google Calendar
+                    const url = generateClienteCalendarUrl({
+                      name: clienteName,
+                      phone: clientePhone,
+                      paese: clientePaese,
+                      reminderDate: dateWithTime,
+                    });
+                    window.open(url, '_blank');
+                    setIsOpen(false);
+                  }}
+                >
+                  <CalendarIcon className="w-3 h-3 mr-2" />
+                  Salva su Google Calendar
+                  <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
+                </Button>
+              )}
             </div>
           </PopoverContent>
         </Popover>
       </div>
-
-      {/* Google Calendar button */}
-      {reminderDate && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full text-xs h-8"
-          onClick={() => {
-            const url = generateClienteCalendarUrl({
-              name: clienteName,
-              phone: clientePhone,
-              paese: clientePaese,
-              reminderDate: new Date(reminderDate),
-            });
-            window.open(url, '_blank');
-          }}
-        >
-          <ExternalLink className="w-3 h-3 mr-2" />
-          Aggiungi a Google Calendar
-        </Button>
-      )}
 
       {/* Last contact info */}
       {lastContactDate && (
