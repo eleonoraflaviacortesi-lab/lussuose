@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, memo } from 'react';
+import { useState, useMemo, useRef, memo, useEffect } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2 } from 'lucide-react';
@@ -200,6 +200,7 @@ const CalendarPage = () => {
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ event: CalendarEvent; position: { x: number; y: number } } | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const weekScrollRef = useRef<HTMLDivElement>(null);
 
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment } = useClienti();
@@ -216,6 +217,18 @@ const CalendarPage = () => {
   const weekDays = useMemo(() => {
     return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
   }, [currentWeekStart]);
+
+  // Scroll to today's card on mount and when week changes (mobile)
+  useEffect(() => {
+    if (!isMobile || !weekScrollRef.current) return;
+    
+    const todayIndex = weekDays.findIndex(day => isSameDay(day, new Date()));
+    if (todayIndex >= 0) {
+      // Each card is 280px + 12px gap
+      const scrollPosition = todayIndex * (280 + 12);
+      weekScrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+    }
+  }, [currentWeekStart, isMobile, weekDays]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
@@ -456,6 +469,7 @@ const CalendarPage = () => {
         </div>
       ) : isMobile ? (
         <div 
+          ref={weekScrollRef}
           className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide touch-pan-x"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
