@@ -226,7 +226,10 @@ const CalendarPage = () => {
     if (todayIndex >= 0) {
       // Each card is 280px + 12px gap
       const scrollPosition = todayIndex * (280 + 12);
-      weekScrollRef.current.scrollTo({ left: scrollPosition, behavior: 'smooth' });
+      // Use requestAnimationFrame to ensure DOM is ready, then scroll instantly
+      requestAnimationFrame(() => {
+        weekScrollRef.current?.scrollTo({ left: scrollPosition, behavior: 'instant' });
+      });
     }
   }, [currentWeekStart, isMobile, weekDays]);
 
