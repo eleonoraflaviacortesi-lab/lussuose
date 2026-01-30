@@ -104,24 +104,29 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
   };
 
   return (
-    <PullToRefresh 
-      onRefresh={handleRefresh}
-      className="min-h-screen bg-background overflow-x-hidden"
-    >
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Fixed elements - not affected by pull-to-refresh */}
       <Header />
       <div className="h-[120px]" />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150 overflow-x-hidden">
-        <Suspense
-          fallback={
-            <div className="py-10 flex items-center justify-center">
-              <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-            </div>
-          }
-        >
-          {renderContent()}
-        </Suspense>
-      </main>
+      
+      {/* Main content with pull-to-refresh */}
+      <PullToRefresh 
+        onRefresh={handleRefresh}
+        className="overflow-x-hidden"
+      >
+        <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150 overflow-x-hidden">
+          <Suspense
+            fallback={
+              <div className="py-10 flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+              </div>
+            }
+          >
+            {renderContent()}
+          </Suspense>
+        </main>
+      </PullToRefresh>
       
       {/* Fixed Notification Bell */}
       <NotificationBell onOpenCliente={handleOpenCliente} />
@@ -132,7 +137,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         open={!!selectedNotizia}
         onOpenChange={(open) => !open && setSelectedNotizia(null)}
       />
-    </PullToRefresh>
+    </div>
   );
 };
 
