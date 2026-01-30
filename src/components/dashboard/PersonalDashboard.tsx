@@ -93,7 +93,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   return (
     <div className="px-4 pb-6 space-y-4 animate-fade-in">
       {/* Ciclo Produttivo Pill Button */}
-      <div className="flex justify-center">
+      <div className="flex justify-center pt-4">
         <button
           onClick={() => navigate('/inserisci')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium tracking-widest transition-all active:scale-95 ${
