@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Cliente, ClienteStatus, ClienteGroupBy } from '@/types';
 import { ClienteCard } from './ClienteCard';
@@ -59,21 +59,6 @@ export function ClientiKanban({
   onEmojiChange,
 }: ClientiKanbanProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-
-  // Sync horizontal scroll between header and content
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    const header = headerRef.current;
-    if (!scrollContainer || !header) return;
-
-    const handleScroll = () => {
-      header.scrollLeft = scrollContainer.scrollLeft;
-    };
-
-    scrollContainer.addEventListener('scroll', handleScroll);
-    return () => scrollContainer.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Get columns based on groupBy
   const columns = useMemo(() => {
@@ -213,78 +198,62 @@ export function ClientiKanban({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="flex flex-col h-full">
-        {/* Fixed header */}
-        <div 
-          ref={headerRef}
-          className="flex gap-3 pb-2 overflow-x-hidden"
-          style={{ minWidth: 'max-content' }}
-        >
-          {columns.map(column => (
-            <div 
-              key={column.id} 
-              className="w-[280px] flex-shrink-0"
-            >
-              <div className="flex items-center gap-2 px-2 py-1">
-                <div className={cn("w-2 h-2 rounded-full", column.color)} />
-                <span className="text-sm font-medium">{column.label}</span>
-                <span className="text-xs text-muted-foreground ml-auto">
-                  {column.items.length}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Scrollable content */}
-        <div 
-          ref={scrollContainerRef}
-          className="flex gap-3 overflow-x-auto overflow-y-hidden flex-1 pb-4"
-        >
-          {columns.map(column => (
-            <Droppable key={column.id} droppableId={column.id}>
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={cn(
-                    "w-[280px] flex-shrink-0 rounded-xl p-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto",
-                    snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"
-                  )}
-                >
-                  <div className="space-y-2">
-                    {column.items.map((cliente, index) => (
-                      <Draggable
-                        key={cliente.id}
-                        draggableId={cliente.id}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                          >
-                            <ClienteCard
-                              cliente={cliente}
-                              onClick={() => onCardClick(cliente)}
-                              onColorChange={(color) => onColorChange(cliente.id, color)}
-                              onEmojiChange={(emoji) => onEmojiChange(cliente.id, emoji)}
-                              isDragging={snapshot.isDragging}
-                              showAgent={groupBy !== 'agente'}
-                              agentName={getAgentName(cliente.assigned_to)}
-                            />
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                  </div>
-                  {provided.placeholder}
+      <div 
+        ref={scrollContainerRef}
+        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4"
+      >
+        {columns.map(column => (
+          <Droppable key={column.id} droppableId={column.id}>
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+                className={cn(
+                  "w-[280px] flex-shrink-0 rounded-xl p-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto",
+                  snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"
+                )}
+              >
+                {/* Column header - scrolls with column */}
+                <div className="flex items-center gap-2 px-2 py-1 mb-2 sticky top-0 bg-inherit z-10">
+                  <div className={cn("w-2 h-2 rounded-full", column.color)} />
+                  <span className="text-sm font-medium">{column.label}</span>
+                  <span className="text-xs text-muted-foreground ml-auto">
+                    {column.items.length}
+                  </span>
                 </div>
-              )}
-            </Droppable>
-          ))}
-        </div>
+                
+                <div className="space-y-2">
+                  {column.items.map((cliente, index) => (
+                    <Draggable
+                      key={cliente.id}
+                      draggableId={cliente.id}
+                      index={index}
+                    >
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <ClienteCard
+                            cliente={cliente}
+                            onClick={() => onCardClick(cliente)}
+                            onColorChange={(color) => onColorChange(cliente.id, color)}
+                            onEmojiChange={(emoji) => onEmojiChange(cliente.id, emoji)}
+                            isDragging={snapshot.isDragging}
+                            showAgent={groupBy !== 'agente'}
+                            agentName={getAgentName(cliente.assigned_to)}
+                          />
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                </div>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        ))}
       </div>
     </DragDropContext>
   );
