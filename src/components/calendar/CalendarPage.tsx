@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 export type CalendarEvent = {
   id: string;
   title: string;
-  time: string;
   type: 'appointment' | 'cliente_reminder' | 'notizia_reminder';
   clienteId?: string;
   clienteName?: string;
@@ -30,6 +29,7 @@ export type CalendarEvent = {
   emoji?: string;
   statusColor?: string; // Color based on status
   urgent?: boolean;
+  displayOrder?: number; // For ordering within a day
 };
 
 // Quick emojis
@@ -249,7 +249,6 @@ const CalendarPage = () => {
           events.push({
             id: apt.id,
             title: apt.title,
-            time: format(parseISO(apt.start_time), 'HH:mm'),
             type: 'appointment',
             clienteId: apt.cliente_id || undefined,
             clienteName: apt.cliente?.nome,
@@ -264,12 +263,12 @@ const CalendarPage = () => {
           events.push({
             id: `cliente-${cliente.id}`,
             title: cliente.nome,
-            time: format(parseISO(cliente.reminder_date), 'HH:mm'),
             type: 'cliente_reminder',
             clienteId: cliente.id,
             clienteName: cliente.nome,
             emoji: cliente.emoji,
             statusColor: getStatusColor(cliente.status),
+            displayOrder: cliente.display_order,
           });
         }
       });
@@ -283,21 +282,21 @@ const CalendarPage = () => {
           events.push({
             id: `notizia-${notizia.id}`,
             title: notizia.name,
-            time: format(parseISO(notizia.reminder_date), 'HH:mm'),
             type: 'notizia_reminder',
             notiziaId: notizia.id,
             emoji: notizia.emoji,
             statusColor: getStatusColor(notizia.status),
             urgent: isUrgent,
+            displayOrder: notizia.display_order,
           });
         }
       });
 
-      // Sort: urgent first, then by time
+      // Sort: urgent first, then by displayOrder
       events.sort((a, b) => {
         if (a.urgent && !b.urgent) return -1;
         if (!a.urgent && b.urgent) return 1;
-        return a.time.localeCompare(b.time);
+        return (a.displayOrder || 0) - (b.displayOrder || 0);
       });
       map.set(dayKey, events);
     });
@@ -921,9 +920,6 @@ const EventCard = memo(({
           <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
             {event.title}
           </p>
-          <span className={cn("text-[9px]", styles.timeClass)}>
-            {event.time}
-          </span>
         </div>
       </div>
     </div>
@@ -1022,9 +1018,6 @@ const DraggableEventCard = memo(({
           <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
             {event.title}
           </p>
-          <span className={cn("text-[9px]", styles.timeClass)}>
-            {event.time}
-          </span>
         </div>
       </div>
     </div>
