@@ -484,7 +484,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   <Calendar
                     mode="single"
                     selected={editData.reminder_date || undefined}
-                    onSelect={(date) => updateAndSave('reminder_date', date || null)}
+                    onSelect={(date) => updateField('reminder_date', date || null)}
                     locale={it}
                     className="pointer-events-auto"
                   />
@@ -495,7 +495,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                         value={editData.reminder_time.split(':')[0]}
                         onValueChange={(hour) => {
                           const mins = editData.reminder_time.split(':')[1] || '00';
-                          updateAndSave('reminder_time', `${hour}:${mins}`);
+                          updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
                         <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
@@ -512,7 +512,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                         value={editData.reminder_time.split(':')[1] || '00'}
                         onValueChange={(mins) => {
                           const hour = editData.reminder_time.split(':')[0] || '09';
-                          updateAndSave('reminder_time', `${hour}:${mins}`);
+                          updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
                         <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
@@ -526,7 +526,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       </Select>
                     </div>
                     
-                    {/* Save to Google Calendar button - only visible when date is selected */}
+                    {/* Save button - always visible when date is selected */}
                     {editData.reminder_date && (
                       <button
                         type="button"
@@ -535,37 +535,18 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                           const reminderDate = new Date(editData.reminder_date!);
                           reminderDate.setHours(parseInt(hours), parseInt(minutes));
                           
-                          // Save first
                           updateNotizia.mutate({
                             id: notizia.id,
-                            name: editData.name,
-                            zona: editData.zona || undefined,
-                            phone: editData.phone || undefined,
-                            type: editData.type || undefined,
-                            notes: editData.notes || undefined,
-                            status: editData.status,
-                            emoji: editData.emoji || '📋',
                             reminder_date: reminderDate.toISOString(),
-                            silent: true,
                           });
                           
-                          // Open Google Calendar
-                          const url = generateNotiziaCalendarUrl({
-                            name: editData.name,
-                            emoji: editData.emoji,
-                            zona: editData.zona || undefined,
-                            type: editData.type || undefined,
-                            phone: editData.phone || undefined,
-                            notes: editData.notes || undefined,
-                            reminder_date: reminderDate,
-                          });
-                          window.open(url, '_blank');
+                          setShowSaved(true);
+                          setTimeout(() => setShowSaved(false), 1500);
                         }}
-                        className="w-full mt-3 py-2 rounded-full bg-foreground text-background text-xs font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:opacity-90"
+                        className="w-full mt-3 py-2.5 rounded-full bg-foreground text-background text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:opacity-90"
                       >
-                        <CalendarIcon className="w-3.5 h-3.5" />
-                        <span>Salva su Google Calendar</span>
-                        <ExternalLink className="w-3 h-3 opacity-60" />
+                        <Check className="w-4 h-4" />
+                        <span>Salva</span>
                       </button>
                     )}
                     
