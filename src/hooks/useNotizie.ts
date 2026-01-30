@@ -130,14 +130,45 @@ export const useNotizie = () => {
       if (error) throw error;
       return { silent };
     },
-    onSuccess: (data) => {
+    // Optimistic update for instant UI feedback
+    onMutate: async ({ id, comments, silent, ...input }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['notizie'] });
+      
+      // Snapshot previous value
+      const previousNotizie = queryClient.getQueryData<Notizia[]>(['notizie']);
+      
+      // Optimistically update cache
+      if (previousNotizie) {
+        queryClient.setQueryData<Notizia[]>(['notizie'], (old) =>
+          old?.map((n) =>
+            n.id === id
+              ? { 
+                  ...n, 
+                  ...input,
+                  ...(comments !== undefined && { comments }),
+                  updated_at: new Date().toISOString(),
+                }
+              : n
+          ) || []
+        );
+      }
+      
+      return { previousNotizie, silent };
+    },
+    onSuccess: (data, variables, context) => {
+      // Refetch to sync with server
       queryClient.invalidateQueries({ queryKey: ['notizie'] });
       // Only show toast if not silent
-      if (!data?.silent) {
+      if (!context?.silent) {
         toast({ title: 'Notizia aggiornata!' });
       }
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // Rollback on error
+      if (context?.previousNotizie) {
+        queryClient.setQueryData(['notizie'], context.previousNotizie);
+      }
       toast({
         title: 'Errore',
         description: error.message,
