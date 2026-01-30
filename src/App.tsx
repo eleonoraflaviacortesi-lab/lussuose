@@ -20,8 +20,13 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
-            {/* Backward-compatible tab routes (avoid 404s on deep links / old navigation) */}
+            {/* Tab routes - avoid 404s on deep links, PWA cache, or old navigation */}
             <Route path="/calendario" element={<Index initialTab="calendario" />} />
+            <Route path="/notizie" element={<Index initialTab="notizie" />} />
+            <Route path="/clienti" element={<Index initialTab="clienti" />} />
+            <Route path="/inserisci" element={<Index initialTab="inserisci" />} />
+            <Route path="/agenzia" element={<Index initialTab="agenzia" />} />
+            <Route path="/impostazioni" element={<Index initialTab="impostazioni" />} />
             <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
