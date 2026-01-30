@@ -99,7 +99,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium tracking-widest transition-all active:scale-95 ${
             hasReportedToday 
               ? 'bg-muted text-muted-foreground' 
-              : 'bg-foreground text-background shadow-[0_0_20px_rgba(0,0,0,0.3)] animate-pulse'
+              : 'bg-foreground text-background shadow-[0_0_25px_8px_rgba(0,0,0,0.25)]'
           }`}
         >
           {hasReportedToday ? (
