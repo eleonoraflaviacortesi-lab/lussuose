@@ -25,7 +25,7 @@ export function MultiCheckboxField({
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">{label}</Label>
-      <div className="grid grid-cols-2 gap-2 max-h-[200px] overflow-y-auto pr-2">
+      <div className="grid grid-cols-2 gap-2">
         {options.map(option => (
           <label
             key={option}
