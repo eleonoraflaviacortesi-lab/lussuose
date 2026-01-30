@@ -199,12 +199,6 @@ const CalendarDayView = ({
                         )}>
                           {styles.label}
                         </span>
-                        <span className={cn(
-                          "text-xs",
-                          styles.customBg && isDarkColor(styles.customBg) ? 'text-white/70' : 'text-muted-foreground'
-                        )}>
-                          {event.time}
-                        </span>
                       </div>
                       <p className={cn(
                         "font-medium",
