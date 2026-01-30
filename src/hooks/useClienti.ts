@@ -174,7 +174,7 @@ export function useClienti(options?: {
     },
   });
 
-  // Update cliente
+  // Update cliente with optimistic update for instant UI feedback
   const updateMutation = useMutation({
     mutationFn: async ({ id, comments, ...updates }: Partial<Cliente> & { id: string }) => {
       const updateData: Record<string, unknown> = { ...updates };
@@ -192,10 +192,40 @@ export function useClienti(options?: {
       if (error) throw error;
       return transformCliente(data);
     },
+    // Optimistic update for instant UI feedback
+    onMutate: async ({ id, comments, ...updates }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['clienti'] });
+      
+      // Snapshot previous value
+      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi]);
+      
+      // Optimistically update cache
+      if (previousClienti) {
+        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi], (old) =>
+          old?.map((c) =>
+            c.id === id
+              ? { 
+                  ...c, 
+                  ...updates,
+                  ...(comments !== undefined && { comments }),
+                  updated_at: new Date().toISOString(),
+                }
+              : c
+          ) || []
+        );
+      }
+      
+      return { previousClienti };
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clienti'] });
     },
-    onError: (error: any) => {
+    onError: (error: any, variables, context) => {
+      // Rollback on error
+      if (context?.previousClienti) {
+        queryClient.setQueryData(['clienti', profile?.sede, (profile as any)?.sedi], context.previousClienti);
+      }
       toast({ title: 'Errore', description: error.message, variant: 'destructive' });
     },
   });
