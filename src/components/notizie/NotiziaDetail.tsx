@@ -526,6 +526,49 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       </Select>
                     </div>
                     
+                    {/* Save to Google Calendar button - only visible when date is selected */}
+                    {editData.reminder_date && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const [hours, minutes] = editData.reminder_time.split(':');
+                          const reminderDate = new Date(editData.reminder_date!);
+                          reminderDate.setHours(parseInt(hours), parseInt(minutes));
+                          
+                          // Save first
+                          updateNotizia.mutate({
+                            id: notizia.id,
+                            name: editData.name,
+                            zona: editData.zona || undefined,
+                            phone: editData.phone || undefined,
+                            type: editData.type || undefined,
+                            notes: editData.notes || undefined,
+                            status: editData.status,
+                            emoji: editData.emoji || '📋',
+                            reminder_date: reminderDate.toISOString(),
+                            silent: true,
+                          });
+                          
+                          // Open Google Calendar
+                          const url = generateNotiziaCalendarUrl({
+                            name: editData.name,
+                            emoji: editData.emoji,
+                            zona: editData.zona || undefined,
+                            type: editData.type || undefined,
+                            phone: editData.phone || undefined,
+                            notes: editData.notes || undefined,
+                            reminder_date: reminderDate,
+                          });
+                          window.open(url, '_blank');
+                        }}
+                        className="w-full mt-3 py-2 rounded-full bg-foreground text-background text-xs font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:opacity-90"
+                      >
+                        <CalendarIcon className="w-3.5 h-3.5" />
+                        <span>Salva su Google Calendar</span>
+                        <ExternalLink className="w-3 h-3 opacity-60" />
+                      </button>
+                    )}
+                    
                     {/* Remove reminder button */}
                     {editData.reminder_date && (
                       <button
@@ -533,7 +576,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                         onClick={() => {
                           updateAndSave('reminder_date', null);
                         }}
-                        className="w-full mt-3 py-2 rounded-full bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive hover:text-white transition-colors"
+                        className="w-full mt-2 py-2 rounded-full bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive hover:text-white transition-colors"
                       >
                         Rimuovi promemoria
                       </button>
