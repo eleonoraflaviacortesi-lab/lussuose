@@ -5,8 +5,9 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { Progress } from '@/components/ui/progress';
-import { Users, Zap, Award, Gift, TrendingUp } from 'lucide-react';
+import { Users, Zap, Award, Gift, TrendingUp, Plus, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 import IncarchiWidget from './IncarchiWidget';
 import DailyQuote from './DailyQuote';
 import AcquisitionChart from './AcquisitionChart';
@@ -33,6 +34,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const { myData } = useDailyData();
   const { settings } = useUserSettings();
   const navigate = useNavigate();
+  const { hasReportedToday } = useTodayReportStatus();
 
   // Dynamic annual target from user settings (weekly * 52 weeks)
   const annualTarget = settings?.vendite_settimana 
@@ -94,10 +96,23 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <div className="flex justify-center">
         <button
           onClick={() => navigate('/inserisci')}
-          className="flex items-center gap-2 bg-foreground text-background px-5 py-2.5 rounded-full text-sm font-medium tracking-wide transition-transform active:scale-95"
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium tracking-widest transition-all active:scale-95 ${
+            hasReportedToday 
+              ? 'bg-muted text-muted-foreground' 
+              : 'bg-foreground text-background shadow-[0_0_20px_rgba(0,0,0,0.3)] animate-pulse'
+          }`}
         >
-          <TrendingUp className="w-4 h-4" />
-          Ciclo Produttivo
+          {hasReportedToday ? (
+            <>
+              <Check className="w-4 h-4" />
+              FATTO
+            </>
+          ) : (
+            <>
+              <Plus className="w-4 h-4" />
+              CICLO PRODUTTIVO
+            </>
+          )}
         </button>
       </div>
 
