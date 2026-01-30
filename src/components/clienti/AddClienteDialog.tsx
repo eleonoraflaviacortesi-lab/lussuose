@@ -455,15 +455,15 @@ export function AddClienteDialog({
 
               <div>
                 <Label>Assegna a</Label>
-                <Select
-                  value={formData.assigned_to}
-                  onValueChange={v => updateField('assigned_to', v)}
+              <Select
+                  value={formData.assigned_to || 'unassigned'}
+                  onValueChange={v => updateField('assigned_to', v === 'unassigned' ? '' : v)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Non assegnato" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Non assegnato</SelectItem>
+                    <SelectItem value="unassigned">Non assegnato</SelectItem>
                     {agents.map(a => (
                       <SelectItem key={a.user_id} value={a.user_id}>
                         <div className="flex items-center gap-2">
