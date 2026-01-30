@@ -139,17 +139,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
               : `${displayClients.length} clienti assegnati a te`}
           </p>
         </div>
-        {isCoordinator && (
-          <div className="flex gap-2">
+        <div className="flex gap-2">
+          {isCoordinator && (
             <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
               <Upload className="w-4 h-4 mr-1.5" />
               CSV
             </Button>
-            <Button onClick={() => setAddDialogOpen(true)}>
-              <Plus className="w-4 h-4" />
-            </Button>
-          </div>
-        )}
+          )}
+          <Button onClick={() => setAddDialogOpen(true)}>
+            <Plus className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
       {/* Stats Chart - only for coordinators */}
