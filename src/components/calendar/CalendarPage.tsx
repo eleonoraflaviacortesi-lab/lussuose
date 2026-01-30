@@ -221,17 +221,18 @@ const CalendarPage = () => {
   // Scroll to today's card on mount and when week changes (mobile)
   useEffect(() => {
     if (!isMobile || !weekScrollRef.current) return;
+
+    const container = weekScrollRef.current;
+    // Wait for DOM to paint the cards, then center "today"
+    const timeoutId = setTimeout(() => {
+      const todayEl = container.querySelector('[data-today="true"]') as HTMLElement | null;
+      if (todayEl) {
+        todayEl.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
+      }
+    }, 50);
     
-    const todayIndex = weekDays.findIndex(day => isSameDay(day, new Date()));
-    if (todayIndex >= 0) {
-      // Each card is 280px + 12px gap
-      const scrollPosition = todayIndex * (280 + 12);
-      // Use requestAnimationFrame to ensure DOM is ready, then scroll instantly
-      requestAnimationFrame(() => {
-        weekScrollRef.current?.scrollTo({ left: scrollPosition, behavior: 'instant' });
-      });
-    }
-  }, [currentWeekStart, isMobile, weekDays]);
+    return () => clearTimeout(timeoutId);
+  }, [currentWeekStart, isMobile]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
@@ -489,11 +490,12 @@ const CalendarPage = () => {
             return (
               <div
                 key={dayKey}
-              className={cn(
-                "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
-                isToday && "ring-2 ring-foreground"
-              )}
-              style={{ scrollSnapAlign: 'center' }}
+                data-today={isToday ? 'true' : undefined}
+                className={cn(
+                  "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
+                  isToday && "ring-2 ring-foreground"
+                )}
+                style={{ scrollSnapAlign: 'center' }}
                 onClick={() => handleDayClick(day)}
               >
                 <div className="text-center mb-3 pb-2 border-b border-muted">
