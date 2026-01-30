@@ -473,8 +473,13 @@ const CalendarPage = () => {
       ) : isMobile ? (
         <div 
           ref={weekScrollRef}
-          className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4 px-6 scrollbar-hide touch-pan-x"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'x proximity',
+          }}
         >
           {weekDays.map((day) => {
             const dayKey = format(day, 'yyyy-MM-dd');
@@ -484,10 +489,11 @@ const CalendarPage = () => {
             return (
               <div
                 key={dayKey}
-                className={cn(
-                  "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] snap-center flex-shrink-0 transition-all",
-                  isToday && "ring-2 ring-foreground"
-                )}
+              className={cn(
+                "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
+                isToday && "ring-2 ring-foreground"
+              )}
+              style={{ scrollSnapAlign: 'center' }}
                 onClick={() => handleDayClick(day)}
               >
                 <div className="text-center mb-3 pb-2 border-b border-muted">
