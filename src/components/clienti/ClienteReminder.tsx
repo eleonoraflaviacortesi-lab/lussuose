@@ -213,55 +213,26 @@ export const ClienteReminder = memo(({
                 </Select>
               </div>
 
-              <div className="flex gap-2">
-                {reminderDate && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="text-destructive"
-                    onClick={handleRemove}
-                  >
-                    <X className="w-4 h-4 mr-1" />
-                    Rimuovi
-                  </Button>
-                )}
-                <Button 
-                  size="sm" 
-                  className="flex-1"
-                  onClick={handleSave}
-                  disabled={!selectedDate}
-                >
-                  Salva
-                </Button>
-              </div>
+              {/* Save button - primary action */}
+              <Button 
+                size="sm" 
+                className="w-full"
+                onClick={handleSave}
+                disabled={!selectedDate}
+              >
+                Salva
+              </Button>
 
-              {/* Google Calendar button - inside popover for quick access */}
-              {selectedDate && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-xs h-8"
-                  onClick={() => {
-                    // Save first
-                    const [hours] = selectedTime.split(':').map(Number);
-                    const dateWithTime = new Date(selectedDate);
-                    dateWithTime.setHours(hours, 0, 0, 0);
-                    onUpdateReminder(dateWithTime.toISOString());
-                    
-                    // Open Google Calendar
-                    const url = generateClienteCalendarUrl({
-                      name: clienteName,
-                      phone: clientePhone,
-                      paese: clientePaese,
-                      reminderDate: dateWithTime,
-                    });
-                    window.open(url, '_blank');
-                    setIsOpen(false);
-                  }}
+              {/* Remove reminder button */}
+              {reminderDate && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                  onClick={handleRemove}
                 >
-                  <CalendarIcon className="w-3 h-3 mr-2" />
-                  Salva su Google Calendar
-                  <ExternalLink className="w-3 h-3 ml-1 opacity-60" />
+                  <X className="w-4 h-4 mr-1" />
+                  Rimuovi promemoria
                 </Button>
               )}
             </div>
