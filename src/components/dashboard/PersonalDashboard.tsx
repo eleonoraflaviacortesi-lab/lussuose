@@ -5,7 +5,8 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { Progress } from '@/components/ui/progress';
-import { Users, Zap, Award, Gift, TrendingUp } from 'lucide-react';
+import { Users, Zap, Award, Gift, TrendingUp, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import IncarchiWidget from './IncarchiWidget';
 import DailyQuote from './DailyQuote';
 import AcquisitionChart from './AcquisitionChart';
@@ -31,6 +32,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
   const { settings } = useUserSettings();
+  const navigate = useNavigate();
 
   // Dynamic annual target from user settings (weekly * 52 weeks)
   const annualTarget = settings?.vendite_settimana 
@@ -88,6 +90,23 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
   return (
     <div className="px-4 pb-6 space-y-4 animate-fade-in">
+      {/* Ciclo Produttivo Button */}
+      <button
+        onClick={() => navigate('/inserisci')}
+        className="w-full flex items-center justify-between bg-card rounded-2xl shadow p-4 transition-transform active:scale-[0.98]"
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-foreground/10 flex items-center justify-center">
+            <TrendingUp className="w-5 h-5 text-foreground" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-semibold text-foreground">Ciclo Produttivo</p>
+            <p className="text-xs text-muted-foreground">Inserisci i dati giornalieri</p>
+          </div>
+        </div>
+        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+      </button>
+
       {/* Today's Reminders Widget */}
       <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
 
