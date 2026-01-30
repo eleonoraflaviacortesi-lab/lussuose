@@ -130,8 +130,8 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">
-            {isCoordinator ? '✱' : '👤 I Miei Clienti'}
+          <h1 className="text-2xl font-bold tracking-tight">
+            {isCoordinator ? '✱' : 'ASSIGNED BUYERS'}
           </h1>
           <p className="text-sm text-muted-foreground">
             {isCoordinator 
