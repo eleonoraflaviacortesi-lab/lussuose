@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -655,6 +655,7 @@ const CalendarPage = () => {
                               <div
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
+                                {...provided.dragHandleProps}
                                 style={provided.draggableProps.style}
                               >
                                 <DraggableEventCard
@@ -664,7 +665,6 @@ const CalendarPage = () => {
                                   onTouchStart={(e) => handleTouchStart(event, e)}
                                   onTouchEnd={handleTouchEnd}
                                   onToggle={handleToggleCompleted}
-                                  dragHandleProps={provided.dragHandleProps}
                                   isDragging={snapshot.isDragging}
                                 />
                               </div>
@@ -927,7 +927,7 @@ const EventCard = memo(({
 });
 EventCard.displayName = 'EventCard';
 
-// Draggable Event Card with drag handle
+// Draggable Event Card - entire card is draggable
 const DraggableEventCard = memo(({ 
   event, 
   onClick,
@@ -935,7 +935,6 @@ const DraggableEventCard = memo(({
   onTouchStart,
   onTouchEnd,
   onToggle,
-  dragHandleProps,
   isDragging,
 }: {
   event: CalendarEvent;
@@ -944,7 +943,6 @@ const DraggableEventCard = memo(({
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onToggle: (id: string, completed: boolean) => void;
-  dragHandleProps: any;
   isDragging: boolean;
 }) => {
   const getEventStyles = () => {
@@ -955,7 +953,6 @@ const DraggableEventCard = memo(({
         customBg: event.statusColor,
         border: 'border-transparent',
         textClass: textColor,
-        timeClass: isDarkColor(event.statusColor) ? 'text-white/70' : 'text-muted-foreground',
       };
     }
     return {
@@ -963,7 +960,6 @@ const DraggableEventCard = memo(({
       customBg: null,
       border: 'border-transparent',
       textClass: 'text-foreground',
-      timeClass: 'text-muted-foreground',
     };
   };
 
@@ -972,7 +968,7 @@ const DraggableEventCard = memo(({
   return (
     <div
       className={cn(
-        "rounded-lg p-2 transition-all cursor-pointer relative group",
+        "rounded-lg p-2 transition-all cursor-grab active:cursor-grabbing relative",
         styles.bg,
         event.urgent && "ring-2 ring-red-500",
         isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
@@ -992,33 +988,19 @@ const DraggableEventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      <div className="flex items-start gap-2">
-        {/* Drag handle */}
-        <div 
-          {...dragHandleProps}
-          className={cn(
-            "flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-60 transition-opacity",
-            isDragging && "opacity-100"
-          )}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="w-3 h-3 text-muted-foreground" />
-        </div>
-        
+      <div className="flex items-center justify-center gap-2">
         {event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
           <div 
-            className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+            className="w-2 h-2 rounded-full shrink-0"
             style={{ backgroundColor: event.statusColor || '#6b7280' }}
           />
         )}
         
-        <div className="flex-1 min-w-0">
-          <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
-            {event.title}
-          </p>
-        </div>
+        <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
+          {event.title}
+        </p>
       </div>
     </div>
   );
