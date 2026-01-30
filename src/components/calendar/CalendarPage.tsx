@@ -1,7 +1,8 @@
-import { useState, useMemo, useRef, memo, useEffect } from 'react';
-import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks } from 'date-fns';
+import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
+import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, GripVertical } from 'lucide-react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
@@ -15,6 +16,7 @@ import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import { useProfiles } from '@/hooks/useProfiles';
+import { toast } from 'sonner';
 
 export type CalendarEvent = {
   id: string;
@@ -429,6 +431,57 @@ const CalendarPage = () => {
     updateNotizia.mutate({ id: notiziaId, reminder_date: date.toISOString(), silent: true });
   };
 
+  // Drag and drop handler
+  const handleDragEnd = useCallback((result: DropResult) => {
+    const { destination, source, draggableId } = result;
+
+    // Dropped outside or same position
+    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+      return;
+    }
+
+    // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
+    const targetDayKey = destination.droppableId.replace('day-', '');
+    const targetDate = parseISO(targetDayKey);
+    
+    // Parse draggableId to get event type and id
+    // Format: 'notizia-{id}' or 'cliente-{id}'
+    if (draggableId.startsWith('notizia-')) {
+      const notiziaId = draggableId.replace('notizia-', '');
+      const notizia = notizie?.find(n => n.id === notiziaId);
+      
+      if (notizia && notizia.reminder_date) {
+        // Keep the same time, just change the date
+        const oldDate = parseISO(notizia.reminder_date);
+        const newDate = setMinutes(setHours(targetDate, oldDate.getHours()), oldDate.getMinutes());
+        
+        triggerHaptic('light');
+        updateNotizia.mutate({ 
+          id: notiziaId, 
+          reminder_date: newDate.toISOString(), 
+          silent: true 
+        });
+        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      }
+    } else if (draggableId.startsWith('cliente-')) {
+      const clienteId = draggableId.replace('cliente-', '');
+      const cliente = clienti?.find(c => c.id === clienteId);
+      
+      if (cliente && cliente.reminder_date) {
+        // Keep the same time, just change the date
+        const oldDate = parseISO(cliente.reminder_date);
+        const newDate = setMinutes(setHours(targetDate, oldDate.getHours()), oldDate.getMinutes());
+        
+        triggerHaptic('light');
+        updateCliente({ 
+          id: clienteId, 
+          reminder_date: newDate.toISOString() 
+        });
+        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      }
+    }
+  }, [notizie, clienti, updateNotizia, updateCliente]);
+
   return (
     <div className="pt-4 pb-8 animate-fade-in">
 
@@ -550,65 +603,102 @@ const CalendarPage = () => {
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-7 gap-2 px-6">
-          {weekDays.map((day) => {
-            const dayKey = format(day, 'yyyy-MM-dd');
-            const events = eventsByDay.get(dayKey) || [];
-            const isToday = isSameDay(day, new Date());
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <div className="grid grid-cols-7 gap-2 px-6">
+            {weekDays.map((day) => {
+              const dayKey = format(day, 'yyyy-MM-dd');
+              const events = eventsByDay.get(dayKey) || [];
+              const isToday = isSameDay(day, new Date());
+              // Only notizie and clienti reminders are draggable
+              const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder');
+              const appointmentEvents = events.filter(e => e.type === 'appointment');
 
-            return (
-              <div
-                key={dayKey}
-                className={cn(
-                  "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer hover:shadow-xl",
-                  isToday && "ring-2 ring-foreground"
-                )}
-                onClick={() => handleDayClick(day)}
-              >
-                <div className="text-center mb-3 pb-2 border-b border-muted">
-                  <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
-                    {format(day, 'EEE', { locale: it })}
-                  </p>
-                  <p className="text-xl font-semibold text-foreground">
-                    {format(day, 'd')}
-                  </p>
-                </div>
+              return (
+                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.droppableProps}
+                      className={cn(
+                        "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                        isToday && "ring-2 ring-foreground",
+                        snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                      )}
+                      onClick={() => handleDayClick(day)}
+                    >
+                      <div className="text-center mb-3 pb-2 border-b border-muted">
+                        <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
+                          {format(day, 'EEE', { locale: it })}
+                        </p>
+                        <p className="text-xl font-semibold text-foreground">
+                          {format(day, 'd')}
+                        </p>
+                      </div>
 
-                <div className="space-y-2">
-                  {events.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
-                      Nessun evento
-                    </p>
-                  ) : (
-                    events.map((event) => (
-                      <EventCard 
-                        key={event.id} 
-                        event={event}
-                        onClick={() => handleEventClick(event)}
-                        onContextMenu={(e) => handleContextMenu(event, e)}
-                        onTouchStart={(e) => handleTouchStart(event, e)}
-                        onTouchEnd={handleTouchEnd}
-                        onToggle={handleToggleCompleted}
-                      />
-                    ))
+                      <div className="space-y-2 min-h-[80px]">
+                        {/* Non-draggable appointments */}
+                        {appointmentEvents.map((event) => (
+                          <EventCard 
+                            key={event.id} 
+                            event={event}
+                            onClick={() => handleEventClick(event)}
+                            onContextMenu={(e) => handleContextMenu(event, e)}
+                            onTouchStart={(e) => handleTouchStart(event, e)}
+                            onTouchEnd={handleTouchEnd}
+                            onToggle={handleToggleCompleted}
+                          />
+                        ))}
+                        
+                        {/* Draggable reminders */}
+                        {draggableEvents.map((event, index) => (
+                          <Draggable key={event.id} draggableId={event.id} index={index}>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                style={provided.draggableProps.style}
+                              >
+                                <DraggableEventCard
+                                  event={event}
+                                  onClick={() => handleEventClick(event)}
+                                  onContextMenu={(e) => handleContextMenu(event, e)}
+                                  onTouchStart={(e) => handleTouchStart(event, e)}
+                                  onTouchEnd={handleTouchEnd}
+                                  onToggle={handleToggleCompleted}
+                                  dragHandleProps={provided.dragHandleProps}
+                                  isDragging={snapshot.isDragging}
+                                />
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        
+                        {events.length === 0 && (
+                          <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                            Nessun evento
+                          </p>
+                        )}
+                        {provided.placeholder}
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(day);
+                          setShowAddMenu(true);
+                        }}
+                        className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span className="text-[10px] font-medium">Aggiungi</span>
+                      </button>
+                    </div>
                   )}
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedDate(day);
-                    setShowAddMenu(true);
-                  }}
-                  className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  <span className="text-[10px] font-medium">Aggiungi</span>
-                </button>
-              </div>
-            );
-          })}
-        </div>
+                </Droppable>
+              );
+            })}
+          </div>
+        </DragDropContext>
       )}
 
       {/* Add Appointment Dialog */}
@@ -840,5 +930,106 @@ const EventCard = memo(({
   );
 });
 EventCard.displayName = 'EventCard';
+
+// Draggable Event Card with drag handle
+const DraggableEventCard = memo(({ 
+  event, 
+  onClick,
+  onContextMenu,
+  onTouchStart,
+  onTouchEnd,
+  onToggle,
+  dragHandleProps,
+  isDragging,
+}: {
+  event: CalendarEvent;
+  onClick: () => void;
+  onContextMenu: (e: React.MouseEvent) => void;
+  onTouchStart: (e: React.TouchEvent) => void;
+  onTouchEnd: () => void;
+  onToggle: (id: string, completed: boolean) => void;
+  dragHandleProps: any;
+  isDragging: boolean;
+}) => {
+  const getEventStyles = () => {
+    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
+      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
+      return {
+        bg: '',
+        customBg: event.statusColor,
+        border: 'border-transparent',
+        textClass: textColor,
+        timeClass: isDarkColor(event.statusColor) ? 'text-white/70' : 'text-muted-foreground',
+      };
+    }
+    return {
+      bg: 'bg-muted/50',
+      customBg: null,
+      border: 'border-transparent',
+      textClass: 'text-foreground',
+      timeClass: 'text-muted-foreground',
+    };
+  };
+
+  const styles = getEventStyles();
+
+  return (
+    <div
+      className={cn(
+        "rounded-lg p-2 transition-all cursor-pointer relative group",
+        styles.bg,
+        event.urgent && "ring-2 ring-red-500",
+        isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
+      )}
+      style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      onContextMenu={onContextMenu}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+      onTouchMove={onTouchEnd}
+    >
+      {event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+          <AlertTriangle className="w-2.5 h-2.5 text-white" />
+        </div>
+      )}
+      <div className="flex items-start gap-2">
+        {/* Drag handle */}
+        <div 
+          {...dragHandleProps}
+          className={cn(
+            "flex items-center justify-center shrink-0 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-60 transition-opacity",
+            isDragging && "opacity-100"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="w-3 h-3 text-muted-foreground" />
+        </div>
+        
+        {event.emoji ? (
+          <span className="text-sm shrink-0">{event.emoji}</span>
+        ) : (
+          <div 
+            className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+            style={{ backgroundColor: event.statusColor || '#6b7280' }}
+          />
+        )}
+        
+        <div className="flex-1 min-w-0">
+          <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
+            {event.title}
+          </p>
+          <span className={cn("text-[9px]", styles.timeClass)}>
+            {event.time}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+});
+DraggableEventCard.displayName = 'DraggableEventCard';
 
 export default CalendarPage;
