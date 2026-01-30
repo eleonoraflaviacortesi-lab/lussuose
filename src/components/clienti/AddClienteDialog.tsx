@@ -141,12 +141,12 @@ export function AddClienteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col rounded-2xl overflow-hidden">
+      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col rounded-2xl">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle>Aggiungi Cliente Manualmente</DialogTitle>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 min-h-0 pr-4">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-2">
           <form id="add-cliente-form" onSubmit={handleSubmit} className="space-y-6 pb-4">
             {/* Section 1: Contact Info */}
             <div className="space-y-4">
@@ -488,7 +488,7 @@ export function AddClienteDialog({
               </div>
             </div>
           </form>
-        </ScrollArea>
+        </div>
 
         <DialogFooter className="border-t pt-4">
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
