@@ -141,16 +141,16 @@ export function AddClienteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col rounded-2xl">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[85vh] flex flex-col rounded-2xl mx-3 sm:mx-auto">
+        <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle>Aggiungi Cliente Manualmente</DialogTitle>
         </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto pr-2">
-          <form id="add-cliente-form" onSubmit={handleSubmit} className="space-y-6 pb-4">
+        <div className="flex-1 min-h-0 overflow-y-auto pr-2 -mr-2">
+          <form id="add-cliente-form" onSubmit={handleSubmit} className="space-y-5 sm:space-y-6 pb-4 px-1">
             {/* Section 1: Contact Info */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Informazioni Contatto
               </h3>
               
@@ -165,7 +165,7 @@ export function AddClienteDialog({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="telefono">Telefono</Label>
                   <Input
@@ -199,12 +199,12 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 2: Search Status */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Stato Ricerca
               </h3>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="tempo_ricerca">Da quanto cerca?</Label>
                   <Input
@@ -234,7 +234,7 @@ export function AddClienteDialog({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="budget">Budget Max (€)</Label>
                   <Input
@@ -267,8 +267,8 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 3: Location Preferences */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Preferenze Località
               </h3>
 
@@ -314,8 +314,8 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 4: Property Preferences */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Preferenze Immobile
               </h3>
 
@@ -333,7 +333,7 @@ export function AddClienteDialog({
                 onChange={v => updateField('stile', v)}
               />
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="dimensioni">Dimensioni (mq)</Label>
                   <Input
@@ -356,12 +356,12 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 5: Outdoor Features */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Caratteristiche Esterne
               </h3>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Terreno?</Label>
                   <Select
@@ -402,12 +402,12 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 6: Usage */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Utilizzo
               </h3>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label>Uso previsto</Label>
                   <Select
@@ -448,8 +448,8 @@ export function AddClienteDialog({
             </div>
 
             {/* Section 7: Assignment & Notes */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+            <div className="space-y-3 sm:space-y-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Assegnazione & Note
               </h3>
 
@@ -490,14 +490,15 @@ export function AddClienteDialog({
           </form>
         </div>
 
-        <DialogFooter className="border-t pt-4">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+        <DialogFooter className="flex-shrink-0 border-t pt-4 gap-2 sm:gap-0">
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none">
             Annulla
           </Button>
           <Button 
             type="submit" 
             form="add-cliente-form"
             disabled={!formData.nome || isLoading}
+            className="flex-1 sm:flex-none"
           >
             {isLoading ? 'Salvataggio...' : 'Aggiungi'}
           </Button>
