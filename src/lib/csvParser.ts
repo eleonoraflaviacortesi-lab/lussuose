@@ -313,9 +313,18 @@ export const parseBoolean = (value: string): boolean => {
   return lower === 'yes' || lower === 'true' || lower === 'sì' || lower === 'si' || lower === '1';
 };
 
-// Parse number value
+// Parse number value - extracts first number from text like "At least 500sqm" or "120 / 150 mq"
 export const parseNumber = (value: string): number | null => {
   if (!value) return null;
+  
+  // Handle range patterns like "120 / 150", "300-500", take the first number
+  const rangeMatch = value.match(/(\d+)\s*[\/\-]\s*\d+/);
+  if (rangeMatch) {
+    const num = parseInt(rangeMatch[1]);
+    return isNaN(num) ? null : num;
+  }
+  
+  // Extract first number from string
   const match = value.match(/\d+/);
   if (!match) return null;
   const num = parseInt(match[0]);
