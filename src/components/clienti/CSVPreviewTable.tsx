@@ -39,8 +39,8 @@ export function CSVPreviewTable({
     return columnInfos.find(c => c.index === index);
   };
 
-  // Count mapped vs unmapped columns
-  const mappedCount = columnInfos.filter(c => c.field).length;
+  // Count mapped vs unmapped columns (exclude '_none' as unmapped)
+  const mappedCount = columnInfos.filter(c => c.field && c.field !== '_none').length;
   const unmappedCount = headers.length - mappedCount;
 
   return (
@@ -67,8 +67,8 @@ export function CSVPreviewTable({
             <TableRow>
               {headers.map((header, index) => {
                 const mapping = getMapping(index);
-                const isMapped = mapping?.field;
-                
+                const isMapped = mapping?.field && mapping.field !== '_none';
+                const selectValue = mapping?.field || '_none';
                 return (
                   <TableHead key={index} className="min-w-[180px] p-2">
                     <div className="space-y-2">
@@ -79,8 +79,8 @@ export function CSVPreviewTable({
                       
                       {/* Field mapping selector */}
                       <Select
-                        value={mapping?.field || ''}
-                        onValueChange={(value) => onColumnMappingChange(index, value)}
+                        value={selectValue}
+                        onValueChange={(value) => onColumnMappingChange(index, value === '_none' ? '' : value)}
                       >
                         <SelectTrigger className={`h-8 text-xs ${isMapped ? 'border-green-500/50' : 'border-dashed'}`}>
                           <SelectValue placeholder="Seleziona campo..." />
@@ -112,13 +112,14 @@ export function CSVPreviewTable({
                 {headers.map((_, colIndex) => {
                   const value = row[colIndex] || '';
                   const mapping = getMapping(colIndex);
+                  const isMapped = mapping?.field && mapping.field !== '_none';
                   const isBooleanLike = value.toLowerCase() === 'true' || value.toLowerCase() === 'false';
                   
                   return (
                     <TableCell 
                       key={colIndex} 
                       className={`text-xs p-2 max-w-[200px] truncate ${
-                        !mapping?.field ? 'text-muted-foreground/50' : ''
+                        !isMapped ? 'text-muted-foreground/50' : ''
                       }`}
                       title={value}
                     >
