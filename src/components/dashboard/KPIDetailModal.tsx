@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, forwardRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import { useDailyData } from '@/hooks/useDailyData';
@@ -20,7 +20,7 @@ const dataKeyMap: Record<string, string> = {
   conversioni: 'vendite_numero', // We'll compute conversion rate
 };
 
-const KPIDetailModal = memo(({ open, onOpenChange, kpiKey, title, value, icon: Icon }: KPIDetailModalProps) => {
+const KPIDetailModal = memo(forwardRef<HTMLDivElement, KPIDetailModalProps>(({ open, onOpenChange, kpiKey, title, value, icon: Icon }, ref) => {
   const { myData } = useDailyData();
 
   const chartData = useMemo(() => {
@@ -138,7 +138,7 @@ const KPIDetailModal = memo(({ open, onOpenChange, kpiKey, title, value, icon: I
       </DialogContent>
     </Dialog>
   );
-});
+}));
 
 KPIDetailModal.displayName = 'KPIDetailModal';
 
