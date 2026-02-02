@@ -8,7 +8,7 @@ import { MessageCircle, X, Plus, GripVertical, Trash2 } from 'lucide-react';
 import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
 
 // Common emojis for quick selection
-const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
+const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
 
 // Preset colors for columns
 const COLUMN_COLORS = [
