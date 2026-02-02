@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import logoLarge from '@/assets/keipiai_logo.svg';
+import logoLarge from '@/assets/app_logo.svg';
 import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
 
