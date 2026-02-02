@@ -208,22 +208,26 @@ const ColumnHeader = memo(({
 });
 ColumnHeader.displayName = 'ColumnHeader';
 
-// Color and Status picker pill component - uses dynamic columns
+// Color, Status, and Emoji picker pill component - uses dynamic columns
 const ColorStatusPickerPill = memo(({ 
   position, 
   currentColor,
   currentStatus,
+  currentEmoji,
   columns,
   onColorSelect, 
   onStatusChange,
+  onEmojiSelect,
   onClose 
 }: { 
   position: { x: number; y: number }; 
   currentColor: string | null;
   currentStatus: NotiziaStatus;
+  currentEmoji: string | null;
   columns: KanbanColumn[];
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
+  onEmojiSelect: (emoji: string | null) => void;
   onClose: () => void;
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
@@ -271,6 +275,37 @@ const ColorStatusPickerPill = memo(({
           ))}
         </div>
         
+        {/* Separator */}
+        <div className="h-px bg-muted/50" />
+        
+        {/* Emoji picker */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
+          <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+            {currentEmoji && (
+              <button
+                onClick={() => { onEmojiSelect(null); onClose(); }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                title="Rimuovi emoji"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {QUICK_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => { onEmojiSelect(emoji); onClose(); }}
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+                  currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
+                )}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Separator */}
         <div className="h-px bg-muted/50" />
         
@@ -506,9 +541,11 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           position={pickerPos}
           currentColor={notizia.card_color}
           currentStatus={notizia.status as NotiziaStatus}
+          currentEmoji={notizia.emoji}
           columns={columns}
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
+          onEmojiSelect={onEmojiChange}
           onClose={() => setPickerOpen(false)}
         />
       )}
