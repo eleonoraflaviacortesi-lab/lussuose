@@ -1,12 +1,13 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, StickyNote } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
+import { useCalendarNotes } from '@/hooks/useCalendarNotes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { triggerHaptic } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,7 @@ export type CalendarEvent = {
   statusColor?: string; // Color based on status
   urgent?: boolean;
   displayOrder?: number; // For ordering within a day
+  calendarNote?: string; // Note visible only in calendar
 };
 
 // Quick emojis
@@ -53,29 +55,43 @@ const EventContextMenu = memo(({
   event,
   columns,
   notizia,
+  calendarNote,
   onStatusChange,
   onEmojiChange,
   onUrgentToggle,
   onRemoveReminder,
+  onNoteChange,
+  onNoteDelete,
   onClose 
 }: { 
   position: { x: number; y: number }; 
   event: CalendarEvent;
   columns: KanbanColumn[];
   notizia?: Notizia | null;
+  calendarNote?: string;
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
   onUrgentToggle: () => void;
   onRemoveReminder: () => void;
+  onNoteChange: (note: string) => void;
+  onNoteDelete: () => void;
   onClose: () => void;
 }) => {
-  // Only show for notizia reminders
-  if (event.type !== 'notizia_reminder') {
-    return null;
-  }
+  const [noteText, setNoteText] = useState(calendarNote || '');
+  const [isEditingNote, setIsEditingNote] = useState(false);
   
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
+  const isNotiziaReminder = event.type === 'notizia_reminder';
+  
+  const handleSaveNote = () => {
+    if (noteText.trim()) {
+      onNoteChange(noteText.trim());
+    } else {
+      onNoteDelete();
+    }
+    setIsEditingNote(false);
+  };
   
   return (
     <>
@@ -85,100 +101,160 @@ const EventContextMenu = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[280px]"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
-          top: Math.min(position.y, window.innerHeight - 280),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 290),
+          top: Math.min(position.y, window.innerHeight - 400),
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
       >
-        {/* Urgent toggle */}
+        {/* Note section - available for all event types */}
         <div>
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
-          <button
-            onClick={() => { onUrgentToggle(); onClose(); }}
-            className={cn(
-              "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
-              event.urgent 
-                ? "bg-red-500 text-white" 
-                : "bg-muted hover:bg-red-100 text-foreground"
-            )}
-          >
-            <AlertTriangle className="w-4 h-4" />
-            <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
-          </button>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Nota calendario</span>
+          {isEditingNote || !calendarNote ? (
+            <div className="flex flex-col gap-2">
+              <textarea
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Aggiungi una nota..."
+                className="w-full bg-white rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none min-h-[60px]"
+                autoFocus={isEditingNote}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleSaveNote}
+                  className="flex-1 px-3 py-1.5 rounded-lg bg-foreground text-background text-xs font-medium hover:opacity-90 transition-opacity"
+                >
+                  Salva
+                </button>
+                {calendarNote && (
+                  <button
+                    onClick={() => { setNoteText(calendarNote); setIsEditingNote(false); }}
+                    className="px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
+                  >
+                    Annulla
+                  </button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="bg-amber-50 rounded-xl px-3 py-2 text-sm text-foreground">
+                {calendarNote}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setIsEditingNote(true)}
+                  className="flex-1 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
+                >
+                  Modifica
+                </button>
+                <button
+                  onClick={() => { onNoteDelete(); onClose(); }}
+                  className="px-3 py-1.5 rounded-lg bg-muted hover:bg-destructive hover:text-white text-foreground text-xs font-medium transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Separator */}
-        <div className="h-px bg-muted/50" />
+        {/* Only show notizia-specific options for notizia reminders */}
+        {isNotiziaReminder && (
+          <>
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
 
-        {/* Emoji picker */}
-        <div>
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
-          <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-            {event.emoji && (
+            {/* Urgent toggle */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
               <button
-                onClick={() => { onEmojiChange(null); onClose(); }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-                title="Rimuovi emoji"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {QUICK_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => { onEmojiChange(emoji); onClose(); }}
+                onClick={() => { onUrgentToggle(); onClose(); }}
                 className={cn(
-                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-                  event.emoji === emoji && "bg-muted ring-1 ring-foreground"
+                  "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
+                  event.urgent 
+                    ? "bg-red-500 text-white" 
+                    : "bg-muted hover:bg-red-100 text-foreground"
                 )}
               >
-                {emoji}
+                <AlertTriangle className="w-4 h-4" />
+                <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
               </button>
-            ))}
-          </div>
-        </div>
-        
-        {/* Separator */}
-        <div className="h-px bg-muted/50" />
+            </div>
 
-        {/* Status selector - horizontal colored pills */}
-        <div>
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Status</span>
-          <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-            {columns.map((col) => (
-              <button
-                key={col.key}
-                onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
-                className={cn(
-                  "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
-                  currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
+
+            {/* Emoji picker */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
+              <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+                {event.emoji && (
+                  <button
+                    onClick={() => { onEmojiChange(null); onClose(); }}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                    title="Rimuovi emoji"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 )}
-                style={{ 
-                  backgroundColor: col.color,
-                  color: isDarkColor(col.color) ? 'white' : 'black'
-                }}
-              >
-                {col.label}
-              </button>
-            ))}
-          </div>
-        </div>
+                {QUICK_EMOJIS.map((emoji) => (
+                  <button
+                    key={emoji}
+                    onClick={() => { onEmojiChange(emoji); onClose(); }}
+                    className={cn(
+                      "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+                      event.emoji === emoji && "bg-muted ring-1 ring-foreground"
+                    )}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
 
-        {/* Separator */}
-        <div className="h-px bg-muted/50" />
+            {/* Status selector - horizontal colored pills */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Status</span>
+              <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+                {columns.map((col) => (
+                  <button
+                    key={col.key}
+                    onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
+                    className={cn(
+                      "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                      currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
+                    )}
+                    style={{ 
+                      backgroundColor: col.color,
+                      color: isDarkColor(col.color) ? 'white' : 'black'
+                    }}
+                  >
+                    {col.label}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        {/* Remove reminder */}
-        <button
-          onClick={() => { onRemoveReminder(); onClose(); }}
-          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
-        >
-          <Trash2 className="w-4 h-4" />
-          <span>Rimuovi promemoria</span>
-        </button>
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
+
+            {/* Remove reminder */}
+            <button
+              onClick={() => { onRemoveReminder(); onClose(); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Rimuovi promemoria</span>
+            </button>
+          </>
+        )}
       </div>
     </>
   );
@@ -209,6 +285,7 @@ const CalendarPage = () => {
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
+  const { getNote, setNote, deleteNote } = useCalendarNotes();
 
   // Helper to get status color from columns
   const getStatusColor = (status: string): string => {
@@ -347,14 +424,12 @@ const CalendarPage = () => {
   const handleContextMenu = (event: CalendarEvent, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (event.type === 'notizia_reminder') {
-      setContextMenu({ event, position: { x: e.clientX - 100, y: e.clientY - 50 } });
-    }
+    // Allow context menu for all event types now (for notes)
+    setContextMenu({ event, position: { x: e.clientX - 100, y: e.clientY - 50 } });
   };
 
   const handleTouchStart = (event: CalendarEvent, e: React.TouchEvent) => {
-    if (event.type !== 'notizia_reminder') return;
-    
+    // Allow long press for all event types now (for notes)
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
@@ -660,6 +735,7 @@ const CalendarPage = () => {
                         onTouchStart={(e) => handleTouchStart(event, e)}
                         onTouchEnd={handleTouchEnd}
                         onToggle={handleToggleCompleted}
+                        hasNote={!!getNote(event.id)}
                         compact
                       />
                     ))
@@ -752,6 +828,7 @@ const CalendarPage = () => {
                               onTouchStart={(e) => handleTouchStart(event, e)}
                               onTouchEnd={handleTouchEnd}
                               onToggle={handleToggleCompleted}
+                              hasNote={!!getNote(event.id)}
                             />
                           ))}
                           
@@ -773,6 +850,7 @@ const CalendarPage = () => {
                                     onTouchEnd={handleTouchEnd}
                                     onToggle={handleToggleCompleted}
                                     isDragging={snapshot.isDragging}
+                                    hasNote={!!getNote(event.id)}
                                   />
                                 </div>
                               )}
@@ -869,6 +947,7 @@ const CalendarPage = () => {
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        getNote={getNote}
       />
 
       {/* Notizia Detail Modal */}
@@ -914,6 +993,7 @@ const CalendarPage = () => {
           event={contextMenu.event}
           columns={columns}
           notizia={contextMenuNotizia}
+          calendarNote={getNote(contextMenu.event.id)}
           onStatusChange={(status) => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleNotiziaStatusChange(notiziaId, status);
@@ -932,6 +1012,15 @@ const CalendarPage = () => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleRemoveReminder(notiziaId);
           }}
+          onNoteChange={(note) => {
+            setNote(contextMenu.event.id, note);
+            triggerHaptic('light');
+            toast.success('Nota salvata');
+          }}
+          onNoteDelete={() => {
+            deleteNote(contextMenu.event.id);
+            triggerHaptic('light');
+          }}
           onClose={() => setContextMenu(null)}
         />
       )}
@@ -947,6 +1036,7 @@ const EventCard = memo(({
   onTouchStart,
   onTouchEnd,
   onToggle,
+  hasNote,
   compact 
 }: {
   event: CalendarEvent;
@@ -955,6 +1045,7 @@ const EventCard = memo(({
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onToggle: (id: string, completed: boolean) => void;
+  hasNote?: boolean;
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
@@ -1024,6 +1115,11 @@ const EventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
+      {hasNote && !event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
+          <StickyNote className="w-2.5 h-2.5 text-amber-900" />
+        </div>
+      )}
       <div className="flex items-start gap-2">
         {canToggle ? (
           <button
@@ -1066,6 +1162,7 @@ const DraggableEventCard = memo(({
   onTouchEnd,
   onToggle,
   isDragging,
+  hasNote,
 }: {
   event: CalendarEvent;
   onClick: () => void;
@@ -1074,6 +1171,7 @@ const DraggableEventCard = memo(({
   onTouchEnd: () => void;
   onToggle: (id: string, completed: boolean) => void;
   isDragging: boolean;
+  hasNote?: boolean;
 }) => {
   const getEventStyles = () => {
     if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
@@ -1116,6 +1214,11 @@ const DraggableEventCard = memo(({
       {event.urgent && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
+        </div>
+      )}
+      {hasNote && !event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
+          <StickyNote className="w-2.5 h-2.5 text-amber-900" />
         </div>
       )}
       <div className="flex items-center justify-center gap-2">
