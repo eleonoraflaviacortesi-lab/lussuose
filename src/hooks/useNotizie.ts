@@ -29,6 +29,7 @@ export interface Notizia {
   comments: NotiziaComment[];
   card_color: string | null;
   display_order: number;
+  is_online: boolean;
 }
 
 export interface NotiziaInput {
@@ -44,6 +45,7 @@ export interface NotiziaInput {
   comments?: NotiziaComment[];
   card_color?: string | null;
   display_order?: number;
+  is_online?: boolean;
 }
 
 // Helper to parse comments from JSON
@@ -66,7 +68,7 @@ export const useNotizie = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
-        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online')
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
       
@@ -77,6 +79,7 @@ export const useNotizie = () => {
         ...item,
         status: item.status as NotiziaStatus,
         comments: parseComments(item.comments),
+        is_online: item.is_online ?? false,
       })) as Notizia[];
     },
     enabled: !!user,

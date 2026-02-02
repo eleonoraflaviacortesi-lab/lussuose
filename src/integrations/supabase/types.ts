@@ -494,6 +494,7 @@ export type Database = {
           display_order: number
           emoji: string | null
           id: string
+          is_online: boolean | null
           name: string
           notes: string | null
           phone: string | null
@@ -511,6 +512,7 @@ export type Database = {
           display_order?: number
           emoji?: string | null
           id?: string
+          is_online?: boolean | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -528,6 +530,7 @@ export type Database = {
           display_order?: number
           emoji?: string | null
           id?: string
+          is_online?: boolean | null
           name?: string
           notes?: string | null
           phone?: string | null

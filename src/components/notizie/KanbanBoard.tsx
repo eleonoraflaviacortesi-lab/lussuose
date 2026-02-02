@@ -4,7 +4,7 @@ import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { MessageCircle, X, Plus, GripVertical, Trash2 } from 'lucide-react';
+import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
 
 // Common emojis for quick selection
@@ -375,13 +375,14 @@ const EmojiPickerPill = memo(({
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card component
-const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange }: { 
+const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange, onOnlineToggle }: { 
   notizia: Notizia; 
   columns: KanbanColumn[];
   onClick: () => void;
   onColorChange: (color: string | null) => void;
   onEmojiChange: (emoji: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
+  onOnlineToggle: (isOnline: boolean) => void;
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -468,6 +469,29 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
               <span className={cn("text-[10px]", isDark ? "text-white/70" : "text-muted-foreground")}>{notizia.zona}</span>
             )}
           </div>
+          
+          {/* Online/Offline toggle for "taken" status */}
+          {notizia.status === 'taken' && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerHaptic('light');
+                onOnlineToggle(!notizia.is_online);
+              }}
+              className={cn(
+                "shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90",
+                notizia.is_online 
+                  ? "bg-green-500 text-white shadow-sm" 
+                  : isDark 
+                    ? "bg-white/20 text-white/60" 
+                    : "bg-muted text-muted-foreground"
+              )}
+              title={notizia.is_online ? "Online - Pubblicato" : "Offline - Non pubblicato"}
+            >
+              {notizia.is_online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+            </button>
+          )}
+          
           {commentsCount > 0 && (
             <div className={cn("flex items-center gap-0.5", isDark ? "text-white/70" : "text-muted-foreground")}>
               <MessageCircle className="w-3 h-3" />
@@ -591,6 +615,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     updateNotizia.mutate({ id, emoji: emoji, silent: true });
   }, [updateNotizia]);
 
+  const handleOnlineToggle = useCallback((id: string, isOnline: boolean) => {
+    updateNotizia.mutate({ id, is_online: isOnline, silent: true });
+  }, [updateNotizia]);
+
   const handleAddColumn = useCallback(() => {
     addColumn({ label: 'Nuova', color: '#6b7280' });
   }, [addColumn]);
@@ -693,6 +721,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                       onColorChange={(color) => handleColorChange(notizia.id, color)}
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
                                       onStatusChange={(status) => onStatusChange(notizia.id, status)}
+                                      onOnlineToggle={(isOnline) => handleOnlineToggle(notizia.id, isOnline)}
                                     />
                                   </div>
                                 )}
