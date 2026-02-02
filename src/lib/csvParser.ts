@@ -85,14 +85,14 @@ export const HEADER_MAPPINGS: HeaderMapping[] = [
   { pattern: /^contesto\s+desiderato/i, field: 'contesto', type: 'array' },
   { pattern: /^contesto$/i, field: 'contesto', type: 'array' },
   
-  // Size
-  { pattern: /size.*property|property\s+size|dimensioni/i, field: 'dimensioni_min', type: 'number' },
+  // Size - now stored as text to preserve original values like "At least 500sqm"
+  { pattern: /size.*property|property\s+size|dimensioni/i, field: 'dimensioni_min', type: 'string' },
   
-  // Bedrooms
+  // Bedrooms - now stored as text to preserve values like "At least 3"
   { pattern: /bedroom|camere/i, field: 'camere', type: 'string' },
   
-  // Bathrooms
-  { pattern: /bathroom|bagni/i, field: 'bagni', type: 'number' },
+  // Bathrooms - now stored as text to preserve values like "At least 2, preferably 3"
+  { pattern: /bathroom|bagni/i, field: 'bagni', type: 'string' },
   
   // Layout
   { pattern: /layout/i, field: 'layout', type: 'string' },

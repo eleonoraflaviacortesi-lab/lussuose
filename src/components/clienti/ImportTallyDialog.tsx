@@ -62,9 +62,6 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
 
   // Field type mapping for proper parsing
   const FIELD_TYPES: Record<string, 'string' | 'number' | 'boolean' | 'array' | 'date' | 'budget'> = {
-    dimensioni_min: 'number',
-    dimensioni_max: 'number',
-    bagni: 'number',
     budget_max: 'budget',
     ha_visitato: 'boolean',
     vicinanza_citta: 'boolean',
@@ -73,6 +70,7 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     contesto: 'array',
     motivo_zona: 'array',
     data_submission: 'date',
+    // dimensioni_min, dimensioni_max, bagni are now text fields - no special parsing
   };
 
   // Handle column mapping change
