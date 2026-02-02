@@ -50,6 +50,9 @@ const HEADER_MAPPINGS: HeaderMapping[] = [
   { pattern: /(estimated\s+)?budget|max\s+budget/i, field: 'budget_max', type: 'budget' },
   
   // Mortgage
+  // Tally exports both a main column and Yes/No/Not sure sub-columns
+  { pattern: /^will\s+you\s+require\s+a\s+mortgage.*\((yes|no|not\s+sure\s+yet)\)$/i, field: 'mutuo', type: 'string', extractOption: true },
+  { pattern: /^will\s+you\s+require\s+a\s+mortgage/i, field: 'mutuo', type: 'string' },
   { pattern: /mortgage|mutuo/i, field: 'mutuo', type: 'string' },
   
   // Search time
@@ -99,6 +102,8 @@ const HEADER_MAPPINGS: HeaderMapping[] = [
   { pattern: /guesthouse|annex|dependance/i, field: 'dependance', type: 'string' },
   
   // Land
+  { pattern: /^do\s+you\s+require\s+land\??$/i, field: 'terreno', type: 'string' },
+  { pattern: /^if\s+yes,\s+how\s+much\s+land/i, field: 'terreno', type: 'string' },
   { pattern: /^how\s+much\s+land|land\s+size|terreno/i, field: 'terreno', type: 'string' },
   
   // Pool
@@ -186,12 +191,17 @@ const parseCSV = (csvText: string): { headers: string[]; rows: string[][] } => {
 
 const parseBudget = (value: string): number | null => {
   if (!value) return null;
-  // Extract numbers from strings like "€600,000" or "600000" or "600.000"
-  const cleaned = value.replace(/[€$,.\s]/g, '');
-  // Handle European format where . is thousands separator
+
+  // Handles: "€600,000" | "600000" | "600.000" | "€ 1.5 M" | "700k"
+  const lower = value.toLowerCase();
+  const multiplier =
+    lower.includes('million') || /\b\d+(?:[\.,]\d+)?\s*m\b/.test(lower) ? 1_000_000 :
+    /\b\d+(?:[\.,]\d+)?\s*k\b/.test(lower) ? 1_000 :
+    1;
+
   const match = value.match(/[\d.,]+/);
   if (!match) return null;
-  
+
   let numStr = match[0];
   // If contains both . and ,, determine format
   if (numStr.includes('.') && numStr.includes(',')) {
@@ -224,9 +234,10 @@ const parseBudget = (value: string): number | null => {
     }
     // Otherwise keep as is (decimal)
   }
-  
+
   const num = parseFloat(numStr);
-  return isNaN(num) ? null : num;
+  if (isNaN(num)) return null;
+  return num * multiplier;
 };
 
 const parseBoolean = (value: string): boolean => {
@@ -326,8 +337,17 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
             switch (colInfo.type) {
               case 'string':
                 // For string fields, only set if not already set (first match wins)
-                if (!row[colInfo.field]) {
-                  row[colInfo.field] = value;
+                // If this is a checkbox sub-column (optionValue), only set when checked.
+                if (colInfo.optionValue) {
+                  if (parseBoolean(value) && !row[colInfo.field]) {
+                    row[colInfo.field] = colInfo.optionValue;
+                  }
+                } else if (!row[colInfo.field]) {
+                  // Avoid storing "true/false" into string fields (common in Tally sub-columns)
+                  const v = value.toLowerCase().trim();
+                  if (v !== 'true' && v !== 'false') {
+                    row[colInfo.field] = value;
+                  }
                 }
                 break;
                 
@@ -363,15 +383,14 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
                 // Handle array fields
                 if (colInfo.optionValue) {
                   // This is a sub-column for a multi-select
-                  // If value is non-empty (checked), add the option
-                  if (value && parseBoolean(value)) {
+                  // If checked, add the option
+                  if (parseBoolean(value)) {
                     arrayFields[colInfo.field]?.push(colInfo.optionValue);
-                  } else if (value && value.toLowerCase() !== 'no' && value.toLowerCase() !== 'false') {
-                    // Sometimes the value IS the option name
-                    arrayFields[colInfo.field]?.push(value);
                   }
                 } else {
                   // Main column with comma-separated values
+                  const v = value.toLowerCase().trim();
+                  if (v === 'true' || v === 'false') return;
                   const items = value.split(',').map(v => v.trim()).filter(Boolean);
                   if (items.length > 0) {
                     arrayFields[colInfo.field] = [...(arrayFields[colInfo.field] || []), ...items];
