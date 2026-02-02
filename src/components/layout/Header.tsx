@@ -66,7 +66,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           </button>
 
           {/* Brand Logo */}
-          <img src={logo} alt="Keipiai" className="h-12" />
+          <img src={logo} alt="Logo" className="h-14" />
 
           {/* Logout */}
           <button 
