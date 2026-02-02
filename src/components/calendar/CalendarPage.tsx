@@ -432,52 +432,98 @@ const CalendarPage = () => {
 
   // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    try {
+      const { destination, source, draggableId } = result;
 
-    // Dropped outside or same position
-    if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
-      return;
-    }
+      // Dropped outside or same position
+      if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+        return;
+      }
 
-    // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
-    const targetDayKey = destination.droppableId.replace('day-', '');
-    const targetDate = parseISO(targetDayKey);
-    
-    // Parse draggableId to get event type and id
-    // Format: 'notizia-{id}' or 'cliente-{id}'
-    if (draggableId.startsWith('notizia-')) {
-      const notiziaId = draggableId.replace('notizia-', '');
-      const notizia = notizie?.find(n => n.id === notiziaId);
+      // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
+      const targetDayKey = destination.droppableId.replace('day-', '');
       
-      if (notizia && notizia.reminder_date) {
-        // Keep the same time, just change the date
-        const oldDate = parseISO(notizia.reminder_date);
-        const newDate = setMinutes(setHours(targetDate, oldDate.getHours()), oldDate.getMinutes());
-        
-        triggerHaptic('light');
-        updateNotizia.mutate({ 
-          id: notiziaId, 
-          reminder_date: newDate.toISOString(), 
-          silent: true 
-        });
-        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      // Validate the date string before parsing
+      if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
+        console.error('Invalid target date key:', targetDayKey);
+        return;
       }
-    } else if (draggableId.startsWith('cliente-')) {
-      const clienteId = draggableId.replace('cliente-', '');
-      const cliente = clienti?.find(c => c.id === clienteId);
       
-      if (cliente && cliente.reminder_date) {
-        // Keep the same time, just change the date
-        const oldDate = parseISO(cliente.reminder_date);
-        const newDate = setMinutes(setHours(targetDate, oldDate.getHours()), oldDate.getMinutes());
-        
-        triggerHaptic('light');
-        updateCliente({ 
-          id: clienteId, 
-          reminder_date: newDate.toISOString() 
-        });
-        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      const targetDate = parseISO(targetDayKey);
+      
+      // Check if targetDate is valid
+      if (isNaN(targetDate.getTime())) {
+        console.error('Invalid target date:', targetDayKey);
+        return;
       }
+      
+      // Parse draggableId to get event type and id
+      // Format: 'notizia-{id}' or 'cliente-{id}'
+      if (draggableId.startsWith('notizia-')) {
+        const notiziaId = draggableId.replace('notizia-', '');
+        const notizia = notizie?.find(n => n.id === notiziaId);
+        
+        if (notizia) {
+          // Use default time of 09:00 if no reminder_date exists
+          let hours = 9;
+          let minutes = 0;
+          
+          if (notizia.reminder_date) {
+            try {
+              const oldDate = parseISO(notizia.reminder_date);
+              if (!isNaN(oldDate.getTime())) {
+                hours = oldDate.getHours();
+                minutes = oldDate.getMinutes();
+              }
+            } catch {
+              // Use default values
+            }
+          }
+          
+          const newDate = setMinutes(setHours(targetDate, hours), minutes);
+          
+          triggerHaptic('light');
+          updateNotizia.mutate({ 
+            id: notiziaId, 
+            reminder_date: newDate.toISOString(), 
+            silent: true 
+          });
+          toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+        }
+      } else if (draggableId.startsWith('cliente-')) {
+        const clienteId = draggableId.replace('cliente-', '');
+        const cliente = clienti?.find(c => c.id === clienteId);
+        
+        if (cliente) {
+          // Use default time of 09:00 if no reminder_date exists
+          let hours = 9;
+          let minutes = 0;
+          
+          if (cliente.reminder_date) {
+            try {
+              const oldDate = parseISO(cliente.reminder_date);
+              if (!isNaN(oldDate.getTime())) {
+                hours = oldDate.getHours();
+                minutes = oldDate.getMinutes();
+              }
+            } catch {
+              // Use default values
+            }
+          }
+          
+          const newDate = setMinutes(setHours(targetDate, hours), minutes);
+          
+          triggerHaptic('light');
+          updateCliente({ 
+            id: clienteId, 
+            reminder_date: newDate.toISOString() 
+          });
+          toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+        }
+      }
+    } catch (error) {
+      console.error('Error during drag and drop:', error);
+      toast.error('Errore durante lo spostamento. Riprova.');
     }
   }, [notizie, clienti, updateNotizia, updateCliente]);
 
