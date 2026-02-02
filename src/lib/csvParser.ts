@@ -129,7 +129,7 @@ export const HEADER_MAPPINGS: HeaderMapping[] = [
 
 // All available database fields for manual mapping
 export const AVAILABLE_FIELDS = [
-  { value: '', label: '-- Non mappare --' },
+  { value: '_none', label: '-- Non mappare --' },
   { value: 'nome', label: 'Nome' },
   { value: 'telefono', label: 'Telefono' },
   { value: 'email', label: 'Email' },
