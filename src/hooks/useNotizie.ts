@@ -157,8 +157,8 @@ export const useNotizie = () => {
       return { previousNotizie, silent };
     },
     onSuccess: (data, variables, context) => {
-      // Refetch to sync with server
-      queryClient.invalidateQueries({ queryKey: ['notizie'] });
+      // Don't invalidate - optimistic update is already applied
+      // This prevents the slow re-fetch that causes UI delay
       // Only show toast if not silent
       if (!context?.silent) {
         toast({ title: 'Notizia aggiornata!' });
