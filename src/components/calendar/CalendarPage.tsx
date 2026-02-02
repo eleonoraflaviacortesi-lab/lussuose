@@ -157,29 +157,9 @@ const EventContextMenu = memo(({
           </div>
         )}
 
-        {/* Only show notizia-specific options for notizia reminders */}
-        {isNotiziaReminder && (
+        {/* Emoji picker - for both notizie and clienti */}
+        {(isNotiziaReminder || isClienteReminder) && (
           <>
-            {/* Separator */}
-            <div className="h-px bg-muted/50" />
-
-            {/* Urgent toggle */}
-            <div>
-              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
-              <button
-                onClick={() => { onUrgentToggle(); onClose(); }}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
-                  event.urgent 
-                    ? "bg-red-500 text-white" 
-                    : "bg-muted hover:bg-red-100 text-foreground"
-                )}
-              >
-                <AlertTriangle className="w-4 h-4" />
-                <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
-              </button>
-            </div>
-
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
@@ -210,7 +190,32 @@ const EventContextMenu = memo(({
                 ))}
               </div>
             </div>
-            
+          </>
+        )}
+
+        {/* Notizia-specific options */}
+        {isNotiziaReminder && (
+          <>
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
+
+            {/* Urgent toggle */}
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
+              <button
+                onClick={() => { onUrgentToggle(); onClose(); }}
+                className={cn(
+                  "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
+                  event.urgent 
+                    ? "bg-red-500 text-white" 
+                    : "bg-muted hover:bg-red-100 text-foreground"
+                )}
+              >
+                <AlertTriangle className="w-4 h-4" />
+                <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
+              </button>
+            </div>
+
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
@@ -237,6 +242,23 @@ const EventContextMenu = memo(({
               </div>
             </div>
 
+            {/* Separator */}
+            <div className="h-px bg-muted/50" />
+
+            {/* Remove reminder */}
+            <button
+              onClick={() => { onRemoveReminder(); onClose(); }}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Rimuovi promemoria</span>
+            </button>
+          </>
+        )}
+
+        {/* Cliente-specific options */}
+        {isClienteReminder && (
+          <>
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
@@ -1053,7 +1075,12 @@ const CalendarPage = () => {
           }}
           onEmojiChange={(emoji) => {
             const notiziaId = contextMenu.event.notiziaId;
-            if (notiziaId) handleNotiziaEmojiChange(notiziaId, emoji);
+            const clienteId = contextMenu.event.clienteId;
+            if (notiziaId) {
+              handleNotiziaEmojiChange(notiziaId, emoji);
+            } else if (clienteId) {
+              updateCliente({ id: clienteId, emoji: emoji || undefined });
+            }
           }}
           onUrgentToggle={() => {
             const notiziaId = contextMenu.event.notiziaId;
@@ -1063,7 +1090,12 @@ const CalendarPage = () => {
           }}
           onRemoveReminder={() => {
             const notiziaId = contextMenu.event.notiziaId;
-            if (notiziaId) handleRemoveReminder(notiziaId);
+            const clienteId = contextMenu.event.clienteId;
+            if (notiziaId) {
+              handleRemoveReminder(notiziaId);
+            } else if (clienteId) {
+              updateCliente({ id: clienteId, reminder_date: undefined });
+            }
           }}
           onAddComment={(text) => {
             if (contextMenu.event.notiziaId) {
