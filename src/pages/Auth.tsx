@@ -179,7 +179,7 @@ const Auth = () => {
         <img 
           src={logoLarge} 
           alt="Logo" 
-          className="h-14" 
+          className="h-16" 
         />
       </div>
 
