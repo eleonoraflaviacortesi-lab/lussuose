@@ -3,27 +3,28 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { Cliente, ClienteStatus, ClienteGroupBy } from '@/types';
 import { ClienteCard } from './ClienteCard';
 import { cn } from '@/lib/utils';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface ClientiKanbanProps {
   clientiGrouped: Map<string, Cliente[]>;
   groupBy: ClienteGroupBy;
-  agents: Array<{ user_id: string; full_name: string; avatar_emoji: string }>;
+  agents: Array<{ user_id: string; full_name: string; avatar_emoji: string | null }>;
   onCardClick: (cliente: Cliente) => void;
   onStatusChange: (clienteId: string, newStatus: ClienteStatus) => void;
   onOrderChange: (items: { id: string; display_order: number; status?: ClienteStatus }[]) => void;
   onColorChange: (clienteId: string, color: string | null) => void;
-  onEmojiChange: (clienteId: string, emoji: string) => void;
+  onEmojiChange: (clienteId: string, emoji: string | null) => void;
 }
 
-// Column definitions for status grouping
-const statusColumns: { id: ClienteStatus; label: string; color: string }[] = [
-  { id: 'new', label: 'Nuovi', color: 'bg-yellow-500' },
-  { id: 'contacted', label: 'Contattati', color: 'bg-blue-400' },
-  { id: 'qualified', label: 'Qualificati', color: 'bg-blue-600' },
-  { id: 'proposal', label: 'Proposta', color: 'bg-orange-500' },
-  { id: 'negotiation', label: 'Trattativa', color: 'bg-red-500' },
-  { id: 'closed_won', label: 'Chiusi ✓', color: 'bg-green-500' },
-  { id: 'closed_lost', label: 'Persi', color: 'bg-gray-500' },
+// Column definitions for status grouping with hex colors for context menu
+const statusColumns: { id: ClienteStatus; label: string; color: string; bgClass: string }[] = [
+  { id: 'new', label: 'Nuovi', color: '#f59e0b', bgClass: 'bg-yellow-500' },
+  { id: 'contacted', label: 'Contattati', color: '#60a5fa', bgClass: 'bg-blue-400' },
+  { id: 'qualified', label: 'Qualificati', color: '#2563eb', bgClass: 'bg-blue-600' },
+  { id: 'proposal', label: 'Proposta', color: '#f97316', bgClass: 'bg-orange-500' },
+  { id: 'negotiation', label: 'Trattativa', color: '#ef4444', bgClass: 'bg-red-500' },
+  { id: 'closed_won', label: 'Chiusi ✓', color: '#22c55e', bgClass: 'bg-green-500' },
+  { id: 'closed_lost', label: 'Persi', color: '#6b7280', bgClass: 'bg-gray-500' },
 ];
 
 // Budget ranges for grouping
@@ -66,7 +67,7 @@ export function ClientiKanban({
       return statusColumns.map(c => ({
         id: c.id,
         label: c.label,
-        color: c.color,
+        color: c.bgClass,
         items: clientiGrouped.get(c.id) || [],
       }));
     }
@@ -120,13 +121,17 @@ export function ClientiKanban({
     }));
   }, [clientiGrouped, groupBy, agents]);
 
-  // Get agent name for display
-  const getAgentName = useCallback((agentId: string | null) => {
-    if (!agentId) return null;
+  // Get agent info for display
+  const getAgent = useCallback((agentId: string | null) => {
+    if (!agentId) return { name: null, emoji: null };
     const agent = agents.find(a => a.user_id === agentId);
-    return agent ? agent.full_name : null;
+    return agent ? { name: agent.full_name, emoji: agent.avatar_emoji } : { name: null, emoji: null };
   }, [agents]);
 
+  // Status columns for picker
+  const statusColumnsForPicker = useMemo(() => 
+    statusColumns.map(c => ({ id: c.id, label: c.label, color: c.color })),
+  []);
   // Handle drag end
   const handleDragEnd = useCallback((result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -240,9 +245,12 @@ export function ClientiKanban({
                             onClick={() => onCardClick(cliente)}
                             onColorChange={(color) => onColorChange(cliente.id, color)}
                             onEmojiChange={(emoji) => onEmojiChange(cliente.id, emoji)}
+                            onStatusChange={(status) => onStatusChange(cliente.id, status)}
                             isDragging={snapshot.isDragging}
                             showAgent={groupBy !== 'agente'}
-                            agentName={getAgentName(cliente.assigned_to)}
+                            agentName={getAgent(cliente.assigned_to).name}
+                            agentEmoji={getAgent(cliente.assigned_to).emoji}
+                            statusColumns={statusColumnsForPicker}
                           />
                         </div>
                       )}
