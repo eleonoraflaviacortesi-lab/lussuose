@@ -18,35 +18,154 @@ interface ImportTallyDialogProps {
   onSuccess: () => void;
 }
 
-// Mapping from Tally field names to database columns
+// Mapping from Tally field names to database columns (supports multiple variations)
 const FIELD_MAPPING: Record<string, string> = {
+  // Name variations
   'name': 'nome',
+  'your name and surname': 'nome',
+  'your name': 'nome',
+  'full name': 'nome',
+  
+  // Phone variations
   'phone number': 'telefono',
+  'phone number (including country code)': 'telefono',
+  'phone': 'telefono',
+  'telephone': 'telefono',
+  
+  // Country variations
   'country': 'paese',
+  "respondent's country": 'paese',
+  'your country': 'paese',
+  
+  // Budget variations
   'max budget': 'budget_max',
+  'what is your estimated budget for the property purchase?': 'budget_max',
+  'budget': 'budget_max',
+  'estimated budget': 'budget_max',
+  
+  // Mortgage variations
   'mutuo': 'mutuo',
+  'will you require a mortgage to finance the purchase of the property?': 'mutuo',
+  'mortgage': 'mutuo',
+  
+  // Search time variations
   'old': 'tempo_ricerca',
+  'how long have you been looking for a property?': 'tempo_ricerca',
+  'search time': 'tempo_ricerca',
+  
+  // Visited properties variations
   'visited properties?': 'ha_visitato',
+  'have you already viewed properties?': 'ha_visitato',
+  'viewed properties': 'ha_visitato',
+  
+  // Regions variations
   'regions': 'regioni',
+  'which regions of italy are you considering?': 'regioni',
+  'italian regions': 'regioni',
+  
+  // Proximity to cities
   'prox to main cities': 'vicinanza_citta',
+  'proximity to cities': 'vicinanza_citta',
+  'is proximity to a main city important to you?': 'vicinanza_citta',
+  
+  // Reason for area
   'why area': 'motivo_zona',
+  'what draws you to this area?': 'motivo_zona',
+  'reason for area': 'motivo_zona',
+  
+  // Property type variations
   'property type': 'tipologia',
+  'what type of property are you looking for?': 'tipologia',
+  'type of property': 'tipologia',
+  
+  // Style variations
   'kind of style': 'stile',
+  'which kind of style do you prefer?': 'stile',
+  'style preference': 'stile',
+  'preferred style': 'stile',
+  
+  // Context/setting variations
   'setting': 'contesto',
+  'what kind of setting or surroundings do you prefer?': 'contesto',
+  'surroundings': 'contesto',
+  'context': 'contesto',
+  
+  // Size variations
   'size': 'dimensioni_min',
+  'what size of property do you need?': 'dimensioni_min',
+  'property size': 'dimensioni_min',
+  'minimum size': 'dimensioni_min',
+  
+  // Bedrooms variations
   'bedrooms': 'camere',
+  'how many bedrooms do you need?': 'camere',
+  'number of bedrooms': 'camere',
+  'rooms': 'camere',
+  
+  // Bathrooms variations
   'bathrooms': 'bagni',
+  'how many bathrooms do you need?': 'bagni',
+  'number of bathrooms': 'bagni',
+  
+  // Layout variations
   'layout': 'layout',
+  'do you have a preference for the layout of the property?': 'layout',
+  'property layout': 'layout',
+  
+  // Guesthouse/annex variations
   'guesthouse or annex': 'dependance',
+  'would you like a guesthouse or annex on the property?': 'dependance',
+  'annex': 'dependance',
+  'guesthouse': 'dependance',
+  
+  // Land variations
   'land': 'terreno',
+  'how much land do you need?': 'terreno',
+  'land size': 'terreno',
+  
+  // Pool variations
   'swimming pool': 'piscina',
+  'would you like a swimming pool?': 'piscina',
+  'pool': 'piscina',
+  
+  // Use variations
   'use': 'uso',
+  'how do you intend to use the property?': 'uso',
+  'property use': 'uso',
+  'intended use': 'uso',
+  
+  // Rental interest variations
   'rent': 'interesse_affitto',
+  'would you consider renting out the property when you are not using it?': 'interesse_affitto',
+  'rental interest': 'interesse_affitto',
+  
+  // Description variations
   'property description': 'descrizione',
+  'how would you describe your ideal property?': 'descrizione',
+  'ideal property': 'descrizione',
+  'description': 'descrizione',
+  
+  // Extra notes variations
   'more': 'note_extra',
+  'is there anything else you would like us to know?': 'note_extra',
+  'additional notes': 'note_extra',
+  'extra notes': 'note_extra',
+  'anything else': 'note_extra',
+  
+  // Email variations
   'email': 'email',
+  'your email': 'email',
+  'email address': 'email',
+  
+  // Date variations
   'date': 'data_submission',
+  'submitted at': 'data_submission',
+  'submission date': 'data_submission',
+  
+  // Submission ID variations
   'submission id': 'tally_submission_id',
+  'tally id': 'tally_submission_id',
+  'id': 'tally_submission_id',
 };
 
 const parseCSVLine = (line: string): string[] => {
