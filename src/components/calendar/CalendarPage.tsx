@@ -435,8 +435,30 @@ const CalendarPage = () => {
     try {
       const { destination, source, draggableId } = result;
 
-      // Dropped outside or same position
-      if (!destination || (destination.droppableId === source.droppableId && destination.index === source.index)) {
+      // Dropped outside
+      if (!destination) {
+        return;
+      }
+
+      // Handle week navigation drops
+      if (destination.droppableId === 'prev-week') {
+        // Navigate to previous week and set the event to Sunday (last day of prev week)
+        const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
+        moveEventToDate(draggableId, targetDate);
+        setCurrentWeekStart(subWeeks(currentWeekStart, 1));
+        return;
+      }
+      
+      if (destination.droppableId === 'next-week') {
+        // Navigate to next week and set the event to Monday (first day of next week)
+        const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
+        moveEventToDate(draggableId, targetDate);
+        setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+        return;
+      }
+
+      // Same position - no change needed
+      if (destination.droppableId === source.droppableId && destination.index === source.index) {
         return;
       }
 
@@ -457,73 +479,78 @@ const CalendarPage = () => {
         return;
       }
       
-      // Parse draggableId to get event type and id
-      // Format: 'notizia-{id}' or 'cliente-{id}'
-      if (draggableId.startsWith('notizia-')) {
-        const notiziaId = draggableId.replace('notizia-', '');
-        const notizia = notizie?.find(n => n.id === notiziaId);
-        
-        if (notizia) {
-          // Use default time of 09:00 if no reminder_date exists
-          let hours = 9;
-          let minutes = 0;
-          
-          if (notizia.reminder_date) {
-            try {
-              const oldDate = parseISO(notizia.reminder_date);
-              if (!isNaN(oldDate.getTime())) {
-                hours = oldDate.getHours();
-                minutes = oldDate.getMinutes();
-              }
-            } catch {
-              // Use default values
-            }
-          }
-          
-          const newDate = setMinutes(setHours(targetDate, hours), minutes);
-          
-          triggerHaptic('light');
-          updateNotizia.mutate({ 
-            id: notiziaId, 
-            reminder_date: newDate.toISOString(), 
-            silent: true 
-          });
-          toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
-        }
-      } else if (draggableId.startsWith('cliente-')) {
-        const clienteId = draggableId.replace('cliente-', '');
-        const cliente = clienti?.find(c => c.id === clienteId);
-        
-        if (cliente) {
-          // Use default time of 09:00 if no reminder_date exists
-          let hours = 9;
-          let minutes = 0;
-          
-          if (cliente.reminder_date) {
-            try {
-              const oldDate = parseISO(cliente.reminder_date);
-              if (!isNaN(oldDate.getTime())) {
-                hours = oldDate.getHours();
-                minutes = oldDate.getMinutes();
-              }
-            } catch {
-              // Use default values
-            }
-          }
-          
-          const newDate = setMinutes(setHours(targetDate, hours), minutes);
-          
-          triggerHaptic('light');
-          updateCliente({ 
-            id: clienteId, 
-            reminder_date: newDate.toISOString() 
-          });
-          toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
-        }
-      }
+      moveEventToDate(draggableId, targetDate);
     } catch (error) {
       console.error('Error during drag and drop:', error);
       toast.error('Errore durante lo spostamento. Riprova.');
+    }
+  }, [notizie, clienti, updateNotizia, updateCliente, currentWeekStart]);
+
+  // Helper function to move an event to a specific date
+  const moveEventToDate = useCallback((draggableId: string, targetDate: Date) => {
+    // Parse draggableId to get event type and id
+    // Format: 'notizia-{id}' or 'cliente-{id}'
+    if (draggableId.startsWith('notizia-')) {
+      const notiziaId = draggableId.replace('notizia-', '');
+      const notizia = notizie?.find(n => n.id === notiziaId);
+      
+      if (notizia) {
+        // Use default time of 09:00 if no reminder_date exists
+        let hours = 9;
+        let minutes = 0;
+        
+        if (notizia.reminder_date) {
+          try {
+            const oldDate = parseISO(notizia.reminder_date);
+            if (!isNaN(oldDate.getTime())) {
+              hours = oldDate.getHours();
+              minutes = oldDate.getMinutes();
+            }
+          } catch {
+            // Use default values
+          }
+        }
+        
+        const newDate = setMinutes(setHours(targetDate, hours), minutes);
+        
+        triggerHaptic('light');
+        updateNotizia.mutate({ 
+          id: notiziaId, 
+          reminder_date: newDate.toISOString(), 
+          silent: true 
+        });
+        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      }
+    } else if (draggableId.startsWith('cliente-')) {
+      const clienteId = draggableId.replace('cliente-', '');
+      const cliente = clienti?.find(c => c.id === clienteId);
+      
+      if (cliente) {
+        // Use default time of 09:00 if no reminder_date exists
+        let hours = 9;
+        let minutes = 0;
+        
+        if (cliente.reminder_date) {
+          try {
+            const oldDate = parseISO(cliente.reminder_date);
+            if (!isNaN(oldDate.getTime())) {
+              hours = oldDate.getHours();
+              minutes = oldDate.getMinutes();
+            }
+          } catch {
+            // Use default values
+          }
+        }
+        
+        const newDate = setMinutes(setHours(targetDate, hours), minutes);
+        
+        triggerHaptic('light');
+        updateCliente({ 
+          id: clienteId, 
+          reminder_date: newDate.toISOString() 
+        });
+        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
+      }
     }
   }, [notizie, clienti, updateNotizia, updateCliente]);
 
@@ -649,99 +676,146 @@ const CalendarPage = () => {
         </div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
-          <div className="grid grid-cols-7 gap-2 px-6">
-            {weekDays.map((day) => {
-              const dayKey = format(day, 'yyyy-MM-dd');
-              const events = eventsByDay.get(dayKey) || [];
-              const isToday = isSameDay(day, new Date());
-              // Only notizie and clienti reminders are draggable
-              const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder');
-              const appointmentEvents = events.filter(e => e.type === 'appointment');
-
-              return (
-                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      className={cn(
-                        "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
-                        isToday && "ring-2 ring-foreground",
-                        snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
-                      )}
-                      onClick={() => handleDayClick(day)}
-                    >
-                      <div className="text-center mb-3 pb-2 border-b border-muted">
-                        <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
-                          {format(day, 'EEE', { locale: it })}
-                        </p>
-                        <p className="text-xl font-semibold text-foreground">
-                          {format(day, 'd')}
-                        </p>
-                      </div>
-
-                      <div className="space-y-2 min-h-[80px]">
-                        {/* Non-draggable appointments */}
-                        {appointmentEvents.map((event) => (
-                          <EventCard 
-                            key={event.id} 
-                            event={event}
-                            onClick={() => handleEventClick(event)}
-                            onContextMenu={(e) => handleContextMenu(event, e)}
-                            onTouchStart={(e) => handleTouchStart(event, e)}
-                            onTouchEnd={handleTouchEnd}
-                            onToggle={handleToggleCompleted}
-                          />
-                        ))}
-                        
-                        {/* Draggable reminders */}
-                        {draggableEvents.map((event, index) => (
-                          <Draggable key={event.id} draggableId={event.id} index={index}>
-                            {(provided, snapshot) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={provided.draggableProps.style}
-                              >
-                                <DraggableEventCard
-                                  event={event}
-                                  onClick={() => handleEventClick(event)}
-                                  onContextMenu={(e) => handleContextMenu(event, e)}
-                                  onTouchStart={(e) => handleTouchStart(event, e)}
-                                  onTouchEnd={handleTouchEnd}
-                                  onToggle={handleToggleCompleted}
-                                  isDragging={snapshot.isDragging}
-                                />
-                              </div>
-                            )}
-                          </Draggable>
-                        ))}
-                        
-                        {events.length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
-                            Nessun evento
-                          </p>
-                        )}
-                        {provided.placeholder}
-                      </div>
-
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedDate(day);
-                          setShowAddMenu(true);
-                        }}
-                        className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span className="text-[10px] font-medium">Aggiungi</span>
-                      </button>
-                    </div>
+          <div className="flex items-stretch gap-2 px-6">
+            {/* Previous week drop zone */}
+            <Droppable droppableId="prev-week">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={cn(
+                    "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                    snapshot.isDraggingOver 
+                      ? "border-primary bg-primary/10 text-primary" 
+                      : "border-muted-foreground/20 text-muted-foreground/50"
                   )}
-                </Droppable>
-              );
-            })}
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                  <span className="text-[9px] font-medium tracking-wider uppercase writing-mode-vertical" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                    Sett. prec.
+                  </span>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+
+            {/* Week days grid */}
+            <div className="grid grid-cols-7 gap-2 flex-1">
+              {weekDays.map((day) => {
+                const dayKey = format(day, 'yyyy-MM-dd');
+                const events = eventsByDay.get(dayKey) || [];
+                const isToday = isSameDay(day, new Date());
+                // Only notizie and clienti reminders are draggable
+                const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder');
+                const appointmentEvents = events.filter(e => e.type === 'appointment');
+
+                return (
+                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={cn(
+                          "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                          isToday && "ring-2 ring-foreground",
+                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                        )}
+                        onClick={() => handleDayClick(day)}
+                      >
+                        <div className="text-center mb-3 pb-2 border-b border-muted">
+                          <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
+                            {format(day, 'EEE', { locale: it })}
+                          </p>
+                          <p className="text-xl font-semibold text-foreground">
+                            {format(day, 'd')}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 min-h-[80px]">
+                          {/* Non-draggable appointments */}
+                          {appointmentEvents.map((event) => (
+                            <EventCard 
+                              key={event.id} 
+                              event={event}
+                              onClick={() => handleEventClick(event)}
+                              onContextMenu={(e) => handleContextMenu(event, e)}
+                              onTouchStart={(e) => handleTouchStart(event, e)}
+                              onTouchEnd={handleTouchEnd}
+                              onToggle={handleToggleCompleted}
+                            />
+                          ))}
+                          
+                          {/* Draggable reminders */}
+                          {draggableEvents.map((event, index) => (
+                            <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(provided, snapshot) => (
+                                <div
+                                  ref={provided.innerRef}
+                                  {...provided.draggableProps}
+                                  {...provided.dragHandleProps}
+                                  style={provided.draggableProps.style}
+                                >
+                                  <DraggableEventCard
+                                    event={event}
+                                    onClick={() => handleEventClick(event)}
+                                    onContextMenu={(e) => handleContextMenu(event, e)}
+                                    onTouchStart={(e) => handleTouchStart(event, e)}
+                                    onTouchEnd={handleTouchEnd}
+                                    onToggle={handleToggleCompleted}
+                                    isDragging={snapshot.isDragging}
+                                  />
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          
+                          {events.length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                              Nessun evento
+                            </p>
+                          )}
+                          {provided.placeholder}
+                        </div>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(day);
+                            setShowAddMenu(true);
+                          }}
+                          className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span className="text-[10px] font-medium">Aggiungi</span>
+                        </button>
+                      </div>
+                    )}
+                  </Droppable>
+                );
+              })}
+            </div>
+
+            {/* Next week drop zone */}
+            <Droppable droppableId="next-week">
+              {(provided, snapshot) => (
+                <div
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  className={cn(
+                    "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                    snapshot.isDraggingOver 
+                      ? "border-primary bg-primary/10 text-primary" 
+                      : "border-muted-foreground/20 text-muted-foreground/50"
+                  )}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                  <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                    Sett. succ.
+                  </span>
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
           </div>
         </DragDropContext>
       )}
