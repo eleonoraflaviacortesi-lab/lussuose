@@ -178,8 +178,8 @@ const Auth = () => {
       <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem]">
         <img 
           src={logoLarge} 
-          alt="Keipiai" 
-          className="h-12" 
+          alt="Logo" 
+          className="h-14" 
         />
       </div>
 
