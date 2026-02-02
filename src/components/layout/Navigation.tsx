@@ -14,7 +14,7 @@ const tabToPath: Record<string, string> = {
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
-  inserisci: '/inserisci',
+  report: '/report',
   agenzia: '/agenzia',
   impostazioni: '/impostazioni',
 };
@@ -28,7 +28,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Users, label: 'Buyers' },
     // separator after index 3
-    { id: 'inserisci', icon: TrendingUp, label: 'Ciclo Produttivo' },
+    { id: 'report', icon: TrendingUp, label: 'I Miei Report' },
     { id: 'agenzia', icon: Building2, label: 'Performance Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
