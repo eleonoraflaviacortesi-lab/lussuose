@@ -274,6 +274,9 @@ const CalendarPage = () => {
   const [contextMenu, setContextMenu] = useState<{ event: CalendarEvent; position: { x: number; y: number } } | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const weekScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Track dragging state to prevent click on day during drag
+  const [isDragging, setIsDragging] = useState(false);
 
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
@@ -404,6 +407,9 @@ const CalendarPage = () => {
   };
 
   const handleDayClick = (day: Date) => {
+    // Don't open dialog if we just finished dragging
+    if (isDragging) return;
+    
     setSelectedDate(day);
     if (isMobile) {
       setShowDayView(true);
@@ -411,6 +417,11 @@ const CalendarPage = () => {
       setShowAddDialog(true);
     }
   };
+  
+  // Drag start handler to track dragging state
+  const handleDragStart = useCallback(() => {
+    setIsDragging(true);
+  }, []);
 
   const handleEventClick = (event: CalendarEvent) => {
     triggerHaptic('light');
@@ -615,6 +626,9 @@ const CalendarPage = () => {
 
   // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {
+    // Reset dragging state after a short delay to prevent click from firing
+    setTimeout(() => setIsDragging(false), 100);
+    
     try {
       const { destination, source, draggableId } = result;
 
@@ -801,7 +815,7 @@ const CalendarPage = () => {
           })}
         </div>
       ) : (
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex items-stretch gap-2 px-6">
             {/* Previous week drop zone */}
             <Droppable droppableId="prev-week">
