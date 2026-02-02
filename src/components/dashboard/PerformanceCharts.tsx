@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { TrendingUp, FileText, Award, Euro } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
@@ -11,7 +11,7 @@ type Props = {
   formatCompactCurrency: (value: number) => string;
 };
 
-const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCompactCurrency }: Props) => {
+const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeriod, onChartPeriodChange, formatCompactCurrency }, ref) => {
   const performanceChartData = useMemo(() => {
     if (!myData || myData.length === 0) return [];
 
@@ -55,7 +55,7 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
   }, [performanceChartData]);
 
   return (
-    <div className="bg-card rounded-2xl shadow-lg p-4 space-y-3">
+    <div ref={ref} className="bg-card rounded-2xl shadow-lg p-4 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
           <TrendingUp className="w-3 h-3 text-foreground" />
@@ -153,6 +153,8 @@ const PerformanceCharts = ({ myData, chartPeriod, onChartPeriodChange, formatCom
       </div>
     </div>
   );
-};
+});
+
+PerformanceCharts.displayName = 'PerformanceCharts';
 
 export default PerformanceCharts;

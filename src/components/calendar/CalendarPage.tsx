@@ -430,64 +430,8 @@ const CalendarPage = () => {
     updateNotizia.mutate({ id: notiziaId, reminder_date: date.toISOString(), silent: true });
   };
 
-  // Drag and drop handler
-  const handleDragEnd = useCallback((result: DropResult) => {
-    try {
-      const { destination, source, draggableId } = result;
-
-      // Dropped outside
-      if (!destination) {
-        return;
-      }
-
-      // Handle week navigation drops
-      if (destination.droppableId === 'prev-week') {
-        // Navigate to previous week and set the event to Sunday (last day of prev week)
-        const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
-        moveEventToDate(draggableId, targetDate);
-        setCurrentWeekStart(subWeeks(currentWeekStart, 1));
-        return;
-      }
-      
-      if (destination.droppableId === 'next-week') {
-        // Navigate to next week and set the event to Monday (first day of next week)
-        const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
-        moveEventToDate(draggableId, targetDate);
-        setCurrentWeekStart(addWeeks(currentWeekStart, 1));
-        return;
-      }
-
-      // Same position - no change needed
-      if (destination.droppableId === source.droppableId && destination.index === source.index) {
-        return;
-      }
-
-      // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
-      const targetDayKey = destination.droppableId.replace('day-', '');
-      
-      // Validate the date string before parsing
-      if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
-        console.error('Invalid target date key:', targetDayKey);
-        return;
-      }
-      
-      const targetDate = parseISO(targetDayKey);
-      
-      // Check if targetDate is valid
-      if (isNaN(targetDate.getTime())) {
-        console.error('Invalid target date:', targetDayKey);
-        return;
-      }
-      
-      moveEventToDate(draggableId, targetDate);
-    } catch (error) {
-      console.error('Error during drag and drop:', error);
-      toast.error('Errore durante lo spostamento. Riprova.');
-    }
-  }, [notizie, clienti, updateNotizia, updateCliente, currentWeekStart]);
-
-  // Helper function to move an event to a specific date
-  const moveEventToDate = useCallback((draggableId: string, targetDate: Date) => {
+  // Helper function to move an event to a specific date - defined first so it can be used in handleDragEnd
+  const moveEvent = useCallback((draggableId: string, targetDate: Date) => {
     // Parse draggableId to get event type and id
     // Format: 'notizia-{id}' or 'cliente-{id}'
     if (draggableId.startsWith('notizia-')) {
@@ -553,6 +497,72 @@ const CalendarPage = () => {
       }
     }
   }, [notizie, clienti, updateNotizia, updateCliente]);
+
+  // Drag and drop handler
+  const handleDragEnd = useCallback((result: DropResult) => {
+    try {
+      const { destination, source, draggableId } = result;
+
+      // Dropped outside
+      if (!destination) {
+        return;
+      }
+
+      // Handle week navigation drops
+      if (destination.droppableId === 'prev-week') {
+        // Navigate to previous week and set the event to Sunday (last day of prev week)
+        const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
+        moveEvent(draggableId, targetDate);
+        setCurrentWeekStart(subWeeks(currentWeekStart, 1));
+        return;
+      }
+      
+      if (destination.droppableId === 'next-week') {
+        // Navigate to next week and set the event to Monday (first day of next week)
+        const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
+        moveEvent(draggableId, targetDate);
+        setCurrentWeekStart(addWeeks(currentWeekStart, 1));
+        return;
+      }
+
+      // Same position - no change needed (reordering in same day is a no-op for date)
+      if (destination.droppableId === source.droppableId && destination.index === source.index) {
+        return;
+      }
+
+      // Same day but different position (reordering) - no date change needed
+      if (destination.droppableId === source.droppableId) {
+        // Just a reorder within the same day - no database update needed
+        // The visual order is handled by React DnD, no persistence needed for now
+        return;
+      }
+
+      // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
+      const targetDayKey = destination.droppableId.replace('day-', '');
+      
+      // Validate the date string before parsing
+      if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
+        console.error('Invalid target date key:', targetDayKey);
+        return;
+      }
+      
+      const targetDate = parseISO(targetDayKey);
+      
+      // Check if targetDate is valid
+      if (isNaN(targetDate.getTime())) {
+        console.error('Invalid target date:', targetDayKey);
+        return;
+      }
+      
+      moveEvent(draggableId, targetDate);
+    } catch (error) {
+      console.error('Error during drag and drop:', error);
+      toast.error('Errore durante lo spostamento. Riprova.');
+    }
+  }, [currentWeekStart, moveEvent]);
+
+  // Legacy alias for backward compatibility
+  const moveEventToDate = moveEvent;
 
   return (
     <div className="pt-4 pb-8 animate-fade-in">
