@@ -71,6 +71,9 @@ const HEADER_MAPPINGS: HeaderMapping[] = [
   
   // Reason for area
   { pattern: /draws\s+you|why\s+area|what\s+attracts/i, field: 'motivo_zona', type: 'array' },
+  // Italian variants
+  { pattern: /^perch[ée]\s+(questa\s+)?zona\??$/i, field: 'motivo_zona', type: 'array' },
+  { pattern: /motivo\s+zona|cosa\s+ti\s+attira/i, field: 'motivo_zona', type: 'array' },
   
   // Property type - main column or sub-columns
   { pattern: /^what\s+type\s+of\s+property.*\(([^)]+)\)$/i, field: 'tipologia', type: 'array', extractOption: true },
@@ -85,6 +88,10 @@ const HEADER_MAPPINGS: HeaderMapping[] = [
   { pattern: /^what\s+kind\s+of\s+setting.*\(([^)]+)\)$/i, field: 'contesto', type: 'array', extractOption: true },
   { pattern: /^what\s+kind\s+of\s+setting(?!\s*\()/i, field: 'contesto', type: 'array' },
   { pattern: /^setting$/i, field: 'contesto', type: 'array' },
+  // Italian variants
+  { pattern: /^contesto\s+desiderato.*\(([^)]+)\)$/i, field: 'contesto', type: 'array', extractOption: true },
+  { pattern: /^contesto\s+desiderato/i, field: 'contesto', type: 'array' },
+  { pattern: /^contesto$/i, field: 'contesto', type: 'array' },
   
   // Size
   { pattern: /size.*property|property\s+size|dimensioni/i, field: 'dimensioni_min', type: 'number' },
@@ -105,15 +112,24 @@ const HEADER_MAPPINGS: HeaderMapping[] = [
   { pattern: /^do\s+you\s+require\s+land\??$/i, field: 'terreno', type: 'string' },
   { pattern: /^if\s+yes,\s+how\s+much\s+land/i, field: 'terreno', type: 'string' },
   { pattern: /^how\s+much\s+land|land\s+size|terreno/i, field: 'terreno', type: 'string' },
+  // Italian variants
+  { pattern: /^vuole\s+terreno\??$/i, field: 'terreno', type: 'string' },
+  { pattern: /^se\s+s[ìi],?\s+quanto\s+terreno/i, field: 'terreno', type: 'string' },
+  { pattern: /dimensione\s+terreno|ettari/i, field: 'terreno', type: 'string' },
   
   // Pool
   { pattern: /swimming\s+pool|pool|piscina/i, field: 'piscina', type: 'string' },
   
   // Use
   { pattern: /intend\s+to\s+use|property\s+use|uso/i, field: 'uso', type: 'string' },
+  // Italian variants
+  { pattern: /^come\s+user[àa]\s+la\s+propriet[àa]/i, field: 'uso', type: 'string' },
+  { pattern: /utilizzo|finalit[àa]/i, field: 'uso', type: 'string' },
   
   // Rental interest
   { pattern: /renting\s+out|rental|affitto/i, field: 'interesse_affitto', type: 'string' },
+  // Italian variants
+  { pattern: /^interessato\s+(ad\s+)?affittare/i, field: 'interesse_affitto', type: 'string' },
   
   // Description
   { pattern: /describe.*ideal\s+property|property\s+description|descrizione/i, field: 'descrizione', type: 'string' },
