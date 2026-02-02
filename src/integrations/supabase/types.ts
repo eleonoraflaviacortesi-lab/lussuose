@@ -214,7 +214,7 @@ export type Database = {
       clienti: {
         Row: {
           assigned_to: string | null
-          bagni: number | null
+          bagni: string | null
           budget_max: number | null
           camere: string | null
           card_color: string | null
@@ -224,8 +224,8 @@ export type Database = {
           data_submission: string | null
           dependance: string | null
           descrizione: string | null
-          dimensioni_max: number | null
-          dimensioni_min: number | null
+          dimensioni_max: string | null
+          dimensioni_min: string | null
           display_order: number
           email: string | null
           emoji: string | null
@@ -256,7 +256,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
-          bagni?: number | null
+          bagni?: string | null
           budget_max?: number | null
           camere?: string | null
           card_color?: string | null
@@ -266,8 +266,8 @@ export type Database = {
           data_submission?: string | null
           dependance?: string | null
           descrizione?: string | null
-          dimensioni_max?: number | null
-          dimensioni_min?: number | null
+          dimensioni_max?: string | null
+          dimensioni_min?: string | null
           display_order?: number
           email?: string | null
           emoji?: string | null
@@ -298,7 +298,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
-          bagni?: number | null
+          bagni?: string | null
           budget_max?: number | null
           camere?: string | null
           card_color?: string | null
@@ -308,8 +308,8 @@ export type Database = {
           data_submission?: string | null
           dependance?: string | null
           descrizione?: string | null
-          dimensioni_max?: number | null
-          dimensioni_min?: number | null
+          dimensioni_max?: string | null
+          dimensioni_min?: string | null
           display_order?: number
           email?: string | null
           emoji?: string | null
