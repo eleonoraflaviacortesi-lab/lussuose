@@ -70,6 +70,39 @@ export type Database = {
           },
         ]
       }
+      client_kanban_columns: {
+        Row: {
+          color: string | null
+          created_at: string
+          display_order: number
+          id: string
+          key: string
+          label: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          key: string
+          label: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          key?: string
+          label?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       client_property_matches: {
         Row: {
           cliente_id: string
