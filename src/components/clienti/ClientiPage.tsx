@@ -9,7 +9,7 @@ import { AddClienteDialog } from './AddClienteDialog';
 import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
-import { Plus, Loader2, Upload } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X } from 'lucide-react';
 
 interface ClientiPageProps {
   initialClienteId?: string | null;
@@ -24,6 +24,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [detailOpen, setDetailOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const {
     clienti,
@@ -167,6 +168,26 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         />
       )}
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          placeholder="Cerca per nome, paese, regione, email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-muted/50 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
       {/* Kanban Board */}
       <ClientiKanban
         clientiGrouped={displayGrouped}
@@ -179,6 +200,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         onOrderChange={handleOrderChange}
         onColorChange={handleColorChange}
         onEmojiChange={handleEmojiChange}
+        searchQuery={searchQuery}
       />
 
       {/* Detail Modal */}
