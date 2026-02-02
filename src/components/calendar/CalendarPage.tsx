@@ -1,13 +1,12 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, StickyNote } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
-import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
+import { useNotizie, Notizia, NotiziaStatus, NotiziaComment } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
-import { useCalendarNotes } from '@/hooks/useCalendarNotes';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { triggerHaptic } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
@@ -17,7 +16,9 @@ import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { Textarea } from '@/components/ui/textarea';
 
 export type CalendarEvent = {
   id: string;
@@ -31,7 +32,8 @@ export type CalendarEvent = {
   statusColor?: string; // Color based on status
   urgent?: boolean;
   displayOrder?: number; // For ordering within a day
-  calendarNote?: string; // Note visible only in calendar
+  lastComment?: NotiziaComment; // Last comment from notizia/cliente
+  commentsCount?: number; // Total number of comments
 };
 
 // Quick emojis
@@ -55,42 +57,44 @@ const EventContextMenu = memo(({
   event,
   columns,
   notizia,
-  calendarNote,
+  cliente,
   onStatusChange,
   onEmojiChange,
   onUrgentToggle,
   onRemoveReminder,
-  onNoteChange,
-  onNoteDelete,
+  onAddComment,
   onClose 
 }: { 
   position: { x: number; y: number }; 
   event: CalendarEvent;
   columns: KanbanColumn[];
   notizia?: Notizia | null;
-  calendarNote?: string;
+  cliente?: any | null;
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
   onUrgentToggle: () => void;
   onRemoveReminder: () => void;
-  onNoteChange: (note: string) => void;
-  onNoteDelete: () => void;
+  onAddComment: (text: string) => void;
   onClose: () => void;
 }) => {
-  const [noteText, setNoteText] = useState(calendarNote || '');
-  const [isEditingNote, setIsEditingNote] = useState(false);
+  const [commentText, setCommentText] = useState('');
   
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
   const isNotiziaReminder = event.type === 'notizia_reminder';
+  const isClienteReminder = event.type === 'cliente_reminder';
   
-  const handleSaveNote = () => {
-    if (noteText.trim()) {
-      onNoteChange(noteText.trim());
-    } else {
-      onNoteDelete();
+  // Get existing comments
+  const comments = notizia?.comments || cliente?.comments || [];
+  const lastComment = comments.length > 0 ? comments[comments.length - 1] : null;
+  
+  const handleAddComment = () => {
+    if (commentText.trim()) {
+      onAddComment(commentText.trim());
+      setCommentText('');
+      triggerHaptic('light');
+      toast.success('Commento aggiunto');
     }
-    setIsEditingNote(false);
   };
   
   return (
@@ -101,66 +105,57 @@ const EventContextMenu = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[280px]"
+        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[300px]"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 290),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 310),
           top: Math.min(position.y, window.innerHeight - 400),
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
         onTouchEnd={(e) => e.stopPropagation()}
       >
-        {/* Note section - available for all event types */}
-        <div>
-          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Nota calendario</span>
-          {isEditingNote || !calendarNote ? (
-            <div className="flex flex-col gap-2">
-              <textarea
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Aggiungi una nota..."
-                className="w-full bg-white rounded-xl px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none min-h-[60px]"
-                autoFocus={isEditingNote}
+        {/* Comments section - for notizie and clienti reminders */}
+        {(isNotiziaReminder || isClienteReminder) && (
+          <div>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
+              <MessageCircle className="w-3 h-3" />
+              Commenti ({comments.length})
+            </span>
+            
+            {/* Show last comment if exists */}
+            {lastComment && (
+              <div className="bg-muted/50 rounded-xl px-3 py-2 text-sm text-foreground mb-2 max-h-[60px] overflow-y-auto">
+                <p className="text-[10px] text-muted-foreground mb-0.5">
+                  {format(parseISO(lastComment.created_at), 'd MMM HH:mm', { locale: it })}
+                </p>
+                <p className="text-xs">{lastComment.text}</p>
+              </div>
+            )}
+            
+            {/* Add new comment */}
+            <div className="flex gap-2">
+              <Textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="Aggiungi commento..."
+                className="flex-1 min-h-[40px] max-h-[80px] text-xs px-2.5 py-2 resize-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAddComment();
+                  }
+                }}
               />
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSaveNote}
-                  className="flex-1 px-3 py-1.5 rounded-lg bg-foreground text-background text-xs font-medium hover:opacity-90 transition-opacity"
-                >
-                  Salva
-                </button>
-                {calendarNote && (
-                  <button
-                    onClick={() => { setNoteText(calendarNote); setIsEditingNote(false); }}
-                    className="px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
-                  >
-                    Annulla
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={handleAddComment}
+                disabled={!commentText.trim()}
+                className="w-9 h-9 shrink-0 rounded-xl bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40"
+              >
+                <Send className="w-4 h-4" />
+              </button>
             </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              <div className="bg-amber-50 rounded-xl px-3 py-2 text-sm text-foreground">
-                {calendarNote}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setIsEditingNote(true)}
-                  className="flex-1 px-3 py-1.5 rounded-lg bg-muted text-foreground text-xs font-medium hover:bg-muted/80 transition-colors"
-                >
-                  Modifica
-                </button>
-                <button
-                  onClick={() => { onNoteDelete(); onClose(); }}
-                  className="px-3 py-1.5 rounded-lg bg-muted hover:bg-destructive hover:text-white text-foreground text-xs font-medium transition-colors"
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Only show notizia-specific options for notizia reminders */}
         {isNotiziaReminder && (
@@ -281,16 +276,22 @@ const CalendarPage = () => {
   const weekScrollRef = useRef<HTMLDivElement>(null);
 
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
-  const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment } = useClienti();
+  const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
-  const { getNote, setNote, deleteNote } = useCalendarNotes();
+  const { user } = useAuth();
 
   // Helper to get status color from columns
   const getStatusColor = (status: string): string => {
     const col = columns.find(c => c.key === status);
     return col?.color || '#6b7280';
+  };
+
+  // Helper to get last comment from notizia or cliente
+  const getLastComment = (comments: NotiziaComment[] | undefined): NotiziaComment | undefined => {
+    if (!comments || comments.length === 0) return undefined;
+    return comments[comments.length - 1];
   };
 
   const weekDays = useMemo(() => {
@@ -337,6 +338,13 @@ const CalendarPage = () => {
       // Add cliente reminders
       clienti?.forEach(cliente => {
         if (cliente.reminder_date && isSameDay(parseISO(cliente.reminder_date), day)) {
+          const clienteComments = (cliente.comments || []) as Array<{id: string; text: string; createdAt?: string; created_at?: string}>;
+          // Normalize to NotiziaComment format
+          const normalizedComments: NotiziaComment[] = clienteComments.map(c => ({
+            id: c.id,
+            text: c.text,
+            created_at: c.created_at || c.createdAt || new Date().toISOString(),
+          }));
           events.push({
             id: `cliente-${cliente.id}`,
             title: cliente.nome,
@@ -346,6 +354,8 @@ const CalendarPage = () => {
             emoji: cliente.emoji,
             statusColor: getStatusColor(cliente.status),
             displayOrder: cliente.display_order,
+            lastComment: getLastComment(normalizedComments),
+            commentsCount: normalizedComments.length,
           });
         }
       });
@@ -365,6 +375,8 @@ const CalendarPage = () => {
             statusColor: getStatusColor(notizia.status),
             urgent: isUrgent,
             displayOrder: notizia.display_order,
+            lastComment: getLastComment(notizia.comments),
+            commentsCount: notizia.comments?.length || 0,
           });
         }
       });
@@ -490,6 +502,11 @@ const CalendarPage = () => {
     ? notizie?.find(n => n.id === contextMenu.event.notiziaId) 
     : null;
 
+  // Get cliente for context menu
+  const contextMenuCliente = contextMenu?.event.clienteId 
+    ? clienti?.find(c => c.id === contextMenu.event.clienteId) 
+    : null;
+
   // Handler to remove reminder from notizia
   const handleRemoveReminder = (notiziaId: string) => {
     updateNotizia.mutate({ id: notiziaId, reminder_date: undefined, silent: true });
@@ -503,6 +520,29 @@ const CalendarPage = () => {
   // Handler to add reminder to existing notizia  
   const handleAddNotiziaReminder = (notiziaId: string, date: Date) => {
     updateNotizia.mutate({ id: notiziaId, reminder_date: date.toISOString(), silent: true });
+  };
+
+  // Handler to add comment to notizia
+  const handleAddNotiziaComment = (notiziaId: string, text: string) => {
+    const notizia = notizie?.find(n => n.id === notiziaId);
+    if (!notizia) return;
+    
+    const newComment: NotiziaComment = {
+      id: crypto.randomUUID(),
+      text,
+      created_at: new Date().toISOString(),
+    };
+    
+    updateNotizia.mutate({ 
+      id: notiziaId, 
+      comments: [...(notizia.comments || []), newComment],
+      silent: true 
+    });
+  };
+
+  // Handler to add comment to cliente  
+  const handleAddClienteCommentFromCalendar = (clienteId: string, text: string) => {
+    addClienteComment({ id: clienteId, comment: text });
   };
 
   // Helper function to move an event to a specific date - defined first so it can be used in handleDragEnd
@@ -735,7 +775,7 @@ const CalendarPage = () => {
                         onTouchStart={(e) => handleTouchStart(event, e)}
                         onTouchEnd={handleTouchEnd}
                         onToggle={handleToggleCompleted}
-                        hasNote={!!getNote(event.id)}
+                        hasComment={!!event.lastComment}
                         compact
                       />
                     ))
@@ -828,7 +868,7 @@ const CalendarPage = () => {
                               onTouchStart={(e) => handleTouchStart(event, e)}
                               onTouchEnd={handleTouchEnd}
                               onToggle={handleToggleCompleted}
-                              hasNote={!!getNote(event.id)}
+                              hasComment={false}
                             />
                           ))}
                           
@@ -850,7 +890,7 @@ const CalendarPage = () => {
                                     onTouchEnd={handleTouchEnd}
                                     onToggle={handleToggleCompleted}
                                     isDragging={snapshot.isDragging}
-                                    hasNote={!!getNote(event.id)}
+                                    hasComment={!!event.lastComment}
                                   />
                                 </div>
                               )}
@@ -947,7 +987,6 @@ const CalendarPage = () => {
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        getNote={getNote}
       />
 
       {/* Notizia Detail Modal */}
@@ -970,7 +1009,7 @@ const CalendarPage = () => {
         }}
         onAddComment={(comment) => {
           if (selectedCliente) {
-            addComment({ id: selectedCliente.id, comment });
+            addClienteComment({ id: selectedCliente.id, comment });
           }
         }}
         onDelete={() => {
@@ -993,7 +1032,7 @@ const CalendarPage = () => {
           event={contextMenu.event}
           columns={columns}
           notizia={contextMenuNotizia}
-          calendarNote={getNote(contextMenu.event.id)}
+          cliente={contextMenuCliente}
           onStatusChange={(status) => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleNotiziaStatusChange(notiziaId, status);
@@ -1012,14 +1051,12 @@ const CalendarPage = () => {
             const notiziaId = contextMenu.event.notiziaId;
             if (notiziaId) handleRemoveReminder(notiziaId);
           }}
-          onNoteChange={(note) => {
-            setNote(contextMenu.event.id, note);
-            triggerHaptic('light');
-            toast.success('Nota salvata');
-          }}
-          onNoteDelete={() => {
-            deleteNote(contextMenu.event.id);
-            triggerHaptic('light');
+          onAddComment={(text) => {
+            if (contextMenu.event.notiziaId) {
+              handleAddNotiziaComment(contextMenu.event.notiziaId, text);
+            } else if (contextMenu.event.clienteId) {
+              handleAddClienteCommentFromCalendar(contextMenu.event.clienteId, text);
+            }
           }}
           onClose={() => setContextMenu(null)}
         />
@@ -1036,7 +1073,7 @@ const EventCard = memo(({
   onTouchStart,
   onTouchEnd,
   onToggle,
-  hasNote,
+  hasComment,
   compact 
 }: {
   event: CalendarEvent;
@@ -1045,7 +1082,7 @@ const EventCard = memo(({
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onToggle: (id: string, completed: boolean) => void;
-  hasNote?: boolean;
+  hasComment?: boolean;
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
@@ -1115,9 +1152,9 @@ const EventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      {hasNote && !event.urgent && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
-          <StickyNote className="w-2.5 h-2.5 text-amber-900" />
+      {hasComment && !event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
+          <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
       <div className="flex items-start gap-2">
@@ -1162,7 +1199,7 @@ const DraggableEventCard = memo(({
   onTouchEnd,
   onToggle,
   isDragging,
-  hasNote,
+  hasComment,
 }: {
   event: CalendarEvent;
   onClick: () => void;
@@ -1171,7 +1208,7 @@ const DraggableEventCard = memo(({
   onTouchEnd: () => void;
   onToggle: (id: string, completed: boolean) => void;
   isDragging: boolean;
-  hasNote?: boolean;
+  hasComment?: boolean;
 }) => {
   const getEventStyles = () => {
     if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
@@ -1216,9 +1253,9 @@ const DraggableEventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      {hasNote && !event.urgent && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 rounded-full flex items-center justify-center">
-          <StickyNote className="w-2.5 h-2.5 text-amber-900" />
+      {hasComment && !event.urgent && (
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
+          <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
       <div className="flex items-center justify-center gap-2">

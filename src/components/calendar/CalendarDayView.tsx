@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, Check, StickyNote } from 'lucide-react';
+import { Plus, Check, MessageCircle } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -23,7 +23,6 @@ type Props = {
   onTouchStart: (event: CalendarEvent, e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onCloseAndOpenDetail?: () => void;
-  getNote?: (eventId: string) => string | undefined;
 };
 
 // Helper to determine if color is dark
@@ -49,7 +48,6 @@ const CalendarDayView = ({
   onContextMenu,
   onTouchStart,
   onTouchEnd,
-  getNote,
 }: Props) => {
   if (!date) return null;
 
@@ -147,7 +145,7 @@ const CalendarDayView = ({
             events.map((event) => {
               const styles = getEventStyles(event);
               const canToggle = event.type === 'appointment';
-              const eventNote = getNote?.(event.id);
+              const lastComment = event.lastComment;
 
               return (
                 <div
@@ -169,9 +167,9 @@ const CalendarDayView = ({
                       <span className="text-white text-[10px] font-bold">!</span>
                     </div>
                   )}
-                  {eventNote && !event.urgent && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-amber-400 rounded-full flex items-center justify-center">
-                      <StickyNote className="w-3 h-3 text-amber-900" />
+                  {lastComment && !event.urgent && (
+                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-400 rounded-full flex items-center justify-center">
+                      <MessageCircle className="w-3 h-3 text-white" />
                     </div>
                   )}
                   <div className="flex items-start gap-3">
@@ -222,14 +220,14 @@ const CalendarDayView = ({
                           👤 {event.clienteName}
                         </p>
                       )}
-                      {eventNote && (
+                      {lastComment && (
                         <div className={cn(
                           "mt-2 text-xs px-2 py-1.5 rounded-lg",
                           styles.customBg && isDarkColor(styles.customBg) 
                             ? 'bg-white/20 text-white/90' 
-                            : 'bg-amber-50 text-amber-900'
+                            : 'bg-blue-50 text-blue-900'
                         )}>
-                          📝 {eventNote}
+                          💬 {lastComment.text}
                         </div>
                       )}
                     </div>
