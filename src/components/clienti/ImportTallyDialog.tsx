@@ -18,194 +18,237 @@ interface ImportTallyDialogProps {
   onSuccess: () => void;
 }
 
-// Mapping from Tally field names to database columns (supports multiple variations)
-const FIELD_MAPPING: Record<string, string> = {
-  // Name variations
-  'name': 'nome',
-  'your name and surname': 'nome',
-  'your name': 'nome',
-  'full name': 'nome',
+// Header pattern matching for Tally CSV columns
+interface HeaderMapping {
+  pattern: RegExp;
+  field: string;
+  type: 'string' | 'number' | 'boolean' | 'array' | 'date' | 'budget';
+  // For multi-column array fields, extract the option value from header
+  extractOption?: boolean;
+}
+
+const HEADER_MAPPINGS: HeaderMapping[] = [
+  // Name
+  { pattern: /^(your\s+)?name(\s+and\s+surname)?$/i, field: 'nome', type: 'string' },
   
-  // Phone variations
-  'phone number': 'telefono',
-  'phone number (including country code)': 'telefono',
-  'phone': 'telefono',
-  'telephone': 'telefono',
+  // Phone
+  { pattern: /phone\s*(number)?/i, field: 'telefono', type: 'string' },
   
-  // Country variations
-  'country': 'paese',
-  "respondent's country": 'paese',
-  'your country': 'paese',
+  // Country
+  { pattern: /(respondent'?s?\s+)?country/i, field: 'paese', type: 'string' },
   
-  // Budget variations
-  'max budget': 'budget_max',
-  'what is your estimated budget for the property purchase?': 'budget_max',
-  'budget': 'budget_max',
-  'estimated budget': 'budget_max',
+  // Email  
+  { pattern: /^(your\s+)?email(\s+address)?$/i, field: 'email', type: 'string' },
   
-  // Mortgage variations
-  'mutuo': 'mutuo',
-  'will you require a mortgage to finance the purchase of the property?': 'mutuo',
-  'mortgage': 'mutuo',
+  // Submission ID
+  { pattern: /^submission\s*id$/i, field: 'tally_submission_id', type: 'string' },
   
-  // Search time variations
-  'old': 'tempo_ricerca',
-  'how long have you been looking for a property?': 'tempo_ricerca',
-  'search time': 'tempo_ricerca',
+  // Date
+  { pattern: /^submitted\s+at$/i, field: 'data_submission', type: 'date' },
   
-  // Visited properties variations
-  'visited properties?': 'ha_visitato',
-  'have you already viewed properties?': 'ha_visitato',
-  'viewed properties': 'ha_visitato',
+  // Budget
+  { pattern: /(estimated\s+)?budget|max\s+budget/i, field: 'budget_max', type: 'budget' },
   
-  // Regions variations
-  'regions': 'regioni',
-  'which regions of italy are you considering?': 'regioni',
-  'italian regions': 'regioni',
+  // Mortgage
+  { pattern: /mortgage|mutuo/i, field: 'mutuo', type: 'string' },
+  
+  // Search time
+  { pattern: /how\s+long.*looking|search\s+time/i, field: 'tempo_ricerca', type: 'string' },
+  
+  // Viewed properties
+  { pattern: /viewed\s+properties|visited\s+properties/i, field: 'ha_visitato', type: 'boolean' },
+  
+  // Regions - main column or sub-columns with region names
+  { pattern: /^which\s+regions.*\(([^)]+)\)$/i, field: 'regioni', type: 'array', extractOption: true },
+  { pattern: /^which\s+regions(?!\s*\()/i, field: 'regioni', type: 'array' },
+  { pattern: /^regions$/i, field: 'regioni', type: 'array' },
   
   // Proximity to cities
-  'prox to main cities': 'vicinanza_citta',
-  'proximity to cities': 'vicinanza_citta',
-  'is proximity to a main city important to you?': 'vicinanza_citta',
+  { pattern: /proximity.*cit|prox.*main\s+cit|vicinanza/i, field: 'vicinanza_citta', type: 'boolean' },
   
   // Reason for area
-  'why area': 'motivo_zona',
-  'what draws you to this area?': 'motivo_zona',
-  'reason for area': 'motivo_zona',
+  { pattern: /draws\s+you|why\s+area|what\s+attracts/i, field: 'motivo_zona', type: 'array' },
   
-  // Property type variations
-  'property type': 'tipologia',
-  'what type of property are you looking for?': 'tipologia',
-  'type of property': 'tipologia',
+  // Property type - main column or sub-columns
+  { pattern: /^what\s+type\s+of\s+property.*\(([^)]+)\)$/i, field: 'tipologia', type: 'array', extractOption: true },
+  { pattern: /^what\s+type\s+of\s+property(?!\s*\()/i, field: 'tipologia', type: 'array' },
+  { pattern: /^property\s+type$/i, field: 'tipologia', type: 'array' },
   
-  // Style variations
-  'kind of style': 'stile',
-  'which kind of style do you prefer?': 'stile',
-  'style preference': 'stile',
-  'preferred style': 'stile',
+  // Style
+  { pattern: /^which\s+kind\s+of\s+style.*\(([^)]+)\)$/i, field: 'stile', type: 'string', extractOption: true },
+  { pattern: /style|stile/i, field: 'stile', type: 'string' },
   
-  // Context/setting variations
-  'setting': 'contesto',
-  'what kind of setting or surroundings do you prefer?': 'contesto',
-  'surroundings': 'contesto',
-  'context': 'contesto',
+  // Setting/context - main column or sub-columns
+  { pattern: /^what\s+kind\s+of\s+setting.*\(([^)]+)\)$/i, field: 'contesto', type: 'array', extractOption: true },
+  { pattern: /^what\s+kind\s+of\s+setting(?!\s*\()/i, field: 'contesto', type: 'array' },
+  { pattern: /^setting$/i, field: 'contesto', type: 'array' },
   
-  // Size variations
-  'size': 'dimensioni_min',
-  'what size of property do you need?': 'dimensioni_min',
-  'property size': 'dimensioni_min',
-  'minimum size': 'dimensioni_min',
+  // Size
+  { pattern: /size.*property|property\s+size|dimensioni/i, field: 'dimensioni_min', type: 'number' },
   
-  // Bedrooms variations
-  'bedrooms': 'camere',
-  'how many bedrooms do you need?': 'camere',
-  'number of bedrooms': 'camere',
-  'rooms': 'camere',
+  // Bedrooms
+  { pattern: /bedroom|camere/i, field: 'camere', type: 'string' },
   
-  // Bathrooms variations
-  'bathrooms': 'bagni',
-  'how many bathrooms do you need?': 'bagni',
-  'number of bathrooms': 'bagni',
+  // Bathrooms
+  { pattern: /bathroom|bagni/i, field: 'bagni', type: 'number' },
   
-  // Layout variations
-  'layout': 'layout',
-  'do you have a preference for the layout of the property?': 'layout',
-  'property layout': 'layout',
+  // Layout
+  { pattern: /layout/i, field: 'layout', type: 'string' },
   
-  // Guesthouse/annex variations
-  'guesthouse or annex': 'dependance',
-  'would you like a guesthouse or annex on the property?': 'dependance',
-  'annex': 'dependance',
-  'guesthouse': 'dependance',
+  // Guesthouse/annex
+  { pattern: /guesthouse|annex|dependance/i, field: 'dependance', type: 'string' },
   
-  // Land variations
-  'land': 'terreno',
-  'how much land do you need?': 'terreno',
-  'land size': 'terreno',
+  // Land
+  { pattern: /^how\s+much\s+land|land\s+size|terreno/i, field: 'terreno', type: 'string' },
   
-  // Pool variations
-  'swimming pool': 'piscina',
-  'would you like a swimming pool?': 'piscina',
-  'pool': 'piscina',
+  // Pool
+  { pattern: /swimming\s+pool|pool|piscina/i, field: 'piscina', type: 'string' },
   
-  // Use variations
-  'use': 'uso',
-  'how do you intend to use the property?': 'uso',
-  'property use': 'uso',
-  'intended use': 'uso',
+  // Use
+  { pattern: /intend\s+to\s+use|property\s+use|uso/i, field: 'uso', type: 'string' },
   
-  // Rental interest variations
-  'rent': 'interesse_affitto',
-  'would you consider renting out the property when you are not using it?': 'interesse_affitto',
-  'rental interest': 'interesse_affitto',
+  // Rental interest
+  { pattern: /renting\s+out|rental|affitto/i, field: 'interesse_affitto', type: 'string' },
   
-  // Description variations
-  'property description': 'descrizione',
-  'how would you describe your ideal property?': 'descrizione',
-  'ideal property': 'descrizione',
-  'description': 'descrizione',
+  // Description
+  { pattern: /describe.*ideal\s+property|property\s+description|descrizione/i, field: 'descrizione', type: 'string' },
   
-  // Extra notes variations
-  'more': 'note_extra',
-  'is there anything else you would like us to know?': 'note_extra',
-  'additional notes': 'note_extra',
-  'extra notes': 'note_extra',
-  'anything else': 'note_extra',
-  
-  // Email variations
-  'email': 'email',
-  'your email': 'email',
-  'email address': 'email',
-  
-  // Date variations
-  'date': 'data_submission',
-  'submitted at': 'data_submission',
-  'submission date': 'data_submission',
-  
-  // Submission ID variations
-  'submission id': 'tally_submission_id',
-  'tally id': 'tally_submission_id',
-  'id': 'tally_submission_id',
+  // Extra notes
+  { pattern: /anything\s+else|extra|additional|more$/i, field: 'note_extra', type: 'string' },
+];
+
+// Clean header text from HTML entities and whitespace
+const cleanHeader = (header: string): string => {
+  return header
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
-const parseCSVLine = (line: string): string[] => {
-  const result: string[] = [];
-  let current = '';
+// Parse CSV handling quoted fields with newlines
+const parseCSV = (csvText: string): { headers: string[]; rows: string[][] } => {
+  const result: string[][] = [];
+  let currentRow: string[] = [];
+  let currentField = '';
   let inQuotes = false;
   
-  for (let i = 0; i < line.length; i++) {
-    const char = line[i];
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+    
     if (char === '"') {
-      inQuotes = !inQuotes;
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote
+        currentField += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
     } else if (char === ',' && !inQuotes) {
-      result.push(current.trim());
-      current = '';
+      currentRow.push(currentField.trim());
+      currentField = '';
+    } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
+      if (char === '\r') i++; // Skip \n in \r\n
+      currentRow.push(currentField.trim());
+      if (currentRow.some(f => f)) { // Only add non-empty rows
+        result.push(currentRow);
+      }
+      currentRow = [];
+      currentField = '';
+    } else if (char === '\r' && !inQuotes) {
+      // Handle \r without \n
+      currentRow.push(currentField.trim());
+      if (currentRow.some(f => f)) {
+        result.push(currentRow);
+      }
+      currentRow = [];
+      currentField = '';
     } else {
-      current += char;
+      currentField += char;
     }
   }
-  result.push(current.trim());
-  return result;
+  
+  // Don't forget the last field and row
+  if (currentField || currentRow.length > 0) {
+    currentRow.push(currentField.trim());
+    if (currentRow.some(f => f)) {
+      result.push(currentRow);
+    }
+  }
+  
+  if (result.length === 0) return { headers: [], rows: [] };
+  
+  return {
+    headers: result[0].map(cleanHeader),
+    rows: result.slice(1)
+  };
 };
 
 const parseBudget = (value: string): number | null => {
   if (!value) return null;
-  // Extract number from strings like "€600,000" or "600000"
-  const cleaned = value.replace(/[€$,\s]/g, '');
-  const num = parseFloat(cleaned);
+  // Extract numbers from strings like "€600,000" or "600000" or "600.000"
+  const cleaned = value.replace(/[€$,.\s]/g, '');
+  // Handle European format where . is thousands separator
+  const match = value.match(/[\d.,]+/);
+  if (!match) return null;
+  
+  let numStr = match[0];
+  // If contains both . and ,, determine format
+  if (numStr.includes('.') && numStr.includes(',')) {
+    // European: 600.000,00 or US: 600,000.00
+    const lastDot = numStr.lastIndexOf('.');
+    const lastComma = numStr.lastIndexOf(',');
+    if (lastComma > lastDot) {
+      // European format: comma is decimal
+      numStr = numStr.replace(/\./g, '').replace(',', '.');
+    } else {
+      // US format: dot is decimal
+      numStr = numStr.replace(/,/g, '');
+    }
+  } else if (numStr.includes(',')) {
+    // Could be thousands separator or decimal
+    const parts = numStr.split(',');
+    if (parts.length === 2 && parts[1].length === 2) {
+      // Likely decimal: 600,00
+      numStr = numStr.replace(',', '.');
+    } else {
+      // Likely thousands: 600,000
+      numStr = numStr.replace(/,/g, '');
+    }
+  } else if (numStr.includes('.')) {
+    // Could be thousands separator or decimal
+    const parts = numStr.split('.');
+    if (parts.length === 2 && parts[1].length === 3) {
+      // Likely thousands: 600.000
+      numStr = numStr.replace(/\./g, '');
+    }
+    // Otherwise keep as is (decimal)
+  }
+  
+  const num = parseFloat(numStr);
   return isNaN(num) ? null : num;
 };
 
 const parseBoolean = (value: string): boolean => {
-  const lower = value.toLowerCase();
-  return lower === 'yes' || lower === 'true' || lower === 'sì' || lower === 'si';
+  if (!value) return false;
+  const lower = value.toLowerCase().trim();
+  return lower === 'yes' || lower === 'true' || lower === 'sì' || lower === 'si' || lower === '1';
 };
 
-const parseArray = (value: string): string[] => {
-  if (!value) return [];
-  // Handle comma-separated values within the cell
-  return value.split(',').map(v => v.trim()).filter(Boolean);
+const parseNumber = (value: string): number | null => {
+  if (!value) return null;
+  const match = value.match(/\d+/);
+  if (!match) return null;
+  const num = parseInt(match[0]);
+  return isNaN(num) ? null : num;
 };
+
+interface ColumnInfo {
+  index: number;
+  field: string;
+  type: HeaderMapping['type'];
+  optionValue?: string; // For multi-column array fields
+}
 
 export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTallyDialogProps) {
   const { profile } = useAuth();
@@ -220,77 +263,152 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     setResults(null);
 
     try {
-      const lines = csvData.trim().split('\n');
-      if (lines.length < 2) {
+      const { headers, rows } = parseCSV(csvData);
+      
+      if (headers.length === 0 || rows.length === 0) {
         toast({ title: 'CSV vuoto', description: 'Il file non contiene dati', variant: 'destructive' });
         setIsLoading(false);
         return;
       }
 
-      // Parse headers
-      const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase().trim());
-      
+      // Map headers to column info
+      const columnInfos: ColumnInfo[] = [];
+      headers.forEach((header, index) => {
+        const cleanedHeader = cleanHeader(header);
+        
+        for (const mapping of HEADER_MAPPINGS) {
+          const match = cleanedHeader.match(mapping.pattern);
+          if (match) {
+            const info: ColumnInfo = {
+              index,
+              field: mapping.field,
+              type: mapping.type,
+            };
+            
+            // Extract option value from parentheses if applicable
+            if (mapping.extractOption && match[1]) {
+              info.optionValue = match[1].trim();
+            }
+            
+            columnInfos.push(info);
+            break;
+          }
+        }
+      });
+
       const clienti: Record<string, any>[] = [];
       const errors: string[] = [];
 
-      // Parse rows
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
+      // Process each row
+      for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
+        const values = rows[rowIdx];
         
         try {
-          const values = parseCSVLine(lines[i]);
           const row: Record<string, any> = {
             sede: profile.sede,
             status: 'new',
             emoji: '🏠',
           };
 
-          headers.forEach((header, idx) => {
-            const value = values[idx] || '';
-            const dbField = FIELD_MAPPING[header];
-            
-            if (!dbField) return;
+          // Initialize array fields
+          const arrayFields: Record<string, string[]> = {
+            regioni: [],
+            tipologia: [],
+            contesto: [],
+            motivo_zona: [],
+          };
 
-            switch (dbField) {
-              case 'budget_max':
-                row[dbField] = parseBudget(value);
-                break;
-              case 'ha_visitato':
-              case 'vicinanza_citta':
-                row[dbField] = parseBoolean(value);
-                break;
-              case 'regioni':
-              case 'tipologia':
-              case 'contesto':
-              case 'motivo_zona':
-                row[dbField] = parseArray(value);
-                break;
-              case 'bagni':
-              case 'dimensioni_min':
-              case 'dimensioni_max':
-                const num = parseInt(value);
-                row[dbField] = isNaN(num) ? null : num;
-                break;
-              case 'data_submission':
-                if (value) {
-                  const date = new Date(value);
-                  row[dbField] = isNaN(date.getTime()) ? null : date.toISOString();
+          // Process each mapped column
+          columnInfos.forEach((colInfo) => {
+            const value = values[colInfo.index] || '';
+            if (!value) return;
+
+            switch (colInfo.type) {
+              case 'string':
+                // For string fields, only set if not already set (first match wins)
+                if (!row[colInfo.field]) {
+                  row[colInfo.field] = value;
                 }
                 break;
-              default:
-                row[dbField] = value || null;
+                
+              case 'number':
+                if (!row[colInfo.field]) {
+                  row[colInfo.field] = parseNumber(value);
+                }
+                break;
+                
+              case 'boolean':
+                // For boolean, set to true if any column indicates true
+                if (parseBoolean(value)) {
+                  row[colInfo.field] = true;
+                }
+                break;
+                
+              case 'budget':
+                if (!row[colInfo.field]) {
+                  row[colInfo.field] = parseBudget(value);
+                }
+                break;
+                
+              case 'date':
+                if (!row[colInfo.field] && value) {
+                  const date = new Date(value);
+                  if (!isNaN(date.getTime())) {
+                    row[colInfo.field] = date.toISOString();
+                  }
+                }
+                break;
+                
+              case 'array':
+                // Handle array fields
+                if (colInfo.optionValue) {
+                  // This is a sub-column for a multi-select
+                  // If value is non-empty (checked), add the option
+                  if (value && parseBoolean(value)) {
+                    arrayFields[colInfo.field]?.push(colInfo.optionValue);
+                  } else if (value && value.toLowerCase() !== 'no' && value.toLowerCase() !== 'false') {
+                    // Sometimes the value IS the option name
+                    arrayFields[colInfo.field]?.push(value);
+                  }
+                } else {
+                  // Main column with comma-separated values
+                  const items = value.split(',').map(v => v.trim()).filter(Boolean);
+                  if (items.length > 0) {
+                    arrayFields[colInfo.field] = [...(arrayFields[colInfo.field] || []), ...items];
+                  }
+                }
+                break;
+            }
+          });
+
+          // Set array fields on row
+          Object.entries(arrayFields).forEach(([field, values]) => {
+            if (values.length > 0) {
+              // Remove duplicates
+              row[field] = [...new Set(values)];
             }
           });
 
           if (!row.nome) {
-            errors.push(`Riga ${i + 1}: Nome mancante`);
+            errors.push(`Riga ${rowIdx + 2}: Nome mancante`);
             continue;
           }
 
           clienti.push(row);
         } catch (err) {
-          errors.push(`Riga ${i + 1}: Errore parsing`);
+          errors.push(`Riga ${rowIdx + 2}: Errore parsing`);
         }
+      }
+
+      if (clienti.length === 0) {
+        toast({ 
+          title: 'Nessun cliente valido', 
+          description: `Trovati ${errors.length} errori. Controlla il formato del CSV.`, 
+          variant: 'destructive' 
+        });
+        setResults({ success: 0, errors });
+        setIsLoading(false);
+        return;
       }
 
       // Insert in batches
