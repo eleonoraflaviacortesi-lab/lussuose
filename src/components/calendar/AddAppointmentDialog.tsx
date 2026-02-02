@@ -105,12 +105,12 @@ const AddAppointmentDialog = ({ open, onOpenChange, defaultDate }: Props) => {
             <label className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1.5 block">
               Cliente Collegato
             </label>
-            <Select value={clienteId} onValueChange={setClienteId}>
+            <Select value={clienteId} onValueChange={(value) => setClienteId(value === 'none' ? '' : value)}>
               <SelectTrigger className="bg-muted border-0 rounded-xl">
                 <SelectValue placeholder="Seleziona cliente (opzionale)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nessun cliente</SelectItem>
+                <SelectItem value="none">Nessun cliente</SelectItem>
                 {clienti?.map((cliente) => (
                   <SelectItem key={cliente.id} value={cliente.id}>
                     {cliente.nome}
@@ -119,7 +119,6 @@ const AddAppointmentDialog = ({ open, onOpenChange, defaultDate }: Props) => {
               </SelectContent>
             </Select>
           </div>
-
           {/* Date */}
           <div>
             <label className="text-xs font-medium tracking-wider uppercase text-muted-foreground mb-1.5 block">
