@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -7,10 +7,18 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { Upload, Loader2, CheckCircle, AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { CSVPreviewTable } from './CSVPreviewTable';
+import {
+  parseCSVText,
+  autoMapHeaders,
+  rowToClient,
+  ColumnInfo,
+  AVAILABLE_FIELDS,
+} from '@/lib/csvParser';
 
 interface ImportTallyDialogProps {
   open: boolean;
@@ -18,418 +26,86 @@ interface ImportTallyDialogProps {
   onSuccess: () => void;
 }
 
-// Header pattern matching for Tally CSV columns
-interface HeaderMapping {
-  pattern: RegExp;
-  field: string;
-  type: 'string' | 'number' | 'boolean' | 'array' | 'date' | 'budget';
-  // For multi-column array fields, extract the option value from header
-  extractOption?: boolean;
-}
-
-const HEADER_MAPPINGS: HeaderMapping[] = [
-  // Name
-  { pattern: /^(your\s+)?name(\s+and\s+surname)?$/i, field: 'nome', type: 'string' },
-  
-  // Phone
-  { pattern: /phone\s*(number)?/i, field: 'telefono', type: 'string' },
-  
-  // Country
-  { pattern: /(respondent'?s?\s+)?country/i, field: 'paese', type: 'string' },
-  
-  // Email  
-  { pattern: /^(your\s+)?email(\s+address)?$/i, field: 'email', type: 'string' },
-  
-  // Submission ID
-  { pattern: /^submission\s*id$/i, field: 'tally_submission_id', type: 'string' },
-  
-  // Date
-  { pattern: /^submitted\s+at$/i, field: 'data_submission', type: 'date' },
-  
-  // Budget
-  { pattern: /(estimated\s+)?budget|max\s+budget/i, field: 'budget_max', type: 'budget' },
-  
-  // Mortgage
-  // Tally exports both a main column and Yes/No/Not sure sub-columns
-  { pattern: /^will\s+you\s+require\s+a\s+mortgage.*\((yes|no|not\s+sure\s+yet)\)$/i, field: 'mutuo', type: 'string', extractOption: true },
-  { pattern: /^will\s+you\s+require\s+a\s+mortgage/i, field: 'mutuo', type: 'string' },
-  { pattern: /mortgage|mutuo/i, field: 'mutuo', type: 'string' },
-  
-  // Search time
-  { pattern: /how\s+long.*looking|search\s+time/i, field: 'tempo_ricerca', type: 'string' },
-  
-  // Viewed properties
-  { pattern: /viewed\s+properties|visited\s+properties/i, field: 'ha_visitato', type: 'boolean' },
-  
-  // Regions - main column or sub-columns with region names
-  { pattern: /^which\s+regions.*\(([^)]+)\)$/i, field: 'regioni', type: 'array', extractOption: true },
-  { pattern: /^which\s+regions(?!\s*\()/i, field: 'regioni', type: 'array' },
-  { pattern: /^regions$/i, field: 'regioni', type: 'array' },
-  
-  // Proximity to cities
-  { pattern: /proximity.*cit|prox.*main\s+cit|vicinanza/i, field: 'vicinanza_citta', type: 'boolean' },
-  
-  // Reason for area
-  { pattern: /draws\s+you|why\s+area|what\s+attracts/i, field: 'motivo_zona', type: 'array' },
-  // Italian variants
-  { pattern: /^perch[ée]\s+(questa\s+)?zona\??$/i, field: 'motivo_zona', type: 'array' },
-  { pattern: /motivo\s+zona|cosa\s+ti\s+attira/i, field: 'motivo_zona', type: 'array' },
-  
-  // Property type - main column or sub-columns
-  { pattern: /^what\s+type\s+of\s+property.*\(([^)]+)\)$/i, field: 'tipologia', type: 'array', extractOption: true },
-  { pattern: /^what\s+type\s+of\s+property(?!\s*\()/i, field: 'tipologia', type: 'array' },
-  { pattern: /^property\s+type$/i, field: 'tipologia', type: 'array' },
-  
-  // Style
-  { pattern: /^which\s+kind\s+of\s+style.*\(([^)]+)\)$/i, field: 'stile', type: 'string', extractOption: true },
-  { pattern: /style|stile/i, field: 'stile', type: 'string' },
-  
-  // Setting/context - main column or sub-columns
-  { pattern: /^what\s+kind\s+of\s+setting.*\(([^)]+)\)$/i, field: 'contesto', type: 'array', extractOption: true },
-  { pattern: /^what\s+kind\s+of\s+setting(?!\s*\()/i, field: 'contesto', type: 'array' },
-  { pattern: /^setting$/i, field: 'contesto', type: 'array' },
-  // Italian variants
-  { pattern: /^contesto\s+desiderato.*\(([^)]+)\)$/i, field: 'contesto', type: 'array', extractOption: true },
-  { pattern: /^contesto\s+desiderato/i, field: 'contesto', type: 'array' },
-  { pattern: /^contesto$/i, field: 'contesto', type: 'array' },
-  
-  // Size
-  { pattern: /size.*property|property\s+size|dimensioni/i, field: 'dimensioni_min', type: 'number' },
-  
-  // Bedrooms
-  { pattern: /bedroom|camere/i, field: 'camere', type: 'string' },
-  
-  // Bathrooms
-  { pattern: /bathroom|bagni/i, field: 'bagni', type: 'number' },
-  
-  // Layout
-  { pattern: /layout/i, field: 'layout', type: 'string' },
-  
-  // Guesthouse/annex
-  { pattern: /guesthouse|annex|dependance/i, field: 'dependance', type: 'string' },
-  
-  // Land
-  { pattern: /^do\s+you\s+require\s+land\??$/i, field: 'terreno', type: 'string' },
-  { pattern: /^if\s+yes,\s+how\s+much\s+land/i, field: 'terreno', type: 'string' },
-  { pattern: /^how\s+much\s+land|land\s+size|terreno/i, field: 'terreno', type: 'string' },
-  // Italian variants
-  { pattern: /^vuole\s+terreno\??$/i, field: 'terreno', type: 'string' },
-  { pattern: /^se\s+s[ìi],?\s+quanto\s+terreno/i, field: 'terreno', type: 'string' },
-  { pattern: /dimensione\s+terreno|ettari/i, field: 'terreno', type: 'string' },
-  
-  // Pool
-  { pattern: /swimming\s+pool|pool|piscina/i, field: 'piscina', type: 'string' },
-  
-  // Use
-  { pattern: /intend\s+to\s+use|property\s+use|uso/i, field: 'uso', type: 'string' },
-  // Italian variants
-  { pattern: /^come\s+user[àa]\s+la\s+propriet[àa]/i, field: 'uso', type: 'string' },
-  { pattern: /utilizzo|finalit[àa]/i, field: 'uso', type: 'string' },
-  
-  // Rental interest
-  { pattern: /renting\s+out|rental|affitto/i, field: 'interesse_affitto', type: 'string' },
-  // Italian variants
-  { pattern: /^interessato\s+(ad\s+)?affittare/i, field: 'interesse_affitto', type: 'string' },
-  
-  // Description
-  { pattern: /describe.*ideal\s+property|property\s+description|descrizione/i, field: 'descrizione', type: 'string' },
-  
-  // Extra notes
-  { pattern: /anything\s+else|extra|additional|more$/i, field: 'note_extra', type: 'string' },
-];
-
-// Clean header text from HTML entities and whitespace
-const cleanHeader = (header: string): string => {
-  return header
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
-
-// Parse CSV handling quoted fields with newlines
-const parseCSV = (csvText: string): { headers: string[]; rows: string[][] } => {
-  const result: string[][] = [];
-  let currentRow: string[] = [];
-  let currentField = '';
-  let inQuotes = false;
-  
-  for (let i = 0; i < csvText.length; i++) {
-    const char = csvText[i];
-    const nextChar = csvText[i + 1];
-    
-    if (char === '"') {
-      if (inQuotes && nextChar === '"') {
-        // Escaped quote
-        currentField += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (char === ',' && !inQuotes) {
-      currentRow.push(currentField.trim());
-      currentField = '';
-    } else if ((char === '\n' || (char === '\r' && nextChar === '\n')) && !inQuotes) {
-      if (char === '\r') i++; // Skip \n in \r\n
-      currentRow.push(currentField.trim());
-      if (currentRow.some(f => f)) { // Only add non-empty rows
-        result.push(currentRow);
-      }
-      currentRow = [];
-      currentField = '';
-    } else if (char === '\r' && !inQuotes) {
-      // Handle \r without \n
-      currentRow.push(currentField.trim());
-      if (currentRow.some(f => f)) {
-        result.push(currentRow);
-      }
-      currentRow = [];
-      currentField = '';
-    } else {
-      currentField += char;
-    }
-  }
-  
-  // Don't forget the last field and row
-  if (currentField || currentRow.length > 0) {
-    currentRow.push(currentField.trim());
-    if (currentRow.some(f => f)) {
-      result.push(currentRow);
-    }
-  }
-  
-  if (result.length === 0) return { headers: [], rows: [] };
-  
-  return {
-    headers: result[0].map(cleanHeader),
-    rows: result.slice(1)
-  };
-};
-
-const parseBudget = (value: string): number | null => {
-  if (!value) return null;
-
-  // Handles: "€600,000" | "600000" | "600.000" | "€ 1.5 M" | "700k"
-  const lower = value.toLowerCase();
-  const multiplier =
-    lower.includes('million') || /\b\d+(?:[\.,]\d+)?\s*m\b/.test(lower) ? 1_000_000 :
-    /\b\d+(?:[\.,]\d+)?\s*k\b/.test(lower) ? 1_000 :
-    1;
-
-  const match = value.match(/[\d.,]+/);
-  if (!match) return null;
-
-  let numStr = match[0];
-  // If contains both . and ,, determine format
-  if (numStr.includes('.') && numStr.includes(',')) {
-    // European: 600.000,00 or US: 600,000.00
-    const lastDot = numStr.lastIndexOf('.');
-    const lastComma = numStr.lastIndexOf(',');
-    if (lastComma > lastDot) {
-      // European format: comma is decimal
-      numStr = numStr.replace(/\./g, '').replace(',', '.');
-    } else {
-      // US format: dot is decimal
-      numStr = numStr.replace(/,/g, '');
-    }
-  } else if (numStr.includes(',')) {
-    // Could be thousands separator or decimal
-    const parts = numStr.split(',');
-    if (parts.length === 2 && parts[1].length === 2) {
-      // Likely decimal: 600,00
-      numStr = numStr.replace(',', '.');
-    } else {
-      // Likely thousands: 600,000
-      numStr = numStr.replace(/,/g, '');
-    }
-  } else if (numStr.includes('.')) {
-    // Could be thousands separator or decimal
-    const parts = numStr.split('.');
-    if (parts.length === 2 && parts[1].length === 3) {
-      // Likely thousands: 600.000
-      numStr = numStr.replace(/\./g, '');
-    }
-    // Otherwise keep as is (decimal)
-  }
-
-  const num = parseFloat(numStr);
-  if (isNaN(num)) return null;
-  return num * multiplier;
-};
-
-const parseBoolean = (value: string): boolean => {
-  if (!value) return false;
-  const lower = value.toLowerCase().trim();
-  return lower === 'yes' || lower === 'true' || lower === 'sì' || lower === 'si' || lower === '1';
-};
-
-const parseNumber = (value: string): number | null => {
-  if (!value) return null;
-  const match = value.match(/\d+/);
-  if (!match) return null;
-  const num = parseInt(match[0]);
-  return isNaN(num) ? null : num;
-};
-
-interface ColumnInfo {
-  index: number;
-  field: string;
-  type: HeaderMapping['type'];
-  optionValue?: string; // For multi-column array fields
-}
+type Step = 'upload' | 'preview' | 'result';
 
 export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTallyDialogProps) {
   const { profile } = useAuth();
   const [csvData, setCsvData] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<{ success: number; errors: string[] } | null>(null);
+  const [step, setStep] = useState<Step>('upload');
+  
+  // Parsed CSV data
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [rows, setRows] = useState<string[][]>([]);
+  const [columnInfos, setColumnInfos] = useState<ColumnInfo[]>([]);
 
+  // Parse CSV when moving to preview
+  const handleParseCSV = () => {
+    if (!csvData.trim()) return;
+    
+    const parsed = parseCSVText(csvData);
+    if (parsed.headers.length === 0 || parsed.rows.length === 0) {
+      toast({ 
+        title: 'CSV vuoto', 
+        description: 'Il file non contiene dati validi', 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
+    setHeaders(parsed.headers);
+    setRows(parsed.rows);
+    setColumnInfos(autoMapHeaders(parsed.headers));
+    setStep('preview');
+  };
+
+  // Handle column mapping change
+  const handleColumnMappingChange = (index: number, field: string) => {
+    setColumnInfos(prev => {
+      const updated = prev.map(c => {
+        if (c.index === index) {
+          // Find the field type from AVAILABLE_FIELDS or default to string
+          const fieldDef = AVAILABLE_FIELDS.find(f => f.value === field);
+          return { ...c, field, type: 'string' as const };
+        }
+        return c;
+      });
+      
+      // If this index doesn't exist yet, add it
+      if (!updated.find(c => c.index === index)) {
+        updated.push({
+          index,
+          header: headers[index] || '',
+          field,
+          type: 'string',
+        });
+      }
+      
+      return updated;
+    });
+  };
+
+  // Perform the import
   const handleImport = async () => {
-    if (!csvData.trim() || !profile) return;
+    if (!profile) return;
 
     setIsLoading(true);
     setResults(null);
 
     try {
-      const { headers, rows } = parseCSV(csvData);
-      
-      if (headers.length === 0 || rows.length === 0) {
-        toast({ title: 'CSV vuoto', description: 'Il file non contiene dati', variant: 'destructive' });
-        setIsLoading(false);
-        return;
-      }
-
-      // Map headers to column info
-      const columnInfos: ColumnInfo[] = [];
-      headers.forEach((header, index) => {
-        const cleanedHeader = cleanHeader(header);
-        
-        for (const mapping of HEADER_MAPPINGS) {
-          const match = cleanedHeader.match(mapping.pattern);
-          if (match) {
-            const info: ColumnInfo = {
-              index,
-              field: mapping.field,
-              type: mapping.type,
-            };
-            
-            // Extract option value from parentheses if applicable
-            if (mapping.extractOption && match[1]) {
-              info.optionValue = match[1].trim();
-            }
-            
-            columnInfos.push(info);
-            break;
-          }
-        }
-      });
-
       const clienti: Record<string, any>[] = [];
       const errors: string[] = [];
 
       // Process each row
       for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
-        const values = rows[rowIdx];
-        
         try {
-          const row: Record<string, any> = {
-            sede: profile.sede,
-            status: 'new',
-            emoji: '🏠',
-          };
-
-          // Initialize array fields
-          const arrayFields: Record<string, string[]> = {
-            regioni: [],
-            tipologia: [],
-            contesto: [],
-            motivo_zona: [],
-          };
-
-          // Process each mapped column
-          columnInfos.forEach((colInfo) => {
-            const value = values[colInfo.index] || '';
-            if (!value) return;
-
-            switch (colInfo.type) {
-              case 'string':
-                // For string fields, only set if not already set (first match wins)
-                // If this is a checkbox sub-column (optionValue), only set when checked.
-                if (colInfo.optionValue) {
-                  if (parseBoolean(value) && !row[colInfo.field]) {
-                    row[colInfo.field] = colInfo.optionValue;
-                  }
-                } else if (!row[colInfo.field]) {
-                  // Avoid storing "true/false" into string fields (common in Tally sub-columns)
-                  const v = value.toLowerCase().trim();
-                  if (v !== 'true' && v !== 'false') {
-                    row[colInfo.field] = value;
-                  }
-                }
-                break;
-                
-              case 'number':
-                if (!row[colInfo.field]) {
-                  row[colInfo.field] = parseNumber(value);
-                }
-                break;
-                
-              case 'boolean':
-                // For boolean, set to true if any column indicates true
-                if (parseBoolean(value)) {
-                  row[colInfo.field] = true;
-                }
-                break;
-                
-              case 'budget':
-                if (!row[colInfo.field]) {
-                  row[colInfo.field] = parseBudget(value);
-                }
-                break;
-                
-              case 'date':
-                if (!row[colInfo.field] && value) {
-                  const date = new Date(value);
-                  if (!isNaN(date.getTime())) {
-                    row[colInfo.field] = date.toISOString();
-                  }
-                }
-                break;
-                
-              case 'array':
-                // Handle array fields
-                if (colInfo.optionValue) {
-                  // This is a sub-column for a multi-select
-                  // If checked, add the option
-                  if (parseBoolean(value)) {
-                    arrayFields[colInfo.field]?.push(colInfo.optionValue);
-                  }
-                } else {
-                  // Main column with comma-separated values
-                  const v = value.toLowerCase().trim();
-                  if (v === 'true' || v === 'false') return;
-                  const items = value.split(',').map(v => v.trim()).filter(Boolean);
-                  if (items.length > 0) {
-                    arrayFields[colInfo.field] = [...(arrayFields[colInfo.field] || []), ...items];
-                  }
-                }
-                break;
-            }
-          });
-
-          // Set array fields on row
-          Object.entries(arrayFields).forEach(([field, values]) => {
-            if (values.length > 0) {
-              // Remove duplicates
-              row[field] = [...new Set(values)];
-            }
-          });
-
-          if (!row.nome) {
+          const client = rowToClient(rows[rowIdx], columnInfos, profile.sede);
+          if (client) {
+            clienti.push(client);
+          } else {
             errors.push(`Riga ${rowIdx + 2}: Nome mancante`);
-            continue;
           }
-
-          clienti.push(row);
         } catch (err) {
           errors.push(`Riga ${rowIdx + 2}: Errore parsing`);
         }
@@ -438,10 +114,11 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
       if (clienti.length === 0) {
         toast({ 
           title: 'Nessun cliente valido', 
-          description: `Trovati ${errors.length} errori. Controlla il formato del CSV.`, 
+          description: `Trovati ${errors.length} errori. Verifica la mappatura delle colonne.`, 
           variant: 'destructive' 
         });
         setResults({ success: 0, errors });
+        setStep('result');
         setIsLoading(false);
         return;
       }
@@ -467,6 +144,7 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
       }
 
       setResults({ success: successCount, errors });
+      setStep('result');
       
       if (successCount > 0) {
         toast({ 
@@ -497,43 +175,89 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     reader.readAsText(file);
   };
 
+  const handleClose = () => {
+    onOpenChange(false);
+    // Reset state after close animation
+    setTimeout(() => {
+      setStep('upload');
+      setCsvData('');
+      setHeaders([]);
+      setRows([]);
+      setColumnInfos([]);
+      setResults(null);
+    }, 300);
+  };
+
+  const handleBack = () => {
+    if (step === 'preview') {
+      setStep('upload');
+    } else if (step === 'result') {
+      setStep('preview');
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+    <Dialog open={open} onOpenChange={handleClose}>
+      <DialogContent className={`${step === 'preview' ? 'max-w-5xl' : 'max-w-2xl'} max-h-[90vh] overflow-hidden flex flex-col`}>
         <DialogHeader>
-          <DialogTitle>Importa da Tally CSV</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {step !== 'upload' && (
+              <Button variant="ghost" size="icon" onClick={handleBack} className="h-8 w-8">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            {step === 'upload' && 'Importa da Tally CSV'}
+            {step === 'preview' && 'Anteprima e Mappatura Colonne'}
+            {step === 'result' && 'Risultato Import'}
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="text-sm text-muted-foreground">
-            <p>Esporta i dati dal tuo form Tally in formato CSV e incollali qui sotto, oppure carica il file.</p>
-            <p className="mt-2">Il sistema riconoscerà automaticamente i campi del form.</p>
-          </div>
+        <div className="flex-1 overflow-auto space-y-4">
+          {/* Step 1: Upload */}
+          {step === 'upload' && (
+            <>
+              <div className="text-sm text-muted-foreground">
+                <p>Esporta i dati dal tuo form Tally in formato CSV e incollali qui sotto, oppure carica il file.</p>
+                <p className="mt-2">Nel passo successivo potrai verificare e modificare la mappatura delle colonne.</p>
+              </div>
 
-          {/* File upload */}
-          <div>
-            <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-              <Upload className="w-5 h-5" />
-              <span>Carica file CSV</span>
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileUpload}
-                className="hidden"
+              {/* File upload */}
+              <div>
+                <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Upload className="w-5 h-5" />
+                  <span>Carica file CSV</span>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* CSV textarea */}
+              <Textarea
+                placeholder="Oppure incolla qui il contenuto CSV..."
+                value={csvData}
+                onChange={(e) => setCsvData(e.target.value)}
+                className="min-h-[200px] font-mono text-xs"
               />
-            </label>
-          </div>
+            </>
+          )}
 
-          {/* CSV textarea */}
-          <Textarea
-            placeholder="Oppure incolla qui il contenuto CSV..."
-            value={csvData}
-            onChange={(e) => setCsvData(e.target.value)}
-            className="min-h-[200px] font-mono text-xs"
-          />
+          {/* Step 2: Preview */}
+          {step === 'preview' && (
+            <CSVPreviewTable
+              headers={headers}
+              rows={rows}
+              columnInfos={columnInfos}
+              onColumnMappingChange={handleColumnMappingChange}
+              previewRowCount={3}
+            />
+          )}
 
-          {/* Results */}
-          {results && (
+          {/* Step 3: Results */}
+          {step === 'result' && results && (
             <div className="rounded-lg bg-muted p-4 space-y-2">
               <div className="flex items-center gap-2 text-sm">
                 <CheckCircle className="w-4 h-4 text-green-500" />
@@ -556,15 +280,28 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
               )}
             </div>
           )}
+        </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Chiudi
+        {/* Actions */}
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={handleClose}>
+            {step === 'result' ? 'Chiudi' : 'Annulla'}
+          </Button>
+          
+          {step === 'upload' && (
+            <Button 
+              onClick={handleParseCSV} 
+              disabled={!csvData.trim()}
+            >
+              Avanti
+              <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
+          )}
+          
+          {step === 'preview' && (
             <Button 
               onClick={handleImport} 
-              disabled={!csvData.trim() || isLoading}
+              disabled={isLoading || columnInfos.filter(c => c.field).length === 0}
             >
               {isLoading ? (
                 <>
@@ -572,10 +309,16 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
                   Importazione...
                 </>
               ) : (
-                'Importa'
+                `Importa ${rows.length} clienti`
               )}
             </Button>
-          </div>
+          )}
+          
+          {step === 'result' && results && results.success > 0 && (
+            <Button onClick={handleClose}>
+              Fatto
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
