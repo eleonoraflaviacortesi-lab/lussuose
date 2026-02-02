@@ -37,7 +37,7 @@ export type CalendarEvent = {
 };
 
 // Quick emojis
-const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞'];
+const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
 
 // Helper to determine if color is dark
 const isDarkColor = (color: string | null): boolean => {
