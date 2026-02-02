@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, GripVertical } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -879,7 +879,6 @@ const CalendarPage = () => {
                                 <div
                                   ref={provided.innerRef}
                                   {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
                                   style={provided.draggableProps.style}
                                 >
                                   <DraggableEventCard
@@ -891,6 +890,7 @@ const CalendarPage = () => {
                                     onToggle={handleToggleCompleted}
                                     isDragging={snapshot.isDragging}
                                     hasComment={!!event.lastComment}
+                                    dragHandleProps={provided.dragHandleProps}
                                   />
                                 </div>
                               )}
@@ -1200,6 +1200,7 @@ const DraggableEventCard = memo(({
   onToggle,
   isDragging,
   hasComment,
+  dragHandleProps,
 }: {
   event: CalendarEvent;
   onClick: () => void;
@@ -1209,6 +1210,7 @@ const DraggableEventCard = memo(({
   onToggle: (id: string, completed: boolean) => void;
   isDragging: boolean;
   hasComment?: boolean;
+  dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
     if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
@@ -1233,7 +1235,7 @@ const DraggableEventCard = memo(({
   return (
     <div
       className={cn(
-        "rounded-lg p-2 transition-all cursor-grab active:cursor-grabbing relative",
+        "rounded-lg p-2 transition-all relative",
         styles.bg,
         event.urgent && "ring-2 ring-red-500",
         isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
@@ -1258,7 +1260,20 @@ const DraggableEventCard = memo(({
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      <div className="flex items-center justify-center gap-2">
+      <div className="flex items-center gap-1.5">
+        {/* Drag handle */}
+        <div
+          {...dragHandleProps}
+          className={cn(
+            "shrink-0 cursor-grab active:cursor-grabbing touch-none p-0.5 rounded hover:bg-black/10 transition-colors",
+            styles.customBg && isDarkColor(styles.customBg) ? 'text-white/60 hover:text-white hover:bg-white/20' : 'text-muted-foreground hover:text-foreground'
+          )}
+          onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+        >
+          <GripVertical className="w-3 h-3" />
+        </div>
+        
         {event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
@@ -1268,7 +1283,7 @@ const DraggableEventCard = memo(({
           />
         )}
         
-        <p className={cn("text-[10px] font-medium truncate", styles.textClass)}>
+        <p className={cn("text-[10px] font-medium truncate flex-1", styles.textClass)}>
           {event.title}
         </p>
       </div>
