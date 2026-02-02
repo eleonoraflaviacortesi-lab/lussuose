@@ -1,5 +1,5 @@
-import { useState, useEffect, lazy, Suspense, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/layout/Header';
@@ -19,12 +19,26 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 
+// Map URL paths to tab ids
+const pathToTab: Record<string, string> = {
+  '/': 'numeri',
+  '/calendario': 'calendario',
+  '/notizie': 'notizie',
+  '/clienti': 'clienti',
+  '/inserisci': 'inserisci',
+  '/agenzia': 'agenzia',
+  '/impostazioni': 'impostazioni',
+};
+
 type IndexContentProps = {
   initialTab?: string;
 };
 
 const IndexContent = ({ initialTab }: IndexContentProps) => {
-  const [activeTab, setActiveTab] = useState(initialTab ?? 'numeri');
+  const location = useLocation();
+  // Derive initial tab from URL path, falling back to initialTab prop or 'numeri'
+  const getTabFromPath = () => pathToTab[location.pathname] || initialTab || 'numeri';
+  const [activeTab, setActiveTab] = useState(getTabFromPath);
   const [pendingClienteId, setPendingClienteId] = useState<string | null>(null);
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const { user, loading } = useAuth();

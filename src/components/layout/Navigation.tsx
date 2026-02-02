@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { Home, Megaphone, Building2, Settings, TrendingUp, Users, Calendar } from 'lucide-react';
@@ -7,7 +8,19 @@ interface NavigationProps {
   onTabChange: (tab: string) => void;
 }
 
+// Map tab ids to URL paths
+const tabToPath: Record<string, string> = {
+  numeri: '/',
+  calendario: '/calendario',
+  notizie: '/notizie',
+  clienti: '/clienti',
+  inserisci: '/inserisci',
+  agenzia: '/agenzia',
+  impostazioni: '/impostazioni',
+};
+
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
+  const navigate = useNavigate();
   
   const tabs = [
     { id: 'numeri', icon: Home, label: 'Home' },
@@ -23,6 +36,8 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   const handleTabChange = (tabId: string) => {
     triggerHaptic('selection');
     onTabChange(tabId);
+    // Update URL to match the tab (enables refresh persistence)
+    navigate(tabToPath[tabId] || '/');
   };
 
   return (
