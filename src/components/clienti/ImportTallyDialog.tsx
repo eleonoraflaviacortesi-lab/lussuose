@@ -60,25 +60,41 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     setStep('preview');
   };
 
+  // Field type mapping for proper parsing
+  const FIELD_TYPES: Record<string, 'string' | 'number' | 'boolean' | 'array' | 'date' | 'budget'> = {
+    dimensioni_min: 'number',
+    dimensioni_max: 'number',
+    bagni: 'number',
+    budget_max: 'budget',
+    ha_visitato: 'boolean',
+    vicinanza_citta: 'boolean',
+    regioni: 'array',
+    tipologia: 'array',
+    contesto: 'array',
+    motivo_zona: 'array',
+    data_submission: 'date',
+  };
+
   // Handle column mapping change
   const handleColumnMappingChange = (index: number, field: string) => {
     setColumnInfos(prev => {
       const updated = prev.map(c => {
         if (c.index === index) {
-          // Find the field type from AVAILABLE_FIELDS or default to string
-          const fieldDef = AVAILABLE_FIELDS.find(f => f.value === field);
-          return { ...c, field, type: 'string' as const };
+          // Determine the correct type for the field
+          const fieldType = FIELD_TYPES[field] || 'string';
+          return { ...c, field, type: fieldType };
         }
         return c;
       });
       
       // If this index doesn't exist yet, add it
       if (!updated.find(c => c.index === index)) {
+        const fieldType = FIELD_TYPES[field] || 'string';
         updated.push({
           index,
           header: headers[index] || '',
           field,
-          type: 'string',
+          type: fieldType,
         });
       }
       
