@@ -1260,18 +1260,18 @@ const DraggableEventCard = memo(({
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         {/* Drag handle */}
         <div
           {...dragHandleProps}
           className={cn(
-            "shrink-0 cursor-grab active:cursor-grabbing touch-none p-0.5 rounded hover:bg-black/10 transition-colors",
-            styles.customBg && isDarkColor(styles.customBg) ? 'text-white/60 hover:text-white hover:bg-white/20' : 'text-muted-foreground hover:text-foreground'
+            "shrink-0 cursor-grab active:cursor-grabbing touch-none p-1 -ml-1 rounded-md hover:bg-black/10 transition-colors",
+            styles.customBg && isDarkColor(styles.customBg) ? 'text-white/70 hover:text-white hover:bg-white/20' : 'text-foreground/50 hover:text-foreground'
           )}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
         >
-          <GripVertical className="w-3 h-3" />
+          <GripVertical className="w-4 h-4" />
         </div>
         
         {event.emoji ? (
