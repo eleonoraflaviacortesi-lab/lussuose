@@ -12,7 +12,7 @@ import type { Notizia } from '@/hooks/useNotizie';
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
 const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
-const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
+
 const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
 const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
@@ -25,7 +25,7 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
-  '/inserisci': 'inserisci',
+  '/report': 'report',
   '/agenzia': 'agenzia',
   '/impostazioni': 'impostazioni',
 };
@@ -100,9 +100,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         );
       case 'notizie':
         return <NotiziePage />;
-      case 'inserisci':
-        return <ReportForm />;
-      case 'analisi':
+      case 'report':
         return <ReportAnalysisTab />;
       case 'agenzia':
         return <AgencyDashboard />;
