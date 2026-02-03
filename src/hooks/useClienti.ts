@@ -219,7 +219,8 @@ export function useClienti(options?: {
       return { previousClienti };
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+      // Don't invalidate - optimistic update is already applied
+      // This prevents the slow re-fetch that causes UI delay
     },
     onError: (error: any, variables, context) => {
       // Rollback on error

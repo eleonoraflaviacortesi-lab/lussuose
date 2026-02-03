@@ -81,7 +81,7 @@ export const useAppointments = () => {
   });
 
   const updateAppointment = useMutation({
-    mutationFn: async ({ id, ...input }: Partial<AppointmentInput> & { id: string; completed?: boolean }) => {
+    mutationFn: async ({ id, ...input }: Partial<AppointmentInput> & { id: string; completed?: boolean; silent?: boolean }) => {
       const { data, error } = await supabase
         .from('appointments')
         .update(input)
@@ -92,10 +92,40 @@ export const useAppointments = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+    // Optimistic update for instant UI feedback
+    onMutate: async ({ id, silent, ...input }) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['appointments'] });
+      
+      // Snapshot previous value
+      const previousAppointments = queryClient.getQueryData<Appointment[]>(['appointments', user?.id]);
+      
+      // Optimistically update cache
+      if (previousAppointments) {
+        queryClient.setQueryData<Appointment[]>(['appointments', user?.id], (old) =>
+          old?.map((a) =>
+            a.id === id
+              ? { 
+                  ...a, 
+                  ...input,
+                  updated_at: new Date().toISOString(),
+                }
+              : a
+          ) || []
+        );
+      }
+      
+      return { previousAppointments, silent };
     },
-    onError: (error) => {
+    onSuccess: (data, variables, context) => {
+      // Don't invalidate - optimistic update is already applied
+      // This prevents the slow re-fetch that causes UI delay
+    },
+    onError: (error, variables, context) => {
+      // Rollback on error
+      if (context?.previousAppointments) {
+        queryClient.setQueryData(['appointments', user?.id], context.previousAppointments);
+      }
       console.error('Error updating appointment:', error);
       toast.error('Errore nell\'aggiornamento');
     },
