@@ -4,6 +4,7 @@ import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
+import ImportDalilaDialog from './ImportDalilaDialog';
 import NotizieStatsChart from './NotizieStatsChart';
 import { Input } from '@/components/ui/input';
 
@@ -70,6 +71,7 @@ const NotiziePage = () => {
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-xl font-bold tracking-wide uppercase shrink-0">Notizie</h2>
         <div className="flex items-center gap-2">
+          <ImportDalilaDialog />
           <ImportCSVDialog />
           <AddNotiziaDialog />
         </div>
