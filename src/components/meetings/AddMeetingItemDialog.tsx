@@ -63,10 +63,16 @@ const SECTION_FIELDS: Record<MeetingSectionType, {
 };
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Campo obbligatorio'),
+  title: z.string().optional(),
   description: z.string().optional(),
   assigned_to: z.string().optional(),
   buyer_name: z.string().optional(),
+  // Goal-specific numeric fields
+  goal_incarichi: z.number().min(0).optional(),
+  goal_notizie: z.number().min(0).optional(),
+  goal_acquisizioni: z.number().min(0).optional(),
+  goal_trattative: z.number().min(0).optional(),
+  notes: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -103,6 +109,11 @@ export const AddMeetingItemDialog = ({
       description: '',
       assigned_to: '',
       buyer_name: '',
+      goal_incarichi: 0,
+      goal_notizie: 0,
+      goal_acquisizioni: 0,
+      goal_trattative: 0,
+      notes: '',
     },
   });
 
@@ -124,19 +135,27 @@ export const AddMeetingItemDialog = ({
       return;
     }
 
+    // For obiettivo, create a title from the numeric goals
+    let title = data.title || '';
+    if (sectionType === 'obiettivo') {
+      title = 'Obiettivi settimanali';
+    }
+
     await addItem.mutateAsync({
       meeting_id: meetingId,
       item_type: sectionType,
-      title: data.title,
+      title,
       description: data.description || undefined,
       assigned_to: data.assigned_to || undefined,
       linked_notizia_id: linkedNotizia || undefined,
       linked_cliente_id: linkedCliente || undefined,
-      // buyer_name viene gestito lato DB
+      buyer_name: data.buyer_name || undefined,
+      goal_incarichi: data.goal_incarichi || 0,
+      goal_notizie: data.goal_notizie || 0,
+      goal_acquisizioni: data.goal_acquisizioni || 0,
+      goal_trattative: data.goal_trattative || 0,
+      notes: data.notes || undefined,
     } as any);
-    
-    // Se c'è buyer_name ma non cliente collegato, lo salviamo separatamente
-    // Nota: questo richiede che il campo buyer_name sia stato aggiunto alla tabella
     
     onOpenChange(false);
   };
@@ -329,39 +348,145 @@ export const AddMeetingItemDialog = ({
               />
             )}
 
-            {/* Title/Notes */}
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{sectionType === 'obiettivo' ? 'Obiettivo' : 'Titolo/Note'}</FormLabel>
-                  <FormControl>
-                    <Input placeholder={fieldConfig.titlePlaceholder} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {/* Obiettivo numeric fields */}
+            {sectionType === 'obiettivo' ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <FormField
+                    control={form.control}
+                    name="goal_incarichi"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Incarichi</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number" 
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="goal_notizie"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notizie</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="goal_acquisizioni"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Acquisizioni</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="goal_trattative"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Trattative</FormLabel>
+                        <FormControl>
+                          <Input 
+                            type="number"
+                            inputMode="numeric"
+                            min={0}
+                            placeholder="0"
+                            {...field}
+                            value={field.value || ''}
+                            onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Note</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Note aggiuntive sugli obiettivi..." 
+                          className="min-h-[60px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            ) : (
+              <>
+                {/* Title/Notes */}
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Titolo/Note</FormLabel>
+                      <FormControl>
+                        <Input placeholder={fieldConfig.titlePlaceholder} {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-            {/* Description (optional) */}
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Dettagli (opzionale)</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Note aggiuntive..." 
-                      className="min-h-[60px]"
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                {/* Description (optional) */}
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Dettagli (opzionale)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Note aggiuntive..." 
+                          className="min-h-[60px]"
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
 
             {/* Agent assignment */}
             <FormField

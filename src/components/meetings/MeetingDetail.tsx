@@ -214,19 +214,58 @@ const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onD
             </div>
           )}
           
-          {/* Title */}
-          <h4 className={cn(
-            "font-medium text-sm",
-            item.status === 'completed' && "line-through"
-          )}>
-            {item.title}
-          </h4>
-          
-          {/* Description */}
-          {item.description && (
-            <p className="text-xs text-muted-foreground mt-1">
-              {item.description}
-            </p>
+          {/* Title or Goals display */}
+          {sectionType === 'obiettivo' ? (
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {(item as any).goal_incarichi > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Incarichi:</span>
+                    <span className="font-semibold">{(item as any).goal_incarichi}</span>
+                  </div>
+                )}
+                {(item as any).goal_notizie > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Notizie:</span>
+                    <span className="font-semibold">{(item as any).goal_notizie}</span>
+                  </div>
+                )}
+                {(item as any).goal_acquisizioni > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Acquisizioni:</span>
+                    <span className="font-semibold">{(item as any).goal_acquisizioni}</span>
+                  </div>
+                )}
+                {(item as any).goal_trattative > 0 && (
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground">Trattative:</span>
+                    <span className="font-semibold">{(item as any).goal_trattative}</span>
+                  </div>
+                )}
+              </div>
+              {(item as any).notes && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {(item as any).notes}
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* Title */}
+              <h4 className={cn(
+                "font-medium text-sm",
+                item.status === 'completed' && "line-through"
+              )}>
+                {item.title}
+              </h4>
+              
+              {/* Description */}
+              {item.description && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  {item.description}
+                </p>
+              )}
+            </>
           )}
 
           {/* Linked entities and agent */}
