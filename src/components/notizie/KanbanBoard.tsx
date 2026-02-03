@@ -96,7 +96,7 @@ const ColumnHeader = memo(({
 
   return (
     <div className={cn(
-      "flex items-center gap-2 mb-2 lg:mb-3 group relative",
+      "flex items-center gap-2 mb-1.5 lg:mb-2 group relative",
       isDragging && "opacity-50"
     )}>
       <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
@@ -470,7 +470,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
     <>
       <div
         className={cn(
-          "rounded-xl p-2.5 cursor-pointer transition-all duration-100 shadow-sm select-none active:scale-[0.97] active:shadow-md",
+          "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 shadow-sm select-none active:scale-[0.97] active:shadow-md",
           notizia.card_color ? "backdrop-blur-sm" : "bg-card"
         )}
         style={notizia.card_color ? { 
@@ -708,7 +708,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                 }
               }}
               {...provided.droppableProps}
-              className="flex gap-3 pb-4 overflow-x-auto lg:flex-1 lg:gap-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+              className="flex gap-3 pb-3 overflow-x-auto lg:flex-1 lg:gap-3 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
             >
               {columns.map((column, columnIndex) => (
                 <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
@@ -738,7 +738,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                             className={cn(
-                              "flex flex-col gap-1.5 min-h-[80px] rounded-lg p-1.5 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
+                              "flex flex-col gap-1 lg:gap-1 min-h-[80px] rounded-lg p-1 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
                               snapshot.isDraggingOver && "bg-accent/20"
                             )}
                           >
