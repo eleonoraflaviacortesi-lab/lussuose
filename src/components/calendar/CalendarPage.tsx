@@ -1236,6 +1236,8 @@ const EventCard = memo(({
           </button>
         ) : event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
+        ) : styles.isBuyer ? (
+          <span className="text-sm shrink-0">💰</span>
         ) : (
           <div 
             className="w-2 h-2 rounded-full mt-1.5 shrink-0"
@@ -1356,6 +1358,8 @@ const DraggableEventCard = memo(({
         
         {event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
+        ) : event.type === 'cliente_reminder' ? (
+          <span className="text-sm shrink-0">💰</span>
         ) : (
           <div 
             className="w-2 h-2 rounded-full shrink-0"
