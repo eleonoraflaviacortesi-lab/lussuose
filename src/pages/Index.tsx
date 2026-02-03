@@ -19,7 +19,7 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
-const DataEntry = lazy(() => import('@/components/dashboard/DataEntry'));
+const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 
 // Map URL paths to tab ids
 const pathToTab: Record<string, string> = {
@@ -124,7 +124,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       case 'riunioni':
         return <MeetingsPage />;
       case 'inserisci':
-        return <DataEntry onComplete={() => { setActiveTab('numeri'); navigate('/'); }} />;
+        return <ReportForm />;
       case 'impostazioni':
         return <SettingsPage />;
       default:
