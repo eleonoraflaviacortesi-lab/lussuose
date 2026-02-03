@@ -24,6 +24,7 @@ export interface DailyDataInput {
   trattative_chiuse: number;
   trattative_chiuse_ideali: number;
   fatturato_a_credito: number;
+  notes?: string;
 }
 
 export const useDailyData = () => {

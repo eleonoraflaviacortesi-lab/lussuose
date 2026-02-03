@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Calendar, Check, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
+import { Calendar, Check, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck, StickyNote } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 import { useUserSettings } from '@/hooks/useUserSettings';
+import { Textarea } from '@/components/ui/textarea';
 
 type ReportFormData = {
   contatti_reali: number;
@@ -14,6 +15,7 @@ type ReportFormData = {
   nuove_trattative: number;
   trattative_chiuse: number;
   fatturato_a_credito: number;
+  notes: string;
 };
 
 type FieldKey = keyof ReportFormData;
@@ -106,6 +108,7 @@ const ReportForm = () => {
     nuove_trattative: 0,
     trattative_chiuse: 0,
     fatturato_a_credito: 0,
+    notes: '',
   });
 
   const { saveDailyData, myData } = useDailyData();
@@ -139,6 +142,7 @@ const ReportForm = () => {
           nuove_trattative: existingEntry.nuove_trattative || 0,
           trattative_chiuse: existingEntry.trattative_chiuse || 0,
           fatturato_a_credito: Number(existingEntry.fatturato_a_credito) || 0,
+          notes: (existingEntry as any).notes || '',
         });
       } else {
         setFormData({
@@ -152,6 +156,7 @@ const ReportForm = () => {
           nuove_trattative: 0,
           trattative_chiuse: 0,
           fatturato_a_credito: 0,
+          notes: '',
         });
       }
     }
@@ -159,6 +164,10 @@ const ReportForm = () => {
 
   const handleValueChange = useCallback((field: FieldKey, value: number) => {
     setFormData(prev => ({ ...prev, [field]: Math.max(0, value) }));
+  }, []);
+
+  const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setFormData(prev => ({ ...prev, notes: e.target.value }));
   }, []);
 
   const handleSave = () => {
@@ -313,7 +322,21 @@ const ReportForm = () => {
             onChange={handleValueChange}
           />
         </div>
-      </div>
+        </div>
+
+        {/* Notes Section */}
+        <div className="bg-card rounded-2xl shadow-lg p-6 md:col-span-3">
+          <div className="flex items-center gap-2 pb-4 border-b border-muted mb-4">
+            <StickyNote className="w-5 h-5 text-muted-foreground" />
+            <h3 className="text-sm font-bold tracking-[0.15em] uppercase">NOTE</h3>
+          </div>
+          <Textarea
+            value={formData.notes}
+            onChange={handleNotesChange}
+            placeholder="Aggiungi note sulla giornata..."
+            className="min-h-[100px] bg-background border border-border"
+          />
+        </div>
 
       {/* Save Button */}
       <button
