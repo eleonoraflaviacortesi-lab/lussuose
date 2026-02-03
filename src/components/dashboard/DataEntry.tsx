@@ -25,7 +25,11 @@ const defaultFormData = {
   fatturato_a_credito: 0,
 };
 
-const DataEntry = () => {
+interface DataEntryProps {
+  onComplete?: () => void;
+}
+
+const DataEntry = ({ onComplete }: DataEntryProps) => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [formData, setFormData] = useState(defaultFormData);
 
@@ -71,7 +75,11 @@ const DataEntry = () => {
       ...formData,
       valutazioni_fatte: 0,
     };
-    saveDailyData.mutate(input);
+    saveDailyData.mutate(input, {
+      onSuccess: () => {
+        onComplete?.();
+      }
+    });
   };
 
   const inputFields = [
