@@ -161,7 +161,7 @@ export const useNotizie = () => {
       
       return { previousNotizie, silent };
     },
-    onSuccess: (data, variables, context) => {
+    onSuccess: (_data, _variables, context) => {
       // Don't invalidate - optimistic update is already applied
       // This prevents the slow re-fetch that causes UI delay
       // Only show toast if not silent
