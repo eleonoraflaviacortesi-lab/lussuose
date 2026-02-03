@@ -62,13 +62,15 @@ export const useNotizie = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
+  // Fetch only user's own notizie (for Notizie page, Calendar)
   const { data: notizie, isLoading } = useQuery({
-    queryKey: ['notizie'],
+    queryKey: ['notizie', user?.id],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
         .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online')
+        .eq('user_id', user.id) // Only user's own notizie
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
       
@@ -255,4 +257,33 @@ export const useNotizie = () => {
     deleteNotizia,
     updateOrder,
   };
+};
+
+// Separate hook to search ALL notizie (for meetings only)
+export const useAllNotizie = () => {
+  const { user } = useAuth();
+
+  const { data: allNotizie, isLoading } = useQuery({
+    queryKey: ['all-notizie'],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('notizie')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,card_color,display_order,is_online')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      return (data || []).map(item => ({
+        ...item,
+        status: item.status as NotiziaStatus,
+        comments: [] as NotiziaComment[], // Don't load comments for search
+        is_online: item.is_online ?? false,
+      })) as Notizia[];
+    },
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return { allNotizie, isLoading };
 };
