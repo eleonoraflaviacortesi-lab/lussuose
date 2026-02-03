@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Calendar, Check, Phone, FileText, CalendarDays, Euro, Handshake, CheckCircle, CreditCard, ClipboardCheck } from 'lucide-react';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
+import { useUserSettings } from '@/hooks/useUserSettings';
 
 type ReportFormData = {
   contatti_reali: number;
@@ -108,6 +109,19 @@ const ReportForm = () => {
   });
 
   const { saveDailyData, myData } = useDailyData();
+  const { settings } = useUserSettings();
+
+  // Calculate daily ideals from weekly goals / 6 working days
+  const dailyIdeals = useMemo(() => ({
+    contatti: Math.round((settings?.contatti_settimana || 0) / 6 * 10) / 10,
+    notizie: Math.round((settings?.notizie_settimana || 0) / 6 * 10) / 10,
+    appuntamenti: Math.round((settings?.appuntamenti_settimana || 0) / 6 * 10) / 10,
+    incarichi: Math.round((settings?.incarichi_settimana || 0) / 6 * 10) / 10,
+    acquisizioni: Math.round((settings?.acquisizioni_settimana || 0) / 6 * 10) / 10,
+    nuove_trattative: Math.round((settings?.nuove_trattative_settimana || 0) / 6 * 10) / 10,
+    trattative_chiuse: Math.round((settings?.trattative_chiuse_settimana || 0) / 6 * 10) / 10,
+    vendite: Math.round((settings?.vendite_settimana || 0) / 6 * 10) / 10,
+  }), [settings]);
 
   // Load existing data for selected date
   useEffect(() => {
@@ -199,7 +213,7 @@ const ReportForm = () => {
             label="CONTATTI REALI"
             value={formData.contatti_reali}
             field="contatti_reali"
-            ideal={5}
+            ideal={dailyIdeals.contatti}
             icon={Phone}
             onChange={handleValueChange}
           />
@@ -208,7 +222,7 @@ const ReportForm = () => {
             label="NOTIZIE ACQUISITE"
             value={formData.notizie_reali}
             field="notizie_reali"
-            ideal={2}
+            ideal={dailyIdeals.notizie}
             icon={FileText}
             onChange={handleValueChange}
           />
@@ -217,7 +231,7 @@ const ReportForm = () => {
             label="APPUNTAMENTI VENDITA"
             value={formData.appuntamenti_vendita}
             field="appuntamenti_vendita"
-            ideal={1}
+            ideal={dailyIdeals.appuntamenti}
             icon={CalendarDays}
             onChange={handleValueChange}
           />
@@ -226,6 +240,7 @@ const ReportForm = () => {
             label="INCARICHI PRESI"
             value={formData.incarichi_vendita}
             field="incarichi_vendita"
+            ideal={dailyIdeals.incarichi}
             icon={Handshake}
             onChange={handleValueChange}
           />
@@ -234,6 +249,7 @@ const ReportForm = () => {
             label="ACQUISIZIONI FATTE"
             value={formData.valutazioni_fatte}
             field="valutazioni_fatte"
+            ideal={dailyIdeals.acquisizioni}
             icon={ClipboardCheck}
             onChange={handleValueChange}
           />
@@ -250,7 +266,7 @@ const ReportForm = () => {
             label="NUOVE TRATTATIVE"
             value={formData.nuove_trattative}
             field="nuove_trattative"
-            ideal={2}
+            ideal={dailyIdeals.nuove_trattative}
             icon={Handshake}
             onChange={handleValueChange}
           />
@@ -259,7 +275,7 @@ const ReportForm = () => {
             label="TRATTATIVE CHIUSE"
             value={formData.trattative_chiuse}
             field="trattative_chiuse"
-            ideal={1}
+            ideal={dailyIdeals.trattative_chiuse}
             icon={CheckCircle}
             onChange={handleValueChange}
           />
@@ -284,7 +300,7 @@ const ReportForm = () => {
             label="NUMERO VENDITE"
             value={formData.vendite_numero}
             field="vendite_numero"
-            ideal={0.1}
+            ideal={dailyIdeals.vendite}
             icon={Check}
             onChange={handleValueChange}
           />
