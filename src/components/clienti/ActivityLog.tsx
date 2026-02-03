@@ -4,12 +4,11 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { 
   Phone, 
-  Mail, 
-  Calendar, 
   Home, 
   ArrowRightLeft, 
   UserCheck, 
   MessageSquare,
+  Link2,
   Loader2 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -32,13 +31,13 @@ const activityConfig: Record<ClienteActivityType, {
     label: 'Chiamata' 
   },
   email: { 
-    icon: Mail, 
+    icon: MessageSquare, 
     color: 'text-blue-600', 
     bgColor: 'bg-blue-100',
     label: 'Email' 
   },
   visit: { 
-    icon: Calendar, 
+    icon: Home, 
     color: 'text-purple-600', 
     bgColor: 'bg-purple-100',
     label: 'Visita' 
@@ -69,8 +68,30 @@ const activityConfig: Record<ClienteActivityType, {
   },
 };
 
+// Map for new activity types (association, match_comment)
+const extendedActivityConfig: Record<string, { 
+  icon: React.ElementType; 
+  color: string; 
+  bgColor: string;
+  label: string;
+}> = {
+  ...activityConfig,
+  association: { 
+    icon: Link2, 
+    color: 'text-indigo-600', 
+    bgColor: 'bg-indigo-100',
+    label: 'Associazione' 
+  },
+  match_comment: { 
+    icon: MessageSquare, 
+    color: 'text-teal-600', 
+    bgColor: 'bg-teal-100',
+    label: 'Commento proprietà' 
+  },
+};
+
 const ActivityItem = memo(({ activity }: { activity: ClienteActivity }) => {
-  const config = activityConfig[activity.activity_type] || activityConfig.comment;
+  const config = extendedActivityConfig[activity.activity_type] || extendedActivityConfig.comment;
   const Icon = config.icon;
 
   return (
@@ -126,9 +147,20 @@ export const ActivityLog = memo(({ activities, isLoading }: ActivityLogProps) =>
     );
   }
 
+  // Sort: comments at top, then by date desc
+  const sortedActivities = [...activities].sort((a, b) => {
+    // Comments first
+    const aIsComment = a.activity_type === 'comment' || (a.activity_type as string) === 'match_comment';
+    const bIsComment = b.activity_type === 'comment' || (b.activity_type as string) === 'match_comment';
+    if (aIsComment && !bIsComment) return -1;
+    if (!aIsComment && bIsComment) return 1;
+    // Then by date desc
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+  });
+
   return (
     <div className="divide-y divide-border">
-      {activities.map(activity => (
+      {sortedActivities.map(activity => (
         <ActivityItem key={activity.id} activity={activity} />
       ))}
     </div>

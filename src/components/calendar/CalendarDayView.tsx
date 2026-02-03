@@ -61,45 +61,51 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
-    // For notizia/cliente reminders, use the status color
-    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
-      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
-      const label = event.type === 'notizia_reminder' ? 'Notizia' : 'Cliente';
+    // Buyers (cliente_reminder) - differentiate with gold left border
+    if (event.type === 'cliente_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D'; // Sage green default
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: event.statusColor,
-        border: 'border-transparent',
-        label,
+        customBg: baseColor,
+        border: 'border-l-4 border-l-amber-400', // Gold accent for buyers
+        label: 'Buyer',
         textClass: textColor,
       };
     }
     
-    switch (event.type) {
-      case 'appointment':
-        return {
-          bg: event.completed ? 'bg-muted' : 'bg-muted/50',
-          customBg: null,
-          border: 'border-transparent',
-          label: 'Appuntamento',
-          textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
-        };
-      case 'cliente_reminder':
-        return {
-          bg: 'bg-muted/50',
-          customBg: null,
-          border: 'border-transparent',
-          label: 'Cliente',
-          textClass: 'text-foreground',
-        };
-      case 'notizia_reminder':
-        return {
-          bg: 'bg-muted/50',
-          customBg: null,
-          border: 'border-transparent',
-          label: 'Notizia',
-          textClass: 'text-foreground',
-        };
+    // Notizie (seller leads) - verde salvia as default
+    if (event.type === 'notizia_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D';
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      return {
+        bg: '',
+        customBg: baseColor,
+        border: 'border-transparent',
+        label: 'Notizia',
+        textClass: textColor,
+      };
     }
+    
+    // Appointments - sage green tint
+    if (event.type === 'appointment') {
+      return {
+        bg: event.completed ? 'bg-[#8B9A7D]/50' : 'bg-[#8B9A7D]/30',
+        customBg: null,
+        border: 'border-transparent',
+        label: 'Appuntamento',
+        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+      };
+    }
+    
+    // Default
+    return {
+      bg: 'bg-[#8B9A7D]/30',
+      customBg: null,
+      border: 'border-transparent',
+      label: 'Evento',
+      textClass: 'text-foreground',
+    };
   };
 
   const handleToggle = (event: CalendarEvent) => {
@@ -153,6 +159,7 @@ const CalendarDayView = ({
                   className={cn(
                     "rounded-xl p-4 transition-all cursor-pointer relative active:scale-[0.98]",
                     styles.bg,
+                    styles.border,
                     event.urgent && "ring-2 ring-red-500"
                   )}
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}

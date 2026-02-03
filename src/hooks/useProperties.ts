@@ -260,6 +260,31 @@ export function useClientPropertyMatches(clienteId: string | undefined) {
     },
   });
 
+  // Update match notes (comments)
+  const updateNotesMutation = useMutation({
+    mutationFn: async ({ matchId, notes }: { matchId: string; notes: string }) => {
+      const { data, error } = await supabase
+        .from('client_property_matches')
+        .update({ notes })
+        .eq('id', matchId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['property-matches', clienteId] });
+    },
+    onError: (error: any) => {
+      toast({ 
+        title: 'Errore', 
+        description: error.message, 
+        variant: 'destructive' 
+      });
+    },
+  });
+
   return {
     matches,
     isLoading,
@@ -270,5 +295,6 @@ export function useClientPropertyMatches(clienteId: string | undefined) {
     setReaction: setReactionMutation.mutateAsync,
     addManualMatch: addManualMatchMutation.mutateAsync,
     removeMatch: removeMatchMutation.mutateAsync,
+    updateNotes: updateNotesMutation.mutateAsync,
   };
 }
