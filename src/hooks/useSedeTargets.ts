@@ -64,31 +64,31 @@ export const useSedeTargets = () => {
     enabled: !!user && !!profile?.sede,
   });
 
-  // Annual targets (sum of all months for current year)
+  // Annual targets (vendite_target and fatturato_target are already annual values in the DB)
   const { data: annualTargets } = useQuery({
     queryKey: ['sede-targets-annual', profile?.sede, currentYear],
     queryFn: async () => {
-      if (!profile?.sede) return { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target };
+      if (!profile?.sede) return { vendite_target: DEFAULT_TARGETS.vendite_target, fatturato_target: DEFAULT_TARGETS.fatturato_target };
 
+      // Get the most recent record for this sede/year - vendite_target is already annual
       const { data, error } = await supabase
         .from('sede_targets')
         .select('vendite_target, fatturato_target')
         .eq('sede', profile.sede)
-        .eq('year', currentYear);
+        .eq('year', currentYear)
+        .order('month', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
       if (error) throw error;
       
-      if (!data || data.length === 0) {
-        return { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target };
+      if (!data) {
+        return { vendite_target: DEFAULT_TARGETS.vendite_target, fatturato_target: DEFAULT_TARGETS.fatturato_target };
       }
 
-      // Sum all months for annual target
-      const annualVendite = data.reduce((sum, m) => sum + (m.vendite_target || 0), 0);
-      const annualFatturato = data.reduce((sum, m) => sum + (m.fatturato_target || 0), 0);
-
       return {
-        vendite_target: annualVendite || DEFAULT_TARGETS.vendite_target * 12,
-        fatturato_target: annualFatturato || DEFAULT_TARGETS.fatturato_target,
+        vendite_target: data.vendite_target || DEFAULT_TARGETS.vendite_target,
+        fatturato_target: data.fatturato_target || DEFAULT_TARGETS.fatturato_target,
       };
     },
     enabled: !!user && !!profile?.sede,
@@ -143,7 +143,7 @@ export const useSedeTargets = () => {
 
   return {
     targets: targets || DEFAULT_TARGETS,
-    annualTargets: annualTargets || { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target },
+    annualTargets: annualTargets || { vendite_target: DEFAULT_TARGETS.vendite_target, fatturato_target: DEFAULT_TARGETS.fatturato_target },
     isLoading,
     updateTargets,
   };
