@@ -55,6 +55,15 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
     }
   }, [user, loading, navigate]);
 
+  // Keep tab state in sync with URL changes (e.g. deep links, navigate('/inserisci'), back/forward)
+  useEffect(() => {
+    const tabFromPath = pathToTab[location.pathname];
+    if (tabFromPath && tabFromPath !== activeTab) {
+      setActiveTab(tabFromPath);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
+
   const handleRefresh = useCallback(async () => {
     // Invalidate all queries to refetch fresh data
     await queryClient.invalidateQueries();
