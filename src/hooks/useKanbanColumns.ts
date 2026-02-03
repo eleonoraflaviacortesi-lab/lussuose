@@ -18,11 +18,14 @@ const DEFAULT_COLUMNS: Omit<KanbanColumn, 'id' | 'user_id'>[] = [
   { key: 'in_progress', label: 'In Progress', color: '#f59e0b', display_order: 1 },
   { key: 'done', label: 'Done', color: '#3b82f6', display_order: 2 },
   { key: 'on_shot', label: 'On Shot', color: '#ef4444', display_order: 3 },
-  { key: 'taken', label: 'Taken', color: '#8b5cf6', display_order: 4 },
+  { key: 'taken', label: 'Presi', color: '#8b5cf6', display_order: 4 },
   { key: 'credit', label: 'Credit', color: '#06b6d4', display_order: 5 },
   { key: 'no', label: 'No', color: '#1f2937', display_order: 6 },
   { key: 'sold', label: 'Sold', color: '#6b7280', display_order: 7 },
 ];
+
+// Protected column that cannot be deleted or renamed (only color can be changed)
+export const PROTECTED_COLUMN_KEY = 'taken';
 
 export function useKanbanColumns() {
   const { user } = useAuth();
@@ -42,12 +45,36 @@ export function useKanbanColumns() {
     enabled: !!user,
   });
 
-  // Initialize default columns if none exist
+  // Initialize default columns if none exist, or ensure protected column exists
   useEffect(() => {
-    if (!isLoading && columns.length === 0 && user) {
-      initializeDefaultColumns();
+    if (!isLoading && user) {
+      if (columns.length === 0) {
+        initializeDefaultColumns();
+      } else {
+        // Ensure protected column exists
+        const hasTakenColumn = columns.some(c => c.key === PROTECTED_COLUMN_KEY);
+        if (!hasTakenColumn) {
+          ensureProtectedColumn();
+        }
+      }
     }
   }, [isLoading, columns.length, user]);
+
+  const ensureProtectedColumn = async () => {
+    if (!user) return;
+    
+    // Find max display_order to add at the end
+    const maxOrder = columns.reduce((max, col) => Math.max(max, col.display_order), -1);
+    
+    await supabase.from('kanban_columns').insert({
+      user_id: user.id,
+      key: PROTECTED_COLUMN_KEY,
+      label: 'Presi',
+      color: '#8b5cf6',
+      display_order: maxOrder + 1,
+    });
+    queryClient.invalidateQueries({ queryKey: ['kanban-columns'] });
+  };
 
   const initializeDefaultColumns = async () => {
     if (!user) return;
@@ -63,6 +90,13 @@ export function useKanbanColumns() {
 
   const updateColumn = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<KanbanColumn> & { id: string }) => {
+      // Find the column to check if it's protected
+      const column = columns.find(c => c.id === id);
+      if (column?.key === PROTECTED_COLUMN_KEY && updates.label !== undefined) {
+        // Don't allow renaming protected column, but allow color change
+        delete updates.label;
+      }
+
       const { error } = await supabase
         .from('kanban_columns')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -99,6 +133,12 @@ export function useKanbanColumns() {
 
   const deleteColumn = useMutation({
     mutationFn: async (id: string) => {
+      // Prevent deletion of protected column
+      const column = columns.find(c => c.id === id);
+      if (column?.key === PROTECTED_COLUMN_KEY) {
+        throw new Error('La colonna "Presi" non può essere eliminata');
+      }
+
       const { error } = await supabase
         .from('kanban_columns')
         .delete()

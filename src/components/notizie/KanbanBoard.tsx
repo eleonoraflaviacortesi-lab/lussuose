@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
-import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
+import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff } from 'lucide-react';
@@ -60,6 +60,7 @@ const ColumnHeader = memo(({
   onQuickAdd?: () => void;
   isDragging?: boolean;
 }) => {
+  const isProtected = column.key === PROTECTED_COLUMN_KEY;
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(column.label);
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -101,7 +102,7 @@ const ColumnHeader = memo(({
     )}>
       <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
       
-      {editing ? (
+      {editing && !isProtected ? (
         <input
           ref={inputRef}
           value={label}
@@ -115,13 +116,17 @@ const ColumnHeader = memo(({
         />
       ) : (
         <button
-          onClick={() => setEditing(true)}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform hover:scale-105 cursor-text"
+          onClick={() => !isProtected && setEditing(true)}
+          className={cn(
+            "text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform",
+            !isProtected && "hover:scale-105 cursor-text",
+            isProtected && "cursor-default"
+          )}
           style={{ 
             backgroundColor: column.color,
             color: isDarkColor(column.color) ? 'white' : 'black'
           }}
-          title="Clicca per modificare nome"
+          title={isProtected ? "Colonna protetta" : "Clicca per modificare nome"}
         >
           {column.label}
         </button>
@@ -146,13 +151,16 @@ const ColumnHeader = memo(({
         </button>
       )}
       
-      <button
-        onClick={onDelete}
-        className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-        title="Elimina colonna"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
+      {/* Delete button - hidden for protected columns */}
+      {!isProtected && (
+        <button
+          onClick={onDelete}
+          className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+          title="Elimina colonna"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      )}
 
       {/* Color picker dropdown - Liquid Glass style */}
       {showColorPicker && (
