@@ -1134,26 +1134,28 @@ const EventCard = memo(({
   const getEventStyles = () => {
     const sageGreen = '#8B9A7D';
     
-    // Buyers (cliente_reminder) - sage green with gold left border
+    // Buyers (cliente_reminder) - ALWAYS sage green with gold left border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
         customBg: sageGreen,
-        border: 'border-l-4 border-l-amber-400', // Gold accent to differentiate buyers
+        border: 'border-l-4 border-l-amber-400',
         textClass: 'text-white',
         timeClass: 'text-white/70',
         isBuyer: true,
       };
     }
     
-    // Notizie (seller leads) - sage green as standard
+    // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
+      const baseColor = event.statusColor || sageGreen;
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: sageGreen,
+        customBg: baseColor,
         border: 'border-transparent',
-        textClass: 'text-white',
-        timeClass: 'text-white/70',
+        textClass: textColor,
+        timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: false,
       };
     }
@@ -1170,7 +1172,6 @@ const EventCard = memo(({
       };
     }
 
-    // Default - sage green
     return {
       bg: 'bg-[#8B9A7D]/30',
       customBg: null,
@@ -1278,23 +1279,25 @@ const DraggableEventCard = memo(({
   const getEventStyles = () => {
     const sageGreen = '#8B9A7D';
     
-    // Buyers (cliente_reminder) - sage green with gold left border
+    // Buyers (cliente_reminder) - ALWAYS sage green with gold border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
         customBg: sageGreen,
-        border: 'border-l-4 border-l-amber-400', // Gold accent for buyers
+        border: 'border-l-4 border-l-amber-400',
         textClass: 'text-white',
       };
     }
     
-    // Notizie - sage green as standard
+    // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
+      const baseColor = event.statusColor || sageGreen;
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: sageGreen,
+        customBg: baseColor,
         border: 'border-transparent',
-        textClass: 'text-white',
+        textClass: textColor,
       };
     }
     
