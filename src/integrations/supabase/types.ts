@@ -354,6 +354,7 @@ export type Database = {
           fatturato_a_credito: number
           id: string
           incarichi_vendita: number
+          notes: string | null
           notizie_ideali: number
           notizie_reali: number
           nuove_trattative: number
@@ -379,6 +380,7 @@ export type Database = {
           fatturato_a_credito?: number
           id?: string
           incarichi_vendita?: number
+          notes?: string | null
           notizie_ideali?: number
           notizie_reali?: number
           nuove_trattative?: number
@@ -404,6 +406,7 @@ export type Database = {
           fatturato_a_credito?: number
           id?: string
           incarichi_vendita?: number
+          notes?: string | null
           notizie_ideali?: number
           notizie_reali?: number
           nuove_trattative?: number
