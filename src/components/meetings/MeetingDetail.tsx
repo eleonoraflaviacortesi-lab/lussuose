@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useMeetings, MeetingItem, MeetingItemStatus } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
+import { useWeeklyProductionDataBySede } from '@/hooks/useWeeklyProductionData';
 import { AddMeetingItemDialog } from './AddMeetingItemDialog';
 import { EditMeetingItemDialog } from './EditMeetingItemDialog';
 import { cn } from '@/lib/utils';
@@ -64,9 +65,16 @@ interface MeetingDetailProps {
 export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const { profile } = useAuth();
   const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
+  const sede = profile?.sede || 'AREZZO';
   
   const { useMeetingDetail, updateMeeting, updateItem, deleteItem, deleteMeeting } = useMeetings();
   const { data: meeting, isLoading } = useMeetingDetail(meetingId);
+  
+  // Fetch weekly production data for objectives comparison
+  const { data: weeklyProductionData } = useWeeklyProductionDataBySede(
+    meeting?.week_start || null,
+    sede
+  );
   
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addSectionType, setAddSectionType] = useState<MeetingSectionType>('trattativa_corso');
@@ -272,6 +280,7 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
                     onEdit={handleEditItem}
+                    weeklyProductionData={weeklyProductionData}
                   />
                 ))}
               </div>
@@ -320,6 +329,8 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   );
 };
 
+import { WeeklyProductionSummary } from '@/hooks/useWeeklyProductionData';
+
 interface MeetingItemCardProps {
   item: MeetingItem;
   sectionType: MeetingSectionType;
@@ -327,14 +338,20 @@ interface MeetingItemCardProps {
   onStatusChange: (item: MeetingItem, status: MeetingItemStatus) => void;
   onDelete: (item: MeetingItem) => void;
   onEdit: (item: MeetingItem, sectionType: MeetingSectionType) => void;
+  weeklyProductionData?: Record<string, WeeklyProductionSummary>;
 }
 
-const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onDelete, onEdit }: MeetingItemCardProps) => {
+const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onDelete, onEdit, weeklyProductionData }: MeetingItemCardProps) => {
   const statusConfig = STATUS_CONFIG[item.status];
   const StatusIcon = statusConfig.icon;
   
   // Per gli obiettivi mostriamo sempre lo status
   const showStatus = sectionType === 'obiettivo';
+
+  // Get actual production data for this agent if it's an objective
+  const agentProductionData = sectionType === 'obiettivo' && item.assigned_to && weeklyProductionData
+    ? weeklyProductionData[item.assigned_to]
+    : null;
 
   return (
     <Card className={cn(
@@ -363,25 +380,53 @@ const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onD
                 {(item as any).goal_incarichi > 0 && (
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground">Incarichi:</span>
-                    <span className="font-semibold">{(item as any).goal_incarichi}</span>
+                    <span className={cn(
+                      "font-semibold",
+                      agentProductionData && agentProductionData.incarichi >= (item as any).goal_incarichi 
+                        ? "text-green-600" 
+                        : ""
+                    )}>
+                      {agentProductionData ? `${agentProductionData.incarichi}/` : ''}{(item as any).goal_incarichi}
+                    </span>
                   </div>
                 )}
                 {(item as any).goal_notizie > 0 && (
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground">Notizie:</span>
-                    <span className="font-semibold">{(item as any).goal_notizie}</span>
+                    <span className={cn(
+                      "font-semibold",
+                      agentProductionData && agentProductionData.notizie >= (item as any).goal_notizie 
+                        ? "text-green-600" 
+                        : ""
+                    )}>
+                      {agentProductionData ? `${agentProductionData.notizie}/` : ''}{(item as any).goal_notizie}
+                    </span>
                   </div>
                 )}
                 {(item as any).goal_acquisizioni > 0 && (
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground">Acquisizioni:</span>
-                    <span className="font-semibold">{(item as any).goal_acquisizioni}</span>
+                    <span className={cn(
+                      "font-semibold",
+                      agentProductionData && agentProductionData.valutazioni >= (item as any).goal_acquisizioni 
+                        ? "text-green-600" 
+                        : ""
+                    )}>
+                      {agentProductionData ? `${agentProductionData.valutazioni}/` : ''}{(item as any).goal_acquisizioni}
+                    </span>
                   </div>
                 )}
                 {(item as any).goal_trattative > 0 && (
                   <div className="flex items-center gap-1">
                     <span className="text-muted-foreground">Trattative:</span>
-                    <span className="font-semibold">{(item as any).goal_trattative}</span>
+                    <span className={cn(
+                      "font-semibold",
+                      agentProductionData && agentProductionData.trattative >= (item as any).goal_trattative 
+                        ? "text-green-600" 
+                        : ""
+                    )}>
+                      {agentProductionData ? `${agentProductionData.trattative}/` : ''}{(item as any).goal_trattative}
+                    </span>
                   </div>
                 )}
               </div>
