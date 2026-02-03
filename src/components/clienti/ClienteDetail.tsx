@@ -193,9 +193,9 @@ export function ClienteDetail({
                 clienteName={cliente.nome}
                 clientePhone={cliente.telefono}
                 clientePaese={cliente.paese}
-                reminderDate={(cliente as any).reminder_date}
-                lastContactDate={(cliente as any).last_contact_date}
-                onUpdateReminder={(date) => onUpdate({ reminder_date: date } as any)}
+                reminderDate={cliente.reminder_date}
+                lastContactDate={cliente.last_contact_date}
+                onUpdateReminder={(date) => onUpdate({ reminder_date: date })}
               />
             </div>
 
