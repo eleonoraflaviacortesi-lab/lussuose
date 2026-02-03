@@ -61,16 +61,14 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
-    const buyerGreen = '#22c55e'; // Vibrant green for buyers
-    
-    // Buyers (cliente_reminder) - vibrant green with thick gold border
+    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
-        bg: '',
-        customBg: buyerGreen,
-        border: 'border-l-[6px] border-l-amber-400',
-        label: '💰 Buyer',
-        textClass: 'text-white',
+        bg: 'bg-white',
+        customBg: null,
+        border: 'border border-foreground',
+        label: 'Buyer',
+        textClass: 'text-foreground',
         showBuyerBadge: true,
       };
     }
