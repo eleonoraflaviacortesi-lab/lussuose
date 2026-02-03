@@ -27,6 +27,7 @@ import {
 import { useMeetings, MeetingItem, MeetingItemStatus } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { AddMeetingItemDialog } from './AddMeetingItemDialog';
+import { EditMeetingItemDialog } from './EditMeetingItemDialog';
 import { cn } from '@/lib/utils';
 
 // Nuovi tipi sezione secondo il modello PDF
@@ -72,6 +73,8 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const [editingNotes, setEditingNotes] = useState(false);
   const [notesValue, setNotesValue] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [editingItem, setEditingItem] = useState<MeetingItem | null>(null);
+  const [editSectionType, setEditSectionType] = useState<MeetingSectionType>('trattativa_corso');
 
   const handleStatusChange = (item: MeetingItem, newStatus: MeetingItemStatus) => {
     updateItem.mutate({
@@ -90,6 +93,11 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const handleAddItem = (sectionType: MeetingSectionType) => {
     setAddSectionType(sectionType);
     setShowAddDialog(true);
+  };
+
+  const handleEditItem = (item: MeetingItem, sectionType: MeetingSectionType) => {
+    setEditingItem(item);
+    setEditSectionType(sectionType);
   };
 
   const handleEditNotes = () => {
@@ -263,6 +271,7 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
                     isCoordinator={isCoordinator}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
+                    onEdit={handleEditItem}
                   />
                 ))}
               </div>
@@ -277,6 +286,14 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
         onOpenChange={setShowAddDialog}
         meetingId={meetingId}
         sectionType={addSectionType}
+      />
+
+      {/* Edit dialog */}
+      <EditMeetingItemDialog
+        open={!!editingItem}
+        onOpenChange={(open) => !open && setEditingItem(null)}
+        item={editingItem}
+        sectionType={editSectionType}
       />
 
       {/* Delete confirmation */}
@@ -309,9 +326,10 @@ interface MeetingItemCardProps {
   isCoordinator: boolean;
   onStatusChange: (item: MeetingItem, status: MeetingItemStatus) => void;
   onDelete: (item: MeetingItem) => void;
+  onEdit: (item: MeetingItem, sectionType: MeetingSectionType) => void;
 }
 
-const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onDelete }: MeetingItemCardProps) => {
+const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onDelete, onEdit }: MeetingItemCardProps) => {
   const statusConfig = STATUS_CONFIG[item.status];
   const StatusIcon = statusConfig.icon;
   
@@ -427,6 +445,10 @@ const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onD
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onEdit(item, sectionType)}>
+              <Edit2 className="h-4 w-4 mr-2" />
+              Modifica
+            </DropdownMenuItem>
             {sectionType === 'obiettivo' && item.status !== 'completed' && (
               <DropdownMenuItem onClick={() => onStatusChange(item, 'completed')}>
                 <Check className="h-4 w-4 mr-2 text-green-600" />
@@ -439,10 +461,12 @@ const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onD
                 Riapri
               </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
             <DropdownMenuItem 
               onClick={() => onDelete(item)}
               className="text-destructive"
             >
+              <Trash2 className="h-4 w-4 mr-2" />
               Elimina
             </DropdownMenuItem>
           </DropdownMenuContent>
