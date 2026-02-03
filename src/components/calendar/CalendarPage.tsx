@@ -1234,10 +1234,10 @@ const EventCard = memo(({
           >
             {event.completed && <Check className="w-3 h-3 text-background" />}
           </button>
-        ) : event.emoji ? (
-          <span className="text-sm shrink-0">{event.emoji}</span>
         ) : styles.isBuyer ? (
           <span className="text-sm shrink-0">💰</span>
+        ) : event.emoji ? (
+          <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
           <div 
             className="w-2 h-2 rounded-full mt-1.5 shrink-0"
@@ -1356,10 +1356,10 @@ const DraggableEventCard = memo(({
           <GripVertical className="w-4 h-4" />
         </div>
         
-        {event.emoji ? (
-          <span className="text-sm shrink-0">{event.emoji}</span>
-        ) : event.type === 'cliente_reminder' ? (
+        {event.type === 'cliente_reminder' ? (
           <span className="text-sm shrink-0">💰</span>
+        ) : event.emoji ? (
+          <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
           <div 
             className="w-2 h-2 rounded-full shrink-0"
