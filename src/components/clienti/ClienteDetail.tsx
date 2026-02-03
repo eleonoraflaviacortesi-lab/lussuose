@@ -208,7 +208,7 @@ export function ClienteDetail({
             </div>
           </div>
 
-          {/* Activity Log */}
+          {/* Activity Log with Comments Input */}
           <Accordion type="single" collapsible defaultValue="activity">
             <AccordionItem value="activity" className="bg-white rounded-2xl shadow-lg border-0">
               <AccordionTrigger className="px-3 py-2 hover:no-underline">
@@ -224,6 +224,24 @@ export function ClienteDetail({
               </AccordionTrigger>
               <AccordionContent className="px-3 pb-3">
                 <ActivityLog activities={activities} isLoading={activitiesLoading} />
+                
+                {/* Comments Input - under activity log */}
+                <div className="mt-4 pt-3 border-t border-muted">
+                  <h4 className="font-medium text-xs mb-2 flex items-center gap-2 text-muted-foreground">
+                    <MessageSquare className="w-3 h-3" /> Aggiungi commento
+                  </h4>
+                  <div className="flex gap-2">
+                    <Textarea
+                      placeholder="Scrivi un commento..."
+                      value={newComment}
+                      onChange={e => setNewComment(e.target.value)}
+                      className="min-h-[60px]"
+                    />
+                    <Button onClick={handleAddComment} disabled={!newComment.trim()} size="sm">
+                      Invia
+                    </Button>
+                  </div>
+                </div>
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -539,14 +557,13 @@ export function ClienteDetail({
           {/* Property Matches Section */}
           <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} />
 
-          {/* Comments */}
-          <div className="bg-white rounded-2xl shadow-lg p-3 mt-3">
-            <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" /> Commenti Interni
-            </h3>
-            
-            {cliente.comments.length > 0 && (
-              <div className="space-y-3 mb-4">
+          {/* Legacy Comments Display (if any exist) */}
+          {cliente.comments.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-3 mt-3">
+              <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" /> Commenti Precedenti
+              </h3>
+              <div className="space-y-3">
                 {cliente.comments.map(comment => (
                   <div key={comment.id} className="bg-muted/50 rounded-lg p-3">
                     <div className="flex items-center justify-between mb-1">
@@ -559,20 +576,8 @@ export function ClienteDetail({
                   </div>
                 ))}
               </div>
-            )}
-
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Aggiungi un commento..."
-                value={newComment}
-                onChange={e => setNewComment(e.target.value)}
-                className="min-h-[60px]"
-              />
-              <Button onClick={handleAddComment} disabled={!newComment.trim()}>
-                Invia
-              </Button>
             </div>
-          </div>
+          )}
 
           {/* Metadata */}
           <div className="text-xs text-muted-foreground bg-white rounded-2xl shadow-lg p-3 mt-3 space-y-1">
