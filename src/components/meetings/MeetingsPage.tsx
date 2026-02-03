@@ -1,11 +1,14 @@
 import { useState, useMemo } from 'react';
 import { format, parseISO, startOfWeek, addWeeks, subWeeks, getMonth, getYear } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { useMeetings, getWeekInfo } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { MeetingDetail } from './MeetingDetail';
@@ -35,8 +38,10 @@ export const MeetingsPage = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>(String(getYear(new Date())));
+  const [editingMeeting, setEditingMeeting] = useState<{ id: string; title: string } | null>(null);
+  const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
   
-  const { meetings, isLoading, createOrGetMeeting } = useMeetings(sede);
+  const { meetings, isLoading, createOrGetMeeting, updateMeeting, deleteMeeting } = useMeetings(sede);
   
   const currentWeek = getWeekInfo(selectedDate);
   
@@ -237,7 +242,35 @@ export const MeetingsPage = () => {
                       {format(addWeeks(parseISO(meeting.week_start), 1), " d MMM", { locale: it })}
                     </div>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-1">
+                    {isCoordinator && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingMeeting({ id: meeting.id, title: meeting.title || `Riunione Settimana ${meeting.week_number}` });
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeletingMeetingId(meeting.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
               </Card>
             ))
@@ -249,6 +282,59 @@ export const MeetingsPage = () => {
           )}
         </div>
       </div>
+
+      {/* Edit Meeting Dialog */}
+      <Dialog open={!!editingMeeting} onOpenChange={() => setEditingMeeting(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifica Riunione</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={editingMeeting?.title || ''}
+            onChange={(e) => setEditingMeeting(prev => prev ? { ...prev, title: e.target.value } : null)}
+            placeholder="Titolo riunione"
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingMeeting(null)}>Annulla</Button>
+            <Button
+              onClick={() => {
+                if (editingMeeting) {
+                  updateMeeting.mutate({ id: editingMeeting.id, title: editingMeeting.title });
+                  setEditingMeeting(null);
+                }
+              }}
+            >
+              Salva
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Meeting Confirmation */}
+      <AlertDialog open={!!deletingMeetingId} onOpenChange={() => setDeletingMeetingId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare questa riunione?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Questa azione è irreversibile. Tutti gli elementi della riunione verranno eliminati.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingMeetingId) {
+                  deleteMeeting.mutate(deletingMeetingId);
+                  setDeletingMeetingId(null);
+                }
+              }}
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
