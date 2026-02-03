@@ -1,14 +1,30 @@
-import { useState } from 'react';
-import { format, parseISO, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { useState, useMemo } from 'react';
+import { format, parseISO, startOfWeek, addWeeks, subWeeks, getMonth, getYear } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Calendar, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMeetings, getWeekInfo } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { MeetingDetail } from './MeetingDetail';
 import { cn } from '@/lib/utils';
+
+const MONTHS = [
+  { value: '0', label: 'Gennaio' },
+  { value: '1', label: 'Febbraio' },
+  { value: '2', label: 'Marzo' },
+  { value: '3', label: 'Aprile' },
+  { value: '4', label: 'Maggio' },
+  { value: '5', label: 'Giugno' },
+  { value: '6', label: 'Luglio' },
+  { value: '7', label: 'Agosto' },
+  { value: '8', label: 'Settembre' },
+  { value: '9', label: 'Ottobre' },
+  { value: '10', label: 'Novembre' },
+  { value: '11', label: 'Dicembre' },
+];
 
 export const MeetingsPage = () => {
   const { profile } = useAuth();
@@ -17,6 +33,8 @@ export const MeetingsPage = () => {
   
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
+  const [filterMonth, setFilterMonth] = useState<string>('all');
+  const [filterYear, setFilterYear] = useState<string>(String(getYear(new Date())));
   
   const { meetings, isLoading, createOrGetMeeting } = useMeetings(sede);
   
@@ -24,6 +42,32 @@ export const MeetingsPage = () => {
   
   // Find meeting for current week
   const currentMeeting = meetings?.find(m => m.week_start === currentWeek.weekStart);
+
+  // Get available years from meetings
+  const availableYears = useMemo(() => {
+    if (!meetings) return [String(getYear(new Date()))];
+    const years = [...new Set(meetings.map(m => String(m.year)))];
+    if (!years.includes(String(getYear(new Date())))) {
+      years.push(String(getYear(new Date())));
+    }
+    return years.sort((a, b) => Number(b) - Number(a));
+  }, [meetings]);
+
+  // Filter meetings by month and year
+  const filteredMeetings = useMemo(() => {
+    if (!meetings) return [];
+    
+    return meetings.filter(m => {
+      const meetingDate = parseISO(m.week_start);
+      const meetingYear = getYear(meetingDate);
+      const meetingMonth = getMonth(meetingDate);
+      
+      if (String(meetingYear) !== filterYear) return false;
+      if (filterMonth !== 'all' && meetingMonth !== Number(filterMonth)) return false;
+      
+      return true;
+    });
+  }, [meetings, filterMonth, filterYear]);
 
   const handlePrevWeek = () => setSelectedDate(subWeeks(selectedDate, 1));
   const handleNextWeek = () => setSelectedDate(addWeeks(selectedDate, 1));
@@ -140,9 +184,35 @@ export const MeetingsPage = () => {
         )}
       </Card>
 
-      {/* Recent meetings list */}
+      {/* Filters and meetings list */}
       <div>
-        <h2 className="text-lg font-semibold mb-3">Riunioni recenti</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold">Riunioni</h2>
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4 text-muted-foreground" />
+            <Select value={filterMonth} onValueChange={setFilterMonth}>
+              <SelectTrigger className="w-[130px] h-9">
+                <SelectValue placeholder="Mese" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tutti i mesi</SelectItem>
+                {MONTHS.map(m => (
+                  <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={filterYear} onValueChange={setFilterYear}>
+              <SelectTrigger className="w-[90px] h-9">
+                <SelectValue placeholder="Anno" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableYears.map(y => (
+                  <SelectItem key={y} value={y}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
         <div className="space-y-2">
           {isLoading ? (
             Array.from({ length: 3 }).map((_, i) => (
@@ -150,8 +220,8 @@ export const MeetingsPage = () => {
                 <Skeleton className="h-5 w-40" />
               </Card>
             ))
-          ) : meetings && meetings.length > 0 ? (
-            meetings.slice(0, 8).map(meeting => (
+          ) : filteredMeetings.length > 0 ? (
+            filteredMeetings.map(meeting => (
               <Card
                 key={meeting.id}
                 className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
@@ -174,7 +244,7 @@ export const MeetingsPage = () => {
           ) : (
             <Card className="p-6 text-center text-muted-foreground">
               <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Nessuna riunione passata</p>
+              <p>Nessuna riunione per {filterMonth === 'all' ? 'questo periodo' : MONTHS[Number(filterMonth)]?.label + ' ' + filterYear}</p>
             </Card>
           )}
         </div>
