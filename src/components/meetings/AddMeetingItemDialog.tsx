@@ -31,7 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useProfiles } from '@/hooks/useProfiles';
-import { useNotizie } from '@/hooks/useNotizie';
+import { useAllNotizie } from '@/hooks/useNotizie';
 import { useClienti } from '@/hooks/useClienti';
 import type { MeetingSectionType } from './MeetingDetail';
 
@@ -92,7 +92,7 @@ export const AddMeetingItemDialog = ({
 }: AddMeetingItemDialogProps) => {
   const { addItem } = useMeetings();
   const { profiles } = useProfiles();
-  const { notizie } = useNotizie();
+  const { allNotizie } = useAllNotizie(); // Use all notizie for meeting search
   const { clienti } = useClienti();
 
   const [linkedNotizia, setLinkedNotizia] = useState<string | null>(null);
@@ -160,7 +160,7 @@ export const AddMeetingItemDialog = ({
     onOpenChange(false);
   };
 
-  const filteredNotizie = notizie?.filter(n => 
+  const filteredNotizie = allNotizie?.filter(n => 
     n.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     n.zona?.toLowerCase().includes(searchQuery.toLowerCase())
   ).slice(0, 10);
@@ -169,7 +169,7 @@ export const AddMeetingItemDialog = ({
     c.nome.toLowerCase().includes(searchQuery.toLowerCase())
   ).slice(0, 10);
 
-  const selectedNotizia = notizie?.find(n => n.id === linkedNotizia);
+  const selectedNotizia = allNotizie?.find(n => n.id === linkedNotizia);
   const selectedCliente = clienti?.find(c => c.id === linkedCliente);
 
   return (
