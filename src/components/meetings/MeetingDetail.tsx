@@ -134,17 +134,15 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
                   {items.length}
                 </Badge>
               </h2>
-              {isCoordinator && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleAddItem(section.key)}
-                  className="h-8"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Aggiungi
-                </Button>
-              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleAddItem(section.key)}
+                className="h-8"
+              >
+                <Plus className="h-4 w-4 mr-1" />
+                Aggiungi
+              </Button>
             </div>
 
             {/* Section items */}
@@ -278,14 +276,12 @@ const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onD
                 Riapri
               </DropdownMenuItem>
             )}
-            {isCoordinator && (
-              <DropdownMenuItem 
-                onClick={() => onDelete(item)}
-                className="text-destructive"
-              >
-                Elimina
-              </DropdownMenuItem>
-            )}
+            <DropdownMenuItem 
+              onClick={() => onDelete(item)}
+              className="text-destructive"
+            >
+              Elimina
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
