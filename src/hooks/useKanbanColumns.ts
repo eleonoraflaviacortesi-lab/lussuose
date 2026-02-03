@@ -45,15 +45,15 @@ export function useKanbanColumns() {
     enabled: !!user,
   });
 
-  // Initialize default columns if none exist, or ensure protected column exists
+  // Initialize default columns if none exist, or ensure protected column exists with correct label
   useEffect(() => {
     if (!isLoading && user) {
       if (columns.length === 0) {
         initializeDefaultColumns();
       } else {
-        // Ensure protected column exists
-        const hasTakenColumn = columns.some(c => c.key === PROTECTED_COLUMN_KEY);
-        if (!hasTakenColumn) {
+        // Ensure protected column exists with correct label "Presi"
+        const takenColumn = columns.find(c => c.key === PROTECTED_COLUMN_KEY);
+        if (!takenColumn || takenColumn.label !== 'Presi') {
           ensureProtectedColumn();
         }
       }
@@ -62,6 +62,19 @@ export function useKanbanColumns() {
 
   const ensureProtectedColumn = async () => {
     if (!user) return;
+    
+    // Check if taken column exists with wrong label
+    const existingTaken = columns.find(c => c.key === PROTECTED_COLUMN_KEY);
+    if (existingTaken) {
+      // Force correct label if wrong
+      if (existingTaken.label !== 'Presi') {
+        await supabase.from('kanban_columns')
+          .update({ label: 'Presi', updated_at: new Date().toISOString() })
+          .eq('id', existingTaken.id);
+        queryClient.invalidateQueries({ queryKey: ['kanban-columns'] });
+      }
+      return;
+    }
     
     // Find max display_order to add at the end
     const maxOrder = columns.reduce((max, col) => Math.max(max, col.display_order), -1);
