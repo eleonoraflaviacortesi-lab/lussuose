@@ -61,20 +61,21 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
-    // Buyers (cliente_reminder) - differentiate with gold left border
+    const buyerGreen = '#22c55e'; // Vibrant green for buyers
+    
+    // Buyers (cliente_reminder) - vibrant green with thick gold border
     if (event.type === 'cliente_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D'; // Sage green default
-      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: baseColor,
-        border: 'border-l-4 border-l-amber-400', // Gold accent for buyers
-        label: 'Buyer',
-        textClass: textColor,
+        customBg: buyerGreen,
+        border: 'border-l-[6px] border-l-amber-400',
+        label: '💰 Buyer',
+        textClass: 'text-white',
+        showBuyerBadge: true,
       };
     }
     
-    // Notizie (seller leads) - verde salvia as default
+    // Notizie (seller leads) - use status color or sage green default
     if (event.type === 'notizia_reminder') {
       const baseColor = event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
@@ -84,6 +85,7 @@ const CalendarDayView = ({
         border: 'border-transparent',
         label: 'Notizia',
         textClass: textColor,
+        showBuyerBadge: false,
       };
     }
     
@@ -95,6 +97,7 @@ const CalendarDayView = ({
         border: 'border-transparent',
         label: 'Appuntamento',
         textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        showBuyerBadge: false,
       };
     }
     
@@ -105,6 +108,7 @@ const CalendarDayView = ({
       border: 'border-transparent',
       label: 'Evento',
       textClass: 'text-foreground',
+      showBuyerBadge: false,
     };
   };
 

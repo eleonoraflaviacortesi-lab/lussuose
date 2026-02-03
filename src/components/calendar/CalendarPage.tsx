@@ -1134,15 +1134,16 @@ const EventCard = memo(({
   const getEventStyles = () => {
     const buyerGreen = '#22c55e'; // Vibrant green for buyers
     
-    // Buyers (cliente_reminder) - ALWAYS vibrant green with gold left border
+    // Buyers (cliente_reminder) - ALWAYS vibrant green with thick gold border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
         customBg: buyerGreen,
-        border: 'border-l-4 border-l-amber-400',
+        border: 'border-l-[6px] border-l-amber-400',
         textClass: 'text-white',
         timeClass: 'text-white/70',
         isBuyer: true,
+        showBuyerBadge: true,
       };
     }
     
@@ -1157,6 +1158,7 @@ const EventCard = memo(({
         textClass: textColor,
         timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: false,
+        showBuyerBadge: false,
       };
     }
     
@@ -1169,6 +1171,7 @@ const EventCard = memo(({
         textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
         timeClass: 'text-muted-foreground',
         isBuyer: false,
+        showBuyerBadge: false,
       };
     }
 
@@ -1179,6 +1182,7 @@ const EventCard = memo(({
       textClass: 'text-foreground',
       timeClass: 'text-muted-foreground',
       isBuyer: false,
+      showBuyerBadge: false,
     };
   };
 
@@ -1221,6 +1225,11 @@ const EventCard = memo(({
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
+      {styles.showBuyerBadge && (
+        <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-lg tracking-wider">
+          💰 BUYER
+        </div>
+      )}
       <div className="flex items-start gap-2">
         {canToggle ? (
           <button
@@ -1234,8 +1243,6 @@ const EventCard = memo(({
           >
             {event.completed && <Check className="w-3 h-3 text-background" />}
           </button>
-        ) : styles.isBuyer ? (
-          <span className="text-sm shrink-0">💰</span>
         ) : event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
@@ -1281,13 +1288,14 @@ const DraggableEventCard = memo(({
   const getEventStyles = () => {
     const buyerGreen = '#22c55e'; // Vibrant green for buyers
     
-    // Buyers (cliente_reminder) - ALWAYS vibrant green with gold border
+    // Buyers (cliente_reminder) - ALWAYS vibrant green with thick gold border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
         customBg: buyerGreen,
-        border: 'border-l-4 border-l-amber-400',
+        border: 'border-l-[6px] border-l-amber-400',
         textClass: 'text-white',
+        showBuyerBadge: true,
       };
     }
     
@@ -1300,6 +1308,7 @@ const DraggableEventCard = memo(({
         customBg: baseColor,
         border: 'border-transparent',
         textClass: textColor,
+        showBuyerBadge: false,
       };
     }
     
@@ -1308,6 +1317,7 @@ const DraggableEventCard = memo(({
       customBg: null,
       border: 'border-transparent',
       textClass: 'text-foreground',
+      showBuyerBadge: false,
     };
   };
 
@@ -1332,12 +1342,17 @@ const DraggableEventCard = memo(({
       onTouchEnd={onTouchEnd}
       onTouchMove={onTouchEnd}
     >
+      {styles.showBuyerBadge && !event.urgent && (
+        <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-lg tracking-wider">
+          💰 BUYER
+        </div>
+      )}
       {event.urgent && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      {hasComment && !event.urgent && (
+      {hasComment && !event.urgent && !styles.showBuyerBadge && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
@@ -1356,9 +1371,7 @@ const DraggableEventCard = memo(({
           <GripVertical className="w-4 h-4" />
         </div>
         
-        {event.type === 'cliente_reminder' ? (
-          <span className="text-sm shrink-0">💰</span>
-        ) : event.emoji ? (
+        {event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
           <div 
