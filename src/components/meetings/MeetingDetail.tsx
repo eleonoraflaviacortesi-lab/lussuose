@@ -1,17 +1,29 @@
 import { useState } from 'react';
 import { format, parseISO, addWeeks } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ArrowLeft, Plus, MoreVertical, Check, Clock, ArrowRight, Link2 } from 'lucide-react';
+import { ArrowLeft, Plus, MoreVertical, Check, Clock, ArrowRight, Link2, Trash2, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useMeetings, MeetingItem, MeetingItemStatus } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { AddMeetingItemDialog } from './AddMeetingItemDialog';
@@ -52,11 +64,14 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const { profile } = useAuth();
   const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
   
-  const { useMeetingDetail, updateItem, deleteItem } = useMeetings();
+  const { useMeetingDetail, updateMeeting, updateItem, deleteItem, deleteMeeting } = useMeetings();
   const { data: meeting, isLoading } = useMeetingDetail(meetingId);
   
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [addSectionType, setAddSectionType] = useState<MeetingSectionType>('trattativa_corso');
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesValue, setNotesValue] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const handleStatusChange = (item: MeetingItem, newStatus: MeetingItemStatus) => {
     updateItem.mutate({
@@ -75,6 +90,25 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const handleAddItem = (sectionType: MeetingSectionType) => {
     setAddSectionType(sectionType);
     setShowAddDialog(true);
+  };
+
+  const handleEditNotes = () => {
+    setNotesValue(meeting?.notes || '');
+    setEditingNotes(true);
+  };
+
+  const handleSaveNotes = () => {
+    updateMeeting.mutate({
+      id: meetingId,
+      notes: notesValue,
+    });
+    setEditingNotes(false);
+  };
+
+  const handleDeleteMeeting = () => {
+    deleteMeeting.mutate(meetingId, {
+      onSuccess: () => onBack(),
+    });
   };
 
   const getItemsBySection = (sectionType: MeetingSectionType) => {
@@ -105,20 +139,89 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   return (
     <div className="space-y-6 pb-24">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={onBack}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-xl font-bold">
-            Settimana {meeting.week_number}, {meeting.year}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {format(parseISO(meeting.week_start), "d MMMM", { locale: it })} - 
-            {format(addWeeks(parseISO(meeting.week_start), 1), " d MMMM", { locale: it })}
-          </p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={onBack}>
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold">
+              Settimana {meeting.week_number}, {meeting.year}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {format(parseISO(meeting.week_start), "d MMMM", { locale: it })} - 
+              {format(addWeeks(parseISO(meeting.week_start), 1), " d MMMM", { locale: it })}
+            </p>
+          </div>
         </div>
+        
+        {/* Meeting actions */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="icon">
+              <MoreVertical className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleEditNotes}>
+              <Edit2 className="h-4 w-4 mr-2" />
+              Modifica note
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              onClick={() => setShowDeleteConfirm(true)}
+              className="text-destructive"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Elimina riunione
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
+
+      {/* Meeting notes */}
+      {(meeting.notes || editingNotes) && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-sm font-medium">Note riunione</h3>
+            {!editingNotes && (
+              <Button variant="ghost" size="sm" onClick={handleEditNotes}>
+                <Edit2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
+          {editingNotes ? (
+            <div className="space-y-2">
+              <Textarea
+                value={notesValue}
+                onChange={(e) => setNotesValue(e.target.value)}
+                placeholder="Note generali sulla riunione..."
+                className="min-h-[80px]"
+              />
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" size="sm" onClick={() => setEditingNotes(false)}>
+                  Annulla
+                </Button>
+                <Button size="sm" onClick={handleSaveNotes} disabled={updateMeeting.isPending}>
+                  Salva
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {meeting.notes}
+            </p>
+          )}
+        </Card>
+      )}
+
+      {/* Add notes button if no notes */}
+      {!meeting.notes && !editingNotes && (
+        <Button variant="outline" size="sm" onClick={handleEditNotes} className="w-full">
+          <Plus className="h-4 w-4 mr-2" />
+          Aggiungi note riunione
+        </Button>
+      )}
 
       {/* Vertical sections */}
       {MEETING_SECTIONS.map(section => {
@@ -175,6 +278,27 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
         meetingId={meetingId}
         sectionType={addSectionType}
       />
+
+      {/* Delete confirmation */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminare questa riunione?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Questa azione è irreversibile. Tutti gli elementi della riunione verranno eliminati.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annulla</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteMeeting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Elimina
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

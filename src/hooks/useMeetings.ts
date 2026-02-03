@@ -288,6 +288,34 @@ export const useMeetings = (sede?: string) => {
     },
   });
 
+  // Delete meeting
+  const deleteMeeting = useMutation({
+    mutationFn: async (meetingId: string) => {
+      // First delete all items
+      const { error: itemsError } = await supabase
+        .from('meeting_items')
+        .delete()
+        .eq('meeting_id', meetingId);
+      
+      if (itemsError) throw itemsError;
+
+      // Then delete meeting
+      const { error } = await supabase
+        .from('meetings')
+        .delete()
+        .eq('id', meetingId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      toast({ title: 'Riunione eliminata' });
+    },
+    onError: (error) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
   return {
     meetings,
     isLoading,
@@ -297,6 +325,7 @@ export const useMeetings = (sede?: string) => {
     addItem,
     updateItem,
     deleteItem,
+    deleteMeeting,
   };
 };
 
