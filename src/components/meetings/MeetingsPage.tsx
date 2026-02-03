@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format, parseISO, startOfWeek, addWeeks, subWeeks, getMonth, getYear } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter, Pencil, Trash2, Copy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Users, Filter, Pencil, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -9,6 +9,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useMeetings, getWeekInfo } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { MeetingDetail } from './MeetingDetail';
@@ -38,7 +41,7 @@ export const MeetingsPage = () => {
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>(String(getYear(new Date())));
-  const [editingMeeting, setEditingMeeting] = useState<{ id: string; title: string } | null>(null);
+  const [editingMeeting, setEditingMeeting] = useState<{ id: string; title: string; weekStart: Date } | null>(null);
   const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
   
   const { meetings, isLoading, createOrGetMeeting, updateMeeting, deleteMeeting, duplicateMeeting } = useMeetings(sede);
@@ -139,7 +142,7 @@ export const MeetingsPage = () => {
         
         <div className="flex justify-center mt-3">
           <Button variant="outline" size="sm" onClick={handleToday}>
-            <Calendar className="h-4 w-4 mr-2" />
+            <CalendarIcon className="h-4 w-4 mr-2" />
             Questa settimana
           </Button>
         </div>
@@ -262,7 +265,11 @@ export const MeetingsPage = () => {
                       className="h-8 w-8"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setEditingMeeting({ id: meeting.id, title: meeting.title || `Riunione Settimana ${meeting.week_number}` });
+                        setEditingMeeting({ 
+                          id: meeting.id, 
+                          title: meeting.title || `Riunione Settimana ${meeting.week_number}`,
+                          weekStart: parseISO(meeting.week_start)
+                        });
                       }}
                     >
                       <Pencil className="h-4 w-4" />
@@ -298,17 +305,63 @@ export const MeetingsPage = () => {
           <DialogHeader>
             <DialogTitle>Modifica Riunione</DialogTitle>
           </DialogHeader>
-          <Input
-            value={editingMeeting?.title || ''}
-            onChange={(e) => setEditingMeeting(prev => prev ? { ...prev, title: e.target.value } : null)}
-            placeholder="Titolo riunione"
-          />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Titolo</Label>
+              <Input
+                value={editingMeeting?.title || ''}
+                onChange={(e) => setEditingMeeting(prev => prev ? { ...prev, title: e.target.value } : null)}
+                placeholder="Titolo riunione"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Settimana</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editingMeeting?.weekStart ? (
+                      <>
+                        {format(startOfWeek(editingMeeting.weekStart, { weekStartsOn: 1 }), "d MMM", { locale: it })} - 
+                        {format(addWeeks(startOfWeek(editingMeeting.weekStart, { weekStartsOn: 1 }), 1), " d MMM yyyy", { locale: it })}
+                      </>
+                    ) : (
+                      <span>Seleziona settimana</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editingMeeting?.weekStart}
+                    onSelect={(date) => {
+                      if (date) {
+                        setEditingMeeting(prev => prev ? { ...prev, weekStart: date } : null);
+                      }
+                    }}
+                    locale={it}
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <p className="text-xs text-muted-foreground">
+                Seleziona un giorno qualsiasi della settimana desiderata
+              </p>
+            </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditingMeeting(null)}>Annulla</Button>
             <Button
               onClick={() => {
                 if (editingMeeting) {
-                  updateMeeting.mutate({ id: editingMeeting.id, title: editingMeeting.title });
+                  const weekInfo = getWeekInfo(editingMeeting.weekStart);
+                  updateMeeting.mutate({ 
+                    id: editingMeeting.id, 
+                    title: editingMeeting.title,
+                    week_start: weekInfo.weekStart,
+                    week_number: weekInfo.weekNumber,
+                    year: weekInfo.year
+                  });
                   setEditingMeeting(null);
                 }
               }}
