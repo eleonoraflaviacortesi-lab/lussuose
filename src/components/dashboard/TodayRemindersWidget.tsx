@@ -123,42 +123,59 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
 
       {/* Reminders list - compact */}
       <div className="px-4 pb-4 space-y-2">
-        {todayReminders.slice(0, 5).map((reminder) => (
-          <button
-            key={reminder.id}
-            onClick={() => handleReminderClick(reminder)}
-            className={cn(
-              "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all active:scale-[0.98]"
-            )}
-            style={{ backgroundColor: reminder.statusColor }}
-          >
-            {reminder.emoji ? (
-              <span className="text-lg">{reminder.emoji}</span>
-            ) : (
-              <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
-                {reminder.type === 'cliente' ? (
-                  <User className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
-                ) : (
-                  <FileText className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
-                )}
+        {todayReminders.slice(0, 5).map((reminder) => {
+          const isBuyer = reminder.type === 'cliente';
+          
+          return (
+            <button
+              key={reminder.id}
+              onClick={() => handleReminderClick(reminder)}
+              className={cn(
+                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all active:scale-[0.98] relative",
+                isBuyer 
+                  ? "bg-white border border-foreground" 
+                  : ""
+              )}
+              style={!isBuyer ? { backgroundColor: reminder.statusColor } : undefined}
+            >
+              {/* Buyer badge */}
+              {isBuyer && (
+                <div className="absolute -top-1.5 right-2 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+                  Buyer
+                </div>
+              )}
+              
+              {reminder.emoji ? (
+                <span className="text-lg">{reminder.emoji}</span>
+              ) : (
+                <div className={cn(
+                  "w-7 h-7 rounded-full flex items-center justify-center",
+                  isBuyer ? "bg-muted" : "bg-white/20"
+                )}>
+                  {isBuyer ? (
+                    <User className="w-4 h-4 text-foreground" />
+                  ) : (
+                    <FileText className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
+                  )}
+                </div>
+              )}
+              <div className="flex-1 min-w-0 text-left">
+                <p className={cn(
+                  "font-medium text-sm truncate",
+                  isBuyer ? "text-foreground" : (isDarkColor(reminder.statusColor) ? "text-white" : "text-black")
+                )}>
+                  {reminder.name}
+                </p>
               </div>
-            )}
-            <div className="flex-1 min-w-0 text-left">
-              <p className={cn(
-                "font-medium text-sm truncate",
-                isDarkColor(reminder.statusColor) ? "text-white" : "text-black"
+              <span className={cn(
+                "text-xs font-medium",
+                isBuyer ? "text-muted-foreground" : (isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60")
               )}>
-                {reminder.name}
-              </p>
-            </div>
-            <span className={cn(
-              "text-xs font-medium",
-              isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60"
-            )}>
-              {reminder.time}
-            </span>
-          </button>
-        ))}
+                {reminder.time}
+              </span>
+            </button>
+          );
+        })}
         
         {todayReminders.length > 5 && (
           <button
