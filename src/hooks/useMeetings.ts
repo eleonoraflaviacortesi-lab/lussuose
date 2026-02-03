@@ -316,6 +316,99 @@ export const useMeetings = (sede?: string) => {
     },
   });
 
+  // Duplicate meeting to current week
+  const duplicateMeeting = useMutation({
+    mutationFn: async (sourceMeetingId: string) => {
+      if (!user) throw new Error('Non autenticato');
+
+      // Get source meeting with items
+      const { data: sourceMeeting, error: meetingError } = await supabase
+        .from('meetings')
+        .select('*')
+        .eq('id', sourceMeetingId)
+        .single();
+
+      if (meetingError) throw meetingError;
+
+      const { data: sourceItems, error: itemsError } = await supabase
+        .from('meeting_items')
+        .select('*')
+        .eq('meeting_id', sourceMeetingId);
+
+      if (itemsError) throw itemsError;
+
+      // Get current week info
+      const today = new Date();
+      const weekInfo = getWeekInfo(today);
+
+      // Check if meeting already exists for current week
+      const { data: existing } = await supabase
+        .from('meetings')
+        .select('id')
+        .eq('sede', sourceMeeting.sede)
+        .eq('week_start', weekInfo.weekStart)
+        .maybeSingle();
+
+      if (existing) {
+        throw new Error('Esiste già una riunione per questa settimana');
+      }
+
+      // Create new meeting for current week
+      const { data: newMeeting, error: createError } = await supabase
+        .from('meetings')
+        .insert({
+          sede: sourceMeeting.sede,
+          week_start: weekInfo.weekStart,
+          week_number: weekInfo.weekNumber,
+          year: weekInfo.year,
+          title: `Riunione ${weekInfo.label}`,
+          notes: sourceMeeting.notes,
+          created_by: user.id,
+        })
+        .select('id')
+        .single();
+
+      if (createError) throw createError;
+
+      // Copy items to new meeting
+      if (sourceItems && sourceItems.length > 0) {
+        const newItems = sourceItems.map(item => ({
+          meeting_id: newMeeting.id,
+          item_type: item.item_type,
+          title: item.title,
+          description: item.description,
+          assigned_to: item.assigned_to,
+          status: 'open', // Reset status
+          linked_notizia_id: item.linked_notizia_id,
+          linked_cliente_id: item.linked_cliente_id,
+          display_order: item.display_order,
+          buyer_name: item.buyer_name,
+          goal_incarichi: item.goal_incarichi,
+          goal_notizie: item.goal_notizie,
+          goal_acquisizioni: item.goal_acquisizioni,
+          goal_trattative: item.goal_trattative,
+          notes: item.notes,
+        }));
+
+        const { error: insertError } = await supabase
+          .from('meeting_items')
+          .insert(newItems);
+
+        if (insertError) throw insertError;
+      }
+
+      return newMeeting.id;
+    },
+    onSuccess: (newMeetingId) => {
+      queryClient.invalidateQueries({ queryKey: ['meetings'] });
+      toast({ title: 'Riunione duplicata per questa settimana!' });
+      return newMeetingId;
+    },
+    onError: (error) => {
+      toast({ title: 'Errore', description: error.message, variant: 'destructive' });
+    },
+  });
+
   return {
     meetings,
     isLoading,
@@ -326,6 +419,7 @@ export const useMeetings = (sede?: string) => {
     updateItem,
     deleteItem,
     deleteMeeting,
+    duplicateMeeting,
   };
 };
 
