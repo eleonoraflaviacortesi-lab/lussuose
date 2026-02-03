@@ -29,9 +29,9 @@ const NotizieStatsChart = memo(({ notizieByStatus }: NotizieStatsChartProps) => 
     <>
       <div 
         onClick={() => setFunnelOpen(true)}
-        className="bg-card rounded-xl p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]"
+        className="bg-card rounded-xl p-2.5 lg:p-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]"
       >
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-1.5 lg:mb-1">
           <span className="text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
             Distribuzione
           </span>
@@ -42,7 +42,7 @@ const NotizieStatsChart = memo(({ notizieByStatus }: NotizieStatsChartProps) => 
         </div>
         
         {/* Stacked bar */}
-        <div className="flex h-3 rounded-full overflow-hidden mb-2">
+        <div className="flex h-2.5 lg:h-2 rounded-full overflow-hidden mb-1.5 lg:mb-1">
           {bars.map(({ key, color, count }) => 
             count > 0 && (
               <div
@@ -57,8 +57,8 @@ const NotizieStatsChart = memo(({ notizieByStatus }: NotizieStatsChartProps) => 
           )}
         </div>
 
-        {/* Legend - only show statuses with items */}
-        <div className="flex flex-wrap gap-x-3 gap-y-1">
+        {/* Legend - hidden on desktop to save space, visible on mobile */}
+        <div className="flex flex-wrap gap-x-3 gap-y-1 lg:hidden">
           {bars.filter(b => b.count > 0).map(({ key, label, color, count }) => (
             <div key={key} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
