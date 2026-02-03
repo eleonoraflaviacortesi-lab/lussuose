@@ -1132,16 +1132,14 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    const buyerGreen = '#22c55e'; // Vibrant green for buyers
-    
-    // Buyers (cliente_reminder) - ALWAYS vibrant green with thick gold border
+    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
-        bg: '',
-        customBg: buyerGreen,
-        border: 'border-l-[6px] border-l-amber-400',
-        textClass: 'text-white',
-        timeClass: 'text-white/70',
+        bg: 'bg-white',
+        customBg: null,
+        border: 'border border-foreground',
+        textClass: 'text-foreground',
+        timeClass: 'text-muted-foreground',
         isBuyer: true,
         showBuyerBadge: true,
       };
@@ -1225,9 +1223,9 @@ const EventCard = memo(({
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      {styles.showBuyerBadge && (
-        <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-lg tracking-wider">
-          💰 BUYER
+      {styles.showBuyerBadge && !event.urgent && !hasComment && (
+        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          Buyer
         </div>
       )}
       <div className="flex items-start gap-2">
@@ -1286,15 +1284,13 @@ const DraggableEventCard = memo(({
   dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
-    const buyerGreen = '#22c55e'; // Vibrant green for buyers
-    
-    // Buyers (cliente_reminder) - ALWAYS vibrant green with thick gold border
+    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
-        bg: '',
-        customBg: buyerGreen,
-        border: 'border-l-[6px] border-l-amber-400',
-        textClass: 'text-white',
+        bg: 'bg-white',
+        customBg: null,
+        border: 'border border-foreground',
+        textClass: 'text-foreground',
         showBuyerBadge: true,
       };
     }
@@ -1343,8 +1339,8 @@ const DraggableEventCard = memo(({
       onTouchMove={onTouchEnd}
     >
       {styles.showBuyerBadge && !event.urgent && (
-        <div className="absolute top-0 right-0 bg-amber-400 text-amber-900 text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg rounded-tr-lg tracking-wider">
-          💰 BUYER
+        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          Buyer
         </div>
       )}
       {event.urgent && (
