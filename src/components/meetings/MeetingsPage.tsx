@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { format, parseISO, startOfWeek, addWeeks, subWeeks, getMonth, getYear } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter, Pencil, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Calendar, Users, Filter, Pencil, Trash2, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,7 +41,7 @@ export const MeetingsPage = () => {
   const [editingMeeting, setEditingMeeting] = useState<{ id: string; title: string } | null>(null);
   const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
   
-  const { meetings, isLoading, createOrGetMeeting, updateMeeting, deleteMeeting } = useMeetings(sede);
+  const { meetings, isLoading, createOrGetMeeting, updateMeeting, deleteMeeting, duplicateMeeting } = useMeetings(sede);
   
   const currentWeek = getWeekInfo(selectedDate);
   
@@ -243,6 +243,19 @@ export const MeetingsPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      title="Duplica per questa settimana"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        const newId = await duplicateMeeting.mutateAsync(meeting.id);
+                        if (newId) setSelectedMeetingId(newId);
+                      }}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
