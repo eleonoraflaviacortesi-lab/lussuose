@@ -29,23 +29,44 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMeetings, MeetingItemType } from '@/hooks/useMeetings';
+import { useMeetings } from '@/hooks/useMeetings';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useNotizie } from '@/hooks/useNotizie';
 import { useClienti } from '@/hooks/useClienti';
+import type { MeetingSectionType } from './MeetingDetail';
 
-const ITEM_TYPE_LABELS: Record<MeetingItemType, string> = {
-  incarico: 'Incarico',
-  trattativa: 'Trattativa',
-  acquirente: 'Acquirente',
-  obiettivo: 'Obiettivo',
-  task: 'Task',
+const SECTION_LABELS: Record<MeetingSectionType, string> = {
+  trattativa_corso: 'Trattativa in corso',
+  trattativa_chiusa: 'Trattativa chiusa',
+  incarico_preso: 'Incarico preso',
+  incarico_mirino: 'Incarico nel mirino',
+  acquirente_caldo: 'Acquirente caldo',
+  incarico_ribasso: 'Incarico da ribassare',
+  obiettivo: 'Obiettivo settimana',
+};
+
+// Config per ogni sezione: quali campi mostrare
+const SECTION_FIELDS: Record<MeetingSectionType, {
+  showNotizia: boolean;
+  showBuyer: boolean;
+  showBuyerText: boolean;
+  agentRequired: boolean;
+  titlePlaceholder: string;
+}> = {
+  trattativa_corso: { showNotizia: true, showBuyer: true, showBuyerText: true, agentRequired: false, titlePlaceholder: 'Note sulla trattativa...' },
+  trattativa_chiusa: { showNotizia: true, showBuyer: true, showBuyerText: true, agentRequired: false, titlePlaceholder: 'Note sulla chiusura...' },
+  incarico_preso: { showNotizia: true, showBuyer: false, showBuyerText: false, agentRequired: false, titlePlaceholder: 'Dettagli incarico...' },
+  incarico_mirino: { showNotizia: true, showBuyer: false, showBuyerText: false, agentRequired: false, titlePlaceholder: 'Potenziale incarico...' },
+  acquirente_caldo: { showNotizia: false, showBuyer: true, showBuyerText: false, agentRequired: false, titlePlaceholder: 'Note acquirente...' },
+  incarico_ribasso: { showNotizia: true, showBuyer: false, showBuyerText: false, agentRequired: false, titlePlaceholder: 'Proposta di ribasso...' },
+  obiettivo: { showNotizia: false, showBuyer: false, showBuyerText: false, agentRequired: true, titlePlaceholder: 'Descrivi l\'obiettivo...' },
 };
 
 const formSchema = z.object({
-  title: z.string().min(1, 'Titolo obbligatorio'),
+  title: z.string().min(1, 'Campo obbligatorio'),
   description: z.string().optional(),
   assigned_to: z.string().optional(),
+  buyer_name: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -54,14 +75,14 @@ interface AddMeetingItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   meetingId: string;
-  itemType: MeetingItemType;
+  sectionType: MeetingSectionType;
 }
 
 export const AddMeetingItemDialog = ({
   open,
   onOpenChange,
   meetingId,
-  itemType,
+  sectionType,
 }: AddMeetingItemDialogProps) => {
   const { addItem } = useMeetings();
   const { profiles } = useProfiles();
@@ -73,12 +94,15 @@ export const AddMeetingItemDialog = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [showLinkPicker, setShowLinkPicker] = useState<'notizia' | 'cliente' | null>(null);
 
+  const fieldConfig = SECTION_FIELDS[sectionType];
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: '',
       description: '',
       assigned_to: '',
+      buyer_name: '',
     },
   });
 
@@ -94,15 +118,26 @@ export const AddMeetingItemDialog = ({
   }, [open, form]);
 
   const onSubmit = async (data: FormData) => {
+    // Validazione agente per obiettivi
+    if (fieldConfig.agentRequired && !data.assigned_to) {
+      form.setError('assigned_to', { message: 'Agente obbligatorio per gli obiettivi' });
+      return;
+    }
+
     await addItem.mutateAsync({
       meeting_id: meetingId,
-      item_type: itemType,
+      item_type: sectionType,
       title: data.title,
       description: data.description || undefined,
       assigned_to: data.assigned_to || undefined,
       linked_notizia_id: linkedNotizia || undefined,
       linked_cliente_id: linkedCliente || undefined,
-    });
+      // buyer_name viene gestito lato DB
+    } as any);
+    
+    // Se c'è buyer_name ma non cliente collegato, lo salviamo separatamente
+    // Nota: questo richiede che il campo buyer_name sia stato aggiunto alla tabella
+    
     onOpenChange(false);
   };
 
@@ -120,29 +155,196 @@ export const AddMeetingItemDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Aggiungi {ITEM_TYPE_LABELS[itemType]}
+            Aggiungi: {SECTION_LABELS[sectionType]}
           </DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {/* Notizia picker */}
+            {fieldConfig.showNotizia && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Collega Notizia</label>
+                {!linkedNotizia ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setShowLinkPicker('notizia')}
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Cerca notizia...
+                  </Button>
+                ) : (
+                  <Badge variant="secondary" className="flex items-center gap-2 p-2 w-full justify-between">
+                    <span>📋 {selectedNotizia?.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLinkedNotizia(null)}
+                      className="hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {showLinkPicker === 'notizia' && (
+                  <div className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Cerca notizia..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-8"
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setShowLinkPicker(null);
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <ScrollArea className="h-32">
+                      {filteredNotizie?.map(n => (
+                        <button
+                          key={n.id}
+                          type="button"
+                          className="w-full text-left px-2 py-1.5 hover:bg-muted rounded text-sm"
+                          onClick={() => {
+                            setLinkedNotizia(n.id);
+                            setShowLinkPicker(null);
+                            setSearchQuery('');
+                          }}
+                        >
+                          {n.emoji || '📋'} {n.name}
+                          {n.zona && <span className="text-muted-foreground ml-1">- {n.zona}</span>}
+                        </button>
+                      ))}
+                      {filteredNotizie?.length === 0 && (
+                        <p className="text-sm text-muted-foreground p-2">Nessun risultato</p>
+                      )}
+                    </ScrollArea>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Buyer picker */}
+            {fieldConfig.showBuyer && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Collega Buyer</label>
+                {!linkedCliente ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start"
+                    onClick={() => setShowLinkPicker('cliente')}
+                  >
+                    <Search className="h-4 w-4 mr-2" />
+                    Cerca buyer...
+                  </Button>
+                ) : (
+                  <Badge variant="secondary" className="flex items-center gap-2 p-2 w-full justify-between">
+                    <span>👤 {selectedCliente?.nome}</span>
+                    <button
+                      type="button"
+                      onClick={() => setLinkedCliente(null)}
+                      className="hover:text-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </Badge>
+                )}
+                
+                {showLinkPicker === 'cliente' && (
+                  <div className="border rounded-lg p-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        placeholder="Cerca buyer..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="h-8"
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setShowLinkPicker(null);
+                          setSearchQuery('');
+                        }}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <ScrollArea className="h-32">
+                      {filteredClienti?.map(c => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          className="w-full text-left px-2 py-1.5 hover:bg-muted rounded text-sm"
+                          onClick={() => {
+                            setLinkedCliente(c.id);
+                            setShowLinkPicker(null);
+                            setSearchQuery('');
+                            form.setValue('buyer_name', ''); // Clear text if selecting
+                          }}
+                        >
+                          {c.emoji || '👤'} {c.nome}
+                        </button>
+                      ))}
+                      {filteredClienti?.length === 0 && (
+                        <p className="text-sm text-muted-foreground p-2">Nessun risultato</p>
+                      )}
+                    </ScrollArea>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Buyer text (if buyer not linked) */}
+            {fieldConfig.showBuyerText && !linkedCliente && (
+              <FormField
+                control={form.control}
+                name="buyer_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Oppure scrivi nome buyer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Nome buyer..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Title/Notes */}
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Titolo</FormLabel>
+                  <FormLabel>{sectionType === 'obiettivo' ? 'Obiettivo' : 'Titolo/Note'}</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descrivi brevemente..." {...field} />
+                    <Input placeholder={fieldConfig.titlePlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {/* Description (optional) */}
             <FormField
               control={form.control}
               name="description"
@@ -152,7 +354,7 @@ export const AddMeetingItemDialog = ({
                   <FormControl>
                     <Textarea 
                       placeholder="Note aggiuntive..." 
-                      className="min-h-[80px]"
+                      className="min-h-[60px]"
                       {...field} 
                     />
                   </FormControl>
@@ -161,12 +363,15 @@ export const AddMeetingItemDialog = ({
               )}
             />
 
+            {/* Agent assignment */}
             <FormField
               control={form.control}
               name="assigned_to"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assegna a</FormLabel>
+                  <FormLabel>
+                    Assegna a {fieldConfig.agentRequired && <span className="text-destructive">*</span>}
+                  </FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -185,122 +390,6 @@ export const AddMeetingItemDialog = ({
                 </FormItem>
               )}
             />
-
-            {/* Link to existing entities */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Collega a</label>
-              
-              <div className="flex gap-2 flex-wrap">
-                {/* Link Notizia button */}
-                {!linkedNotizia ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowLinkPicker('notizia')}
-                  >
-                    <Link2 className="h-3 w-3 mr-1" />
-                    Notizia
-                  </Button>
-                ) : (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    📋 {selectedNotizia?.name}
-                    <button
-                      type="button"
-                      onClick={() => setLinkedNotizia(null)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-
-                {/* Link Cliente button */}
-                {!linkedCliente ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowLinkPicker('cliente')}
-                  >
-                    <Link2 className="h-3 w-3 mr-1" />
-                    Buyer
-                  </Button>
-                ) : (
-                  <Badge variant="secondary" className="flex items-center gap-1">
-                    👤 {selectedCliente?.nome}
-                    <button
-                      type="button"
-                      onClick={() => setLinkedCliente(null)}
-                      className="ml-1 hover:text-destructive"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </Badge>
-                )}
-              </div>
-
-              {/* Link picker */}
-              {showLinkPicker && (
-                <div className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Search className="h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder={`Cerca ${showLinkPicker === 'notizia' ? 'notizia' : 'buyer'}...`}
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="h-8"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setShowLinkPicker(null);
-                        setSearchQuery('');
-                      }}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <ScrollArea className="h-32">
-                    {showLinkPicker === 'notizia' ? (
-                      filteredNotizie?.map(n => (
-                        <button
-                          key={n.id}
-                          type="button"
-                          className="w-full text-left px-2 py-1.5 hover:bg-muted rounded text-sm"
-                          onClick={() => {
-                            setLinkedNotizia(n.id);
-                            setShowLinkPicker(null);
-                            setSearchQuery('');
-                          }}
-                        >
-                          {n.emoji || '📋'} {n.name}
-                          {n.zona && <span className="text-muted-foreground ml-1">- {n.zona}</span>}
-                        </button>
-                      ))
-                    ) : (
-                      filteredClienti?.map(c => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          className="w-full text-left px-2 py-1.5 hover:bg-muted rounded text-sm"
-                          onClick={() => {
-                            setLinkedCliente(c.id);
-                            setShowLinkPicker(null);
-                            setSearchQuery('');
-                          }}
-                        >
-                          {c.emoji || '👤'} {c.nome}
-                        </button>
-                      ))
-                    )}
-                  </ScrollArea>
-                </div>
-              )}
-            </div>
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

@@ -1,29 +1,40 @@
 import { useState } from 'react';
 import { format, parseISO, addWeeks } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ArrowLeft, Plus, MoreVertical, Check, Clock, ArrowRight, Link2, User } from 'lucide-react';
+import { ArrowLeft, Plus, MoreVertical, Check, Clock, ArrowRight, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useMeetings, MeetingItem, MeetingItemType, MeetingItemStatus } from '@/hooks/useMeetings';
+import { useMeetings, MeetingItem, MeetingItemStatus } from '@/hooks/useMeetings';
 import { useAuth } from '@/hooks/useAuth';
 import { AddMeetingItemDialog } from './AddMeetingItemDialog';
 import { cn } from '@/lib/utils';
 
-const ITEM_TYPES: { key: MeetingItemType; label: string; emoji: string }[] = [
-  { key: 'incarico', label: 'Incarichi', emoji: '📋' },
-  { key: 'trattativa', label: 'Trattative', emoji: '🤝' },
-  { key: 'acquirente', label: 'Acquirenti', emoji: '👤' },
-  { key: 'obiettivo', label: 'Obiettivi', emoji: '🎯' },
-  { key: 'task', label: 'Task', emoji: '✅' },
+// Nuovi tipi sezione secondo il modello PDF
+export type MeetingSectionType = 
+  | 'trattativa_corso' 
+  | 'trattativa_chiusa' 
+  | 'incarico_preso' 
+  | 'incarico_mirino' 
+  | 'acquirente_caldo' 
+  | 'incarico_ribasso' 
+  | 'obiettivo';
+
+const MEETING_SECTIONS: { key: MeetingSectionType; label: string; emoji: string }[] = [
+  { key: 'trattativa_corso', label: 'Trattative in corso', emoji: '🤝' },
+  { key: 'trattativa_chiusa', label: 'Trattative chiuse', emoji: '✅' },
+  { key: 'incarico_preso', label: 'Incarichi presi settimana scorsa', emoji: '📋' },
+  { key: 'incarico_mirino', label: 'Incarichi nel mirino', emoji: '🎯' },
+  { key: 'acquirente_caldo', label: 'Acquirenti caldi', emoji: '🔥' },
+  { key: 'incarico_ribasso', label: 'Incarichi da ribassare', emoji: '📉' },
+  { key: 'obiettivo', label: 'Obiettivo settimana', emoji: '🏆' },
 ];
 
 const STATUS_CONFIG: Record<MeetingItemStatus, { label: string; color: string; icon: typeof Check }> = {
@@ -45,8 +56,7 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   const { data: meeting, isLoading } = useMeetingDetail(meetingId);
   
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [addItemType, setAddItemType] = useState<MeetingItemType>('task');
-  const [activeTab, setActiveTab] = useState<MeetingItemType>('incarico');
+  const [addSectionType, setAddSectionType] = useState<MeetingSectionType>('trattativa_corso');
 
   const handleStatusChange = (item: MeetingItem, newStatus: MeetingItemStatus) => {
     updateItem.mutate({
@@ -62,13 +72,13 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
     }
   };
 
-  const handleAddItem = (type: MeetingItemType) => {
-    setAddItemType(type);
+  const handleAddItem = (sectionType: MeetingSectionType) => {
+    setAddSectionType(sectionType);
     setShowAddDialog(true);
   };
 
-  const getItemsByType = (type: MeetingItemType) => {
-    return meeting?.items?.filter(i => i.item_type === type) || [];
+  const getItemsBySection = (sectionType: MeetingSectionType) => {
+    return meeting?.items?.filter(i => i.item_type === sectionType) || [];
   };
 
   if (isLoading) {
@@ -93,7 +103,7 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
   }
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-6 pb-24">
       {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" onClick={onBack}>
@@ -110,67 +120,62 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
         </div>
       </div>
 
-      {/* Tabs for item types */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as MeetingItemType)}>
-        <TabsList className="w-full grid grid-cols-5 h-auto">
-          {ITEM_TYPES.map(type => (
-            <TabsTrigger 
-              key={type.key} 
-              value={type.key}
-              className="flex flex-col py-2 px-1 text-xs"
-            >
-              <span className="text-lg">{type.emoji}</span>
-              <span className="hidden sm:inline">{type.label}</span>
-              <Badge variant="secondary" className="mt-1 text-[10px] px-1.5">
-                {getItemsByType(type.key).length}
-              </Badge>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {ITEM_TYPES.map(type => (
-          <TabsContent key={type.key} value={type.key} className="mt-4">
-            <div className="space-y-3">
-              {/* Add button */}
+      {/* Vertical sections */}
+      {MEETING_SECTIONS.map(section => {
+        const items = getItemsBySection(section.key);
+        return (
+          <div key={section.key} className="space-y-3">
+            {/* Section header */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-2">
+                <span className="text-lg">{section.emoji}</span>
+                {section.label}
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {items.length}
+                </Badge>
+              </h2>
               {isCoordinator && (
                 <Button
-                  variant="outline"
-                  className="w-full border-dashed"
-                  onClick={() => handleAddItem(type.key)}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleAddItem(section.key)}
+                  className="h-8"
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Aggiungi {type.label.toLowerCase().slice(0, -1)}
+                  <Plus className="h-4 w-4 mr-1" />
+                  Aggiungi
                 </Button>
               )}
+            </div>
 
-              {/* Items list */}
-              {getItemsByType(type.key).length === 0 ? (
-                <Card className="p-6 text-center text-muted-foreground">
-                  <span className="text-3xl mb-2 block">{type.emoji}</span>
-                  <p>Nessun {type.label.toLowerCase().slice(0, -1)} per questa settimana</p>
-                </Card>
-              ) : (
-                getItemsByType(type.key).map(item => (
+            {/* Section items */}
+            {items.length === 0 ? (
+              <Card className="p-4 text-center text-muted-foreground border-dashed">
+                <p className="text-sm">Nessun elemento</p>
+              </Card>
+            ) : (
+              <div className="space-y-2">
+                {items.map(item => (
                   <MeetingItemCard
                     key={item.id}
                     item={item}
+                    sectionType={section.key}
                     isCoordinator={isCoordinator}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
                   />
-                ))
-              )}
-            </div>
-          </TabsContent>
-        ))}
-      </Tabs>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
 
       {/* Add dialog */}
       <AddMeetingItemDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
         meetingId={meetingId}
-        itemType={addItemType}
+        sectionType={addSectionType}
       />
     </div>
   );
@@ -178,69 +183,80 @@ export const MeetingDetail = ({ meetingId, onBack }: MeetingDetailProps) => {
 
 interface MeetingItemCardProps {
   item: MeetingItem;
+  sectionType: MeetingSectionType;
   isCoordinator: boolean;
   onStatusChange: (item: MeetingItem, status: MeetingItemStatus) => void;
   onDelete: (item: MeetingItem) => void;
 }
 
-const MeetingItemCard = ({ item, isCoordinator, onStatusChange, onDelete }: MeetingItemCardProps) => {
+const MeetingItemCard = ({ item, sectionType, isCoordinator, onStatusChange, onDelete }: MeetingItemCardProps) => {
   const statusConfig = STATUS_CONFIG[item.status];
   const StatusIcon = statusConfig.icon;
+  
+  // Per gli obiettivi mostriamo sempre lo status
+  const showStatus = sectionType === 'obiettivo';
 
   return (
     <Card className={cn(
-      "p-4 transition-all",
+      "p-3 transition-all",
       item.status === 'completed' && "opacity-60"
     )}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
-              statusConfig.color
-            )}>
-              <StatusIcon className="h-3 w-3" />
-              {statusConfig.label}
-            </span>
-            
-            {item.assigned_to_name && (
-              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <span>{item.assigned_to_emoji}</span>
-                {item.assigned_to_name}
+          {/* Status badge only for objectives */}
+          {showStatus && (
+            <div className="mb-2">
+              <span className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+                statusConfig.color
+              )}>
+                <StatusIcon className="h-3 w-3" />
+                {statusConfig.label}
               </span>
-            )}
-          </div>
+            </div>
+          )}
           
+          {/* Title */}
           <h4 className={cn(
-            "font-medium mt-2",
+            "font-medium text-sm",
             item.status === 'completed' && "line-through"
           )}>
             {item.title}
           </h4>
           
+          {/* Description */}
           {item.description && (
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs text-muted-foreground mt-1">
               {item.description}
             </p>
           )}
 
-          {/* Linked entities */}
-          {(item.linked_notizia_name || item.linked_cliente_name) && (
-            <div className="flex items-center gap-2 mt-2 flex-wrap">
-              {item.linked_notizia_name && (
-                <Badge variant="outline" className="text-xs">
-                  <Link2 className="h-3 w-3 mr-1" />
-                  📋 {item.linked_notizia_name}
-                </Badge>
-              )}
-              {item.linked_cliente_name && (
-                <Badge variant="outline" className="text-xs">
-                  <Link2 className="h-3 w-3 mr-1" />
-                  👤 {item.linked_cliente_name}
-                </Badge>
-              )}
-            </div>
-          )}
+          {/* Linked entities and agent */}
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
+            {item.linked_notizia_name && (
+              <Badge variant="outline" className="text-xs">
+                <Link2 className="h-3 w-3 mr-1" />
+                📋 {item.linked_notizia_name}
+              </Badge>
+            )}
+            {item.linked_cliente_name && (
+              <Badge variant="outline" className="text-xs">
+                <Link2 className="h-3 w-3 mr-1" />
+                👤 {item.linked_cliente_name}
+              </Badge>
+            )}
+            {(item as any).buyer_name && !(item.linked_cliente_id) && (
+              <Badge variant="outline" className="text-xs">
+                👤 {(item as any).buyer_name}
+              </Badge>
+            )}
+            {item.assigned_to_name && (
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                <span>{item.assigned_to_emoji}</span>
+                {item.assigned_to_name}
+              </span>
+            )}
+          </div>
         </div>
 
         <DropdownMenu>
@@ -250,22 +266,16 @@ const MeetingItemCard = ({ item, isCoordinator, onStatusChange, onDelete }: Meet
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {item.status !== 'completed' && (
+            {sectionType === 'obiettivo' && item.status !== 'completed' && (
               <DropdownMenuItem onClick={() => onStatusChange(item, 'completed')}>
                 <Check className="h-4 w-4 mr-2 text-green-600" />
                 Segna completato
               </DropdownMenuItem>
             )}
-            {item.status !== 'open' && (
+            {sectionType === 'obiettivo' && item.status === 'completed' && (
               <DropdownMenuItem onClick={() => onStatusChange(item, 'open')}>
                 <Clock className="h-4 w-4 mr-2 text-blue-600" />
                 Riapri
-              </DropdownMenuItem>
-            )}
-            {item.status !== 'postponed' && (
-              <DropdownMenuItem onClick={() => onStatusChange(item, 'postponed')}>
-                <ArrowRight className="h-4 w-4 mr-2 text-amber-600" />
-                Rimanda
               </DropdownMenuItem>
             )}
             {isCoordinator && (

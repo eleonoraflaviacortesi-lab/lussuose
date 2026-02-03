@@ -96,3 +96,69 @@ export const celebrateMini = () => {
     zIndex: 9999,
   });
 };
+
+// Celebrazione esplosiva per "GASI ABBESTIA!"
+export const celebrateGasiAbbestia = () => {
+  const duration = 4000;
+  const animationEnd = Date.now() + duration;
+  const defaults = { 
+    startVelocity: 45, 
+    spread: 360, 
+    ticks: 100, 
+    zIndex: 9998,
+    colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500', '#FFD700'],
+  };
+
+  function randomInRange(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+  }
+
+  // Initial burst from center
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { x: 0.5, y: 0.5 },
+    colors: ['#FFD700', '#FFA500', '#FF6347'],
+    zIndex: 9998,
+    startVelocity: 50,
+  });
+
+  // Continuous rain from sides
+  const interval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+
+    if (timeLeft <= 0) {
+      return clearInterval(interval);
+    }
+
+    const particleCount = 30 * (timeLeft / duration);
+
+    // From left
+    confetti({
+      ...defaults,
+      particleCount: Math.floor(particleCount),
+      origin: { x: randomInRange(0.1, 0.3), y: randomInRange(0.2, 0.6) },
+    });
+    
+    // From right
+    confetti({
+      ...defaults,
+      particleCount: Math.floor(particleCount),
+      origin: { x: randomInRange(0.7, 0.9), y: randomInRange(0.2, 0.6) },
+    });
+  }, 200);
+
+  // Final burst
+  setTimeout(() => {
+    confetti({
+      particleCount: 150,
+      spread: 100,
+      origin: { x: 0.5, y: 0.6 },
+      colors: ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00CED1'],
+      zIndex: 9998,
+      startVelocity: 60,
+      shapes: ['star', 'circle'],
+      scalar: 1.2,
+    });
+  }, 1500);
+};
