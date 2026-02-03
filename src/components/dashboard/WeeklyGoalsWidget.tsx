@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useMeetings } from '@/hooks/useMeetings';
+import { useWeeklyProductionData } from '@/hooks/useWeeklyProductionData';
 import { celebrateGasiAbbestia } from '@/lib/confetti';
 import { GasiCelebration } from '@/components/ui/gasi-celebration';
 import { cn } from '@/lib/utils';
@@ -20,6 +21,9 @@ export const WeeklyGoalsWidget = () => {
 
   // Get current week start
   const currentWeekStart = format(startOfWeek(new Date(), { weekStartsOn: 1 }), 'yyyy-MM-dd');
+
+  // Fetch real production data for this week
+  const { data: productionData } = useWeeklyProductionData(currentWeekStart, user?.id || null);
 
   // Fetch user's goals for current week
   const { data: goals, isLoading } = useQuery({
@@ -92,6 +96,9 @@ export const WeeklyGoalsWidget = () => {
   const openGoals = goals.filter(g => g.status === 'open');
   const completedGoals = goals.filter(g => g.status === 'completed');
 
+  // Helper to check if actual >= target
+  const isGoalMet = (actual: number, target: number) => target > 0 && actual >= target;
+
   return (
     <>
       <Card className="p-4 space-y-3">
@@ -113,25 +120,45 @@ export const WeeklyGoalsWidget = () => {
                   {goal.goal_incarichi > 0 && (
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Incarichi:</span>
-                      <span className="font-semibold">{goal.goal_incarichi}</span>
+                      <span className={cn(
+                        "font-semibold",
+                        productionData && isGoalMet(productionData.incarichi, goal.goal_incarichi) && "text-green-600"
+                      )}>
+                        {productionData ? `${productionData.incarichi}/` : ''}{goal.goal_incarichi}
+                      </span>
                     </div>
                   )}
                   {goal.goal_notizie > 0 && (
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Notizie:</span>
-                      <span className="font-semibold">{goal.goal_notizie}</span>
+                      <span className={cn(
+                        "font-semibold",
+                        productionData && isGoalMet(productionData.notizie, goal.goal_notizie) && "text-green-600"
+                      )}>
+                        {productionData ? `${productionData.notizie}/` : ''}{goal.goal_notizie}
+                      </span>
                     </div>
                   )}
                   {goal.goal_acquisizioni > 0 && (
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Acquisizioni:</span>
-                      <span className="font-semibold">{goal.goal_acquisizioni}</span>
+                      <span className={cn(
+                        "font-semibold",
+                        productionData && isGoalMet(productionData.valutazioni, goal.goal_acquisizioni) && "text-green-600"
+                      )}>
+                        {productionData ? `${productionData.valutazioni}/` : ''}{goal.goal_acquisizioni}
+                      </span>
                     </div>
                   )}
                   {goal.goal_trattative > 0 && (
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Trattative:</span>
-                      <span className="font-semibold">{goal.goal_trattative}</span>
+                      <span className={cn(
+                        "font-semibold",
+                        productionData && isGoalMet(productionData.trattative, goal.goal_trattative) && "text-green-600"
+                      )}>
+                        {productionData ? `${productionData.trattative}/` : ''}{goal.goal_trattative}
+                      </span>
                     </div>
                   )}
                 </div>

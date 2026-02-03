@@ -34,7 +34,7 @@ export const useWeeklyProductionData = (
 
       const { data, error } = await supabase
         .from('daily_data')
-        .select('incarichi_vendita, notizie_reali, acquisizioni, nuove_trattative')
+        .select('incarichi_vendita, notizie_reali, valutazioni_fatte, nuove_trattative')
         .eq('user_id', userId)
         .gte('date', startStr)
         .lte('date', endStr);
@@ -42,11 +42,12 @@ export const useWeeklyProductionData = (
       if (error) throw error;
 
       // Sum up the weekly values
+      // Note: "acquisizioni" in goals = "valutazioni_fatte" in daily_data
       const summary = (data || []).reduce(
         (acc, day) => ({
           incarichi: acc.incarichi + (day.incarichi_vendita || 0),
           notizie: acc.notizie + (day.notizie_reali || 0),
-          valutazioni: acc.valutazioni + (day.acquisizioni || 0), // "acquisizioni" in DB = "valutazioni" in goals
+          valutazioni: acc.valutazioni + (day.valutazioni_fatte || 0),
           trattative: acc.trattative + (day.nuove_trattative || 0),
         }),
         { incarichi: 0, notizie: 0, valutazioni: 0, trattative: 0 }
@@ -91,7 +92,7 @@ export const useWeeklyProductionDataBySede = (
       // Fetch daily data for all these users in the week
       const { data, error } = await supabase
         .from('daily_data')
-        .select('user_id, incarichi_vendita, notizie_reali, acquisizioni, nuove_trattative')
+        .select('user_id, incarichi_vendita, notizie_reali, valutazioni_fatte, nuove_trattative')
         .in('user_id', userIds)
         .gte('date', startStr)
         .lte('date', endStr);
@@ -107,7 +108,7 @@ export const useWeeklyProductionDataBySede = (
         }
         byUser[day.user_id].incarichi += day.incarichi_vendita || 0;
         byUser[day.user_id].notizie += day.notizie_reali || 0;
-        byUser[day.user_id].valutazioni += day.acquisizioni || 0;
+        byUser[day.user_id].valutazioni += day.valutazioni_fatte || 0;
         byUser[day.user_id].trattative += day.nuove_trattative || 0;
       }
 

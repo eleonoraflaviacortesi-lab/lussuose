@@ -93,8 +93,11 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
   return (
     <div className="px-4 pb-6 space-y-4 animate-fade-in">
+      {/* Daily Quote at top */}
+      <DailyQuote />
+
       {/* Ciclo Produttivo Pill Button */}
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center">
         <button
           onClick={() => navigate('/inserisci')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium tracking-widest transition-all active:scale-95 ${
@@ -123,8 +126,8 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       {/* Today's Reminders Widget */}
       <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
 
-      {/* Daily Quote */}
-      <DailyQuote />
+      {/* Incarichi del Mese - below calendar reminders */}
+      <IncarchiWidget />
 
       {/* Status Annuale Personale */}
       <div className="text-center space-y-2">
@@ -152,9 +155,6 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           <p className="text-[10px] text-muted-foreground mt-1">{completionPercent}% target</p>
         </div>
       </div>
-
-      {/* Incarichi Widget */}
-      <IncarchiWidget />
 
       {/* Volume Generato & Volume a Credito */}
       <div className="grid grid-cols-2 gap-3">
