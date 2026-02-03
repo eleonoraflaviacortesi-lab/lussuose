@@ -1132,30 +1132,28 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    // Buyers (cliente_reminder) - differentiate with left border accent
+    const sageGreen = '#8B9A7D';
+    
+    // Buyers (cliente_reminder) - sage green with gold left border
     if (event.type === 'cliente_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D'; // Default sage green for buyers
-      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: baseColor,
+        customBg: sageGreen,
         border: 'border-l-4 border-l-amber-400', // Gold accent to differentiate buyers
-        textClass: textColor,
-        timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
+        textClass: 'text-white',
+        timeClass: 'text-white/70',
         isBuyer: true,
       };
     }
     
-    // Notizie (seller leads) - use status color, verde salvia as default
+    // Notizie (seller leads) - sage green as standard
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D'; // Sage green default
-      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: baseColor,
+        customBg: sageGreen,
         border: 'border-transparent',
-        textClass: textColor,
-        timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
+        textClass: 'text-white',
+        timeClass: 'text-white/70',
         isBuyer: false,
       };
     }
@@ -1278,27 +1276,25 @@ const DraggableEventCard = memo(({
   dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
-    // Buyers (cliente_reminder) - differentiate with left border accent
+    const sageGreen = '#8B9A7D';
+    
+    // Buyers (cliente_reminder) - sage green with gold left border
     if (event.type === 'cliente_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D';
-      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: baseColor,
+        customBg: sageGreen,
         border: 'border-l-4 border-l-amber-400', // Gold accent for buyers
-        textClass: textColor,
+        textClass: 'text-white',
       };
     }
     
-    // Notizie - sage green default
+    // Notizie - sage green as standard
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D';
-      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: baseColor,
+        customBg: sageGreen,
         border: 'border-transparent',
-        textClass: textColor,
+        textClass: 'text-white',
       };
     }
     
