@@ -1132,13 +1132,13 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    const sageGreen = '#8B9A7D';
+    const buyerGreen = '#22c55e'; // Vibrant green for buyers
     
-    // Buyers (cliente_reminder) - ALWAYS sage green with gold left border
+    // Buyers (cliente_reminder) - ALWAYS vibrant green with gold left border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
-        customBg: sageGreen,
+        customBg: buyerGreen,
         border: 'border-l-4 border-l-amber-400',
         textClass: 'text-white',
         timeClass: 'text-white/70',
@@ -1148,7 +1148,7 @@ const EventCard = memo(({
     
     // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || sageGreen;
+      const baseColor = event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
@@ -1277,13 +1277,13 @@ const DraggableEventCard = memo(({
   dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
-    const sageGreen = '#8B9A7D';
+    const buyerGreen = '#22c55e'; // Vibrant green for buyers
     
-    // Buyers (cliente_reminder) - ALWAYS sage green with gold border
+    // Buyers (cliente_reminder) - ALWAYS vibrant green with gold border
     if (event.type === 'cliente_reminder') {
       return {
         bg: '',
-        customBg: sageGreen,
+        customBg: buyerGreen,
         border: 'border-l-4 border-l-amber-400',
         textClass: 'text-white',
       };
@@ -1291,7 +1291,7 @@ const DraggableEventCard = memo(({
     
     // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || sageGreen;
+      const baseColor = event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
