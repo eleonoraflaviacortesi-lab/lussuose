@@ -231,7 +231,7 @@ const ReportForm = () => {
           />
           
           <CounterField
-            label="VALUTAZIONI FATTE"
+            label="ACQUISIZIONI FATTE"
             value={formData.valutazioni_fatte}
             field="valutazioni_fatte"
             icon={ClipboardCheck}
