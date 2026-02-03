@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useClientPropertyMatches, useProperties, PropertyMatch, Property } from '@/hooks/useProperties';
 import { useClienteActivities } from '@/hooks/useClienteActivities';
@@ -32,6 +32,10 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+// Simple in-memory cache for search results
+const searchCache = new Map<string, { results: WebSearchResult[]; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 interface PropertyMatchesSectionProps {
   clienteId: string;
@@ -362,38 +366,98 @@ function AddPropertyDialog({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<WebSearchResult[]>([]);
   const [isImporting, setIsImporting] = useState<string | null>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.length < 2) return;
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      if (abortControllerRef.current) abortControllerRef.current.abort();
+    };
+  }, []);
+
+  const executeSearch = useCallback(async (query: string) => {
+    if (!query.trim() || query.length < 2) return;
     
-    setIsSearching(true);
-    setSearchResults([]);
+    const cacheKey = query.toLowerCase().trim();
+    
+    // Check cache first
+    const cached = searchCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      setSearchResults(cached.results);
+      setIsSearching(false);
+      return;
+    }
+    
+    // Cancel previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
     
     try {
       const { data, error } = await supabase.functions.invoke('search-website-properties', {
-        body: { query: searchQuery },
+        body: { query },
       });
 
       if (error) throw error;
 
       if (data.success) {
-        setSearchResults(data.results || []);
-        if (data.results.length === 0) {
+        const results = data.results || [];
+        setSearchResults(results);
+        
+        // Cache the results
+        searchCache.set(cacheKey, { results, timestamp: Date.now() });
+        
+        if (results.length === 0) {
           toast({ title: 'Nessun risultato', description: 'Prova con termini diversi' });
         }
       } else {
         throw new Error(data.error || 'Ricerca fallita');
       }
     } catch (err: any) {
-      toast({
-        title: 'Errore ricerca',
-        description: err.message,
-        variant: 'destructive',
-      });
+      if (err.name !== 'AbortError') {
+        toast({
+          title: 'Errore ricerca',
+          description: err.message,
+          variant: 'destructive',
+        });
+      }
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [toast]);
+
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim() || searchQuery.length < 2) return;
+    setIsSearching(true);
+    setSearchResults([]);
+    executeSearch(searchQuery);
+  }, [searchQuery, executeSearch]);
+
+  // Debounced auto-search as user types
+  const handleQueryChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    
+    if (value.length >= 3) {
+      // Check cache immediately for instant feedback
+      const cacheKey = value.toLowerCase().trim();
+      const cached = searchCache.get(cacheKey);
+      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+        setSearchResults(cached.results);
+        return;
+      }
+      
+      // Debounce the actual search
+      debounceRef.current = setTimeout(() => {
+        setIsSearching(true);
+        executeSearch(value);
+      }, 400);
+    }
+  }, [executeSearch]);
 
   const handleImportAndAdd = async (result: WebSearchResult) => {
     setIsImporting(result.url);
@@ -470,9 +534,10 @@ function AddPropertyDialog({
             <Input
               placeholder="Cerca villa, casale, Cortona, piscina..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               onKeyDown={handleKeyDown}
               className="flex-1 border-0 shadow-lg rounded-xl bg-white"
+              autoFocus
             />
             <Button 
               onClick={handleSearch} 
@@ -488,13 +553,26 @@ function AddPropertyDialog({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Cerca direttamente sul sito cortesiluxuryrealestate.com
+            {isSearching ? 'Cercando...' : 'Inizia a digitare per cercare (min 3 caratteri)'}
           </p>
 
-          {searchResults.length === 0 && !isSearching ? (
+          {isSearching && searchResults.length === 0 ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg">
+                  <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-3 w-1/2" />
+                    <Skeleton className="h-5 w-24" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : searchResults.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Inserisci un termine e clicca cerca</p>
+              <p className="text-sm">Inizia a digitare per cercare</p>
             </div>
           ) : (
             <ScrollArea className="h-[400px]">
