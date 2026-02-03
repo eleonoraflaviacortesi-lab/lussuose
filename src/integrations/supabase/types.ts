@@ -489,6 +489,7 @@ export type Database = {
       meeting_items: {
         Row: {
           assigned_to: string | null
+          buyer_name: string | null
           created_at: string
           description: string | null
           display_order: number
@@ -503,6 +504,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          buyer_name?: string | null
           created_at?: string
           description?: string | null
           display_order?: number
@@ -517,6 +519,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          buyer_name?: string | null
           created_at?: string
           description?: string | null
           display_order?: number

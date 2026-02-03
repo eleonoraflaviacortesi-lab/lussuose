@@ -12,6 +12,7 @@ import IncarchiWidget from './IncarchiWidget';
 import DailyQuote from './DailyQuote';
 import AcquisitionChart from './AcquisitionChart';
 import TodayRemindersWidget from './TodayRemindersWidget';
+import WeeklyGoalsWidget from './WeeklyGoalsWidget';
 import { celebrateGoal } from '@/lib/confetti';
 import { Notizia } from '@/hooks/useNotizie';
 
@@ -115,6 +116,9 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           )}
         </button>
       </div>
+
+      {/* Weekly Goals Widget */}
+      <WeeklyGoalsWidget />
 
       {/* Today's Reminders Widget */}
       <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
