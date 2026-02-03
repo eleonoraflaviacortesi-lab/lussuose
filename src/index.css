@@ -138,12 +138,12 @@
 
   h1 {
     font-family: var(--font-sans);
-    @apply tracking-widest uppercase font-semibold text-xl;
+    @apply tracking-normal uppercase font-bold text-xl;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-semibold text-lg;
+    @apply tracking-normal uppercase font-bold text-lg;
   }
 
   h3 {
