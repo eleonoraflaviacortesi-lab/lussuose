@@ -106,7 +106,7 @@ export const useNotizie = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notizie'] });
+      queryClient.invalidateQueries({ queryKey: ['notizie', user?.id] });
       toast({ title: 'Notizia aggiunta!' });
     },
     onError: (error) => {
@@ -138,14 +138,14 @@ export const useNotizie = () => {
     // Optimistic update for instant UI feedback
     onMutate: async ({ id, comments, silent, ...input }) => {
       // Cancel outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['notizie'] });
+      await queryClient.cancelQueries({ queryKey: ['notizie', user?.id] });
       
       // Snapshot previous value
-      const previousNotizie = queryClient.getQueryData<Notizia[]>(['notizie']);
+      const previousNotizie = queryClient.getQueryData<Notizia[]>(['notizie', user?.id]);
       
       // Optimistically update cache
       if (previousNotizie) {
-        queryClient.setQueryData<Notizia[]>(['notizie'], (old) =>
+        queryClient.setQueryData<Notizia[]>(['notizie', user?.id], (old) =>
           old?.map((n) =>
             n.id === id
               ? { 
@@ -172,7 +172,7 @@ export const useNotizie = () => {
     onError: (error, variables, context) => {
       // Rollback on error
       if (context?.previousNotizie) {
-        queryClient.setQueryData(['notizie'], context.previousNotizie);
+        queryClient.setQueryData(['notizie', user?.id], context.previousNotizie);
       }
       toast({
         title: 'Errore',
@@ -194,7 +194,7 @@ export const useNotizie = () => {
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notizie'] });
+      queryClient.invalidateQueries({ queryKey: ['notizie', user?.id] });
       toast({ title: 'Notizia eliminata!' });
     },
     onError: (error) => {
@@ -244,7 +244,7 @@ export const useNotizie = () => {
       if (errorResult?.error) throw errorResult.error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notizie'] });
+      queryClient.invalidateQueries({ queryKey: ['notizie', user?.id] });
     },
   });
 
