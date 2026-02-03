@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Building2, Settings, TrendingUp, Users, Calendar } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Users, Calendar, UsersRound } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -14,6 +14,7 @@ const tabToPath: Record<string, string> = {
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
+  riunioni: '/riunioni',
   report: '/report',
   agenzia: '/agenzia',
   impostazioni: '/impostazioni',
@@ -27,7 +28,8 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'calendario', icon: Calendar, label: 'Calendario' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Users, label: 'Buyers' },
-    // separator after index 3
+    { id: 'riunioni', icon: UsersRound, label: 'Riunioni' },
+    // separator after index 4
     { id: 'report', icon: TrendingUp, label: 'I Miei Report' },
     { id: 'agenzia', icon: Building2, label: 'Performance Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
@@ -47,7 +49,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          const showSeparatorAfter = index === 3; // After clienti
+          const showSeparatorAfter = index === 4; // After riunioni
           
           return (
             <div key={tab.id} className="flex items-center">

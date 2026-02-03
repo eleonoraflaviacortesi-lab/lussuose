@@ -18,6 +18,7 @@ const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboar
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
+const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
 
 // Map URL paths to tab ids
 const pathToTab: Record<string, string> = {
@@ -25,6 +26,7 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
+  '/riunioni': 'riunioni',
   '/report': 'report',
   '/agenzia': 'agenzia',
   '/impostazioni': 'impostazioni',
@@ -108,6 +110,8 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'calendario':
         return <CalendarPage />;
+      case 'riunioni':
+        return <MeetingsPage />;
       case 'impostazioni':
         return <SettingsPage />;
       default:

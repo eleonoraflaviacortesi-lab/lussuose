@@ -486,6 +486,112 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_items: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          item_type: string
+          linked_cliente_id: string | null
+          linked_notizia_id: string | null
+          meeting_id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          item_type: string
+          linked_cliente_id?: string | null
+          linked_notizia_id?: string | null
+          meeting_id: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          item_type?: string
+          linked_cliente_id?: string | null
+          linked_notizia_id?: string | null
+          meeting_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_items_linked_cliente_id_fkey"
+            columns: ["linked_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_items_linked_notizia_id_fkey"
+            columns: ["linked_notizia_id"]
+            isOneToOne: false
+            referencedRelation: "notizie"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_items_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          notes: string | null
+          sede: string
+          title: string | null
+          updated_at: string
+          week_number: number
+          week_start: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          notes?: string | null
+          sede?: string
+          title?: string | null
+          updated_at?: string
+          week_number: number
+          week_start: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          notes?: string | null
+          sede?: string
+          title?: string | null
+          updated_at?: string
+          week_number?: number
+          week_start?: string
+          year?: number
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
