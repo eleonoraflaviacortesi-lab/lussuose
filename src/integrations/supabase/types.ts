@@ -493,11 +493,16 @@ export type Database = {
           created_at: string
           description: string | null
           display_order: number
+          goal_acquisizioni: number | null
+          goal_incarichi: number | null
+          goal_notizie: number | null
+          goal_trattative: number | null
           id: string
           item_type: string
           linked_cliente_id: string | null
           linked_notizia_id: string | null
           meeting_id: string
+          notes: string | null
           status: string
           title: string
           updated_at: string
@@ -508,11 +513,16 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          goal_acquisizioni?: number | null
+          goal_incarichi?: number | null
+          goal_notizie?: number | null
+          goal_trattative?: number | null
           id?: string
           item_type: string
           linked_cliente_id?: string | null
           linked_notizia_id?: string | null
           meeting_id: string
+          notes?: string | null
           status?: string
           title: string
           updated_at?: string
@@ -523,11 +533,16 @@ export type Database = {
           created_at?: string
           description?: string | null
           display_order?: number
+          goal_acquisizioni?: number | null
+          goal_incarichi?: number | null
+          goal_notizie?: number | null
+          goal_trattative?: number | null
           id?: string
           item_type?: string
           linked_cliente_id?: string | null
           linked_notizia_id?: string | null
           meeting_id?: string
+          notes?: string | null
           status?: string
           title?: string
           updated_at?: string

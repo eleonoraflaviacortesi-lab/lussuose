@@ -109,9 +109,34 @@ export const WeeklyGoalsWidget = () => {
               className="flex items-center justify-between gap-3 p-3 bg-muted/50 rounded-lg"
             >
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate">{goal.title}</p>
-                {goal.description && (
-                  <p className="text-xs text-muted-foreground truncate">{goal.description}</p>
+                <div className="grid grid-cols-2 gap-1 text-sm">
+                  {goal.goal_incarichi > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Incarichi:</span>
+                      <span className="font-semibold">{goal.goal_incarichi}</span>
+                    </div>
+                  )}
+                  {goal.goal_notizie > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Notizie:</span>
+                      <span className="font-semibold">{goal.goal_notizie}</span>
+                    </div>
+                  )}
+                  {goal.goal_acquisizioni > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Acquisizioni:</span>
+                      <span className="font-semibold">{goal.goal_acquisizioni}</span>
+                    </div>
+                  )}
+                  {goal.goal_trattative > 0 && (
+                    <div className="flex items-center gap-1">
+                      <span className="text-muted-foreground">Trattative:</span>
+                      <span className="font-semibold">{goal.goal_trattative}</span>
+                    </div>
+                  )}
+                </div>
+                {goal.notes && (
+                  <p className="text-xs text-muted-foreground mt-1 truncate">{goal.notes}</p>
                 )}
               </div>
               <Button
@@ -139,9 +164,12 @@ export const WeeklyGoalsWidget = () => {
             >
               <div className="flex items-center gap-2 flex-1 min-w-0">
                 <Check className="h-4 w-4 text-green-600 shrink-0" />
-                <p className="font-medium text-sm line-through text-muted-foreground truncate">
-                  {goal.title}
-                </p>
+                <div className="text-sm text-muted-foreground line-through">
+                  {goal.goal_incarichi > 0 && <span>Incarichi: {goal.goal_incarichi} </span>}
+                  {goal.goal_notizie > 0 && <span>Notizie: {goal.goal_notizie} </span>}
+                  {goal.goal_acquisizioni > 0 && <span>Acq: {goal.goal_acquisizioni} </span>}
+                  {goal.goal_trattative > 0 && <span>Tratt: {goal.goal_trattative}</span>}
+                </div>
               </div>
               <Button
                 size="sm"
