@@ -32,6 +32,7 @@ export const useSedeTargets = () => {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
 
+  // Current month targets
   const { data: targets, isLoading } = useQuery({
     queryKey: ['sede-targets', profile?.sede, currentMonth, currentYear],
     queryFn: async () => {
@@ -59,6 +60,36 @@ export const useSedeTargets = () => {
         fatturato_target: data.fatturato_target ?? DEFAULT_TARGETS.fatturato_target,
         trattative_chiuse_target: data.trattative_chiuse_target ?? DEFAULT_TARGETS.trattative_chiuse_target,
       } as SedeTargets;
+    },
+    enabled: !!user && !!profile?.sede,
+  });
+
+  // Annual targets (sum of all months for current year)
+  const { data: annualTargets } = useQuery({
+    queryKey: ['sede-targets-annual', profile?.sede, currentYear],
+    queryFn: async () => {
+      if (!profile?.sede) return { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target };
+
+      const { data, error } = await supabase
+        .from('sede_targets')
+        .select('vendite_target, fatturato_target')
+        .eq('sede', profile.sede)
+        .eq('year', currentYear);
+
+      if (error) throw error;
+      
+      if (!data || data.length === 0) {
+        return { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target };
+      }
+
+      // Sum all months for annual target
+      const annualVendite = data.reduce((sum, m) => sum + (m.vendite_target || 0), 0);
+      const annualFatturato = data.reduce((sum, m) => sum + (m.fatturato_target || 0), 0);
+
+      return {
+        vendite_target: annualVendite || DEFAULT_TARGETS.vendite_target * 12,
+        fatturato_target: annualFatturato || DEFAULT_TARGETS.fatturato_target,
+      };
     },
     enabled: !!user && !!profile?.sede,
   });
@@ -112,6 +143,7 @@ export const useSedeTargets = () => {
 
   return {
     targets: targets || DEFAULT_TARGETS,
+    annualTargets: annualTargets || { vendite_target: DEFAULT_TARGETS.vendite_target * 12, fatturato_target: DEFAULT_TARGETS.fatturato_target },
     isLoading,
     updateTargets,
   };

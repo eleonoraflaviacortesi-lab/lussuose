@@ -3,7 +3,7 @@ import { useState, useMemo, useEffect, useRef, lazy, Suspense } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
-import { useUserSettings } from '@/hooks/useUserSettings';
+import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
 import { Users, Zap, Award, Gift, TrendingUp, Plus, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -33,14 +33,12 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
-  const { settings } = useUserSettings();
+  const { annualTargets } = useSedeTargets();
   const navigate = useNavigate();
   const { hasReportedToday } = useTodayReportStatus();
 
-  // Dynamic annual target from user settings (weekly * 52 weeks)
-  const annualTarget = settings?.vendite_settimana 
-    ? Math.round(settings.vendite_settimana * 52) 
-    : 25;
+  // Annual target from sede targets (sum of all months)
+  const annualTarget = annualTargets?.vendite_target || 48;
   const currentSales = kpis?.vendite?.value || 0;
   const completionPercent = Math.min(100, Math.round((currentSales / annualTarget) * 100));
   const fatturato = kpis?.fatturato?.value || 0;
