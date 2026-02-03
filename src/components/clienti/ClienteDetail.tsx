@@ -184,8 +184,6 @@ export function ClienteDetail({
             </h3>
             <ActivityQuickActions
               onLogCall={(desc) => logCall(cliente.id, desc)}
-              onLogEmail={(desc) => logEmail(cliente.id, desc)}
-              onLogVisit={(desc) => logVisit(cliente.id, desc)}
               isLoading={isLoggingActivity}
             />
             

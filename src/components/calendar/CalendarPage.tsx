@@ -1132,36 +1132,54 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    // For notizia/cliente reminders, use the status color
-    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
-      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
+    // Buyers (cliente_reminder) - differentiate with left border accent
+    if (event.type === 'cliente_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D'; // Default sage green for buyers
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: event.statusColor,
-        border: 'border-transparent',
+        customBg: baseColor,
+        border: 'border-l-4 border-l-amber-400', // Gold accent to differentiate buyers
         textClass: textColor,
-        timeClass: isDarkColor(event.statusColor) ? 'text-white/70' : 'text-muted-foreground',
+        timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
+        isBuyer: true,
       };
     }
     
-    // Appointments use muted styles
+    // Notizie (seller leads) - use status color, verde salvia as default
+    if (event.type === 'notizia_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D'; // Sage green default
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      return {
+        bg: '',
+        customBg: baseColor,
+        border: 'border-transparent',
+        textClass: textColor,
+        timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
+        isBuyer: false,
+      };
+    }
+    
+    // Appointments - sage green
     if (event.type === 'appointment') {
       return {
-        bg: event.completed ? 'bg-muted' : 'bg-muted/50',
+        bg: event.completed ? 'bg-[#8B9A7D]/50' : 'bg-[#8B9A7D]/30',
         customBg: null,
         border: 'border-transparent',
         textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
         timeClass: 'text-muted-foreground',
+        isBuyer: false,
       };
     }
 
-    // Default
+    // Default - sage green
     return {
-      bg: 'bg-muted/50',
+      bg: 'bg-[#8B9A7D]/30',
       customBg: null,
       border: 'border-transparent',
       textClass: 'text-foreground',
       timeClass: 'text-muted-foreground',
+      isBuyer: false,
     };
   };
 
@@ -1181,6 +1199,7 @@ const EventCard = memo(({
       className={cn(
         "rounded-lg p-2 transition-all hover:scale-[1.02] cursor-pointer relative",
         styles.bg,
+        styles.border,
         event.urgent && "ring-2 ring-red-500"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
@@ -1259,17 +1278,32 @@ const DraggableEventCard = memo(({
   dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
-    if (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder')) {
-      const textColor = isDarkColor(event.statusColor) ? 'text-white' : 'text-foreground';
+    // Buyers (cliente_reminder) - differentiate with left border accent
+    if (event.type === 'cliente_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D';
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
-        customBg: event.statusColor,
+        customBg: baseColor,
+        border: 'border-l-4 border-l-amber-400', // Gold accent for buyers
+        textClass: textColor,
+      };
+    }
+    
+    // Notizie - sage green default
+    if (event.type === 'notizia_reminder') {
+      const baseColor = event.statusColor || '#8B9A7D';
+      const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      return {
+        bg: '',
+        customBg: baseColor,
         border: 'border-transparent',
         textClass: textColor,
       };
     }
+    
     return {
-      bg: 'bg-muted/50',
+      bg: 'bg-[#8B9A7D]/30',
       customBg: null,
       border: 'border-transparent',
       textClass: 'text-foreground',
@@ -1283,6 +1317,7 @@ const DraggableEventCard = memo(({
       className={cn(
         "rounded-lg p-2 transition-all relative",
         styles.bg,
+        styles.border,
         event.urgent && "ring-2 ring-red-500",
         isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
       )}

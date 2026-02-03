@@ -1,9 +1,12 @@
 import { useState, useMemo } from 'react';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useClientPropertyMatches, useProperties, PropertyMatch, Property } from '@/hooks/useProperties';
+import { useClienteActivities } from '@/hooks/useClienteActivities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -24,7 +27,11 @@ import {
   ThumbsDown,
   MessageCircle,
   Send,
+  Trash2,
+  GripVertical,
+  X,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PropertyMatchesSectionProps {
   clienteId: string;
@@ -40,16 +47,29 @@ const WhatsAppIcon = ({ className }: { className?: string }) => (
 
 function PropertyCard({ 
   match, 
+  clienteId,
   clientePhone,
   onToggleSuggested,
   onSetReaction,
+  onRemove,
+  onUpdateNotes,
+  dragHandleProps,
 }: { 
   match: PropertyMatch;
+  clienteId: string;
   clientePhone?: string | null;
   onToggleSuggested: (matchId: string, suggested: boolean) => void;
   onSetReaction: (matchId: string, reaction: 'liked' | 'disliked' | null) => void;
+  onRemove: (matchId: string) => void;
+  onUpdateNotes: (matchId: string, notes: string) => void;
+  dragHandleProps?: any;
 }) {
   const { toast } = useToast();
+  const { createActivity } = useClienteActivities(clienteId);
+  const [showCommentDialog, setShowCommentDialog] = useState(false);
+  const [commentText, setCommentText] = useState(match.notes || '');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  
   const property = match.property;
   if (!property) return null;
 
@@ -66,37 +86,63 @@ function PropertyCard({
     return 'bg-orange-400';
   };
 
-  const handleWhatsApp = () => {
-    // Kept for backward compatibility (not used directly anymore)
-  };
-
   const getWhatsAppHref = () => {
     if (!clientePhone) return null;
-    // wa.me expects digits only (country code + number)
-    const digitsOnly = clientePhone
-      .replace(/^00/, '')
-      .replace(/\D/g, '');
-
+    const digitsOnly = clientePhone.replace(/^00/, '').replace(/\D/g, '');
     if (!digitsOnly) return null;
-
     const message = encodeURIComponent(
       `Ciao! Ti invio questa proprietà che potrebbe interessarti:\n\n${property.title}\n${property.url}`
     );
-
     return `https://wa.me/${digitsOnly}?text=${message}`;
   };
 
   const handleReaction = (reaction: 'liked' | 'disliked') => {
-    // Toggle off if same reaction, otherwise set new reaction
     const newReaction = match.reaction === reaction ? null : reaction;
     onSetReaction(match.id, newReaction);
+  };
+
+  const handleSaveComment = async () => {
+    onUpdateNotes(match.id, commentText);
+    // Log activity for the comment
+    if (commentText.trim()) {
+      await createActivity({
+        cliente_id: clienteId,
+        activity_type: 'comment' as any,
+        title: 'Commento su proprietà',
+        description: `${property.title}: ${commentText.substring(0, 100)}`,
+        property_id: property.id,
+      });
+    }
+    setShowCommentDialog(false);
+    toast({ title: 'Commento salvato' });
+  };
+
+  const handleRemove = async () => {
+    // Log activity for removal
+    await createActivity({
+      cliente_id: clienteId,
+      activity_type: 'status_change' as any,
+      title: 'Associazione rimossa',
+      description: property.title,
+      property_id: property.id,
+    });
+    onRemove(match.id);
+    setShowDeleteConfirm(false);
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-3 backdrop-blur-xl">
       <div className="flex gap-2.5">
+        {/* Drag handle */}
+        <div
+          {...dragHandleProps}
+          className="shrink-0 cursor-grab active:cursor-grabbing touch-none p-1 rounded-md hover:bg-muted transition-colors self-center"
+        >
+          <GripVertical className="w-4 h-4 text-muted-foreground" />
+        </div>
+        
         {/* Image */}
-        <div className="w-16 h-16 rounded-xl overflow-hidden bg-muted/30 flex-shrink-0">
+        <div className="w-14 h-14 rounded-xl overflow-hidden bg-muted/30 flex-shrink-0">
           {property.image_url ? (
             <img 
               src={property.image_url} 
@@ -105,7 +151,7 @@ function PropertyCard({
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <Home className="h-6 w-6 text-muted-foreground/50" />
+              <Home className="h-5 w-5 text-muted-foreground/50" />
             </div>
           )}
         </div>
@@ -119,7 +165,7 @@ function PropertyCard({
             </Badge>
           </div>
 
-          <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+          <div className="flex items-center gap-2 mt-0.5 text-[10px] text-muted-foreground">
             {property.location && (
               <span className="flex items-center gap-0.5 truncate">
                 <MapPin className="h-2.5 w-2.5" />
@@ -134,47 +180,83 @@ function PropertyCard({
         </div>
       </div>
 
+      {/* Comment preview */}
+      {match.notes && (
+        <div 
+          className="mt-2 px-2 py-1.5 bg-muted/50 rounded-lg text-xs text-muted-foreground cursor-pointer hover:bg-muted transition-colors"
+          onClick={() => setShowCommentDialog(true)}
+        >
+          💬 {match.notes}
+        </div>
+      )}
+
       {/* Action bar */}
-      <div className="flex items-center justify-between mt-2.5 pt-2">
-        {/* Left: reactions */}
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-muted/50">
+        {/* Left: reactions + comment */}
         <div className="flex items-center gap-1">
           {/* Proposed tick */}
           <button
             onClick={() => onToggleSuggested(match.id, !match.suggested)}
-            className={`p-1.5 rounded-full transition-all ${
+            className={cn(
+              "p-1.5 rounded-full transition-all",
               match.suggested 
                 ? 'bg-green-100 text-green-600' 
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
+            )}
             title={match.suggested ? 'Proposta inviata' : 'Segna come proposta'}
           >
-            <Check className="h-3.5 w-3.5" />
+            <Check className="h-3 w-3" />
           </button>
 
           {/* Thumbs up */}
           <button
             onClick={() => handleReaction('liked')}
-            className={`p-1.5 rounded-full transition-all ${
+            className={cn(
+              "p-1.5 rounded-full transition-all",
               match.reaction === 'liked'
                 ? 'bg-blue-100 text-blue-600'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
+            )}
             title="Piace al cliente"
           >
-            <ThumbsUp className="h-3.5 w-3.5" />
+            <ThumbsUp className="h-3 w-3" />
           </button>
 
           {/* Thumbs down */}
           <button
             onClick={() => handleReaction('disliked')}
-            className={`p-1.5 rounded-full transition-all ${
+            className={cn(
+              "p-1.5 rounded-full transition-all",
               match.reaction === 'disliked'
                 ? 'bg-red-100 text-red-500'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-            }`}
+            )}
             title="Non piace al cliente"
           >
-            <ThumbsDown className="h-3.5 w-3.5" />
+            <ThumbsDown className="h-3 w-3" />
+          </button>
+
+          {/* Comment */}
+          <button
+            onClick={() => setShowCommentDialog(true)}
+            className={cn(
+              "p-1.5 rounded-full transition-all",
+              match.notes 
+                ? 'bg-teal-100 text-teal-600' 
+                : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+            )}
+            title="Aggiungi commento"
+          >
+            <MessageCircle className="h-3 w-3" />
+          </button>
+
+          {/* Delete */}
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="p-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-red-100 hover:text-red-500 transition-all"
+            title="Rimuovi associazione"
+          >
+            <Trash2 className="h-3 w-3" />
           </button>
         </div>
 
@@ -190,28 +272,9 @@ function PropertyCard({
                 rel="noopener noreferrer"
                 className="p-1.5 rounded-full bg-green-500 text-white hover:bg-green-600 transition-colors"
                 title="Invia su WhatsApp"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // In Lovable preview (iframe) WhatsApp is blocked; prevent navigation and guide user.
-                  try {
-                    if (window.self !== window.top) {
-                      e.preventDefault();
-                      toast({
-                        title: 'WhatsApp bloccato in anteprima',
-                        description: 'Apri l’app pubblicata (o una nuova scheda fuori dalla preview) per inviare il messaggio.',
-                      });
-                    }
-                  } catch {
-                    // If cross-origin blocks window.top access, be safe and prevent iframe navigation.
-                    e.preventDefault();
-                    toast({
-                      title: 'WhatsApp bloccato in anteprima',
-                      description: 'Apri l’app pubblicata per inviare il messaggio.',
-                    });
-                  }
-                }}
+                onClick={(e) => e.stopPropagation()}
               >
-                <WhatsAppIcon className="h-3.5 w-3.5" />
+                <WhatsAppIcon className="h-3 w-3" />
               </a>
             );
           })()}
@@ -222,10 +285,48 @@ function PropertyCard({
             className="p-1.5 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted transition-colors"
             title="Vedi annuncio"
           >
-            <ExternalLink className="h-3.5 w-3.5" />
+            <ExternalLink className="h-3 w-3" />
           </a>
         </div>
       </div>
+
+      {/* Comment Dialog */}
+      <Dialog open={showCommentDialog} onOpenChange={setShowCommentDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <MessageCircle className="w-4 h-4" />
+              Commento
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground line-clamp-2">{property.title}</p>
+          <Textarea
+            value={commentText}
+            onChange={(e) => setCommentText(e.target.value)}
+            placeholder="Aggiungi note o commenti..."
+            className="min-h-[100px]"
+            autoFocus
+          />
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowCommentDialog(false)}>Annulla</Button>
+            <Button onClick={handleSaveComment}>Salva</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Rimuovere associazione?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">{property.title}</p>
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowDeleteConfirm(false)}>Annulla</Button>
+            <Button variant="destructive" onClick={handleRemove}>Rimuovi</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -255,6 +356,7 @@ function AddPropertyDialog({
   onSyncComplete: () => void;
 }) {
   const { toast } = useToast();
+  const { createActivity } = useClienteActivities(clienteId);
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
@@ -306,6 +408,16 @@ function AddPropertyDialog({
       if (data.success && data.propertyId) {
         toast({ title: 'Proprietà importata e aggiunta!' });
         onAdd(data.propertyId);
+        
+        // Log activity for adding association
+        await createActivity({
+          cliente_id: clienteId,
+          activity_type: 'proposal' as any,
+          title: 'Proprietà associata',
+          description: result.title,
+          property_id: data.propertyId,
+        });
+        
         setOpen(false);
         setSearchQuery('');
         setSearchResults([]);
@@ -376,7 +488,7 @@ function AddPropertyDialog({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Cerca direttamente sul sito cortesiluxuryrealestate.com per titolo, località, tipologia...
+            Cerca direttamente sul sito cortesiluxuryrealestate.com
           </p>
 
           {searchResults.length === 0 && !isSearching ? (
@@ -392,17 +504,12 @@ function AddPropertyDialog({
                     key={idx}
                     className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg"
                   >
-                    {/* Thumbnail */}
                     <div className="flex-shrink-0">
                       {result.image_url ? (
                         <img 
                           src={result.image_url} 
                           alt={result.title}
                           className="w-20 h-20 rounded-xl object-cover"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '';
-                            (e.target as HTMLImageElement).className = 'w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center';
-                          }}
                         />
                       ) : (
                         <div className="w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center">
@@ -411,11 +518,9 @@ function AddPropertyDialog({
                       )}
                     </div>
                     
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
                       
-                      {/* Location + details */}
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
                         {result.location && (
                           <span className="flex items-center gap-0.5">
@@ -427,19 +532,16 @@ function AddPropertyDialog({
                         {result.rooms && <span>{result.rooms} cam</span>}
                       </div>
                       
-                      {/* Price */}
                       {result.price && (
                         <p className="font-bold text-base mt-1">{formatPrice(result.price)}</p>
                       )}
                       
-                      {/* Actions */}
                       <div className="flex items-center justify-between mt-2">
                         <a
                           href={result.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground flex items-center gap-1 active:scale-95"
-                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs text-muted-foreground flex items-center gap-1"
                         >
                           <ExternalLink className="h-3 w-3" />
                         </a>
@@ -447,7 +549,7 @@ function AddPropertyDialog({
                           size="sm"
                           onClick={() => handleImportAndAdd(result)}
                           disabled={isImporting !== null}
-                          className="bg-black text-white hover:bg-black/80 active:scale-95 h-8 px-3"
+                          className="bg-black text-white hover:bg-black/80 h-8 px-3"
                         >
                           {isImporting === result.url ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -480,13 +582,31 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
     toggleSuggested,
     setReaction,
     addManualMatch,
+    removeMatch,
+    updateNotes,
   } = useClientPropertyMatches(clienteId);
 
   const { syncProperties, isSyncing, refetchProperties } = useProperties();
+  const [orderedMatches, setOrderedMatches] = useState<PropertyMatch[]>([]);
 
-  const suggestedCount = matches.filter(m => m.suggested).length;
-  const likedCount = matches.filter(m => m.reaction === 'liked').length;
-  const existingPropertyIds = matches.map(m => m.property_id);
+  // Sync orderedMatches with matches from server
+  useMemo(() => {
+    if (matches.length > 0 && orderedMatches.length === 0) {
+      setOrderedMatches(matches);
+    } else if (matches.length !== orderedMatches.length) {
+      // Merge: keep order of existing, append new ones
+      const existingIds = new Set(orderedMatches.map(m => m.id));
+      const newMatches = matches.filter(m => !existingIds.has(m.id));
+      const validOrdered = orderedMatches.filter(o => matches.some(m => m.id === o.id));
+      setOrderedMatches([...validOrdered, ...newMatches]);
+    }
+  }, [matches]);
+
+  const displayMatches = orderedMatches.length > 0 ? orderedMatches : matches;
+
+  const suggestedCount = displayMatches.filter(m => m.suggested).length;
+  const likedCount = displayMatches.filter(m => m.reaction === 'liked').length;
+  const existingPropertyIds = displayMatches.map(m => m.property_id);
 
   const handleSync = async () => {
     await syncProperties();
@@ -509,6 +629,25 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
     await addManualMatch({ propertyId });
   };
 
+  const handleRemove = async (matchId: string) => {
+    await removeMatch(matchId);
+    setOrderedMatches(prev => prev.filter(m => m.id !== matchId));
+  };
+
+  const handleUpdateNotes = async (matchId: string, notes: string) => {
+    await updateNotes({ matchId, notes });
+  };
+
+  const handleDragEnd = (result: DropResult) => {
+    if (!result.destination) return;
+    
+    const items = Array.from(orderedMatches.length > 0 ? orderedMatches : matches);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    setOrderedMatches(items);
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-3">
@@ -520,14 +659,14 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
 
   return (
     <div className="space-y-3">
-      {/* Header - liquid glass style */}
+      {/* Header */}
       <div className="flex items-center justify-between bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg p-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Home className="h-4 w-4 text-foreground" />
           <h3 className="font-semibold text-sm">Proprietà</h3>
-          {matches.length > 0 && (
+          {displayMatches.length > 0 && (
             <Badge variant="secondary" className="text-[10px] px-1.5">
-              {matches.length}
+              {displayMatches.length}
             </Badge>
           )}
           {suggestedCount > 0 && (
@@ -561,8 +700,8 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
         </div>
       </div>
 
-      {/* Property list - no scroll, show all */}
-      {matches.length === 0 ? (
+      {/* Property list with drag-drop */}
+      {displayMatches.length === 0 ? (
         <div className="text-center py-6 text-muted-foreground bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg">
           <Home className="h-8 w-8 mx-auto mb-2 opacity-50" />
           <p className="text-sm">Nessuna proprietà compatibile</p>
@@ -571,20 +710,47 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {matches.map(match => (
-            <PropertyCard 
-              key={match.id} 
-              match={match}
-              clientePhone={clientePhone}
-              onToggleSuggested={handleToggleSuggested}
-              onSetReaction={handleSetReaction}
-            />
-          ))}
-        </div>
+        <DragDropContext onDragEnd={handleDragEnd}>
+          <Droppable droppableId="properties">
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="space-y-2"
+              >
+                {displayMatches.map((match, index) => (
+                  <Draggable key={match.id} draggableId={match.id} index={index}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        className={cn(
+                          "transition-shadow",
+                          snapshot.isDragging && "shadow-xl"
+                        )}
+                      >
+                        <PropertyCard 
+                          match={match}
+                          clienteId={clienteId}
+                          clientePhone={clientePhone}
+                          onToggleSuggested={handleToggleSuggested}
+                          onSetReaction={handleSetReaction}
+                          onRemove={handleRemove}
+                          onUpdateNotes={handleUpdateNotes}
+                          dragHandleProps={provided.dragHandleProps}
+                        />
+                      </div>
+                    )}
+                  </Draggable>
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       )}
 
-      {/* Add manual - liquid glass */}
+      {/* Add manual */}
       <AddPropertyDialog
         clienteId={clienteId}
         existingPropertyIds={existingPropertyIds}
