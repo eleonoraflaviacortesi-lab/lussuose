@@ -10,6 +10,8 @@ export type Task = {
   due_date: string;
   completed: boolean;
   display_order: number;
+  card_color: string | null;
+  is_urgent: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -61,7 +63,7 @@ export const useTasks = () => {
   });
 
   const updateTask = useMutation({
-    mutationFn: async (updates: { id: string; title?: string; notes?: string; due_date?: string; completed?: boolean; display_order?: number }) => {
+    mutationFn: async (updates: { id: string; title?: string; notes?: string; due_date?: string; completed?: boolean; display_order?: number; card_color?: string | null; is_urgent?: boolean }) => {
       const { id, ...rest } = updates;
       
       const { data, error } = await supabase

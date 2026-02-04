@@ -897,33 +897,39 @@ export type Database = {
       }
       tasks: {
         Row: {
+          card_color: string | null
           completed: boolean | null
           created_at: string | null
           display_order: number | null
           due_date: string
           id: string
+          is_urgent: boolean | null
           notes: string | null
           title: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          card_color?: string | null
           completed?: boolean | null
           created_at?: string | null
           display_order?: number | null
           due_date: string
           id?: string
+          is_urgent?: boolean | null
           notes?: string | null
           title: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          card_color?: string | null
           completed?: boolean | null
           created_at?: string | null
           display_order?: number | null
           due_date?: string
           id?: string
+          is_urgent?: boolean | null
           notes?: string | null
           title?: string
           updated_at?: string | null

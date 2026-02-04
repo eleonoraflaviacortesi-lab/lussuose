@@ -14,6 +14,8 @@ import { cn } from '@/lib/utils';
 import AddAppointmentDialog from './AddAppointmentDialog';
 import AddToCalendarMenu from './AddToCalendarMenu';
 import AddTaskDialog from './AddTaskDialog';
+import EditTaskDialog from './EditTaskDialog';
+import TaskContextMenu from './TaskContextMenu';
 import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
@@ -38,6 +40,8 @@ export type CalendarEvent = {
   lastComment?: NotiziaComment; // Last comment from notizia/cliente
   commentsCount?: number; // Total number of comments
   notes?: string; // For tasks
+  cardColor?: string; // Custom color for task card
+  isUrgent?: boolean; // Urgent flag for tasks
 };
 
 // Quick emojis
@@ -296,6 +300,10 @@ const CalendarPage = () => {
   // For opening detail modals
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [selectedCliente, setSelectedCliente] = useState<any | null>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  
+  // Task context menu state (separate from other events)
+  const [taskContextMenu, setTaskContextMenu] = useState<{ task: Task; position: { x: number; y: number } } | null>(null);
   
   // Context menu state
   const [contextMenu, setContextMenu] = useState<{ event: CalendarEvent; position: { x: number; y: number } } | null>(null);
@@ -308,7 +316,7 @@ const CalendarPage = () => {
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
-  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted } = useTasks();
+  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted, updateTask } = useTasks();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
   const { user } = useAuth();
@@ -424,6 +432,9 @@ const CalendarPage = () => {
             emoji: '✏️',
             displayOrder: task.display_order,
             notes: task.notes || undefined,
+            cardColor: task.card_color || undefined,
+            isUrgent: task.is_urgent || false,
+            urgent: task.is_urgent || false, // Map to the general urgent field for sorting
           });
         }
       });
@@ -470,6 +481,15 @@ const CalendarPage = () => {
   const handleEventClick = (event: CalendarEvent) => {
     triggerHaptic('light');
     
+    // Tasks - open edit dialog
+    if (event.type === 'task' && event.taskId) {
+      const task = tasks?.find(t => t.id === event.taskId);
+      if (task) {
+        setSelectedTask(task);
+      }
+      return;
+    }
+    
     if (event.type === 'notizia_reminder' && event.notiziaId) {
       const notizia = notizie?.find(n => n.id === event.notiziaId);
       if (notizia) {
@@ -491,15 +511,34 @@ const CalendarPage = () => {
   const handleContextMenu = (event: CalendarEvent, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    // Tasks have their own context menu
+    if (event.type === 'task' && event.taskId) {
+      const task = tasks?.find(t => t.id === event.taskId);
+      if (task) {
+        setTaskContextMenu({ task, position: { x: e.clientX - 100, y: e.clientY - 50 } });
+      }
+      return;
+    }
+    
     // Allow context menu for all event types now (for notes)
     setContextMenu({ event, position: { x: e.clientX - 100, y: e.clientY - 50 } });
   };
 
   const handleTouchStart = (event: CalendarEvent, e: React.TouchEvent) => {
-    // Allow long press for all event types now (for notes)
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
+      
+      // Tasks have their own context menu
+      if (event.type === 'task' && event.taskId) {
+        const task = tasks?.find(t => t.id === event.taskId);
+        if (task) {
+          setTaskContextMenu({ task, position: { x: touch.clientX - 100, y: touch.clientY - 60 } });
+        }
+        return;
+      }
+      
       setContextMenu({ event, position: { x: touch.clientX - 100, y: touch.clientY - 60 } });
     }, 500);
   };
@@ -509,6 +548,19 @@ const CalendarPage = () => {
       clearTimeout(longPressTimer.current);
       longPressTimer.current = null;
     }
+  };
+
+  // Task-specific handlers
+  const handleTaskColorChange = (taskId: string, color: string | null) => {
+    updateTask.mutate({ id: taskId, card_color: color });
+    triggerHaptic('light');
+    toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
+  };
+
+  const handleTaskUrgentToggle = (taskId: string, isCurrentlyUrgent: boolean) => {
+    updateTask.mutate({ id: taskId, is_urgent: !isCurrentlyUrgent });
+    triggerHaptic('light');
+    toast.success(!isCurrentlyUrgent ? 'Segnata come urgente' : 'Urgenza rimossa');
   };
 
   const handleToggleCompleted = (eventId: string, completed: boolean) => {
@@ -1115,6 +1167,13 @@ const CalendarPage = () => {
         }}
       />
 
+      {/* Edit Task Dialog */}
+      <EditTaskDialog
+        open={!!selectedTask}
+        onOpenChange={(open) => !open && setSelectedTask(null)}
+        task={selectedTask}
+      />
+
       {/* Context Menu */}
       {contextMenu && (
         <EventContextMenu
@@ -1161,6 +1220,17 @@ const CalendarPage = () => {
           onClose={() => setContextMenu(null)}
         />
       )}
+
+      {/* Task Context Menu */}
+      {taskContextMenu && (
+        <TaskContextMenu
+          position={taskContextMenu.position}
+          task={taskContextMenu.task}
+          onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
+          onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
+          onClose={() => setTaskContextMenu(null)}
+        />
+      )}
     </div>
   );
 };
@@ -1186,13 +1256,17 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
-    // Tasks - white card with black border, like Buyers
+    // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
+      const hasCustomColor = !!event.cardColor;
+      const baseColor = event.cardColor || null;
+      const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      
       return {
-        bg: 'bg-white',
-        customBg: null,
-        border: 'border border-foreground',
-        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        bg: hasCustomColor ? '' : 'bg-white',
+        customBg: baseColor,
+        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         timeClass: 'text-muted-foreground',
         isBuyer: false,
         showBuyerBadge: false,

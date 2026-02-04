@@ -61,14 +61,18 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
-    // Tasks - white card with black border, like Buyers
+    // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
+      const hasCustomColor = !!event.cardColor;
+      const baseColor = event.cardColor || null;
+      const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      
       return {
-        bg: 'bg-white',
-        customBg: null,
-        border: 'border border-foreground',
+        bg: hasCustomColor ? '' : 'bg-white',
+        customBg: baseColor,
+        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
         label: 'Task',
-        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         showBuyerBadge: false,
         showTaskBadge: true,
         canToggle: true,
