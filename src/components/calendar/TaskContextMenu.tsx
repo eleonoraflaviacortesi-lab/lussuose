@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { AlertTriangle, X, Palette } from 'lucide-react';
+import { AlertTriangle, X, Palette, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { Task } from '@/hooks/useTasks';
@@ -35,6 +35,7 @@ type Props = {
   task: Task;
   onColorChange: (color: string | null) => void;
   onUrgentToggle: () => void;
+  onDelete: () => void;
   onClose: () => void;
 };
 
@@ -43,6 +44,7 @@ const TaskContextMenu = memo(({
   task,
   onColorChange,
   onUrgentToggle,
+  onDelete,
   onClose,
 }: Props) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -56,6 +58,12 @@ const TaskContextMenu = memo(({
   const handleUrgentToggle = () => {
     onUrgentToggle();
     triggerHaptic('light');
+    onClose();
+  };
+
+  const handleDelete = () => {
+    onDelete();
+    triggerHaptic('warning');
     onClose();
   };
 
@@ -158,6 +166,18 @@ const TaskContextMenu = memo(({
             </Popover>
           </div>
         </div>
+
+        {/* Separator */}
+        <div className="h-px bg-muted/50" />
+
+        {/* Delete button */}
+        <button
+          onClick={handleDelete}
+          className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-destructive/10 hover:bg-destructive hover:text-white text-destructive transition-all w-full"
+        >
+          <Trash2 className="w-4 h-4" />
+          <span>Elimina task</span>
+        </button>
       </div>
     </>
   );
