@@ -895,6 +895,42 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          display_order: number | null
+          due_date: string
+          id: string
+          notes: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          display_order?: number | null
+          due_date: string
+          id?: string
+          notes?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          display_order?: number | null
+          due_date?: string
+          id?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_settings: {
         Row: {
           acquisizioni_settimana: number

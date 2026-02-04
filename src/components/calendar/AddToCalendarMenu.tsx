@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, User, FileText, Search, X } from 'lucide-react';
+import { Plus, User, FileText, Search, X, Pencil } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { format, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
 
-type AddType = 'appointment' | 'cliente' | 'notizia';
+type AddType = 'appointment' | 'cliente' | 'notizia' | 'task';
 
 type Cliente = {
   id: string;
@@ -43,6 +43,7 @@ type Props = {
   onAddAppointment: () => void;
   onAddClienteReminder: (clienteId: string, date: Date) => void;
   onAddNotiziaReminder: (notiziaId: string, date: Date) => void;
+  onAddTask: () => void;
 };
 
 const AddToCalendarMenu = ({
@@ -54,6 +55,7 @@ const AddToCalendarMenu = ({
   onAddAppointment,
   onAddClienteReminder,
   onAddNotiziaReminder,
+  onAddTask,
 }: Props) => {
   const [selectedType, setSelectedType] = useState<AddType | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -159,6 +161,22 @@ const AddToCalendarMenu = ({
                 <div className="text-left">
                   <p className="font-medium">Seller</p>
                   <p className="text-sm text-muted-foreground">Imposta promemoria per un seller</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  onAddTask();
+                  onOpenChange(false);
+                }}
+                className="w-full flex items-center gap-4 p-4 rounded-xl bg-white border border-foreground hover:bg-muted transition-colors"
+              >
+                <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
+                  <Pencil className="w-6 h-6 text-background" />
+                </div>
+                <div className="text-left">
+                  <p className="font-medium">Task</p>
+                  <p className="text-sm text-muted-foreground">Aggiungi un'attività da completare</p>
                 </div>
               </button>
             </div>

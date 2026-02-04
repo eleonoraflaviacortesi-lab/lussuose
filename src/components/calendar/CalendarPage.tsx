@@ -6,12 +6,14 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia, NotiziaStatus, NotiziaComment } from '@/hooks/useNotizie';
+import { useTasks, Task } from '@/hooks/useTasks';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { triggerHaptic } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
 import AddAppointmentDialog from './AddAppointmentDialog';
 import AddToCalendarMenu from './AddToCalendarMenu';
+import AddTaskDialog from './AddTaskDialog';
 import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
@@ -23,10 +25,11 @@ import { Textarea } from '@/components/ui/textarea';
 export type CalendarEvent = {
   id: string;
   title: string;
-  type: 'appointment' | 'cliente_reminder' | 'notizia_reminder';
+  type: 'appointment' | 'cliente_reminder' | 'notizia_reminder' | 'task';
   clienteId?: string;
   clienteName?: string;
   notiziaId?: string;
+  taskId?: string;
   completed?: boolean;
   emoji?: string;
   statusColor?: string; // Color based on status
@@ -34,6 +37,7 @@ export type CalendarEvent = {
   displayOrder?: number; // For ordering within a day
   lastComment?: NotiziaComment; // Last comment from notizia/cliente
   commentsCount?: number; // Total number of comments
+  notes?: string; // For tasks
 };
 
 // Quick emojis
@@ -285,6 +289,7 @@ const CalendarPage = () => {
   );
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
   
@@ -303,6 +308,7 @@ const CalendarPage = () => {
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
+  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted } = useTasks();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
   const { user } = useAuth();
@@ -406,6 +412,22 @@ const CalendarPage = () => {
         }
       });
 
+      // Add tasks
+      tasks?.forEach(task => {
+        if (isSameDay(parseISO(task.due_date), day)) {
+          events.push({
+            id: `task-${task.id}`,
+            title: task.title,
+            type: 'task',
+            taskId: task.id,
+            completed: task.completed,
+            emoji: '✏️',
+            displayOrder: task.display_order,
+            notes: task.notes || undefined,
+          });
+        }
+      });
+
       // Sort: urgent first, then by displayOrder
       events.sort((a, b) => {
         if (a.urgent && !b.urgent) return -1;
@@ -416,7 +438,7 @@ const CalendarPage = () => {
     });
 
     return map;
-  }, [weekDays, appointments, clienti, notizie, columns]);
+  }, [weekDays, appointments, clienti, notizie, tasks, columns]);
 
   const navigateWeek = (direction: 'prev' | 'next') => {
     setCurrentWeekStart(prev => 
@@ -490,7 +512,11 @@ const CalendarPage = () => {
   };
 
   const handleToggleCompleted = (eventId: string, completed: boolean) => {
-    if (!eventId.startsWith('cliente-') && !eventId.startsWith('notizia-')) {
+    if (eventId.startsWith('task-')) {
+      const taskId = eventId.replace('task-', '');
+      toggleTaskCompleted.mutate({ id: taskId, completed });
+      triggerHaptic('light');
+    } else if (!eventId.startsWith('cliente-') && !eventId.startsWith('notizia-')) {
       toggleCompleted.mutate({ id: eventId, completed });
     }
   };
@@ -515,7 +541,7 @@ const CalendarPage = () => {
     updateNotizia.mutate({ id: notiziaId, notes: newNotes, silent: true });
   };
 
-  const isLoading = loadingAppointments || loadingClienti || loadingNotizie;
+  const isLoading = loadingAppointments || loadingClienti || loadingNotizie || loadingTasks;
 
   const selectedDayEvents = useMemo(() => {
     if (!selectedDate) return [];
@@ -870,6 +896,7 @@ const CalendarPage = () => {
                 // Only notizie and clienti reminders are draggable
                 const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder');
                 const appointmentEvents = events.filter(e => e.type === 'appointment');
+                const taskEvents = events.filter(e => e.type === 'task');
 
                 return (
                   <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
@@ -896,6 +923,20 @@ const CalendarPage = () => {
                         <div className="space-y-2 min-h-[80px]">
                           {/* Non-draggable appointments */}
                           {appointmentEvents.map((event) => (
+                            <EventCard 
+                              key={event.id} 
+                              event={event}
+                              onClick={() => handleEventClick(event)}
+                              onContextMenu={(e) => handleContextMenu(event, e)}
+                              onTouchStart={(e) => handleTouchStart(event, e)}
+                              onTouchEnd={handleTouchEnd}
+                              onToggle={handleToggleCompleted}
+                              hasComment={false}
+                            />
+                          ))}
+                          
+                          {/* Non-draggable tasks */}
+                          {taskEvents.map((event) => (
                             <EventCard 
                               key={event.id} 
                               event={event}
@@ -1005,6 +1046,19 @@ const CalendarPage = () => {
           }}
           onAddClienteReminder={handleAddClienteReminder}
           onAddNotiziaReminder={handleAddNotiziaReminder}
+          onAddTask={() => {
+            setShowAddMenu(false);
+            setShowAddTaskDialog(true);
+          }}
+        />
+      )}
+
+      {/* Add Task Dialog */}
+      {selectedDate && (
+        <AddTaskDialog
+          open={showAddTaskDialog}
+          onOpenChange={setShowAddTaskDialog}
+          date={selectedDate}
         />
       )}
 
@@ -1132,6 +1186,21 @@ const EventCard = memo(({
   compact?: boolean;
 }) => {
   const getEventStyles = () => {
+    // Tasks - white card with black border, like Buyers
+    if (event.type === 'task') {
+      return {
+        bg: 'bg-white',
+        customBg: null,
+        border: 'border border-foreground',
+        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        timeClass: 'text-muted-foreground',
+        isBuyer: false,
+        showBuyerBadge: false,
+        showTaskBadge: true,
+        canToggle: true,
+      };
+    }
+    
     // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
@@ -1142,6 +1211,8 @@ const EventCard = memo(({
         timeClass: 'text-muted-foreground',
         isBuyer: true,
         showBuyerBadge: true,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -1157,6 +1228,8 @@ const EventCard = memo(({
         timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: false,
         showBuyerBadge: false,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -1170,6 +1243,8 @@ const EventCard = memo(({
         timeClass: 'text-muted-foreground',
         isBuyer: false,
         showBuyerBadge: false,
+        showTaskBadge: false,
+        canToggle: true,
       };
     }
 
@@ -1181,11 +1256,13 @@ const EventCard = memo(({
       timeClass: 'text-muted-foreground',
       isBuyer: false,
       showBuyerBadge: false,
+      showTaskBadge: false,
+      canToggle: false,
     };
   };
 
   const styles = getEventStyles();
-  const canToggle = event.type === 'appointment';
+  const canToggle = styles.canToggle;
 
   const handleToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -1226,6 +1303,11 @@ const EventCard = memo(({
       {styles.showBuyerBadge && !event.urgent && !hasComment && (
         <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Buyer
+        </div>
+      )}
+      {styles.showTaskBadge && !event.urgent && !hasComment && (
+        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          Task
         </div>
       )}
       <div className="flex items-start gap-2">

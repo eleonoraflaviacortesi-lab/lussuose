@@ -61,6 +61,20 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
+    // Tasks - white card with black border, like Buyers
+    if (event.type === 'task') {
+      return {
+        bg: 'bg-white',
+        customBg: null,
+        border: 'border border-foreground',
+        label: 'Task',
+        textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
+        showBuyerBadge: false,
+        showTaskBadge: true,
+        canToggle: true,
+      };
+    }
+    
     // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
@@ -70,6 +84,8 @@ const CalendarDayView = ({
         label: 'Buyer',
         textClass: 'text-foreground',
         showBuyerBadge: true,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -84,6 +100,8 @@ const CalendarDayView = ({
         label: 'Notizia',
         textClass: textColor,
         showBuyerBadge: false,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -96,6 +114,8 @@ const CalendarDayView = ({
         label: 'Appuntamento',
         textClass: event.completed ? 'line-through text-muted-foreground' : 'text-foreground',
         showBuyerBadge: false,
+        showTaskBadge: false,
+        canToggle: true,
       };
     }
     
@@ -107,18 +127,20 @@ const CalendarDayView = ({
       label: 'Evento',
       textClass: 'text-foreground',
       showBuyerBadge: false,
+      showTaskBadge: false,
+      canToggle: false,
     };
   };
 
   const handleToggle = (event: CalendarEvent) => {
-    if (event.type === 'appointment') {
+    if (event.type === 'appointment' || event.type === 'task') {
       triggerHaptic('light');
       onToggle(event.id, !event.completed);
     }
   };
 
-  const completedCount = events.filter(e => e.type === 'appointment' && e.completed).length;
-  const appointmentCount = events.filter(e => e.type === 'appointment').length;
+  const completedCount = events.filter(e => (e.type === 'appointment' || e.type === 'task') && e.completed).length;
+  const toggleableCount = events.filter(e => e.type === 'appointment' || e.type === 'task').length;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -133,10 +155,10 @@ const CalendarDayView = ({
                 {format(date, 'EEEE', { locale: it })}
               </p>
             </div>
-            {appointmentCount > 0 && (
+            {toggleableCount > 0 && (
               <div className="text-right">
                 <p className="text-lg font-semibold text-accent">
-                  {completedCount}/{appointmentCount}
+                  {completedCount}/{toggleableCount}
                 </p>
                 <p className="text-xs text-muted-foreground">completati</p>
               </div>
@@ -152,7 +174,7 @@ const CalendarDayView = ({
           ) : (
             events.map((event) => {
               const styles = getEventStyles(event);
-              const canToggle = event.type === 'appointment';
+              const canToggle = styles.canToggle;
               const lastComment = event.lastComment;
 
               return (
@@ -210,7 +232,11 @@ const CalendarDayView = ({
                       <div className="flex items-center gap-2 mb-1">
                         <span className={cn(
                           "text-[10px] font-medium tracking-wider uppercase px-2 py-0.5 rounded-full",
-                          styles.customBg ? (isDarkColor(styles.customBg) ? 'bg-white/20 text-white' : 'bg-black/10 text-black') : 'bg-muted'
+                          styles.showTaskBadge 
+                            ? 'bg-foreground text-background' 
+                            : styles.customBg 
+                              ? (isDarkColor(styles.customBg) ? 'bg-white/20 text-white' : 'bg-black/10 text-black') 
+                              : 'bg-muted'
                         )}>
                           {styles.label}
                         </span>
@@ -221,6 +247,11 @@ const CalendarDayView = ({
                       )}>
                         {event.title}
                       </p>
+                      {event.notes && event.type === 'task' && (
+                        <p className="text-sm text-muted-foreground mt-1">
+                          📝 {event.notes}
+                        </p>
+                      )}
                       {event.clienteName && (
                         <p className={cn(
                           "text-sm mt-1",
