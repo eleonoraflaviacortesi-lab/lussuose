@@ -659,7 +659,7 @@ const CalendarPage = () => {
   // Helper function to move an event to a specific date - defined first so it can be used in handleDragEnd
   const moveEvent = useCallback((draggableId: string, targetDate: Date) => {
     // Parse draggableId to get event type and id
-    // Format: 'notizia-{id}' or 'cliente-{id}'
+    // Format: 'notizia-{id}' or 'cliente-{id}' or 'task-{id}'
     if (draggableId.startsWith('notizia-')) {
       const notiziaId = draggableId.replace('notizia-', '');
       const notizia = notizie?.find(n => n.id === notiziaId);
@@ -721,8 +721,22 @@ const CalendarPage = () => {
         });
         toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
       }
+    } else if (draggableId.startsWith('task-')) {
+      const taskId = draggableId.replace('task-', '');
+      const task = tasks?.find(t => t.id === taskId);
+      
+      if (task) {
+        const newDateStr = format(targetDate, 'yyyy-MM-dd');
+        
+        triggerHaptic('light');
+        updateTask.mutate({ 
+          id: taskId, 
+          due_date: newDateStr 
+        });
+        toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);
+      }
     }
-  }, [notizie, clienti, updateNotizia, updateCliente]);
+  }, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]);
 
   // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {
@@ -945,10 +959,9 @@ const CalendarPage = () => {
                 const dayKey = format(day, 'yyyy-MM-dd');
                 const events = eventsByDay.get(dayKey) || [];
                 const isToday = isSameDay(day, new Date());
-                // Only notizie and clienti reminders are draggable
-                const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder');
+                // Notizie, clienti reminders and tasks are draggable
+                const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
                 const appointmentEvents = events.filter(e => e.type === 'appointment');
-                const taskEvents = events.filter(e => e.type === 'task');
 
                 return (
                   <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
@@ -975,20 +988,6 @@ const CalendarPage = () => {
                         <div className="space-y-2 min-h-[80px]">
                           {/* Non-draggable appointments */}
                           {appointmentEvents.map((event) => (
-                            <EventCard 
-                              key={event.id} 
-                              event={event}
-                              onClick={() => handleEventClick(event)}
-                              onContextMenu={(e) => handleContextMenu(event, e)}
-                              onTouchStart={(e) => handleTouchStart(event, e)}
-                              onTouchEnd={handleTouchEnd}
-                              onToggle={handleToggleCompleted}
-                              hasComment={false}
-                            />
-                          ))}
-                          
-                          {/* Non-draggable tasks */}
-                          {taskEvents.map((event) => (
                             <EventCard 
                               key={event.id} 
                               event={event}
