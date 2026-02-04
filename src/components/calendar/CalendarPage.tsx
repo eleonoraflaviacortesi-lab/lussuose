@@ -316,7 +316,7 @@ const CalendarPage = () => {
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
   const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
-  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted, updateTask } = useTasks();
+  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted, updateTask, deleteTask } = useTasks();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
   const { user } = useAuth();
@@ -1228,6 +1228,11 @@ const CalendarPage = () => {
           task={taskContextMenu.task}
           onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
           onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
+          onDelete={async () => {
+            await deleteTask.mutateAsync(taskContextMenu.task.id);
+            toast.success('Task eliminata');
+            setTaskContextMenu(null);
+          }}
           onClose={() => setTaskContextMenu(null)}
         />
       )}
