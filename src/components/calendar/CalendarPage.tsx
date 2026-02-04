@@ -1444,6 +1444,23 @@ const DraggableEventCard = memo(({
   dragHandleProps?: any;
 }) => {
   const getEventStyles = () => {
+    // Tasks - white card with black border, or custom color
+    if (event.type === 'task') {
+      const hasCustomColor = !!event.cardColor;
+      const baseColor = event.cardColor || null;
+      const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
+      
+      return {
+        bg: hasCustomColor ? '' : 'bg-white',
+        customBg: baseColor,
+        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
+        showBuyerBadge: false,
+        showTaskBadge: true,
+        canToggle: true,
+      };
+    }
+    
     // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
@@ -1452,6 +1469,8 @@ const DraggableEventCard = memo(({
         border: 'border border-foreground',
         textClass: 'text-foreground',
         showBuyerBadge: true,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -1465,6 +1484,8 @@ const DraggableEventCard = memo(({
         border: 'border-transparent',
         textClass: textColor,
         showBuyerBadge: false,
+        showTaskBadge: false,
+        canToggle: false,
       };
     }
     
@@ -1474,6 +1495,8 @@ const DraggableEventCard = memo(({
       border: 'border-transparent',
       textClass: 'text-foreground',
       showBuyerBadge: false,
+      showTaskBadge: false,
+      canToggle: false,
     };
   };
 
@@ -1503,12 +1526,17 @@ const DraggableEventCard = memo(({
           Buyer
         </div>
       )}
+      {styles.showTaskBadge && !event.urgent && !hasComment && (
+        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          Task
+        </div>
+      )}
       {event.urgent && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       )}
-      {hasComment && !event.urgent && !styles.showBuyerBadge && (
+      {hasComment && !event.urgent && !styles.showBuyerBadge && !styles.showTaskBadge && (
         <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
@@ -1527,7 +1555,24 @@ const DraggableEventCard = memo(({
           <GripVertical className="w-4 h-4" />
         </div>
         
-        {event.emoji ? (
+        {/* Checkbox for tasks, emoji/dot for others */}
+        {styles.canToggle ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              triggerHaptic('light');
+              onToggle(event.id, !event.completed);
+            }}
+            className={cn(
+              "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
+              event.completed 
+                ? 'bg-foreground border-foreground' 
+                : 'border-muted-foreground/50 hover:border-foreground'
+            )}
+          >
+            {event.completed && <Check className="w-3 h-3 text-background" />}
+          </button>
+        ) : event.emoji ? (
           <span className="text-sm shrink-0">{event.emoji}</span>
         ) : (
           <div 
