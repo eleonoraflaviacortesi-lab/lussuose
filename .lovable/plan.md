@@ -1,102 +1,126 @@
 
-# Piano: Importazione Notizie Excel per DALILA
+# Piano: Aggiunta Task al Calendario
 
 ## Panoramica
-Importazione di **17 notizie** dal file Excel nel sistema, raggruppate per zona e con tutti i dati preservati.
+Aggiungere un nuovo tipo di elemento "Task" al calendario, distinto dagli appuntamenti. Le task avranno:
+- Titolo e note
+- Checkbox per segnare come completata
+- Stile visivo bianco con bordo nero (come i Buyer)
+- Etichetta "TASK" e emoji matita (✏️)
 
-## Analisi Dati Excel
+## Modifiche da Implementare
 
-Il file contiene notizie immobiliari con queste informazioni:
+### 1. Database - Nuova Tabella `tasks`
+Creare una tabella dedicata per le task con i seguenti campi:
+- `id` (UUID, primary key)
+- `user_id` (UUID, riferimento all'utente)
+- `title` (TEXT, obbligatorio)
+- `notes` (TEXT, opzionale)
+- `due_date` (DATE, data della task)
+- `completed` (BOOLEAN, default false)
+- `display_order` (INTEGER, per ordinamento)
+- `created_at` / `updated_at` (TIMESTAMP)
 
-| # | Nome | Zona | Tel | Data | Status suggerito |
-|---|------|------|-----|------|------------------|
-| 1 | IL CASALE | Cortona | 0575 612531 | 03/12/2025 | no |
-| 2 | POGGIOBELLO | Cortona | 3334937894 | 03/12/2025 | no |
-| 3 | PODERE LA VECCHIA FORNACE | Cortona | 0575 601359 | 03/12/2025 | in_progress |
-| 4 | LA MUCCHIA | Cortona | 335 8097912 | 03/12/2025 | done |
-| 5 | IL GRIFONE A CORTONA | Cortona | 3474865489 | 04/12/2025 | in_progress |
-| 6 | IL CASALE DI LEDA | Cortona | 0575 603230 | 04/12/2025 | no |
-| 7 | FATTORIA BORGONUOVO | Cortona | 348 047 0286 | 04/12/2025 | in_progress |
-| 8 | RELAIS VILLA PETRISCHIO | Cortona | 0575 610316 | 05/12/2025 | no |
-| 9 | HOTEL NUOVO CENTRALE | Camucia | 0575 630578 | 06/12/2025 | in_progress |
-| 10 | VILLA SANTA MARGHERITA | Cortona | 0575 082440 | 11/12/2025 | in_progress |
-| 11 | SOMMAVILLA | Cortona | 335436174 | 13/12/2025 | in_progress |
-| 12 | VILLA GLORIA | Cortona | 0575 690037 | 16/12/2025 | done |
-| 13 | PILARI | Cortona | 0575 619231 | 16/12/2025 | done |
-| 14 | LE MACINE | Cortona | 0575 616018 | 17/12/2025 | done |
-| 15 | L'ETRUSCA | Cortona | 0575 691006 | 17/12/2025 | done |
-| 16 | VILLA GIARRADEA | Cortona | 3398258670 | 23/01/2025 | in_progress |
-| 17 | RISTORANTE LA PIEVE VECCHIA | Monterchi | 0575 709053 | 24/01/2025 | in_progress |
+RLS policies per garantire che ogni utente veda solo le proprie task.
 
-## Raggruppamento per Zona (Somiglianza)
+### 2. Hook `useTasks`
+Nuovo hook React Query per gestire le task:
+- Query per recuperare le task dell'utente
+- Mutation per creare, aggiornare, eliminare task
+- Mutation per toggle completamento (con optimistic update)
 
-- **Cortona**: 15 notizie (ordine cronologico)
-- **Camucia**: 1 notizia
-- **Monterchi**: 1 notizia
+### 3. Aggiornamenti al Calendario
 
-## Mappatura Dati
+**CalendarPage.tsx:**
+- Aggiungere `task` al type `CalendarEvent`
+- Integrare le task nel calcolo `eventsByDay`
+- Le task appariranno con:
+  - Sfondo bianco, bordo nero
+  - Badge "TASK" in alto a destra
+  - Emoji ✏️ come indicatore visivo
+  - Checkbox per completamento
 
-Ogni notizia avrà tutti i dati consolidati nelle note:
+**AddToCalendarMenu.tsx:**
+- Aggiungere opzione "Task" nel menu di aggiunta
+- Nuova sezione con form semplice (titolo + note)
+
+**CalendarDayView.tsx:**
+- Supporto per visualizzazione e interazione con le task
+- Checkbox funzionante per completamento
+
+### 4. Nuovi Componenti
+
+**AddTaskDialog.tsx:**
+Form semplice per creare una nuova task:
+- Campo titolo (obbligatorio)
+- Campo note (opzionale, textarea)
+- Data pre-selezionata dal giorno scelto
+
+**TaskDetailSheet.tsx:** (opzionale)
+- Vista dettaglio per modificare titolo/note
+- Eliminazione task
+
+## Visual Design
 
 ```text
-📋 INFORMATORE: [nome informatore]
-📞 FONTE: [fonte chiamata]
-📝 AZIONE: [azione corrente]
-🔗 LINK: [link proprietà]
+┌──────────────────────────┐
+│  ✏️ Titolo della task    │  ← Badge "TASK"
+│  □ ← checkbox            │
+│                          │
+│  📝 Note (se presenti)   │
+└──────────────────────────┘
 
---- STORICO ---
-▸ STEP 1: [testo]
-▸ STEP 2: [testo]
-▸ STEP 3: [testo]
-▸ STEP 4: [testo]
-
---- NOTE ORIGINALI ---
-[note notizia]
+Stile: bg-white, border border-foreground (nero)
+Badge: bg-foreground text-background, testo "TASK"
 ```
 
-## Implementazione Tecnica
+## Flusso Utente
+1. Utente clicca "Aggiungi" su un giorno
+2. Appare menu con opzioni: Buyer, Seller, **Task**
+3. Seleziona "Task" → form con titolo + note
+4. Task appare nel calendario con stile bianco/nero
+5. Click sulla checkbox → segna come completata (strikethrough)
 
-### 1. Creare Script di Import Specifico
-Nuovo file `src/lib/importDalilaNotizie.ts`:
-- Converte i dati Excel in formato `NotiziaInput`
-- Mappa status in base alla colonna AZIONE
-- Consolida tutte le info nelle note
+## Dettagli Tecnici
 
-### 2. Logica di Mappatura Status
-| AZIONE nel file | Status nel sistema |
-|-----------------|-------------------|
-| "Non richiamare!" | `no` |
-| "Per adesso non vende" | `no` |
-| "Non più interessata" | `no` |
-| "Sviluppato --> All'asta" | `no` |
-| "App. fissato" | `done` |
-| "Sviluppare" | `in_progress` |
-| "Da richiamare" / "Attendere" | `in_progress` |
-| Altro | `new` |
+**Schema SQL:**
+```sql
+CREATE TABLE public.tasks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL,
+  title TEXT NOT NULL,
+  notes TEXT,
+  due_date DATE NOT NULL,
+  completed BOOLEAN DEFAULT false,
+  display_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
 
-### 3. Componente Import One-Click
-Aggiungere pulsante nella pagina Notizie per l'import diretto dell'account DALILA.
+-- RLS Policy
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can manage own tasks" 
+  ON public.tasks FOR ALL 
+  USING (auth.uid() = user_id);
+```
 
-## Dati Preservati
-✅ Nome proprietà
-✅ Zona geografica
-✅ Numero telefono (anche multipli)
-✅ Data notizia originale
-✅ Note complete
-✅ Informatore
-✅ Fonte chiamata
-✅ Link proprietà
-✅ Storico azioni (Step 1-4)
-✅ Status derivato dall'azione
+**CalendarEvent type aggiornato:**
+```typescript
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  type: 'appointment' | 'cliente_reminder' | 'notizia_reminder' | 'task';
+  // ... altri campi esistenti
+  notes?: string; // Per le task
+};
+```
 
-## Nessuna Modifica al Database
-L'importazione usa i campi esistenti:
-- `name`: nome proprietà
-- `zona`: zona geografica
-- `phone`: telefono
-- `notes`: tutte le info consolidate
-- `status`: derivato da AZIONE
-- `created_at`: data notizia originale
-
-## Verifica Post-Import
-Dopo l'importazione, le 17 notizie appariranno nella Kanban di DALILA raggruppate per status, con tutti i dettagli nelle note di ogni card.
+## File da Modificare/Creare
+| File | Azione |
+|------|--------|
+| `supabase/migrations/...` | Nuova migrazione per tabella `tasks` |
+| `src/hooks/useTasks.ts` | **Nuovo** - Hook per gestione task |
+| `src/components/calendar/AddTaskDialog.tsx` | **Nuovo** - Dialog creazione task |
+| `src/components/calendar/CalendarPage.tsx` | Aggiungere supporto task |
+| `src/components/calendar/AddToCalendarMenu.tsx` | Aggiungere opzione "Task" |
+| `src/components/calendar/CalendarDayView.tsx` | Supporto visualizzazione task |
