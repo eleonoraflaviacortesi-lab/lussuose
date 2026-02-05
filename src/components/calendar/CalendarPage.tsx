@@ -314,9 +314,9 @@ const CalendarPage = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
-  const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment } = useClienti();
-  const { notizie, isLoading: loadingNotizie, updateNotizia } = useNotizie();
-  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted, updateTask, deleteTask } = useTasks();
+  const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment, reorderClienti } = useClienti();
+  const { notizie, isLoading: loadingNotizie, updateNotizia, reorderNotizie } = useNotizie();
+  const { tasks, isLoading: loadingTasks, toggleCompleted: toggleTaskCompleted, updateTask, deleteTask, reorderTasks } = useTasks();
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
   const { user } = useAuth();
@@ -773,10 +773,45 @@ const CalendarPage = () => {
         return;
       }
 
-      // Same day but different position (reordering) - no date change needed
+      // Same day but different position - reorder within the day
       if (destination.droppableId === source.droppableId) {
-        // Just a reorder within the same day - no database update needed
-        // The visual order is handled by React DnD, no persistence needed for now
+        const dayKey = source.droppableId.replace('day-', '');
+        const events = eventsByDay.get(dayKey) || [];
+        
+        // Get only draggable events (same filter as in the render)
+        const draggableEvents = events.filter(e => 
+          e.type === 'notizia_reminder' || 
+          e.type === 'cliente_reminder' || 
+          e.type === 'task'
+        );
+        
+        // Create a copy and reorder
+        const reordered = [...draggableEvents];
+        const [removed] = reordered.splice(source.index, 1);
+        reordered.splice(destination.index, 0, removed);
+        
+        // Calculate new display_order for all events in this day and group by type
+        const taskUpdates: { id: string; display_order: number }[] = [];
+        const notiziaUpdates: { id: string; display_order: number }[] = [];
+        const clienteUpdates: { id: string; display_order: number }[] = [];
+        
+        reordered.forEach((event, index) => {
+          const newOrder = index * 10;
+          if (event.type === 'task' && event.taskId) {
+            taskUpdates.push({ id: event.taskId, display_order: newOrder });
+          } else if (event.type === 'notizia_reminder' && event.notiziaId) {
+            notiziaUpdates.push({ id: event.notiziaId, display_order: newOrder });
+          } else if (event.type === 'cliente_reminder' && event.clienteId) {
+            clienteUpdates.push({ id: event.clienteId, display_order: newOrder });
+          }
+        });
+        
+        // Batch updates for each type
+        if (taskUpdates.length > 0) reorderTasks.mutate(taskUpdates);
+        if (notiziaUpdates.length > 0) reorderNotizie.mutate(notiziaUpdates);
+        if (clienteUpdates.length > 0) reorderClienti.mutate(clienteUpdates);
+        
+        triggerHaptic('light');
         return;
       }
 
