@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, GripVertical } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -1504,8 +1504,9 @@ const DraggableEventCard = memo(({
 
   return (
     <div
+      {...dragHandleProps}
       className={cn(
-        "rounded-lg p-2 transition-all relative",
+        "rounded-lg p-2 transition-all relative cursor-grab active:cursor-grabbing touch-none",
         styles.bg,
         styles.border,
         event.urgent && "ring-2 ring-red-500",
@@ -1542,19 +1543,6 @@ const DraggableEventCard = memo(({
         </div>
       )}
       <div className="flex items-center gap-2">
-        {/* Drag handle */}
-        <div
-          {...dragHandleProps}
-          className={cn(
-            "shrink-0 cursor-grab active:cursor-grabbing touch-none p-1 -ml-1 rounded-md hover:bg-black/10 transition-colors",
-            styles.customBg && isDarkColor(styles.customBg) ? 'text-white/70 hover:text-white hover:bg-white/20' : 'text-foreground/50 hover:text-foreground'
-          )}
-          onClick={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-        >
-          <GripVertical className="w-4 h-4" />
-        </div>
-        
         {/* Checkbox for tasks, emoji/dot for others */}
         {styles.canToggle ? (
           <button
