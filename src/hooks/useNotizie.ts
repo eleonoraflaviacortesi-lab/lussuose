@@ -248,6 +248,44 @@ export const useNotizie = () => {
     },
   });
 
+  // Reorder notizie - batch update display_order only (for calendar same-day reordering)
+  const reorderNotizie = useMutation({
+    mutationFn: async (updates: { id: string; display_order: number }[]) => {
+      const results = await Promise.all(
+        updates.map(update =>
+          supabase
+            .from('notizie')
+            .update({ display_order: update.display_order })
+            .eq('id', update.id)
+        )
+      );
+      
+      const errorResult = results.find(r => r.error);
+      if (errorResult?.error) throw errorResult.error;
+    },
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ['notizie', user?.id] });
+      
+      const previousNotizie = queryClient.getQueryData<Notizia[]>(['notizie', user?.id]);
+      
+      if (previousNotizie) {
+        queryClient.setQueryData<Notizia[]>(['notizie', user?.id], 
+          previousNotizie.map(notizia => {
+            const update = updates.find(u => u.id === notizia.id);
+            return update ? { ...notizia, display_order: update.display_order } : notizia;
+          })
+        );
+      }
+      
+      return { previousNotizie };
+    },
+    onError: (err, updates, context) => {
+      if (context?.previousNotizie) {
+        queryClient.setQueryData(['notizie', user?.id], context.previousNotizie);
+      }
+    },
+  });
+
   return {
     notizie,
     notizieByStatus,
@@ -256,6 +294,7 @@ export const useNotizie = () => {
     updateNotizia,
     deleteNotizia,
     updateOrder,
+    reorderNotizie,
   };
 };
 

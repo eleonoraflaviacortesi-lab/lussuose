@@ -165,6 +165,45 @@ export const useTasks = () => {
     },
   });
 
+  // Reorder tasks - batch update display_order with optimistic update
+  const reorderTasks = useMutation({
+    mutationFn: async (updates: { id: string; display_order: number }[]) => {
+      // Execute all updates in parallel
+      const results = await Promise.all(
+        updates.map(update =>
+          supabase
+            .from('tasks')
+            .update({ display_order: update.display_order })
+            .eq('id', update.id)
+        )
+      );
+      
+      const errorResult = results.find(r => r.error);
+      if (errorResult?.error) throw errorResult.error;
+    },
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ['tasks'] });
+      
+      const previousTasks = queryClient.getQueryData<Task[]>(['tasks', user?.id]);
+      
+      if (previousTasks) {
+        queryClient.setQueryData<Task[]>(['tasks', user?.id], 
+          previousTasks.map(task => {
+            const update = updates.find(u => u.id === task.id);
+            return update ? { ...task, display_order: update.display_order } : task;
+          })
+        );
+      }
+      
+      return { previousTasks };
+    },
+    onError: (err, updates, context) => {
+      if (context?.previousTasks) {
+        queryClient.setQueryData(['tasks', user?.id], context.previousTasks);
+      }
+    },
+  });
+
   return {
     tasks,
     isLoading,
@@ -172,5 +211,6 @@ export const useTasks = () => {
     updateTask,
     deleteTask,
     toggleCompleted,
+    reorderTasks,
   };
 };

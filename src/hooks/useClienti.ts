@@ -343,6 +343,44 @@ export function useClienti(options?: {
     },
   });
 
+  // Reorder clienti - batch update display_order only (for calendar same-day reordering)
+  const reorderClientiMutation = useMutation({
+    mutationFn: async (updates: { id: string; display_order: number }[]) => {
+      const results = await Promise.all(
+        updates.map(update =>
+          supabase
+            .from('clienti')
+            .update({ display_order: update.display_order })
+            .eq('id', update.id)
+        )
+      );
+      
+      const errorResult = results.find(r => r.error);
+      if (errorResult?.error) throw errorResult.error;
+    },
+    onMutate: async (updates) => {
+      await queryClient.cancelQueries({ queryKey: ['clienti'] });
+      
+      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi]);
+      
+      if (previousClienti) {
+        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi], 
+          previousClienti.map(cliente => {
+            const update = updates.find(u => u.id === cliente.id);
+            return update ? { ...cliente, display_order: update.display_order } : cliente;
+          })
+        );
+      }
+      
+      return { previousClienti };
+    },
+    onError: (err, updates, context) => {
+      if (context?.previousClienti) {
+        queryClient.setQueryData(['clienti', profile?.sede, (profile as any)?.sedi], context.previousClienti);
+      }
+    },
+  });
+
   return {
     clienti: filteredClienti,
     clientiGrouped,
@@ -355,6 +393,7 @@ export function useClienti(options?: {
     assignCliente: assignMutation.mutateAsync,
     updateOrder: updateOrderMutation.mutateAsync,
     addComment: addCommentMutation.mutateAsync,
+    reorderClienti: reorderClientiMutation,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
