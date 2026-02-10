@@ -3,8 +3,7 @@ import { AlertTriangle, X, Palette, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { Task } from '@/hooks/useTasks';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 
 // Preset colors for quick selection
 const PRESET_COLORS = [
@@ -139,31 +138,22 @@ const TaskContextMenu = memo(({
             ))}
             
             {/* Custom color picker */}
-            <Popover open={showColorPicker} onOpenChange={setShowColorPicker}>
-              <PopoverTrigger asChild>
-                <button
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-red-400 via-purple-400 to-blue-400 hover:scale-110 transition-transform"
-                  title="Colore personalizzato"
-                >
-                  <span className="text-white text-xs font-bold">+</span>
-                </button>
-              </PopoverTrigger>
-              <PopoverContent 
-                className="w-auto p-0 border-0 bg-transparent shadow-none" 
-                side="top" 
-                align="center"
-                sideOffset={8}
-              >
-                <LiquidGlassColorPicker
-                  color={task.card_color || '#FEF3C7'}
-                  onChange={(newColor) => {
-                    handleColorSelect(newColor);
-                    setShowColorPicker(false);
-                  }}
-                  onClose={() => setShowColorPicker(false)}
-                />
-              </PopoverContent>
-            </Popover>
+            <button
+              onClick={() => setShowColorPicker(true)}
+              className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-red-400 via-purple-400 to-blue-400 hover:scale-110 transition-transform"
+              title="Colore personalizzato"
+            >
+              <span className="text-white text-xs font-bold">+</span>
+            </button>
+            <ColorPickerOverlay
+              open={showColorPicker}
+              color={task.card_color || '#FEF3C7'}
+              onChange={(newColor) => {
+                handleColorSelect(newColor);
+                setShowColorPicker(false);
+              }}
+              onClose={() => setShowColorPicker(false)}
+            />
           </div>
         </div>
 

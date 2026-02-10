@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { MapPin, Euro, Home, Clock, Bell, X } from 'lucide-react';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
-import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 
 interface ClienteCardProps {
   cliente: Cliente & { reminder_date?: string | null };
@@ -186,21 +186,16 @@ const ColorStatusPickerPill = memo(({
           </div>
         </div>
         
-        {/* Custom color picker */}
-        {showCustomPicker && (
-          <div className="pt-2 border-t border-black/5">
-            <LiquidGlassColorPicker
-              color={customCardColor}
-              onChange={(newColor) => {
-                onColorSelect(newColor);
-                onClose();
-              }}
-              onClose={() => setShowCustomPicker(false)}
-              showEyeDropper={true}
-              className="shadow-none p-0 bg-transparent backdrop-blur-none"
-            />
-          </div>
-        )}
+        {/* Custom color picker overlay */}
+        <ColorPickerOverlay
+          open={showCustomPicker}
+          color={customCardColor}
+          onChange={(newColor) => {
+            onColorSelect(newColor);
+            onClose();
+          }}
+          onClose={() => setShowCustomPicker(false)}
+        />
       </div>
     </>
   );

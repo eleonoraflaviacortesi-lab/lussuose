@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { useClientKanbanColumns, ClientKanbanColumn } from '@/hooks/useClientKanbanColumns';
 import { GripVertical, Trash2, Plus } from 'lucide-react';
-import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 
 interface ClientiKanbanProps {
   clientiGrouped: Map<string, Cliente[]>;
@@ -181,23 +181,18 @@ const ColumnHeader = memo(({
               </button>
             </div>
             
-            {/* Custom color picker */}
-            {showCustomPicker && (
-              <div className="mt-3 pt-3 border-t border-black/5">
-                <LiquidGlassColorPicker
-                  color={customColor}
-                  onChange={(newColor) => {
-                    setCustomColor(newColor);
-                    onUpdate({ color: newColor });
-                    setShowColorPicker(false);
-                    setShowCustomPicker(false);
-                  }}
-                  onClose={() => setShowCustomPicker(false)}
-                  showEyeDropper={true}
-                  className="shadow-none p-0 bg-transparent backdrop-blur-none"
-                />
-              </div>
-            )}
+            {/* Custom color picker overlay */}
+            <ColorPickerOverlay
+              open={showCustomPicker}
+              color={customColor}
+              onChange={(newColor) => {
+                setCustomColor(newColor);
+                onUpdate({ color: newColor });
+                setShowColorPicker(false);
+                setShowCustomPicker(false);
+              }}
+              onClose={() => setShowCustomPicker(false)}
+            />
           </div>
         </>
       )}

@@ -5,7 +5,7 @@ import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/us
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff } from 'lucide-react';
-import { LiquidGlassColorPicker } from '@/components/ui/liquid-glass-color-picker';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -191,23 +191,18 @@ const ColumnHeader = memo(({
               </button>
             </div>
             
-            {/* Custom color picker section - NEW Liquid Glass Style */}
-            {showCustomPicker && (
-              <div className="mt-3 pt-3 border-t border-black/5">
-                <LiquidGlassColorPicker
-                  color={customColor}
-                  onChange={(newColor) => {
-                    setCustomColor(newColor);
-                    onUpdate({ color: newColor });
-                    setShowColorPicker(false);
-                    setShowCustomPicker(false);
-                  }}
-                  onClose={() => setShowCustomPicker(false)}
-                  showEyeDropper={true}
-                  className="shadow-none p-0 bg-transparent backdrop-blur-none"
-                />
-              </div>
-            )}
+            {/* Custom color picker overlay */}
+            <ColorPickerOverlay
+              open={showCustomPicker}
+              color={customColor}
+              onChange={(newColor) => {
+                setCustomColor(newColor);
+                onUpdate({ color: newColor });
+                setShowColorPicker(false);
+                setShowCustomPicker(false);
+              }}
+              onClose={() => setShowCustomPicker(false)}
+            />
           </div>
         </>
       )}
@@ -346,21 +341,16 @@ const ColorStatusPickerPill = memo(({
           </div>
         </div>
         
-        {/* Custom color picker section - NEW Liquid Glass Style */}
-        {showCustomPicker && (
-          <div className="pt-2 border-t border-black/5">
-            <LiquidGlassColorPicker
-              color={customCardColor}
-              onChange={(newColor) => {
-                onColorSelect(newColor);
-                onClose();
-              }}
-              onClose={() => setShowCustomPicker(false)}
-              showEyeDropper={true}
-              className="shadow-none p-0 bg-transparent backdrop-blur-none"
-            />
-          </div>
-        )}
+        {/* Custom color picker overlay */}
+        <ColorPickerOverlay
+          open={showCustomPicker}
+          color={customCardColor}
+          onChange={(newColor) => {
+            onColorSelect(newColor);
+            onClose();
+          }}
+          onClose={() => setShowCustomPicker(false)}
+        />
       </div>
     </>
   );
