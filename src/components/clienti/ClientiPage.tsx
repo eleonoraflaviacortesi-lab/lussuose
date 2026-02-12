@@ -9,6 +9,7 @@ import { AddClienteDialog } from './AddClienteDialog';
 import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Plus, Loader2, Upload, Search, X } from 'lucide-react';
 
 interface ClientiPageProps {
@@ -147,7 +148,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
               CSV
             </Button>
           )}
-          <Button onClick={() => setAddDialogOpen(true)}>
+          <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
             <Plus className="w-4 h-4" />
           </Button>
         </div>
@@ -170,20 +171,20 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
       {/* Search Bar */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-        <input
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
           type="text"
           placeholder="Cerca per nome, paese, regione, email..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-muted/50 border-0 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
+          className="pl-9 pr-9"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-muted-foreground" />
           </button>
         )}
       </div>
