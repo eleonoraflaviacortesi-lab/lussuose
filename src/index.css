@@ -258,6 +258,24 @@
       inset 0 -2px 4px rgba(255, 255, 255, 0.4);
   }
 
+  /* Liquid Glass Nav */
+  .glass-nav {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.75) 0%,
+      rgba(255, 255, 255, 0.5) 50%,
+      rgba(255, 255, 255, 0.75) 100%
+    );
+    backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+    -webkit-backdrop-filter: blur(40px) saturate(200%) brightness(1.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 9999px;
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  }
+
   .glass-button {
     background: rgba(255, 255, 255, 0.7);
     backdrop-filter: blur(10px);
