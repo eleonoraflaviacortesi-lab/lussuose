@@ -330,18 +330,17 @@ const ColorStatusPickerPill = memo(({
             </button>
           </div>
         </div>
-        
-        {/* Custom color picker overlay */}
-        <ColorPickerOverlay
-          open={showCustomPicker}
-          color={customCardColor}
-          onChange={(newColor) => {
-            onColorSelect(newColor);
-            onClose();
-          }}
-          onClose={() => setShowCustomPicker(false)}
-        />
       </div>
+      {/* Custom color picker overlay - outside scrollable container */}
+      <ColorPickerOverlay
+        open={showCustomPicker}
+        color={customCardColor}
+        onChange={(newColor) => {
+          onColorSelect(newColor);
+          onClose();
+        }}
+        onClose={() => setShowCustomPicker(false)}
+      />
     </>
   );
 });

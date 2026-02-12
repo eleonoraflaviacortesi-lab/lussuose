@@ -135,15 +135,6 @@ const TaskContextMenu = memo(({
             >
               <span className="text-white text-xs font-bold">+</span>
             </button>
-            <ColorPickerOverlay
-              open={showColorPicker}
-              color={task.card_color || '#FEF3C7'}
-              onChange={(newColor) => {
-                handleColorSelect(newColor);
-                setShowColorPicker(false);
-              }}
-              onClose={() => setShowColorPicker(false)}
-            />
           </div>
         </div>
 
@@ -159,6 +150,16 @@ const TaskContextMenu = memo(({
           <span>Elimina task</span>
         </button>
       </div>
+      {/* Color picker overlay - outside scrollable container */}
+      <ColorPickerOverlay
+        open={showColorPicker}
+        color={task.card_color || '#FEF3C7'}
+        onChange={(newColor) => {
+          handleColorSelect(newColor);
+          setShowColorPicker(false);
+        }}
+        onClose={() => setShowColorPicker(false)}
+      />
     </>
   );
 });
