@@ -1,6 +1,6 @@
 import { memo, useState } from 'react';
 import { AlertTriangle, X, Palette, Trash2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { Task } from '@/hooks/useTasks';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
@@ -17,17 +17,6 @@ const PRESET_COLORS = [
   '#FFFFFF', // White
 ];
 
-// Helper to determine if color is dark
-const isDarkColor = (color: string | null): boolean => {
-  if (!color) return false;
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-};
 
 type Props = {
   position: { x: number; y: number };

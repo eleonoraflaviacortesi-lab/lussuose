@@ -2,6 +2,7 @@ import { memo, useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowDown } from 'lucide-react';
 import { Cliente } from '@/types';
+import { isDarkColor } from '@/lib/utils';
 
 interface ClientiFunnelChartModalProps {
   open: boolean;
@@ -19,15 +20,6 @@ const CLIENTE_COLUMNS = [
   { key: 'closed_lost', label: 'Perso', color: '#1a1a1a' },
 ];
 
-const isDarkColor = (color: string): boolean => {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-};
 
 const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFunnelChartModalProps) => {
   const [animated, setAnimated] = useState(false);

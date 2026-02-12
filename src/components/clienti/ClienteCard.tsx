@@ -1,6 +1,6 @@
 import { memo, useState, useCallback, useMemo, useRef } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import { MapPin, Euro, Home, Clock, Bell, X } from 'lucide-react';
 import { isPast, isToday, isTomorrow } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
@@ -41,16 +41,6 @@ const defaultStatusColumns: Array<{ id: ClienteStatus; label: string; color: str
   { id: 'closed_won', label: 'Chiusi ✓', color: '#22c55e' },
   { id: 'closed_lost', label: 'Persi', color: '#6b7280' },
 ];
-
-const isDarkColor = (hex: string | null): boolean => {
-  if (!hex) return false;
-  const c = hex.replace('#', '');
-  if (c.length !== 6) return false;
-  const r = parseInt(c.substring(0, 2), 16);
-  const g = parseInt(c.substring(2, 4), 16);
-  const b = parseInt(c.substring(4, 6), 16);
-  return (r * 0.299 + g * 0.587 + b * 0.114) < 150;
-};
 
 const isUrgent = (tempoRicerca: string | null): boolean => {
   if (!tempoRicerca) return false;

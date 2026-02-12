@@ -44,6 +44,7 @@ export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
               "bg-white/80 backdrop-blur-xl shadow-lg",
               "hover:scale-105 active:scale-95 transition-transform"
             )}
+            aria-label={`Notifiche${unreadCount > 0 ? ` (${unreadCount} non lette)` : ''}`}
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
