@@ -33,7 +33,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
   const { myData } = useDailyData();
-  const { annualTargets } = useSedeTargets();
+  const { annualTargets, targets: sedeTargets } = useSedeTargets();
   const navigate = useNavigate();
   const { hasReportedToday } = useTodayReportStatus();
 
@@ -82,7 +82,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const conversioni = contatti > 0 ? Math.round((chiusure / contatti) * 100) : 0;
 
   const incarichiTeam = kpis?.incarichi?.value || 0;
-  const incarichiTarget = 12;
+  const incarichiTarget = sedeTargets.incarichi_target || 4;
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
   const handleNotiziaClick = (notizia: Notizia) => {
