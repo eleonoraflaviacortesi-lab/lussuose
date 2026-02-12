@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send, Check } from 'lucide-react';
+import MentionInput from '@/components/ui/mention-input';
+import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -61,6 +63,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const { updateNotizia, deleteNotizia } = useNotizie();
   const { columns } = useKanbanColumns();
+  const { sendMentionNotifications } = useMentionNotifications();
   const [customEmoji, setCustomEmoji] = useState('');
   const [newComment, setNewComment] = useState('');
   const [showSaved, setShowSaved] = useState(false);
@@ -174,7 +177,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   // Early return AFTER all hooks
   if (!notizia || !open) return null;
 
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!newComment.trim()) return;
     const comment: NotiziaComment = {
       id: crypto.randomUUID(),
@@ -183,6 +186,14 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     };
     const newComments = [...editData.comments, comment];
     setEditData({ ...editData, comments: newComments });
+    
+    // Send mention notifications
+    await sendMentionNotifications(newComment.trim(), {
+      type: 'comment_notizia',
+      entityName: editData.name,
+      referenceId: notizia.id,
+    });
+    
     setNewComment('');
     // Auto-save after adding comment
     triggerAutoSave();
@@ -433,17 +444,12 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             )}
             {/* New comment input */}
             <div className="flex gap-2">
-              <input
+              <MentionInput
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Aggiungi un commento..."
+                onChange={setNewComment}
+                onSubmit={handleAddComment}
+                placeholder="Aggiungi un commento... usa @ per taggare"
                 className={cn(pillInputClass, "flex-1")}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleAddComment();
-                  }
-                }}
               />
               <button
                 type="button"

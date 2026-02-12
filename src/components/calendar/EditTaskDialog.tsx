@@ -7,8 +7,9 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import MentionInput from '@/components/ui/mention-input';
 import { useTasks, Task } from '@/hooks/useTasks';
+import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/haptics';
 
@@ -22,6 +23,7 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const { updateTask, deleteTask } = useTasks();
+  const { sendMentionNotifications } = useMentionNotifications();
 
   // Sync state when task changes
   useEffect(() => {
@@ -47,6 +49,15 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
         title: title.trim(),
         notes: notes.trim() || undefined,
       });
+
+      // Send notifications to mentioned users
+      if (notes.trim()) {
+        await sendMentionNotifications(notes.trim(), {
+          type: 'task',
+          entityName: title.trim(),
+          referenceId: task.id,
+        });
+      }
       
       triggerHaptic('success');
       toast.success('Task aggiornata');
@@ -113,11 +124,13 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
               Note (opzionale)
             </label>
-            <Textarea
+            <MentionInput
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Aggiungi dettagli..."
-              className="min-h-[100px] resize-none"
+              onChange={setNotes}
+              placeholder="Aggiungi dettagli... usa @ per taggare"
+              className="min-h-[100px] resize-none w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+              multiline
+              rows={4}
             />
           </div>
 
