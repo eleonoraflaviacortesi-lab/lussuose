@@ -4,8 +4,9 @@ import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
 import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff } from 'lucide-react';
+import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff, Star } from 'lucide-react';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
+import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -224,6 +225,7 @@ const ColorStatusPickerPill = memo(({
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
   const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
   
   const handleSaveCustomColor = () => {
     onColorSelect(customCardColor);
@@ -329,7 +331,47 @@ const ColorStatusPickerPill = memo(({
               +
             </button>
           </div>
+          {/* Save current color as favorite */}
+          {currentColor && !cardColors.some(c => c.value === currentColor) && !favorites.includes(currentColor) && (
+            <button
+              onClick={() => { addFavorite(currentColor); triggerHaptic('light'); }}
+              className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Star className="w-3 h-3" />
+              Salva come preferito
+            </button>
+          )}
         </div>
+
+        {/* Favorite colors */}
+        {favorites.length > 0 && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                Preferiti
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+                {favorites.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => { onColorSelect(color); onClose(); }}
+                    onContextMenu={(e) => { e.preventDefault(); removeFavorite(color); triggerHaptic('light'); }}
+                    className={cn(
+                      "w-7 h-7 rounded-lg transition-all hover:scale-110 relative group",
+                      currentColor === color && "ring-2 ring-offset-1 ring-foreground"
+                    )}
+                    style={{ backgroundColor: color }}
+                    title="Click: applica · Tasto destro: rimuovi"
+                  >
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-destructive text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
       {/* Custom color picker overlay - outside scrollable container */}
       <ColorPickerOverlay
