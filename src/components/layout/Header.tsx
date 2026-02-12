@@ -45,7 +45,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
           <div className="flex ticker-smooth whitespace-nowrap pt-2">
             {[...Array(3)].map((_, i) => (
-              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-important tracking-[0.15em] uppercase">
+              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
                 <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
                 <span>★</span>
                 <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>

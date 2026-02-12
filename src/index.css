@@ -2,30 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Futura font family - separate families to prevent browser weight synthesis */
-@font-face {
-  font-family: 'FuturaLight';
-  src: url('/fonts/Futura_Light.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'FuturaMedium';
-  src: url('/fonts/Futura_Medium.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'FuturaBold';
-  src: url('/fonts/Futura_Bold.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/inter/300.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
 
 /* Le Lussuose Design System - Pink & White Style */
 
@@ -79,11 +63,8 @@
     --pink-light: 326 70% 90%;
     --pink-dark: 326 85% 45%;
 
-    --font-light: "FuturaLight", -apple-system, sans-serif;
-    --font-medium: "FuturaMedium", -apple-system, sans-serif;
-    --font-bold: "FuturaBold", -apple-system, sans-serif;
-    --font-serif: "FuturaMedium", Georgia, serif;
-    --font-sans: "FuturaLight", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
@@ -149,56 +130,54 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-light);
+    font-family: var(--font-sans);
+    font-weight: 300;
     font-size: 14px;
     letter-spacing: 0.01em;
     overscroll-behavior-y: contain;
   }
 
   h1 {
-    font-family: var(--font-bold);
-    @apply tracking-normal uppercase text-xl;
+    font-family: var(--font-sans);
+    @apply tracking-normal uppercase font-extrabold text-xl;
   }
 
   h2 {
-    font-family: var(--font-medium);
-    @apply tracking-normal uppercase text-lg;
+    font-family: var(--font-sans);
+    @apply tracking-normal uppercase font-extrabold text-lg;
   }
 
   h3 {
-    font-family: var(--font-medium);
-    @apply tracking-wide uppercase text-base;
+    font-family: var(--font-sans);
+    @apply tracking-wide uppercase font-medium text-base;
   }
 
   h4, h5, h6 {
-    font-family: var(--font-medium);
-    @apply tracking-wide text-sm;
+    font-family: var(--font-sans);
+    @apply tracking-wide font-medium text-sm;
   }
 
   p {
-    /* font inherited from body (FuturaLight) */
+    @apply font-normal;
   }
 
   strong, b {
-    font-family: var(--font-medium);
+    @apply font-bold;
   }
 
   small {
-    font-family: var(--font-light);
-    @apply text-xs;
+    @apply text-xs font-light;
   }
 }
 
 @layer components {
   .font-serif {
-    font-family: var(--font-medium);
+    font-family: var(--font-serif);
   }
   
   .font-sans {
-    font-family: var(--font-light);
+    font-family: var(--font-sans);
   }
-
-  /* font-title and font-important moved to @layer utilities for max priority */
 
   /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
   
@@ -433,14 +412,6 @@
 }
 
 @layer utilities {
-  .font-title {
-    font-family: var(--font-medium) !important;
-  }
-
-  .font-important {
-    font-family: var(--font-bold) !important;
-  }
-
   .text-gradient-pink {
     background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
     -webkit-background-clip: text;

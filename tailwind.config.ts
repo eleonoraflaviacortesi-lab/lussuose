@@ -14,10 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["FuturaMedium", "Georgia", "serif"],
-        sans: ["FuturaLight", "system-ui", "sans-serif"],
-        title: ["FuturaMedium", "system-ui", "sans-serif"],
-        important: ["FuturaBold", "system-ui", "sans-serif"],
+        serif: ["Playfair Display", "Georgia", "serif"],
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",

@@ -289,7 +289,7 @@ export const ClienteCard = memo(({
           {cliente.emoji}
         </span>
         <div className="flex-1 min-w-0">
-          <h4 className="font-title text-sm whitespace-normal break-words">{cliente.nome}</h4>
+          <h4 className="font-medium text-sm whitespace-normal break-words">{cliente.nome}</h4>
           {cliente.paese && (
             <span className="text-xs opacity-70">{cliente.paese}</span>
           )}
