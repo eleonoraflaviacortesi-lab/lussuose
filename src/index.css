@@ -348,7 +348,8 @@
 
   /* Pill Navigation - Minimal with touch */
   .pill-nav {
-    @apply px-2 py-3 flex items-center gap-1 justify-center;
+    @apply px-2 py-4 flex items-center gap-1 justify-center;
+    padding-top: 1.25rem;
   }
 
   .pill-nav-item {
