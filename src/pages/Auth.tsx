@@ -215,7 +215,7 @@ const Auth = () => {
                         {account.avatar_emoji}
                       </div>
                       <div className="flex-1 text-left">
-                        <p className="font-semibold text-foreground tracking-tight">{account.full_name}</p>
+                        <p className="font-medium text-foreground tracking-tight">{account.full_name}</p>
                         <p className="text-xs text-muted-foreground">Tocca per accedere</p>
                       </div>
                       {loading === account.user_id && (
