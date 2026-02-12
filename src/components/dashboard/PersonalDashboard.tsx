@@ -32,7 +32,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
   const { profile } = useAuth();
   const { kpis, isLoading } = useKPIs('year');
-  const { myData } = useDailyData();
+  const { myData, allData } = useDailyData();
   const { annualTargets, targets: sedeTargets } = useSedeTargets();
   const navigate = useNavigate();
   const { hasReportedToday } = useTodayReportStatus();
@@ -60,6 +60,15 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
     return myData.reduce((sum, d) => sum + (Number(d.fatturato_a_credito) || 0), 0);
   }, [myData]);
 
+  const incarichiTeam = useMemo(() => {
+    if (!allData) return 0;
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    return allData
+      .filter(d => new Date(d.date) >= startOfMonth)
+      .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0);
+  }, [allData]);
+
   // NOTE: performance charts (Recharts) are lazy-loaded in PerformanceCharts to speed up first paint.
 
   const formatCompactCurrency = (value: number) => {
@@ -81,7 +90,6 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const chiusure = kpis?.vendite?.value || 0;
   const conversioni = contatti > 0 ? Math.round((chiusure / contatti) * 100) : 0;
 
-  const incarichiTeam = kpis?.incarichi?.value || 0;
   const incarichiTarget = sedeTargets.incarichi_target || 4;
   const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
 
