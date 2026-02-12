@@ -108,7 +108,7 @@ const SettingsPage = () => {
           <Settings className="w-7 h-7" />
         </div>
         <div>
-          <h2 className="text-xl font-bold tracking-tight">IMPOSTAZIONI</h2>
+          <h2 className="text-2xl font-extrabold tracking-wide uppercase">IMPOSTAZIONI</h2>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
             I TUOI OBIETTIVI PERSONALI
           </p>

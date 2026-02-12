@@ -276,7 +276,7 @@ const ReportAnalysisTab = () => {
           <Calendar className="w-7 h-7" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight">ANALISI PRODUTTIVITÀ</h1>
+          <h1 className="text-2xl font-extrabold tracking-wide uppercase">ANALISI PRODUTTIVITÀ</h1>
           <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
             STORICO PERFORMANCE
           </p>

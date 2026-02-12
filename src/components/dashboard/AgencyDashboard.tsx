@@ -131,7 +131,7 @@ const AgencyDashboard = () => {
             <BarChart3 className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h2 className="text-lg font-bold tracking-tight">{userSede}</h2>
+            <h2 className="text-2xl font-extrabold tracking-wide uppercase">{userSede}</h2>
             <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
               {periodLabel}
             </p>
