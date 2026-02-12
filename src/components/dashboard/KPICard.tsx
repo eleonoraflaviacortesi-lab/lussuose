@@ -70,7 +70,7 @@ const KPICard = ({ title, value, target, delta, icon, format = 'number' }: KPICa
       </div>
       
       <div className="mb-3">
-        <span className="font-serif text-3xl font-semibold text-foreground">
+        <span className="font-serif text-3xl font-bold text-foreground">
           {formatValue(value)}
         </span>
       </div>
