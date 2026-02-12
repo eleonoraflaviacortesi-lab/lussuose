@@ -1436,7 +1436,7 @@ const EventCard = memo(({
         )}
         
         <div className="flex-1 min-w-0">
-          <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
+          <p className={cn("text-xs font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
         </div>
@@ -1595,7 +1595,7 @@ const DraggableEventCard = memo(({
         )}
         
         <div className="flex-1 min-w-0">
-          <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
+          <p className={cn("text-xs font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
         </div>
