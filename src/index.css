@@ -2,27 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Futura font family */
+/* Futura font family - separate families to prevent browser weight synthesis */
 @font-face {
-  font-family: 'Futura';
+  font-family: 'FuturaLight';
   src: url('/fonts/Futura_Light.otf') format('opentype');
-  font-weight: 200 300;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Futura';
+  font-family: 'FuturaMedium';
   src: url('/fonts/Futura_Medium.otf') format('opentype');
-  font-weight: 400 600;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Futura';
+  font-family: 'FuturaBold';
   src: url('/fonts/Futura_Bold.otf') format('opentype');
-  font-weight: 700 900;
+  font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
@@ -79,8 +79,11 @@
     --pink-light: 326 70% 90%;
     --pink-dark: 326 85% 45%;
 
-    --font-serif: "Futura", Georgia, serif;
-    --font-sans: "Futura", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-light: "FuturaLight", -apple-system, sans-serif;
+    --font-medium: "FuturaMedium", -apple-system, sans-serif;
+    --font-bold: "FuturaBold", -apple-system, sans-serif;
+    --font-serif: "FuturaMedium", Georgia, serif;
+    --font-sans: "FuturaLight", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 0 0% 26%;
@@ -146,53 +149,61 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-sans);
-    font-weight: 300;
+    font-family: var(--font-light);
     font-size: 14px;
     letter-spacing: 0.01em;
     overscroll-behavior-y: contain;
   }
 
   h1 {
-    font-family: var(--font-sans);
-    @apply tracking-normal uppercase font-bold text-xl;
+    font-family: var(--font-bold);
+    @apply tracking-normal uppercase text-xl;
   }
 
   h2 {
-    font-family: var(--font-sans);
-    @apply tracking-normal uppercase font-medium text-lg;
+    font-family: var(--font-medium);
+    @apply tracking-normal uppercase text-lg;
   }
 
   h3 {
-    font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-medium text-base;
+    font-family: var(--font-medium);
+    @apply tracking-wide uppercase text-base;
   }
 
   h4, h5, h6 {
-    font-family: var(--font-sans);
-    @apply tracking-wide font-medium text-sm;
+    font-family: var(--font-medium);
+    @apply tracking-wide text-sm;
   }
 
   p {
-    @apply font-normal;
+    font-family: var(--font-light);
   }
 
   strong, b {
-    @apply font-medium;
+    font-family: var(--font-medium);
   }
 
   small {
-    @apply text-xs font-light;
+    font-family: var(--font-light);
+    @apply text-xs;
   }
 }
 
 @layer components {
   .font-serif {
-    font-family: var(--font-serif);
+    font-family: var(--font-medium);
   }
   
   .font-sans {
-    font-family: var(--font-sans);
+    font-family: var(--font-light);
+  }
+
+  .font-title {
+    font-family: var(--font-medium);
+  }
+
+  .font-important {
+    font-family: var(--font-bold);
   }
 
   /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
