@@ -443,7 +443,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </div>
             )}
             {/* New comment input */}
-            <div className="flex gap-2 items-center justify-center">
+            <div className="flex gap-2 items-center w-full">
               <MentionInput
                 value={newComment}
                 onChange={setNewComment}
