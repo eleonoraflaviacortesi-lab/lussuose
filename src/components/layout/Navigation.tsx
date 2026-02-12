@@ -44,9 +44,9 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   };
 
   return (
-    <nav className="fixed top-[88px] left-0 right-0 z-[55] flex justify-center py-2 px-3">
+    <nav className="fixed top-[88px] left-0 right-0 z-[55] flex justify-center py-2 px-3 md:px-0">
       {/* Pill Navigation */}
-      <div className="pill-nav glass-nav">
+      <div className="pill-nav glass-nav w-full md:w-auto">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
