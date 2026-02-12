@@ -7,7 +7,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import MentionInput from '@/components/ui/mention-input';
+import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { Badge } from '@/components/ui/badge';
 import {
   Select,
@@ -92,6 +93,7 @@ export function ClienteDetail({
   onUpdate,
 }: ClienteDetailProps) {
   const [newComment, setNewComment] = useState('');
+  const { sendMentionNotifications } = useMentionNotifications();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Activity log hook
@@ -112,6 +114,12 @@ export function ClienteDetail({
       onAddComment(newComment.trim());
       // Log the comment as activity
       await logComment(cliente.id, newComment.trim());
+      // Send mention notifications
+      await sendMentionNotifications(newComment.trim(), {
+        type: 'comment_cliente',
+        entityName: cliente.nome,
+        referenceId: cliente.id,
+      });
       setNewComment('');
     }
   };
@@ -231,11 +239,14 @@ export function ClienteDetail({
                     <MessageSquare className="w-3 h-3" /> Aggiungi commento
                   </h4>
                   <div className="flex gap-2">
-                    <Textarea
-                      placeholder="Scrivi un commento..."
+                    <MentionInput
                       value={newComment}
-                      onChange={e => setNewComment(e.target.value)}
-                      className="min-h-[60px]"
+                      onChange={setNewComment}
+                      onSubmit={handleAddComment}
+                      placeholder="Scrivi un commento... usa @ per taggare"
+                      className="min-h-[60px] flex-1 w-full bg-white rounded-xl px-3 py-2 text-sm border border-input focus:outline-none focus:ring-2 focus:ring-ring"
+                      multiline
+                      rows={2}
                     />
                     <Button onClick={handleAddComment} disabled={!newComment.trim()} size="sm">
                       Invia

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Check, Users, ExternalLink } from 'lucide-react';
+import { Bell, Check, Users, ExternalLink, AtSign } from 'lucide-react';
 import { useNotifications, Notification } from '@/hooks/useNotifications';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -23,12 +23,19 @@ export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
       setOpen(false);
       onOpenCliente(notification.reference_id);
     }
+    // Handle mention notifications - open the referenced entity
+    if (notification.type === 'mention' && notification.reference_id && onOpenCliente) {
+      setOpen(false);
+      onOpenCliente(notification.reference_id);
+    }
   };
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'assignment':
         return <Users className="w-4 h-4 text-[hsl(var(--banner))]" />;
+      case 'mention':
+        return <AtSign className="w-4 h-4 text-[hsl(var(--banner))]" />;
       default:
         return <Bell className="w-4 h-4" />;
     }
