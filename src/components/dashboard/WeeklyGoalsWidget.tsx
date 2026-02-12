@@ -123,7 +123,7 @@ export const WeeklyGoalsWidget = () => {
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Incarichi:</span>
                       <span className={cn(
-                        "font-semibold",
+                        "font-important",
                         productionData && isGoalMet(productionData.incarichi, goal.goal_incarichi) && "text-green-600"
                       )}>
                         {productionData ? `${productionData.incarichi}/` : ''}{goal.goal_incarichi}
@@ -134,7 +134,7 @@ export const WeeklyGoalsWidget = () => {
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Notizie:</span>
                       <span className={cn(
-                        "font-semibold",
+                        "font-important",
                         productionData && isGoalMet(productionData.notizie, goal.goal_notizie) && "text-green-600"
                       )}>
                         {productionData ? `${productionData.notizie}/` : ''}{goal.goal_notizie}
@@ -145,7 +145,7 @@ export const WeeklyGoalsWidget = () => {
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Acquisizioni:</span>
                       <span className={cn(
-                        "font-semibold",
+                        "font-important",
                         productionData && isGoalMet(productionData.valutazioni, goal.goal_acquisizioni) && "text-green-600"
                       )}>
                         {productionData ? `${productionData.valutazioni}/` : ''}{goal.goal_acquisizioni}
@@ -156,7 +156,7 @@ export const WeeklyGoalsWidget = () => {
                     <div className="flex items-center gap-1">
                       <span className="text-muted-foreground">Trattative:</span>
                       <span className={cn(
-                        "font-semibold",
+                        "font-important",
                         productionData && isGoalMet(productionData.trattative, goal.goal_trattative) && "text-green-600"
                       )}>
                         {productionData ? `${productionData.trattative}/` : ''}{goal.goal_trattative}
