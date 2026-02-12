@@ -1,113 +1,98 @@
 
 
-# Piano: Riordino Eventi nel Calendario
+# Piano: Miglioramenti Generali dell'App
 
-## Obiettivo
-Permettere agli utenti di riordinare gli eventi (task, buyer, seller) all'interno dello stesso giorno tramite drag-and-drop, salvando l'ordine personalizzato nel database.
+## 1. Performance - Ticker Header ottimizzato
 
-## Situazione Attuale
-- Il drag-and-drop tra giorni diversi funziona già
-- Il riordino nello stesso giorno è attualmente un "no-op" (righe 776-780 di CalendarPage.tsx)
-- Tutte le entità hanno già un campo `display_order` nel database:
-  - `tasks.display_order`
-  - `notizie.display_order`  
-  - `clienti.display_order`
+**Problema**: Il ticker nel header duplica il contenuto 8 volte (`[...Array(8)]`), creando 16 elementi DOM inutili.
 
-## Implementazione
+**Soluzione**: Ridurre a 3 copie (il minimo per un loop fluido senza vuoti visibili) e aggiungere `will-change: transform` solo via CSS (gia presente).
 
-### 1. Aggiungere funzione di riordino batch negli hooks
+**File**: `src/components/layout/Header.tsx`
 
-**useTasks.ts** - Nuova mutation `reorderTasks`:
-```text
-- Accetta un array di { id, display_order }
-- Aggiorna il display_order per ogni task
-- Usa optimistic update per feedback immediato
-```
+---
 
-**useNotizie.ts** - Nuova mutation `reorderNotizie`:
-```text
-- Stessa logica per le notizie/seller
-```
+## 2. Performance - Pull-to-refresh mirato
 
-**useClienti.ts** - Nuova mutation `reorderClienti`:
-```text
-- Stessa logica per i buyer
-```
+**Problema**: `queryClient.invalidateQueries()` senza filtri invalida TUTTE le query cached, causando ricaricamenti inutili (es. profili, colonne kanban, settings).
 
-### 2. Modificare handleDragEnd in CalendarPage.tsx
+**Soluzione**: Invalidare solo le query relative ai dati che cambiano frequentemente:
+- `tasks`, `notizie`, `clienti`, `appointments`, `daily-data`, `kpis`, `weekly-goals`, `notifications`
 
-Quando `destination.droppableId === source.droppableId` (stesso giorno):
+**File**: `src/pages/Index.tsx`
 
-```text
-1. Ottenere la lista degli eventi del giorno
-2. Rimuovere l'evento dalla posizione source.index
-3. Inserirlo nella posizione destination.index
-4. Calcolare i nuovi display_order per ogni evento
-5. Raggruppare gli eventi per tipo (task, notizia, cliente)
-6. Chiamare le rispettive mutation di riordino
-```
+---
 
-### 3. Logica di calcolo ordine
+## 3. Accessibilita - aria-label sui bottoni icona
 
-```text
-Per ogni evento riordinato:
-- nuovo display_order = indice nella lista * 10
-  (moltiplicando per 10 si lascia spazio per inserimenti futuri)
-```
+**Problema**: I bottoni con sole icone (profilo, logout, navigazione, notification bell) non hanno `aria-label`, rendendo l'app inaccessibile a screen reader.
 
-## Dettagli Tecnici
+**Soluzione**: Aggiungere `aria-label` a:
+- Bottone profilo nel Header
+- Bottone logout nel Header
+- Ogni tab nella Navigation
+- Bottone campana notifiche
 
-### Struttura della funzione reorderEvents
+**File**: `src/components/layout/Header.tsx`, `src/components/layout/Navigation.tsx`, `src/components/layout/NotificationBell.tsx`
 
-```typescript
-const reorderEvents = (dayKey: string, sourceIndex: number, destIndex: number) => {
-  const events = eventsByDay.get(dayKey) || [];
-  const draggableEvents = events.filter(e => 
-    e.type === 'notizia_reminder' || 
-    e.type === 'cliente_reminder' || 
-    e.type === 'task'
-  );
-  
-  // Riordina array
-  const [removed] = draggableEvents.splice(sourceIndex, 1);
-  draggableEvents.splice(destIndex, 0, removed);
-  
-  // Calcola nuovi ordini e raggruppa per tipo
-  const taskUpdates = [];
-  const notiziaUpdates = [];
-  const clienteUpdates = [];
-  
-  draggableEvents.forEach((event, index) => {
-    const newOrder = index * 10;
-    if (event.type === 'task' && event.taskId) {
-      taskUpdates.push({ id: event.taskId, display_order: newOrder });
-    } else if (event.type === 'notizia_reminder' && event.notiziaId) {
-      notiziaUpdates.push({ id: event.notiziaId, display_order: newOrder });
-    } else if (event.type === 'cliente_reminder' && event.clienteId) {
-      clienteUpdates.push({ id: event.clienteId, display_order: newOrder });
-    }
-  });
-  
-  // Batch updates
-  if (taskUpdates.length) reorderTasks.mutate(taskUpdates);
-  if (notiziaUpdates.length) reorderNotizie.mutate(notiziaUpdates);
-  if (clienteUpdates.length) reorderClienti.mutate(clienteUpdates);
-};
-```
+---
 
-## File da Modificare
+## 4. UX - Feedback tattile su azioni completate
 
-| File | Modifica |
-|------|----------|
-| `src/hooks/useTasks.ts` | Aggiungere mutation `reorderTasks` |
-| `src/hooks/useNotizie.ts` | Aggiungere mutation `reorderNotizie` |
-| `src/hooks/useClienti.ts` | Aggiungere mutation `reorderClienti` |
-| `src/components/calendar/CalendarPage.tsx` | Implementare logica riordino in `handleDragEnd` |
+**Problema**: Azioni come completare un task, spostare un evento, o salvare un report non danno feedback tattile di conferma.
 
-## Comportamento Atteso
+**Soluzione**: Aggiungere `triggerHaptic('success')` dopo:
+- Completamento task nel calendario
+- Completamento obiettivo settimanale
+- Salvataggio report giornaliero (bottone "CICLO PRODUTTIVO" -> completato)
 
-1. **Trascinamento stesso giorno**: L'evento viene spostato nella nuova posizione, l'ordine viene salvato
-2. **Trascinamento altro giorno**: Comportamento esistente (cambia data)
-3. **Feedback visivo**: Optimistic update per risposta immediata
-4. **Persistenza**: L'ordine viene mantenuto tra le sessioni
+**File**: `src/components/calendar/CalendarPage.tsx`, `src/components/dashboard/WeeklyGoalsWidget.tsx`
+
+---
+
+## 5. UX - Transizione fluida tra tab
+
+**Problema**: Il cambio tab e istantaneo senza transizione, risultando brusco.
+
+**Soluzione**: Aggiungere una micro-animazione fade-in al contenuto quando si cambia tab, usando la classe `animate-fade-in` gia definita nel design system. Wrappare il `renderContent()` con una key basata su `activeTab` per triggerare il re-mount con animazione.
+
+**File**: `src/pages/Index.tsx`
+
+---
+
+## 6. iOS - Prevenire bounce su scroll
+
+**Problema**: Su iOS Safari, lo scroll oltre i limiti causa un "rubber band" effect che puo confondere con il pull-to-refresh.
+
+**Soluzione**: Aggiungere `overscroll-behavior: none` al body quando il pull-to-refresh e attivo, e `overscroll-behavior-y: contain` al container principale.
+
+**File**: `src/index.css`
+
+---
+
+## 7. Code Quality - Funzione isDarkColor duplicata
+
+**Problema**: La funzione `isDarkColor` e copiata identica in 3 file: `CalendarPage.tsx`, `TodayRemindersWidget.tsx`, e probabilmente altri.
+
+**Soluzione**: Estrarla in `src/lib/utils.ts` e importarla ovunque serve.
+
+**File**: `src/lib/utils.ts`, `src/components/calendar/CalendarPage.tsx`, `src/components/clienti/TodayRemindersWidget.tsx`
+
+---
+
+## Riepilogo modifiche
+
+| File | Tipo | Modifica |
+|------|------|----------|
+| `src/components/layout/Header.tsx` | Perf + A11y | Ridurre ticker copies, aggiungere aria-label |
+| `src/pages/Index.tsx` | Perf + UX | Invalidation mirata, transizione tab |
+| `src/components/layout/Navigation.tsx` | A11y | aria-label su tab |
+| `src/components/layout/NotificationBell.tsx` | A11y | aria-label su campana |
+| `src/components/calendar/CalendarPage.tsx` | UX + DRY | Haptic feedback, importare isDarkColor |
+| `src/components/dashboard/WeeklyGoalsWidget.tsx` | UX | Haptic su completamento |
+| `src/components/dashboard/TodayRemindersWidget.tsx` | DRY | Importare isDarkColor |
+| `src/lib/utils.ts` | DRY | Aggiungere isDarkColor |
+| `src/index.css` | iOS | overscroll-behavior |
+
+Nessuna modifica al database. Nessuna nuova dipendenza.
 
