@@ -176,7 +176,7 @@
   }
 
   p {
-    font-family: var(--font-light);
+    /* font inherited from body (FuturaLight) */
   }
 
   strong, b {
@@ -198,13 +198,7 @@
     font-family: var(--font-light);
   }
 
-  .font-title {
-    font-family: var(--font-medium);
-  }
-
-  .font-important {
-    font-family: var(--font-bold);
-  }
+  /* font-title and font-important moved to @layer utilities for max priority */
 
   /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
   
@@ -439,6 +433,14 @@
 }
 
 @layer utilities {
+  .font-title {
+    font-family: var(--font-medium) !important;
+  }
+
+  .font-important {
+    font-family: var(--font-bold) !important;
+  }
+
   .text-gradient-pink {
     background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
     -webkit-background-clip: text;
