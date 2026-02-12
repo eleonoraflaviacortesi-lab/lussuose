@@ -207,7 +207,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-light text-foreground">{contatti}</p>
+          <p className="text-xl font-bold text-foreground">{contatti}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONTATTI</p>
         </button>
         <button
@@ -215,7 +215,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-light text-foreground">{notizie}</p>
+          <p className="text-xl font-bold text-foreground">{notizie}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">NOTIZIE</p>
         </button>
         <button
@@ -223,7 +223,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Award className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-light text-foreground">{chiusure}</p>
+          <p className="text-xl font-bold text-foreground">{chiusure}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CHIUSURE</p>
         </button>
         <button
@@ -231,7 +231,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Zap className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-light text-foreground">{conversioni}%</p>
+          <p className="text-xl font-bold text-foreground">{conversioni}%</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONV.</p>
         </button>
       </div>
