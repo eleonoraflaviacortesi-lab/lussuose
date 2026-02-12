@@ -1,36 +1,31 @@
 
+## Barra di navigazione fissa con effetto Liquid Glass
 
-# Fix: Widget "INCARICHI TEAM" deve mostrare solo il mese corrente
+### Cosa cambia
 
-## Problema
-Il widget "INCARICHI TEAM" in fondo alla dashboard usa `kpis?.incarichi?.value` che proviene da `useKPIs('year')`, sommando tutti gli incarichi da gennaio 2026. Siamo a febbraio, quindi i 3 incarichi di gennaio vengono contati erroneamente.
+La pill-nav attualmente scorre via con la pagina. Verra' resa **fissa sotto l'header** e acquisira' un effetto **liquid glass** allo scorrimento, con bordi arrotondati e ombra per creare rilievo.
 
-## Soluzione
-Calcolare gli incarichi team separatamente, filtrando `allData` solo per il mese corrente (come fa gia `IncarchiWidget` per i dati personali).
+### Comportamento
 
-## Modifica
+1. **Sempre visibile**: la barra resta ancorata sotto l'header durante lo scroll
+2. **Effetto liquid glass**: sfondo semi-trasparente con backdrop-blur, ombra morbida e bordi arrotondati (come l'header esistente ma adattato alla pill-nav)
+3. **Transizione fluida**: il contenuto della pagina scorre sotto la barra con l'effetto vetro che lascia intravedere gli elementi sottostanti
 
-**File: `src/components/dashboard/PersonalDashboard.tsx`**
+### Dettagli tecnici
 
-Aggiungere un calcolo dedicato per gli incarichi team del mese corrente usando `allData` da `useDailyData()` (che gia include i dati di tutto il team per la stessa sede):
+**Navigation.tsx**:
+- Rendere il wrapper `nav` con `fixed` positioning, posizionato subito sotto l'header (circa `top-[88px]` considerando ticker + header)
+- Aggiungere `z-[55]` per restare sopra il contenuto ma sotto l'header
+- Applicare una nuova classe CSS `glass-nav` alla pill-nav
 
-```typescript
-const incarichiTeam = useMemo(() => {
-  if (!allData) return 0;
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  return allData
-    .filter(d => new Date(d.date) >= startOfMonth)
-    .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0);
-}, [allData]);
-```
+**index.css**:
+- Creare la classe `.glass-nav` con lo stesso stile liquid glass dell'header (`backdrop-filter: blur`, sfondo semi-trasparente bianco, `box-shadow` per il rilievo) adattato alla forma pill con bordi arrotondati
 
-Questo richiede di importare `allData` da `useDailyData()` (attualmente importa solo `myData`). Verra anche aggiornato il titolo del widget per chiarire che e mensile.
+**Index.tsx**:
+- Aggiornare lo spacer (`h-[120px]`) per compensare sia l'header che la nav ora entrambi fissi (circa `h-[160px]`)
+- Rimuovere il rendering diretto di `Navigation` dal flusso normale e posizionarlo nel blocco fisso insieme all'header
 
-## Riepilogo
-
-| File | Modifica |
-|------|----------|
-| `src/components/dashboard/PersonalDashboard.tsx` | Destrutturare `allData` da `useDailyData()`, calcolare incarichi team mensili, rimuovere dipendenza da `kpis.incarichi` |
-
-Nessuna modifica al database.
+### File coinvolti
+- `src/components/layout/Navigation.tsx`
+- `src/index.css`
+- `src/pages/Index.tsx`
