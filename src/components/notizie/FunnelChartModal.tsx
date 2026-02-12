@@ -2,6 +2,7 @@ import { memo, useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useKanbanColumns } from '@/hooks/useKanbanColumns';
 import { ArrowDown } from 'lucide-react';
+import { isDarkColor } from '@/lib/utils';
 
 interface FunnelChartModalProps {
   open: boolean;
@@ -9,15 +10,6 @@ interface FunnelChartModalProps {
   notizieByStatus: Record<string, { length: number }>;
 }
 
-const isDarkColor = (color: string): boolean => {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-};
 
 const FunnelChartModal = memo(({ open, onOpenChange, notizieByStatus }: FunnelChartModalProps) => {
   const [animated, setAnimated] = useState(false);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { triggerHaptic } from '@/lib/haptics';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { startOfWeek, format } from 'date-fns';
 import { Target, Check, Loader2 } from 'lucide-react';
@@ -66,6 +67,7 @@ export const WeeklyGoalsWidget = () => {
       });
 
       // Trigger celebration
+      triggerHaptic('success');
       celebrateGasiAbbestia();
       setShowCelebration(true);
       

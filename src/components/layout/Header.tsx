@@ -44,7 +44,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         {/* Ticker Banner - Black with smooth scroll */}
         <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
           <div className="flex ticker-smooth whitespace-nowrap pt-2">
-            {[...Array(8)].map((_, i) => (
+            {[...Array(3)].map((_, i) => (
               <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
                 <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
                 <span>★</span>
@@ -61,6 +61,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           <button 
             onClick={() => setShowProfile(true)}
             className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
+            aria-label="Apri profilo"
           >
             {profile?.avatar_emoji || '🖤'}
           </button>
@@ -72,6 +73,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           <button 
             onClick={handleSignOut}
             className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Esci"
           >
             <LogOut className="w-4 h-4" />
           </button>

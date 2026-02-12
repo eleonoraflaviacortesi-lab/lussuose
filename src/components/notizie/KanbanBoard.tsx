@@ -2,7 +2,7 @@ import { memo, useCallback, useState, useRef, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
@@ -32,17 +32,6 @@ const cardColors = [
   { value: '#bbf7d0', label: 'Verde', color: 'bg-green-300' },
 ];
 
-// Helper to determine if color is dark
-const isDarkColor = (color: string | null): boolean => {
-  if (!color) return false;
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-};
 
 // Editable column header
 const ColumnHeader = memo(({ 

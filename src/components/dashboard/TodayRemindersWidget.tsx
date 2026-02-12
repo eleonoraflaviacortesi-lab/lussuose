@@ -5,22 +5,11 @@ import { Calendar, ChevronRight, User, FileText } from 'lucide-react';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia } from '@/hooks/useNotizie';
 import { useKanbanColumns } from '@/hooks/useKanbanColumns';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 
 type TodayRemindersWidgetProps = {
   onNotiziaClick?: (notizia: Notizia) => void;
   onGoToCalendar?: () => void;
-};
-
-const isDarkColor = (color: string | null): boolean => {
-  if (!color) return false;
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
 };
 
 const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayRemindersWidgetProps) => {

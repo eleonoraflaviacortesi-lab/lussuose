@@ -65,9 +65,9 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
   }, [location.pathname]);
 
   const handleRefresh = useCallback(async () => {
-    // Invalidate all queries to refetch fresh data
-    await queryClient.invalidateQueries();
-    // Small delay for visual feedback
+    // Invalidate only frequently-changing queries (not profiles, columns, settings)
+    const keysToRefresh = ['tasks', 'notizie', 'clienti', 'appointments', 'daily-data', 'kpis', 'weekly-goals', 'notifications'];
+    await Promise.all(keysToRefresh.map(key => queryClient.invalidateQueries({ queryKey: [key] })));
     await new Promise(resolve => setTimeout(resolve, 300));
   }, [queryClient]);
 
@@ -152,7 +152,9 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
               </div>
             }
           >
-            {renderContent()}
+            <div key={activeTab} className="animate-fade-in">
+              {renderContent()}
+            </div>
           </Suspense>
         </main>
       </PullToRefresh>

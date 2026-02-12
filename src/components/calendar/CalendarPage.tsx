@@ -10,7 +10,7 @@ import { useTasks, Task } from '@/hooks/useTasks';
 import { useKanbanColumns, KanbanColumn } from '@/hooks/useKanbanColumns';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { triggerHaptic } from '@/lib/haptics';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import AddAppointmentDialog from './AddAppointmentDialog';
 import AddToCalendarMenu from './AddToCalendarMenu';
 import AddTaskDialog from './AddTaskDialog';
@@ -47,17 +47,6 @@ export type CalendarEvent = {
 // Quick emojis
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
 
-// Helper to determine if color is dark
-const isDarkColor = (color: string | null): boolean => {
-  if (!color) return false;
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance < 0.5;
-};
 
 // Context menu for events
 const EventContextMenu = memo(({ 

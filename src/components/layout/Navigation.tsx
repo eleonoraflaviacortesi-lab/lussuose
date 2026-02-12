@@ -61,6 +61,8 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                   isActive && 'active'
                 )}
                 title={tab.label}
+                aria-label={tab.label}
+                aria-current={isActive ? 'page' : undefined}
               >
                 <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
               </button>
