@@ -183,7 +183,7 @@ const MentionInput = ({
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex-1 min-w-0">
       {multiline ? (
         <textarea
           {...commonProps}
