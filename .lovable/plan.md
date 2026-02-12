@@ -1,36 +1,47 @@
 
 
-# Fix: Widget "INCARICHI TEAM" deve mostrare solo il mese corrente
+## Fix Font Futura Medium - Piano Definitivo
 
-## Problema
-Il widget "INCARICHI TEAM" in fondo alla dashboard usa `kpis?.incarichi?.value` che proviene da `useKPIs('year')`, sommando tutti gli incarichi da gennaio 2026. Siamo a febbraio, quindi i 3 incarichi di gennaio vengono contati erroneamente.
+### Problema
+I nomi degli account nella pagina di login (e altri elementi) mostrano **Futura Light** invece di **Futura Medium**, nonostante la classe `font-title` sia applicata.
 
-## Soluzione
-Calcolare gli incarichi team separatamente, filtrando `allData` solo per il mese corrente (come fa gia `IncarchiWidget` per i dati personali).
+**Causa**: La regola `p { font-family: var(--font-light); }` nel CSS base forza **tutti** i tag `<p>` a usare Light. Anche se la classe `.font-title` dovrebbe sovrascriverla, in pratica non funziona perche' entrambe le regole impostano `font-family` direttamente e il browser da' precedenza alla regola sul tag `p` nel contesto dei layer CSS.
 
-## Modifica
+### Soluzione
 
-**File: `src/components/dashboard/PersonalDashboard.tsx`**
+1. **Rimuovere la regola `p`** dal `@layer base` -- e' ridondante perche' il `body` gia' imposta FuturaLight come font predefinito, e tutti i `<p>` lo ereditano automaticamente.
 
-Aggiungere un calcolo dedicato per gli incarichi team del mese corrente usando `allData` da `useDailyData()` (che gia include i dati di tutto il team per la stessa sede):
+2. **Spostare `.font-title` e `.font-important`** da `@layer components` a `@layer utilities` per garantire la massima priorita' CSS (le utilities vincono sempre su base e components).
 
-```typescript
-const incarichiTeam = useMemo(() => {
-  if (!allData) return 0;
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  return allData
-    .filter(d => new Date(d.date) >= startOfMonth)
-    .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0);
-}, [allData]);
+3. **Aggiungere `!important`** come sicurezza extra sulle classi `.font-title` e `.font-important`.
+
+### Dettagli tecnici
+
+**File: `src/index.css`**
+
+Rimuovere (righe 178-180):
+```css
+p {
+  font-family: var(--font-light);
+}
 ```
 
-Questo richiede di importare `allData` da `useDailyData()` (attualmente importa solo `myData`). Verra anche aggiornato il titolo del widget per chiarire che e mensile.
+Spostare da `@layer components` a `@layer utilities`:
+```css
+@layer utilities {
+  .font-title {
+    font-family: var(--font-medium) !important;
+  }
+  .font-important {
+    font-family: var(--font-bold) !important;
+  }
+}
+```
 
-## Riepilogo
+Nessuna modifica necessaria ad `Auth.tsx` o `toast.tsx` -- usano gia' `font-title` correttamente.
 
-| File | Modifica |
-|------|----------|
-| `src/components/dashboard/PersonalDashboard.tsx` | Destrutturare `allData` da `useDailyData()`, calcolare incarichi team mensili, rimuovere dipendenza da `kpis.incarichi` |
-
-Nessuna modifica al database.
+### Risultato atteso
+- Nomi account nella login: **Futura Medium**
+- Corpo del testo e sottotitoli: **Futura Light** (ereditato dal body)
+- Titoli h2-h6, strong: **Futura Medium** (dalle regole base)
+- H1 e elementi importanti: **Futura Bold**
