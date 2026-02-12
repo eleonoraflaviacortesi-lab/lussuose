@@ -37,6 +37,7 @@ import {
   User,
   History,
   Bell,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -136,9 +137,12 @@ export function ClienteDetail({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[95vw] h-[90vh] flex flex-col p-0 rounded-3xl overflow-hidden">
+      <DialogContent className="max-w-lg w-full h-[100dvh] max-h-[100dvh] flex flex-col p-0 rounded-none sm:rounded-none border-0 gap-0 [&>button]:hidden animate-in slide-in-from-bottom duration-300">
         <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
+            <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
+              <X className="w-5 h-5" />
+            </button>
             <span className="text-2xl">{cliente.emoji}</span>
             <div className="flex-1 min-w-0">
               <InlineEditText

@@ -229,23 +229,16 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
-      onClick={() => onOpenChange(false)}
+      className={cn(
+        "fixed inset-0 z-[100] flex flex-col bg-background",
+        "animate-in slide-in-from-bottom duration-300",
+      )}
     >
-      {/* Blur backdrop */}
-      <div className="absolute inset-0 bg-black/10 backdrop-blur-md" />
-      
-      {/* Compact floating card - same style as AddNotiziaDialog */}
+      {/* Full-screen scrollable content */}
       <div 
-        onClick={(e) => e.stopPropagation()}
-        className={cn(
-          "relative z-10 w-full max-w-sm",
-          "bg-white/85 backdrop-blur-2xl",
-          "rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]",
-          "p-5 animate-in zoom-in-95 fade-in duration-200",
-          "max-h-[90vh] overflow-y-auto"
-        )}
+        className="flex-1 overflow-y-auto"
       >
+        <div className="w-full max-w-lg mx-auto p-5 pb-10">
         {/* Close button */}
         <button 
           onClick={() => onOpenChange(false)}
@@ -655,6 +648,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
+        </div>
         </div>
       </div>
     </div>
