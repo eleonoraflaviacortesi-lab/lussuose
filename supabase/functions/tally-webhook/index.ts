@@ -246,9 +246,9 @@ Deno.serve(async (req) => {
       
       // Usage & Rental
       // "Intended use of the property:"
-      uso: String(getFieldValue(fields, "intended use", "use of the property", "uso") || ""),
+      uso: getOptionText(fields, "intended use", "use of the property", "uso"),
       // "Do you plan to rent the property?"
-      interesse_affitto: String(getFieldValue(fields, "plan to rent", "rent the property", "affitto") || ""),
+      interesse_affitto: getOptionText(fields, "plan to rent", "rent the property", "affitto"),
       
       // Descriptions & Notes
       // "How would you describe your ideal property?"
