@@ -352,7 +352,7 @@
 
   /* Pill Navigation - Minimal with touch */
   .pill-nav {
-    @apply rounded-full px-1.5 py-1.5 flex items-center gap-1 justify-center;
+    @apply px-2 py-3 flex items-center gap-1 justify-center;
   }
 
   .pill-nav-item {
@@ -365,7 +365,12 @@
   }
 
   .pill-nav-item.active {
-    @apply bg-foreground text-background;
+    @apply bg-transparent text-foreground;
+    box-shadow:
+      0 3px 10px rgba(0, 0, 0, 0.15),
+      0 1px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.7);
   }
 
   .pill-nav-item:not(.active) {
