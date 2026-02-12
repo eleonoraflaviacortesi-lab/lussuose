@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useTasks } from '@/hooks/useTasks';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/haptics';
@@ -91,11 +92,11 @@ const AddTaskDialog = ({ open, onOpenChange, date }: Props) => {
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
               Note (opzionale)
             </label>
-            <Textarea
+            <RichTextEditor
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={setNotes}
               placeholder="Aggiungi dettagli..."
-              className="min-h-[100px] resize-none"
+              minHeight="100px"
             />
           </div>
 
