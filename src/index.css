@@ -350,7 +350,7 @@
   .pill-nav {
     @apply px-2 flex items-center gap-1 justify-center;
     padding-top: 1.5rem;
-    padding-bottom: 1rem;
+    padding-bottom: 0.75rem;
   }
 
   .pill-nav-item {
