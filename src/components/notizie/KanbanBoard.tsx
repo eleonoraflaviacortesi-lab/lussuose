@@ -524,7 +524,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           </button>
           <div className="flex-1">
             <p className={cn(
-              "font-medium text-sm leading-tight whitespace-normal",
+              "font-title text-sm leading-tight whitespace-normal",
               isDark ? "text-white" : "text-foreground"
             )} style={{ wordBreak: 'break-word' }}>
               {notizia.name}
