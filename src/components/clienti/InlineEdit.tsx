@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { RichTextEditor, RichTextDisplay } from '@/components/ui/rich-text-editor';
 
 interface InlineEditTextProps {
   value: string | null;
@@ -61,15 +62,13 @@ export function InlineEditText({
 
   if (isEditing) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="space-y-1">
         {multiline ? (
-          <Textarea
-            ref={inputRef as React.RefObject<HTMLTextAreaElement>}
+          <RichTextEditor
             value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            onBlur={handleSave}
-            className="min-h-[60px] text-sm"
+            onChange={setEditValue}
+            placeholder="Scrivi..."
+            minHeight="60px"
           />
         ) : (
           <Input
@@ -81,6 +80,24 @@ export function InlineEditText({
             className="h-8 text-sm"
           />
         )}
+        {multiline && (
+          <div className="flex gap-1 justify-end">
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
+            >
+              Annulla
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-2.5 py-1 text-xs bg-foreground text-background rounded-full active:scale-95 transition-transform"
+            >
+              Salva
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -88,6 +105,22 @@ export function InlineEditText({
   const displayValue = value 
     ? (formatDisplay ? formatDisplay(value) : value)
     : placeholder;
+
+  // For multiline, render HTML content
+  if (multiline && value) {
+    return (
+      <div
+        onClick={() => setIsEditing(true)}
+        className={cn(
+          'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors',
+          className
+        )}
+      >
+        <RichTextDisplay html={value} className="text-sm" />
+        <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity inline-block ml-1" />
+      </div>
+    );
+  }
 
   return (
     <div

@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send, Check } from 'lucide-react';
 import MentionInput from '@/components/ui/mention-input';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -396,14 +397,12 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           
           <div>
             <Label htmlFor="edit-notes" className="text-xs font-medium mb-1.5 block">Note</Label>
-            <textarea
-              id="edit-notes"
+            <RichTextEditor
               value={editData.notes}
-              onChange={(e) => updateField('notes', e.target.value)}
+              onChange={(val) => updateField('notes', val)}
               onBlur={handleBlur}
               placeholder="Aggiungi note..."
-              rows={2}
-              className={pillTextareaClass}
+              minHeight="60px"
             />
           </div>
 
