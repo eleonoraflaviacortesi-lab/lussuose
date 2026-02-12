@@ -443,7 +443,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </div>
             )}
             {/* New comment input */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center justify-center">
               <MentionInput
                 value={newComment}
                 onChange={setNewComment}
@@ -455,7 +455,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 type="button"
                 onClick={handleAddComment}
                 disabled={!newComment.trim()}
-                className="w-10 h-10 bg-foreground text-background rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50"
+                className="w-10 h-10 bg-foreground text-background rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50 flex-shrink-0"
               >
                 <Send className="w-4 h-4" />
               </button>
