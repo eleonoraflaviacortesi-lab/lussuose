@@ -1,21 +1,20 @@
 
 
-## Fix: Barra di navigazione non visibile su iPhone
+## Importazione Buyers Dalila: Distribuzione su due sedi
 
-### Problema
-La nav bar ha una posizione fissa a `top: 85px`, ma l'header su iPhone include il "safe area inset" (circa 47-59px per il notch/Dynamic Island). Questo rende l'header molto piu' alto e la nav bar finisce nascosta dietro di esso.
-
-### Soluzione
-Usare `calc()` con `env(safe-area-inset-top)` nel posizionamento della nav bar, cosi' si adatta automaticamente a qualsiasi dispositivo.
+### Cosa cambia
+I buyers importati dal CSV di Dalila verranno distribuiti alternandoli tra le sedi **CITTÀ DI CASTELLO** e **AREZZO**, invece di assegnarli tutti a una sola sede. La coordinatrice potra' poi riassegnarli manualmente.
 
 ### Dettagli tecnici
 
-**File: `src/components/layout/Navigation.tsx`**
-- Cambiare `top-[85px]` in uno stile inline che usa `calc(85px + env(safe-area-inset-top))` per compensare dinamicamente il safe area di iPhone
+**File: `src/lib/importDalilaClienti.ts`**
+- Rimuovere il parametro `sede` dalla funzione `fetchAndParseDalilaCSV`
+- Assegnare la sede alternando tra 'CITTÀ DI CASTELLO' e 'AREZZO' ad ogni buyer (uno alla prima, il successivo alla seconda, e cosi' via)
 
-**File: `src/pages/Index.tsx`**
-- Aggiornare lo spacer `h-[175px]` per includere anche il safe-area-inset-top, usando uno stile inline con `calc(175px + env(safe-area-inset-top))`
+**File: `src/components/clienti/ImportDalilaCSVDialog.tsx`**
+- Rimuovere il passaggio di `profile.sede` alla funzione, dato che non serve piu'
+- Aggiornare il testo di anteprima per indicare che i buyers saranno distribuiti su entrambe le sedi
 
-**File: `src/index.css`**
-- Rimuovere `padding: env(safe-area-inset-top) ...` dall'elemento `html` che potrebbe causare conflitti con il layout fisso (l'header gestisce gia' il safe area internamente)
+**Correzione dati esistenti (SQL)**
+- Aggiornare i record gia' importati con sede 'PERUGIA' distribuendoli tra le due sedi corrette
 
