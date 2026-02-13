@@ -1,31 +1,21 @@
 
-## Barra di navigazione fissa con effetto Liquid Glass
 
-### Cosa cambia
+## Fix: Barra di navigazione non visibile su iPhone
 
-La pill-nav attualmente scorre via con la pagina. Verra' resa **fissa sotto l'header** e acquisira' un effetto **liquid glass** allo scorrimento, con bordi arrotondati e ombra per creare rilievo.
+### Problema
+La nav bar ha una posizione fissa a `top: 85px`, ma l'header su iPhone include il "safe area inset" (circa 47-59px per il notch/Dynamic Island). Questo rende l'header molto piu' alto e la nav bar finisce nascosta dietro di esso.
 
-### Comportamento
-
-1. **Sempre visibile**: la barra resta ancorata sotto l'header durante lo scroll
-2. **Effetto liquid glass**: sfondo semi-trasparente con backdrop-blur, ombra morbida e bordi arrotondati (come l'header esistente ma adattato alla pill-nav)
-3. **Transizione fluida**: il contenuto della pagina scorre sotto la barra con l'effetto vetro che lascia intravedere gli elementi sottostanti
+### Soluzione
+Usare `calc()` con `env(safe-area-inset-top)` nel posizionamento della nav bar, cosi' si adatta automaticamente a qualsiasi dispositivo.
 
 ### Dettagli tecnici
 
-**Navigation.tsx**:
-- Rendere il wrapper `nav` con `fixed` positioning, posizionato subito sotto l'header (circa `top-[88px]` considerando ticker + header)
-- Aggiungere `z-[55]` per restare sopra il contenuto ma sotto l'header
-- Applicare una nuova classe CSS `glass-nav` alla pill-nav
+**File: `src/components/layout/Navigation.tsx`**
+- Cambiare `top-[85px]` in uno stile inline che usa `calc(85px + env(safe-area-inset-top))` per compensare dinamicamente il safe area di iPhone
 
-**index.css**:
-- Creare la classe `.glass-nav` con lo stesso stile liquid glass dell'header (`backdrop-filter: blur`, sfondo semi-trasparente bianco, `box-shadow` per il rilievo) adattato alla forma pill con bordi arrotondati
+**File: `src/pages/Index.tsx`**
+- Aggiornare lo spacer `h-[175px]` per includere anche il safe-area-inset-top, usando uno stile inline con `calc(175px + env(safe-area-inset-top))`
 
-**Index.tsx**:
-- Aggiornare lo spacer (`h-[120px]`) per compensare sia l'header che la nav ora entrambi fissi (circa `h-[160px]`)
-- Rimuovere il rendering diretto di `Navigation` dal flusso normale e posizionarlo nel blocco fisso insieme all'header
+**File: `src/index.css`**
+- Rimuovere `padding: env(safe-area-inset-top) ...` dall'elemento `html` che potrebbe causare conflitti con il layout fisso (l'header gestisce gia' il safe area internamente)
 
-### File coinvolti
-- `src/components/layout/Navigation.tsx`
-- `src/index.css`
-- `src/pages/Index.tsx`
