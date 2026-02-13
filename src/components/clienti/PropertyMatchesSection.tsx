@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect, memo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useClientPropertyMatches, useProperties, PropertyMatch, Property } from '@/hooks/useProperties';
 import { useClienteActivities } from '@/hooks/useClienteActivities';
@@ -40,6 +40,7 @@ const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 interface PropertyMatchesSectionProps {
   clienteId: string;
   clientePhone?: string | null;
+  noteExtra?: string | null;
 }
 
 // WhatsApp icon component
@@ -163,7 +164,12 @@ function PropertyCard({
         {/* Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1">
-            <h4 className="font-medium text-xs leading-tight line-clamp-2 flex-1">{property.title}</h4>
+            <div className="flex-1 min-w-0">
+              {property.ref_number && (
+                <span className="font-mono text-[10px] font-semibold text-muted-foreground">{property.ref_number}</span>
+              )}
+              <h4 className="font-medium text-xs leading-tight line-clamp-2">{property.title}</h4>
+            </div>
             <Badge className={`${getScoreColor(match.match_score || 0)} text-white text-[10px] px-1.5 py-0 flex-shrink-0`}>
               {match.match_score}%
             </Badge>
@@ -176,6 +182,8 @@ function PropertyCard({
                 {property.location}
               </span>
             )}
+            {property.surface_mq && <span>{property.surface_mq} mq</span>}
+            {property.rooms && <span>{property.rooms} cam</span>}
             {property.has_pool && <Droplets className="h-2.5 w-2.5 text-blue-500 flex-shrink-0" />}
             {property.has_land && <Trees className="h-2.5 w-2.5 text-green-500 flex-shrink-0" />}
           </div>
@@ -654,7 +662,7 @@ function AddPropertyDialog({
   );
 }
 
-export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatchesSectionProps) {
+export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: PropertyMatchesSectionProps) {
   const { 
     matches, 
     isLoading, 
@@ -669,6 +677,67 @@ export function PropertyMatchesSection({ clienteId, clientePhone }: PropertyMatc
 
   const { syncProperties, isSyncing, refetchProperties } = useProperties();
   const [orderedMatches, setOrderedMatches] = useState<PropertyMatch[]>([]);
+  const autoMatchAttempted = useRef(false);
+
+  // Auto-match: parse note_extra for Ref. numbers and associate properties
+  useEffect(() => {
+    if (autoMatchAttempted.current || !noteExtra || isLoading) return;
+    autoMatchAttempted.current = true;
+
+    // Extract ref numbers from note_extra (patterns: "Ref. 1234", "Ref 1234", "(Ref. 1234)")
+    const refMatches = noteExtra.match(/Ref\.?\s*(\d+)/gi);
+    if (!refMatches || refMatches.length === 0) return;
+
+    const refNumbers = refMatches.map(m => {
+      const num = m.match(/(\d+)/);
+      return num ? num[1] : null;
+    }).filter(Boolean) as string[];
+
+    if (refNumbers.length === 0) return;
+
+    // Search for properties with these ref numbers and auto-associate
+    const autoAssociate = async () => {
+      const existingPropertyIds = matches.map(m => m.property_id);
+      
+      for (const refNum of refNumbers) {
+        try {
+          // Search in existing properties table
+          const { data: found } = await supabase
+            .from('properties')
+            .select('id')
+            .ilike('ref_number', `%${refNum}%`)
+            .limit(1);
+
+          if (found && found.length > 0 && !existingPropertyIds.includes(found[0].id)) {
+            await addManualMatch({ propertyId: found[0].id, notes: `Auto-match da Ref. ${refNum}` });
+            existingPropertyIds.push(found[0].id);
+          } else if (!found || found.length === 0) {
+            // Try importing via search edge function
+            const { data: searchData } = await supabase.functions.invoke('search-website-properties', {
+              body: { query: refNum },
+            });
+            if (searchData?.success && searchData.results?.length > 0) {
+              const result = searchData.results[0];
+              // Check if ref matches
+              if (result.ref_number && result.ref_number.includes(refNum)) {
+                const { data: importData } = await supabase.functions.invoke('import-single-property', {
+                  body: { url: result.url },
+                });
+                if (importData?.success && importData.propertyId && !existingPropertyIds.includes(importData.propertyId)) {
+                  await addManualMatch({ propertyId: importData.propertyId, notes: `Auto-match da Ref. ${refNum}` });
+                  existingPropertyIds.push(importData.propertyId);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.warn(`Auto-match failed for Ref ${refNum}:`, err);
+        }
+      }
+    };
+
+    autoAssociate();
+  }, [noteExtra, isLoading, matches, addManualMatch]);
 
   // Sync orderedMatches with matches from server
   useMemo(() => {
