@@ -112,7 +112,7 @@ export function InlineEditText({
       <div
         onClick={() => setIsEditing(true)}
         className={cn(
-          'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors bg-primary/5',
+          'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-amber-200/60 transition-colors bg-amber-100/70 border border-amber-200/50',
           className
         )}
       >
@@ -126,9 +126,9 @@ export function InlineEditText({
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
+        'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors flex items-center gap-1',
         !value && 'text-muted-foreground italic',
-        value && 'bg-primary/5 font-medium',
+        value && 'bg-amber-100/70 border border-amber-200/50 font-medium',
         className
       )}
     >
@@ -212,9 +212,9 @@ export function InlineEditNumber({
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
+        'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors flex items-center gap-1',
         value === null && 'text-muted-foreground italic',
-        value !== null && 'bg-primary/5 font-medium',
+        value !== null && 'bg-amber-100/70 border border-amber-200/50 font-medium',
         className
       )}
     >
@@ -279,8 +279,8 @@ export function InlineEditBadges({
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        'group cursor-pointer rounded px-1 -mx-1 py-1 hover:bg-muted/80 transition-colors min-h-[32px]',
-        values.length > 0 && 'bg-primary/5',
+        'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors min-h-[32px]',
+        values.length > 0 && 'bg-amber-100/70 border border-amber-200/50',
         className
       )}
     >
@@ -378,9 +378,9 @@ export function InlineEditSelect({
     <div
       onClick={() => setIsEditing(true)}
       className={cn(
-        'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
+        'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors flex items-center gap-1',
         !value && 'text-muted-foreground italic',
-        value && 'bg-primary/5 font-medium',
+        value && 'bg-amber-100/70 border border-amber-200/50 font-medium',
         className
       )}
     >
@@ -410,8 +410,8 @@ export function InlineEditBoolean({
     <div
       onClick={() => onSave(!value)}
       className={cn(
-        'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
-        value && 'bg-primary/5 font-medium',
+        'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors flex items-center gap-1',
+        value && 'bg-amber-100/70 border border-amber-200/50 font-medium',
         className
       )}
     >
