@@ -112,11 +112,11 @@ export function InlineEditText({
       <div
         onClick={() => setIsEditing(true)}
         className={cn(
-          'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors',
+          'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors bg-primary/5',
           className
         )}
       >
-        <RichTextDisplay html={value} className="text-sm" />
+        <RichTextDisplay html={value} className="text-sm font-medium" />
         <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity inline-block ml-1" />
       </div>
     );
@@ -128,6 +128,7 @@ export function InlineEditText({
       className={cn(
         'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
         !value && 'text-muted-foreground italic',
+        value && 'bg-primary/5 font-medium',
         className
       )}
     >
@@ -213,6 +214,7 @@ export function InlineEditNumber({
       className={cn(
         'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
         value === null && 'text-muted-foreground italic',
+        value !== null && 'bg-primary/5 font-medium',
         className
       )}
     >
@@ -278,6 +280,7 @@ export function InlineEditBadges({
       onClick={() => setIsEditing(true)}
       className={cn(
         'group cursor-pointer rounded px-1 -mx-1 py-1 hover:bg-muted/80 transition-colors min-h-[32px]',
+        values.length > 0 && 'bg-primary/5',
         className
       )}
     >
@@ -377,6 +380,7 @@ export function InlineEditSelect({
       className={cn(
         'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
         !value && 'text-muted-foreground italic',
+        value && 'bg-primary/5 font-medium',
         className
       )}
     >
@@ -407,6 +411,7 @@ export function InlineEditBoolean({
       onClick={() => onSave(!value)}
       className={cn(
         'group cursor-pointer rounded px-1 -mx-1 py-0.5 hover:bg-muted/80 transition-colors flex items-center gap-1',
+        value && 'bg-primary/5 font-medium',
         className
       )}
     >
