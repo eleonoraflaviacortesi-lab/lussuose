@@ -571,7 +571,7 @@ export function ClienteDetail({
           </div>
 
           {/* Property Matches Section */}
-          <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} />
+          <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
 
           {/* Legacy Comments Display (if any exist) */}
           {cliente.comments.length > 0 && (
