@@ -612,6 +612,10 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
       const newMatches = matches.filter(m => !existingIds.has(m.id));
       const validOrdered = orderedMatches.filter(o => matches.some(m => m.id === o.id));
       setOrderedMatches([...validOrdered, ...newMatches]);
+    } else if (orderedMatches.length > 0) {
+      // Update match data (reaction, suggested, notes) while preserving order
+      const matchMap = new Map(matches.map(m => [m.id, m]));
+      setOrderedMatches(prev => prev.map(o => matchMap.get(o.id) || o));
     }
   }, [matches]);
 
