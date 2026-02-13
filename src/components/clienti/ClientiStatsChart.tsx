@@ -2,32 +2,40 @@ import { memo, useMemo, useState } from 'react';
 import { Cliente } from '@/types';
 import { ChevronRight } from 'lucide-react';
 import ClientiFunnelChartModal from './ClientiFunnelChartModal';
+import { useClientKanbanColumns } from '@/hooks/useClientKanbanColumns';
 
 interface ClientiStatsChartProps {
   clienti: Cliente[];
 }
 
-const CLIENTE_COLUMNS = [
-  { key: 'new', label: 'Nuovo', color: '#e5e5e5' },
-  { key: 'contacted', label: 'Contattato', color: '#fbbf24' },
-  { key: 'qualified', label: 'Qualificato', color: '#60a5fa' },
-  { key: 'proposal', label: 'Proposta', color: '#a78bfa' },
-  { key: 'negotiation', label: 'Trattativa', color: '#f97316' },
-  { key: 'closed_won', label: 'Chiuso ✓', color: '#22c55e' },
-  { key: 'closed_lost', label: 'Perso', color: '#1a1a1a' },
-];
+// Fallback colors if columns not loaded yet
+const FALLBACK_COLORS: Record<string, string> = {
+  new: '#e5e5e5',
+  contacted: '#fbbf24',
+  qualified: '#60a5fa',
+  proposal: '#a78bfa',
+  negotiation: '#f97316',
+  closed_won: '#22c55e',
+  closed_lost: '#1a1a1a',
+};
 
 const ClientiStatsChart = memo(({ clienti }: ClientiStatsChartProps) => {
   const [funnelOpen, setFunnelOpen] = useState(false);
+  const { columns: kanbanColumns } = useClientKanbanColumns();
 
   const { total, bars } = useMemo(() => {
-    const counts = CLIENTE_COLUMNS.map(col => {
+    // Use kanban columns for labels & colors, fallback for missing
+    const columnsToUse = kanbanColumns.length > 0
+      ? kanbanColumns.map(c => ({ key: c.key, label: c.label, color: c.color }))
+      : Object.entries(FALLBACK_COLORS).map(([key, color]) => ({ key, label: key, color }));
+
+    const counts = columnsToUse.map(col => {
       const count = clienti.filter(c => c.status === col.key).length;
       return { ...col, count };
     });
     const total = counts.reduce((sum, c) => sum + c.count, 0);
     return { total, bars: counts };
-  }, [clienti]);
+  }, [clienti, kanbanColumns]);
 
   if (total === 0) return null;
 

@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ArrowDown } from 'lucide-react';
 import { Cliente } from '@/types';
 import { isDarkColor } from '@/lib/utils';
+import { useClientKanbanColumns } from '@/hooks/useClientKanbanColumns';
 
 interface ClientiFunnelChartModalProps {
   open: boolean;
@@ -10,7 +11,7 @@ interface ClientiFunnelChartModalProps {
   clienti: Cliente[];
 }
 
-const CLIENTE_COLUMNS = [
+const FALLBACK_COLUMNS = [
   { key: 'new', label: 'Nuovo', color: '#e5e5e5' },
   { key: 'contacted', label: 'Contattato', color: '#fbbf24' },
   { key: 'qualified', label: 'Qualificato', color: '#60a5fa' },
@@ -23,6 +24,13 @@ const CLIENTE_COLUMNS = [
 
 const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFunnelChartModalProps) => {
   const [animated, setAnimated] = useState(false);
+  const { columns: kanbanColumns } = useClientKanbanColumns();
+
+  const columnsToUse = useMemo(() => 
+    kanbanColumns.length > 0
+      ? kanbanColumns.map(c => ({ key: c.key, label: c.label, color: c.color }))
+      : FALLBACK_COLUMNS,
+  [kanbanColumns]);
 
   useEffect(() => {
     if (open) {
@@ -35,7 +43,7 @@ const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFu
 
   const clientiByStatus = useMemo(() => {
     const grouped: Record<string, Cliente[]> = {};
-    CLIENTE_COLUMNS.forEach(col => {
+    columnsToUse.forEach(col => {
       grouped[col.key] = [];
     });
     clienti.forEach(cliente => {
@@ -44,11 +52,11 @@ const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFu
       }
     });
     return grouped;
-  }, [clienti]);
+  }, [clienti, columnsToUse]);
 
   const funnelData = useMemo(() => {
     // Exclude closed_lost from funnel calculation (it's a parallel exit, not part of conversion)
-    const funnelColumns = CLIENTE_COLUMNS.filter(col => col.key !== 'closed_lost');
+    const funnelColumns = columnsToUse.filter(col => col.key !== 'closed_lost');
     
     const steps = funnelColumns.map(col => ({
       key: col.key,
@@ -78,7 +86,7 @@ const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFu
         textColor: isDarkColor(step.color) ? 'text-white' : 'text-black',
       };
     });
-  }, [clientiByStatus]);
+  }, [clientiByStatus, columnsToUse]);
 
   const totalNew = clientiByStatus['new']?.length || 0;
   const totalWon = clientiByStatus['closed_won']?.length || 0;
