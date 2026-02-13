@@ -38,8 +38,8 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        query: `site:cortesiluxuryrealestate.com ${query}`,
-        limit: 15,
+        query: `site:cortesiluxuryrealestate.com/en/ ${query}`,
+        limit: 8,
         scrapeOptions: {
           formats: ['markdown'],
           onlyMainContent: true,
