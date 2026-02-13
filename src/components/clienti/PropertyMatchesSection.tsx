@@ -14,29 +14,21 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
   Home, 
-  RefreshCw, 
   ExternalLink, 
-  Plus, 
-  Check, 
   MapPin, 
   Droplets,
   Trees,
   Calculator,
-  Search,
   Loader2,
   ThumbsUp,
   ThumbsDown,
   MessageCircle,
-  Send,
-  Trash2,
   GripVertical,
-  X,
+  Check,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-// Simple in-memory cache for search results
-const searchCache = new Map<string, { results: WebSearchResult[]; timestamp: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 interface PropertyMatchesSectionProps {
   clienteId: string;
@@ -344,324 +336,6 @@ function PropertyCard({
   );
 }
 
-interface WebSearchResult {
-  url: string;
-  title: string;
-  description: string;
-  ref_number: string | null;
-  price: number | null;
-  image_url: string | null;
-  rooms: number | null;
-  bathrooms: number | null;
-  surface: number | null;
-  location: string | null;
-}
-
-function AddPropertyDialog({ 
-  clienteId,
-  existingPropertyIds,
-  onAdd,
-  onSyncComplete,
-}: {
-  clienteId: string;
-  existingPropertyIds: string[];
-  onAdd: (propertyId: string) => void;
-  onSyncComplete: () => void;
-}) {
-  const { toast } = useToast();
-  const { createActivity } = useClienteActivities(clienteId);
-  const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<WebSearchResult[]>([]);
-  const [isImporting, setIsImporting] = useState<string | null>(null);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      if (abortControllerRef.current) abortControllerRef.current.abort();
-    };
-  }, []);
-
-  const executeSearch = useCallback(async (query: string) => {
-    if (!query.trim() || query.length < 2) return;
-    
-    const cacheKey = query.toLowerCase().trim();
-    
-    // Check cache first
-    const cached = searchCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      setSearchResults(cached.results);
-      setIsSearching(false);
-      return;
-    }
-    
-    // Cancel previous request
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('search-website-properties', {
-        body: { query },
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        const results = data.results || [];
-        setSearchResults(results);
-        
-        // Cache the results
-        searchCache.set(cacheKey, { results, timestamp: Date.now() });
-        
-        if (results.length === 0) {
-          toast({ title: 'Nessun risultato', description: 'Prova con termini diversi' });
-        }
-      } else {
-        throw new Error(data.error || 'Ricerca fallita');
-      }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
-        toast({
-          title: 'Errore ricerca',
-          description: err.message,
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIsSearching(false);
-    }
-  }, [toast]);
-
-  const handleSearch = useCallback(() => {
-    if (!searchQuery.trim() || searchQuery.length < 2) return;
-    setIsSearching(true);
-    setSearchResults([]);
-    executeSearch(searchQuery);
-  }, [searchQuery, executeSearch]);
-
-  // Debounced auto-search as user types
-  const handleQueryChange = useCallback((value: string) => {
-    setSearchQuery(value);
-    
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    
-    if (value.length >= 3) {
-      // Check cache immediately for instant feedback
-      const cacheKey = value.toLowerCase().trim();
-      const cached = searchCache.get(cacheKey);
-      if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-        setSearchResults(cached.results);
-        return;
-      }
-      
-      // Debounce the actual search
-      debounceRef.current = setTimeout(() => {
-        setIsSearching(true);
-        executeSearch(value);
-      }, 400);
-    }
-  }, [executeSearch]);
-
-  const handleImportAndAdd = async (result: WebSearchResult) => {
-    setIsImporting(result.url);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('import-single-property', {
-        body: { url: result.url },
-      });
-
-      if (error) throw error;
-
-      if (data.success && data.propertyId) {
-        toast({ title: 'Proprietà importata e aggiunta!' });
-        onAdd(data.propertyId);
-        
-        // Log activity for adding association
-        await createActivity({
-          cliente_id: clienteId,
-          activity_type: 'proposal' as any,
-          title: 'Proprietà associata',
-          description: result.title,
-          property_id: data.propertyId,
-        });
-        
-        setOpen(false);
-        setSearchQuery('');
-        setSearchResults([]);
-        onSyncComplete();
-      } else {
-        throw new Error(data.error || 'Importazione fallita');
-      }
-    } catch (err: any) {
-      toast({
-        title: 'Errore importazione',
-        description: err.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsImporting(null);
-    }
-  };
-
-  const formatPrice = (price: number | null) => {
-    if (!price) return '';
-    return new Intl.NumberFormat('it-IT', {
-      style: 'currency',
-      currency: 'EUR',
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleSearch();
-    }
-  };
-
-  return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button size="sm" className="w-full bg-black text-white hover:bg-black/80">
-          <Plus className="h-4 w-4 mr-1" />
-          Cerca sul sito
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>Cerca proprietà sul sito</DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Cerca villa, casale, Cortona, Ref 1023..."
-              value={searchQuery}
-              onChange={(e) => handleQueryChange(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1 border-0 shadow-lg rounded-xl bg-white"
-              autoFocus
-            />
-            <Button 
-              onClick={handleSearch} 
-              disabled={isSearching || searchQuery.length < 2}
-              className="bg-black text-white hover:bg-black/80"
-            >
-              {isSearching ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-            </Button>
-          </div>
-
-          <p className="text-xs text-muted-foreground">
-            {isSearching ? 'Cercando...' : 'Inizia a digitare per cercare (min 3 caratteri)'}
-          </p>
-
-          {isSearching && searchResults.length === 0 ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg">
-                  <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-3 w-1/2" />
-                    <Skeleton className="h-5 w-24" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : searchResults.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <Search className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">Inizia a digitare per cercare</p>
-            </div>
-          ) : (
-            <ScrollArea className="h-[400px]">
-              <div className="space-y-2">
-                {searchResults.map((result, idx) => (
-                  <div 
-                    key={idx}
-                    className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg"
-                  >
-                    <div className="flex-shrink-0">
-                      {result.image_url ? (
-                        <img 
-                          src={result.image_url} 
-                          alt={result.title}
-                          className="w-20 h-20 rounded-xl object-cover"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 rounded-xl bg-muted/30 flex items-center justify-center">
-                          <Home className="w-6 h-6 text-muted-foreground/50" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
-                      
-                      <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                        {result.ref_number && (
-                          <span className="font-mono font-semibold text-foreground">{result.ref_number}</span>
-                        )}
-                        {result.location && (
-                          <span className="flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3" />
-                            {result.location}
-                          </span>
-                        )}
-                        {result.surface && <span>{result.surface} mq</span>}
-                        {result.rooms && <span>{result.rooms} cam</span>}
-                      </div>
-                      
-                      {result.price && (
-                        <p className="font-bold text-base mt-1">{formatPrice(result.price)}</p>
-                      )}
-                      
-                      <div className="flex items-center justify-between mt-2">
-                        <a
-                          href={result.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground flex items-center gap-1"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
-                        <Button
-                          size="sm"
-                          onClick={() => handleImportAndAdd(result)}
-                          disabled={isImporting !== null}
-                          className="bg-black text-white hover:bg-black/80 h-8 px-3"
-                        >
-                          {isImporting === result.url ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <>
-                              <Plus className="h-4 w-4 mr-1" />
-                              Importa
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: PropertyMatchesSectionProps) {
   const { 
@@ -676,7 +350,7 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
     updateNotes,
   } = useClientPropertyMatches(clienteId);
 
-  const { syncProperties, isSyncing, refetchProperties } = useProperties();
+  const { refetchProperties } = useProperties();
   const queryClient = useQueryClient();
   const [orderedMatches, setOrderedMatches] = useState<PropertyMatch[]>([]);
   const [autoMatching, setAutoMatching] = useState(false);
@@ -730,29 +404,6 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
               });
               existingPropertyIds.push(found[0].id);
               added++;
-            } else if (!found || found.length === 0) {
-              // Try importing via search edge function
-              const { data: searchData } = await supabase.functions.invoke('search-website-properties', {
-                body: { query: refNum },
-              });
-              if (searchData?.success && searchData.results?.length > 0) {
-                // Find result matching this exact ref
-                const result = searchData.results.find((r: any) => r.ref_number && r.ref_number.includes(refNum)) || searchData.results[0];
-                const { data: importData } = await supabase.functions.invoke('import-single-property', {
-                  body: { url: result.url },
-                });
-                if (importData?.success && importData.propertyId && !existingPropertyIds.includes(importData.propertyId)) {
-                  await supabase.from('client_property_matches').insert({
-                    cliente_id: clienteId,
-                    property_id: importData.propertyId,
-                    match_type: 'manual',
-                    match_score: 100,
-                    notes: `Auto-match da Ref. ${refNum}`,
-                  });
-                  existingPropertyIds.push(importData.propertyId);
-                  added++;
-                }
-              }
             }
           } catch (err) {
             console.warn(`Auto-match failed for Ref ${refNum}:`, err);
@@ -789,11 +440,6 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
   const suggestedCount = displayMatches.filter(m => m.suggested).length;
   const likedCount = displayMatches.filter(m => m.reaction === 'liked').length;
   const existingPropertyIds = displayMatches.map(m => m.property_id);
-
-  const handleSync = async () => {
-    await syncProperties();
-    await calculateMatches();
-  };
 
   const handleCalculate = async () => {
     await calculateMatches();
@@ -871,14 +517,6 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
           >
             <Calculator className={`h-4 w-4 ${isCalculating ? 'animate-spin' : ''}`} />
           </button>
-          <button
-            onClick={handleSync}
-            disabled={isSyncing || isCalculating}
-            className="p-2 rounded-full bg-muted/50 hover:bg-muted transition-colors disabled:opacity-50"
-            title="Sincronizza dal sito"
-          >
-            <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
-          </button>
         </div>
       </div>
 
@@ -941,13 +579,6 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
         </DragDropContext>
       )}
 
-      {/* Add manual */}
-      <AddPropertyDialog
-        clienteId={clienteId}
-        existingPropertyIds={existingPropertyIds}
-        onAdd={handleAddManual}
-        onSyncComplete={refetchProperties}
-      />
     </div>
   );
 }
