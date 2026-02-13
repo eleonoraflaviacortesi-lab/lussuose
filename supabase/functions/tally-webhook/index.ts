@@ -224,7 +224,7 @@ Deno.serve(async (req) => {
       // "What type of property are you looking for?"
       tipologia: getArrayValue(fields, "type of property are you looking", "property type", "tipologia"),
       // "How would you describe the category or style of property you are looking for?"
-      stile: getOptionText(fields, "category or style", "style of property", "stile"),
+      stile: getArrayValue(fields, "category or style", "style of property", "stile").join(", "),
       // "Preferred setting:"
       contesto: getArrayValue(fields, "preferred setting", "setting", "contesto"),
       
@@ -246,9 +246,9 @@ Deno.serve(async (req) => {
       
       // Usage & Rental
       // "Intended use of the property:"
-      uso: String(getFieldValue(fields, "intended use", "use of the property", "uso") || ""),
+      uso: getOptionText(fields, "intended use", "use of the property", "uso"),
       // "Do you plan to rent the property?"
-      interesse_affitto: String(getFieldValue(fields, "plan to rent", "rent the property", "affitto") || ""),
+      interesse_affitto: getOptionText(fields, "plan to rent", "rent the property", "affitto"),
       
       // Descriptions & Notes
       // "How would you describe your ideal property?"
