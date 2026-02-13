@@ -1,20 +1,23 @@
 
 
-## Importazione Buyers Dalila: Distribuzione su due sedi
+## Rendere il Ref. ben visibile nei risultati di ricerca
 
-### Cosa cambia
-I buyers importati dal CSV di Dalila verranno distribuiti alternandoli tra le sedi **CITTÀ DI CASTELLO** e **AREZZO**, invece di assegnarli tutti a una sola sede. La coordinatrice potra' poi riassegnarli manualmente.
+Il riferimento attualmente usa `text-[10px]` grigio chiaro, praticamente invisibile. Lo renderemo prominente con un badge colorato sopra il titolo.
 
-### Dettagli tecnici
+### Modifica
 
-**File: `src/lib/importDalilaClienti.ts`**
-- Rimuovere il parametro `sede` dalla funzione `fetchAndParseDalilaCSV`
-- Assegnare la sede alternando tra 'CITTÀ DI CASTELLO' e 'AREZZO' ad ogni buyer (uno alla prima, il successivo alla seconda, e cosi' via)
+Nel file `src/components/clienti/PropertyMatchesSection.tsx` (riga 491-493), sostituire lo span del ref_number con un badge ben visibile:
 
-**File: `src/components/clienti/ImportDalilaCSVDialog.tsx`**
-- Rimuovere il passaggio di `profile.sede` alla funzione, dato che non serve piu'
-- Aggiornare il testo di anteprima per indicare che i buyers saranno distribuiti su entrambe le sedi
+- Sfondo nero con testo bianco, font mono, grassetto
+- Dimensione `text-xs` (non 10px)
+- Padding e bordi arrotondati per creare un badge pill
+- Posizionato sopra il titolo come elemento distinto
 
-**Correzione dati esistenti (SQL)**
-- Aggiornare i record gia' importati con sede 'PERUGIA' distribuendoli tra le due sedi corrette
+```tsx
+{result.ref_number && (
+  <span className="inline-block font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1">
+    {result.ref_number}
+  </span>
+)}
+```
 
