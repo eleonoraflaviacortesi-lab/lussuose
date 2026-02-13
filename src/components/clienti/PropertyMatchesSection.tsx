@@ -488,9 +488,11 @@ function AddPropertyDialog({
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
+                      {result.ref_number && (
+                        <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-wide">{result.ref_number}</span>
+                      )}
                       <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
-                        {result.ref_number && <span className="font-mono font-semibold text-foreground">{result.ref_number}</span>}
                         {result.location && <span className="flex items-center gap-0.5"><MapPin className="w-3 h-3" />{result.location}</span>}
                         {result.surface && <span>{result.surface} mq</span>}
                         {result.rooms && <span>{result.rooms} cam</span>}
