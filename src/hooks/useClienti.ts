@@ -290,18 +290,16 @@ export function useClienti(options?: {
   // Update order (for drag-drop)
   const updateOrderMutation = useMutation({
     mutationFn: async (items: { id: string; display_order: number; status?: ClienteStatus }[]) => {
-      // Update each item individually
-      for (const item of items) {
-        const updateData: Record<string, unknown> = { display_order: item.display_order };
-        if (item.status) updateData.status = item.status;
-        
-        const { error } = await supabase
-          .from('clienti')
-          .update(updateData)
-          .eq('id', item.id);
-
-        if (error) throw error;
-      }
+      // Batch update all items in parallel
+      const results = await Promise.all(
+        items.map(item => {
+          const updateData: Record<string, unknown> = { display_order: item.display_order };
+          if (item.status) updateData.status = item.status;
+          return supabase.from('clienti').update(updateData).eq('id', item.id);
+        })
+      );
+      const errorResult = results.find(r => r.error);
+      if (errorResult?.error) throw errorResult.error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clienti'] });
