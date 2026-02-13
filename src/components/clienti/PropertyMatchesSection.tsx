@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect, memo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useClientPropertyMatches, useProperties, PropertyMatch, Property } from '@/hooks/useProperties';
+import { useQueryClient } from '@tanstack/react-query';
 import { useClienteActivities } from '@/hooks/useClienteActivities';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -676,14 +677,15 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
   } = useClientPropertyMatches(clienteId);
 
   const { syncProperties, isSyncing, refetchProperties } = useProperties();
+  const queryClient = useQueryClient();
   const [orderedMatches, setOrderedMatches] = useState<PropertyMatch[]>([]);
+  const [autoMatching, setAutoMatching] = useState(false);
   const autoMatchAttempted = useRef(false);
 
   // Auto-match: parse note_extra for Ref. numbers and associate properties
   useEffect(() => {
-    if (autoMatchAttempted.current || !noteExtra || isLoading) return;
-    autoMatchAttempted.current = true;
-
+    if (autoMatchAttempted.current || !noteExtra || !clienteId) return;
+    
     // Extract ref numbers from note_extra (patterns: "Ref. 1234", "Ref 1234", "(Ref. 1234)")
     const refMatches = noteExtra.match(/Ref\.?\s*(\d+)/gi);
     if (!refMatches || refMatches.length === 0) return;
@@ -694,50 +696,80 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
     }).filter(Boolean) as string[];
 
     if (refNumbers.length === 0) return;
+    
+    autoMatchAttempted.current = true;
 
     // Search for properties with these ref numbers and auto-associate
     const autoAssociate = async () => {
-      const existingPropertyIds = matches.map(m => m.property_id);
-      
-      for (const refNum of refNumbers) {
-        try {
-          // Search in existing properties table
-          const { data: found } = await supabase
-            .from('properties')
-            .select('id')
-            .ilike('ref_number', `%${refNum}%`)
-            .limit(1);
+      setAutoMatching(true);
+      try {
+        // Get existing matches to avoid duplicates
+        const { data: existingMatches } = await supabase
+          .from('client_property_matches')
+          .select('property_id')
+          .eq('cliente_id', clienteId);
+        const existingPropertyIds = (existingMatches || []).map(m => m.property_id);
+        
+        let added = 0;
+        for (const refNum of refNumbers) {
+          try {
+            // Search in existing properties table
+            const { data: found } = await supabase
+              .from('properties')
+              .select('id')
+              .ilike('ref_number', `%${refNum}%`)
+              .limit(1);
 
-          if (found && found.length > 0 && !existingPropertyIds.includes(found[0].id)) {
-            await addManualMatch({ propertyId: found[0].id, notes: `Auto-match da Ref. ${refNum}` });
-            existingPropertyIds.push(found[0].id);
-          } else if (!found || found.length === 0) {
-            // Try importing via search edge function
-            const { data: searchData } = await supabase.functions.invoke('search-website-properties', {
-              body: { query: refNum },
-            });
-            if (searchData?.success && searchData.results?.length > 0) {
-              const result = searchData.results[0];
-              // Check if ref matches
-              if (result.ref_number && result.ref_number.includes(refNum)) {
+            if (found && found.length > 0 && !existingPropertyIds.includes(found[0].id)) {
+              await supabase.from('client_property_matches').insert({
+                cliente_id: clienteId,
+                property_id: found[0].id,
+                match_type: 'manual',
+                match_score: 100,
+                notes: `Auto-match da Ref. ${refNum}`,
+              });
+              existingPropertyIds.push(found[0].id);
+              added++;
+            } else if (!found || found.length === 0) {
+              // Try importing via search edge function
+              const { data: searchData } = await supabase.functions.invoke('search-website-properties', {
+                body: { query: refNum },
+              });
+              if (searchData?.success && searchData.results?.length > 0) {
+                // Find result matching this exact ref
+                const result = searchData.results.find((r: any) => r.ref_number && r.ref_number.includes(refNum)) || searchData.results[0];
                 const { data: importData } = await supabase.functions.invoke('import-single-property', {
                   body: { url: result.url },
                 });
                 if (importData?.success && importData.propertyId && !existingPropertyIds.includes(importData.propertyId)) {
-                  await addManualMatch({ propertyId: importData.propertyId, notes: `Auto-match da Ref. ${refNum}` });
+                  await supabase.from('client_property_matches').insert({
+                    cliente_id: clienteId,
+                    property_id: importData.propertyId,
+                    match_type: 'manual',
+                    match_score: 100,
+                    notes: `Auto-match da Ref. ${refNum}`,
+                  });
                   existingPropertyIds.push(importData.propertyId);
+                  added++;
                 }
               }
             }
+          } catch (err) {
+            console.warn(`Auto-match failed for Ref ${refNum}:`, err);
           }
-        } catch (err) {
-          console.warn(`Auto-match failed for Ref ${refNum}:`, err);
         }
+        
+        if (added > 0) {
+          console.log(`Auto-matched ${added} properties from note_extra refs`);
+          queryClient.invalidateQueries({ queryKey: ['property-matches', clienteId] });
+        }
+      } finally {
+        setAutoMatching(false);
       }
     };
 
     autoAssociate();
-  }, [noteExtra, isLoading, matches, addManualMatch]);
+  }, [noteExtra, clienteId]);
 
   // Sync orderedMatches with matches from server
   useMemo(() => {
@@ -853,11 +885,20 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
       {/* Property list with drag-drop */}
       {displayMatches.length === 0 ? (
         <div className="text-center py-6 text-muted-foreground bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg">
-          <Home className="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">Nessuna proprietà compatibile</p>
-          <p className="text-xs mt-1">
-            Clicca <Calculator className="h-3 w-3 inline" /> per calcolare
-          </p>
+          {autoMatching ? (
+            <>
+              <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin opacity-50" />
+              <p className="text-sm">Cercando proprietà dai riferimenti...</p>
+            </>
+          ) : (
+            <>
+              <Home className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Nessuna proprietà compatibile</p>
+              <p className="text-xs mt-1">
+                Clicca <Calculator className="h-3 w-3 inline" /> per calcolare
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <DragDropContext onDragEnd={handleDragEnd}>
