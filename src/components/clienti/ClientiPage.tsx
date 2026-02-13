@@ -10,7 +10,8 @@ import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Loader2, Upload, Search, X } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X, FileSpreadsheet } from 'lucide-react';
+import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
 
 interface ClientiPageProps {
   initialClienteId?: string | null;
@@ -26,6 +27,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dalilaImportOpen, setDalilaImportOpen] = useState(false);
 
   const {
     clienti,
@@ -143,10 +145,16 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         </div>
         <div className="flex gap-2">
           {isCoordinator && (
-            <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-              <Upload className="w-4 h-4 mr-1.5" />
-              CSV
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={() => setDalilaImportOpen(true)}>
+                <FileSpreadsheet className="w-4 h-4 mr-1.5" />
+                Import Dalila
+              </Button>
+              <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
+                <Upload className="w-4 h-4 mr-1.5" />
+                CSV
+              </Button>
+            </>
           )}
           <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
             <Plus className="w-4 h-4" />
@@ -236,6 +244,12 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         onSuccess={() => {
           setImportDialogOpen(false);
         }}
+      />
+
+      {/* Dalila CSV Import Dialog */}
+      <ImportDalilaCSVDialog
+        open={dalilaImportOpen}
+        onOpenChange={setDalilaImportOpen}
       />
     </div>
   );
