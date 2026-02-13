@@ -69,8 +69,12 @@ Deno.serve(async (req) => {
       const markdown = result.markdown || '';
       const metadata = result.metadata || {};
       
-      // Extract ref number from URL or title
-      const refMatch = url.match(/ref[_-]?(\d+)/i) || title.match(/Ref[.\s]*(\d+)/i);
+      // Extract ref number from URL, title, description, or markdown content
+      const refMatch = url.match(/ref[_-]?(\d+)/i) || 
+                       title.match(/Ref[.\s]*(\d+)/i) || 
+                       description.match(/Ref[.\s]*(\d+)/i) ||
+                       markdown.match(/Ref[.\s]*(\d+)/i) ||
+                       markdown.match(/(?:Reference|Riferimento|Code|Codice)[:\s]*(\d+)/i);
       const refNumber = refMatch ? `Ref. ${refMatch[1]}` : null;
 
       // Try to extract price from description, markdown, or metadata
