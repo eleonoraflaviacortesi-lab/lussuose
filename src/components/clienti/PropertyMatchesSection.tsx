@@ -91,7 +91,7 @@ function PropertyCard({
     const digitsOnly = clientePhone.replace(/^00/, '').replace(/\D/g, '');
     if (!digitsOnly) return null;
     const message = encodeURIComponent(
-      `Ciao! Ti invio questa proprietà che potrebbe interessarti:\n\n${property.title}\n${property.url}`
+      `Hi! I'm sending you this property that might interest you:\n\n${property.title}\n${property.url}`
     );
     return `https://wa.me/${digitsOnly}?text=${message}`;
   };
@@ -221,7 +221,7 @@ function PropertyCard({
             className={cn(
               "p-1.5 rounded-full transition-all",
               match.reaction === 'liked'
-                ? 'bg-blue-100 text-blue-600'
+                ? 'bg-blue-500 text-white shadow-md'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
             title="Piace al cliente"
@@ -235,7 +235,7 @@ function PropertyCard({
             className={cn(
               "p-1.5 rounded-full transition-all",
               match.reaction === 'disliked'
-                ? 'bg-red-100 text-red-500'
+                ? 'bg-red-500 text-white shadow-md'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
             title="Non piace al cliente"
