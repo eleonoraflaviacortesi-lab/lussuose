@@ -296,6 +296,13 @@ export const ClienteCard = memo(({
         </div>
       </div>
 
+      {/* Notes preview */}
+      {cliente.note_extra && (
+        <div className="text-xs opacity-70 mb-1.5 line-clamp-2 whitespace-pre-line break-words">
+          {cliente.note_extra}
+        </div>
+      )}
+
       {/* Regions */}
       {cliente.regioni.length > 0 && (
         <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">

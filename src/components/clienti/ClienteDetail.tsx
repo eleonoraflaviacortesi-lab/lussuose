@@ -157,6 +157,18 @@ export function ClienteDetail({
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
         <div className="space-y-3">
+          {/* Notes at top */}
+          <div className="bg-white rounded-2xl shadow-lg p-3 space-y-2">
+            <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Note</h3>
+            <InlineEditText
+              value={cliente.note_extra}
+              onSave={(value) => onUpdate({ note_extra: value })}
+              placeholder="Nessuna nota"
+              multiline
+              className="text-sm break-words whitespace-pre-wrap"
+            />
+          </div>
+
           {/* Assignment */}
           <div className="bg-white rounded-2xl shadow-lg p-3">
             <Select
@@ -541,26 +553,15 @@ export function ClienteDetail({
               </div>
             </div>
 
-            {/* Notes Section */}
+            {/* Description Section */}
             <div className="space-y-2">
-              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Note</h3>
+              <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Descrizione</h3>
               
               <div>
                 <label className="text-[10px] text-muted-foreground block mb-0.5">Descrizione richiesta</label>
                 <InlineEditText
                   value={cliente.descrizione}
                   onSave={(value) => onUpdate({ descrizione: value })}
-                  placeholder="Non specificato"
-                  multiline
-                  className="text-sm break-words whitespace-pre-wrap"
-                />
-              </div>
-              
-              <div>
-                <label className="text-[10px] text-muted-foreground block mb-0.5">Note aggiuntive</label>
-                <InlineEditText
-                  value={cliente.note_extra}
-                  onSave={(value) => onUpdate({ note_extra: value })}
                   placeholder="Non specificato"
                   multiline
                   className="text-sm break-words whitespace-pre-wrap"
