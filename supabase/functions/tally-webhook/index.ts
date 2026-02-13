@@ -284,6 +284,36 @@ Deno.serve(async (req) => {
 
     console.log("Cliente saved:", data.id);
 
+    // Send in-app notifications to coordinators/admins of the same sede
+    try {
+      const { data: targets } = await supabase
+        .from("profiles")
+        .select("user_id")
+        .in("role", ["coordinatore", "admin"]);
+
+      if (targets && targets.length > 0) {
+        const notifications = targets.map((t) => ({
+          user_id: t.user_id,
+          type: "tally_submission",
+          title: `📋 Nuovo lead da Tally: ${clienteData.nome}`,
+          message: `Sede: ${clienteData.sede} — Budget: ${clienteData.budget_max ? "€" + clienteData.budget_max.toLocaleString() : "N/D"}`,
+          reference_id: data.id,
+        }));
+
+        const { error: notifError } = await supabase
+          .from("notifications")
+          .insert(notifications);
+
+        if (notifError) {
+          console.error("Notification insert error:", notifError);
+        } else {
+          console.log(`Sent ${notifications.length} notifications`);
+        }
+      }
+    } catch (notifErr) {
+      console.error("Notification error:", notifErr);
+    }
+
     return new Response(
       JSON.stringify({ success: true, clienteId: data.id }),
       {
