@@ -131,11 +131,17 @@ Deno.serve(async (req) => {
         location,
       };
     }).filter((r: any) => 
-      // Filter to only property pages
+      // Filter to only individual property pages
       r.url.includes('cortesiluxuryrealestate.com') && 
       !r.url.includes('/category/') &&
       !r.url.includes('/page/') &&
-      r.title.length > 5
+      !r.url.endsWith('/properties/') &&
+      !r.url.endsWith('/vendita/') &&
+      r.title.length > 5 &&
+      // Exclude generic listing/category pages (non-property results)
+      !/^(Villas|Farmhouses|Properties|Luxury|Casali|Ville|Lussuose|Propriedades|Элитная|Luksusejendomme|Immobili)\s+(and|e|di|for|in|de|на|i)\s/i.test(r.title) &&
+      // Must have a specific property URL pattern (contains property slug, not just category)
+      r.url.split('/').filter((s: string) => s.length > 0).length >= 4
     );
 
     console.log(`Returning ${results.length} filtered results`);
