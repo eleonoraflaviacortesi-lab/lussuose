@@ -161,7 +161,7 @@ function PropertyCard({
           <div className="flex items-start justify-between gap-1">
             <div className="flex-1 min-w-0">
               {property.ref_number && (
-                <span className="font-mono text-[10px] font-semibold text-muted-foreground">{property.ref_number}</span>
+                <span className="inline-block font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1">{property.ref_number}</span>
               )}
               <h4 className="font-medium text-xs leading-tight line-clamp-2">{property.title}</h4>
             </div>
@@ -489,7 +489,7 @@ function AddPropertyDialog({
                     </div>
                     <div className="flex-1 min-w-0">
                       {result.ref_number && (
-                        <span className="font-mono text-[10px] font-bold text-muted-foreground tracking-wide">{result.ref_number}</span>
+                        <span className="inline-block font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1">{result.ref_number}</span>
                       )}
                       <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
