@@ -532,7 +532,7 @@ function AddPropertyDialog({
         <div className="space-y-4">
           <div className="flex gap-2">
             <Input
-              placeholder="Cerca villa, casale, Cortona, piscina..."
+              placeholder="Cerca villa, casale, Cortona, Ref 1023..."
               value={searchQuery}
               onChange={(e) => handleQueryChange(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -600,6 +600,9 @@ function AddPropertyDialog({
                       <p className="font-medium text-sm line-clamp-2 leading-tight">{result.title}</p>
                       
                       <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground flex-wrap">
+                        {result.ref_number && (
+                          <span className="font-mono font-semibold text-foreground">{result.ref_number}</span>
+                        )}
                         {result.location && (
                           <span className="flex items-center gap-0.5">
                             <MapPin className="w-3 h-3" />
