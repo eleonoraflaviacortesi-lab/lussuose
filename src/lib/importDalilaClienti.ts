@@ -243,6 +243,8 @@ export async function fetchAndParseDalilaCSV(): Promise<ParsedBuyer[]> {
   const rows = parseCSVText(text);
   const grouped = consolidateRows(rows);
   const buyers: ParsedBuyer[] = [];
+  const sedi = ['CITTÀ DI CASTELLO', 'AREZZO'];
+  let index = 0;
   
   for (const [, groupRows] of grouped) {
     const firstRow = groupRows[0];
@@ -253,7 +255,6 @@ export async function fetchAndParseDalilaCSV(): Promise<ParsedBuyer[]> {
     const telefono = extractPhone(firstRow);
     const email = extractEmail(firstRow);
     
-    // Find the most recent contact date
     let latestDate: string | null = null;
     for (const r of groupRows) {
       const d = parseDate(r.dataContatto);
@@ -270,8 +271,9 @@ export async function fetchAndParseDalilaCSV(): Promise<ParsedBuyer[]> {
       status: 'contacted',
       note_extra: buildNoteExtra(groupRows),
       last_contact_date: latestDate,
-      sede: 'PERUGIA',
+      sede: sedi[index % 2],
     });
+    index++;
   }
   
   return buyers;
