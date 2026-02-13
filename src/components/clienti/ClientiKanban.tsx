@@ -220,7 +220,8 @@ export function ClientiKanban({
       c.paese?.toLowerCase().includes(query) ||
       c.regioni.some(r => r.toLowerCase().includes(query)) ||
       c.email?.toLowerCase().includes(query) ||
-      c.telefono?.includes(query)
+      c.telefono?.includes(query) ||
+      c.note_extra?.toLowerCase().includes(query)
     );
   }, [searchQuery]);
 

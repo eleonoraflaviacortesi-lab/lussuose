@@ -1,8 +1,8 @@
 import { memo, useState, useCallback, useMemo, useRef } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { cn, isDarkColor } from '@/lib/utils';
-import { MapPin, Euro, Home, Clock, Bell, X } from 'lucide-react';
-import { isPast, isToday, isTomorrow } from 'date-fns';
+import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle } from 'lucide-react';
+import { isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 
@@ -261,6 +261,13 @@ export const ClienteCard = memo(({
     return null;
   }, [cliente.reminder_date]);
 
+  // Days since last contact
+  const daysSinceContact = useMemo(() => {
+    const refDate = cliente.last_contact_date || cliente.updated_at;
+    if (!refDate) return null;
+    return differenceInDays(new Date(), new Date(refDate));
+  }, [cliente.last_contact_date, cliente.updated_at]);
+
   const formatBudget = (budget: number | null) => {
     if (!budget) return null;
     if (budget >= 1000000) return `€${(budget / 1000000).toFixed(1)}M`;
@@ -345,7 +352,7 @@ export const ClienteCard = memo(({
           {reminderStatus && (
             <div className={cn(
               "flex items-center gap-1 text-xs font-medium",
-              reminderStatus === 'overdue' ? 'text-red-600' : 
+              reminderStatus === 'overdue' ? 'text-destructive' : 
               reminderStatus === 'today' ? 'text-primary' : 'text-amber-600'
             )}>
               <Bell className="w-3 h-3" />
@@ -359,6 +366,15 @@ export const ClienteCard = memo(({
             <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
               <Clock className="w-3 h-3" />
               <span>Urgente</span>
+            </div>
+          )}
+          {daysSinceContact !== null && daysSinceContact > 14 && (
+            <div className={cn(
+              "flex items-center gap-1 text-xs font-medium",
+              daysSinceContact > 30 ? 'text-destructive' : 'text-amber-600'
+            )}>
+              <AlertCircle className="w-3 h-3" />
+              <span>{daysSinceContact}g</span>
             </div>
           )}
         </div>
