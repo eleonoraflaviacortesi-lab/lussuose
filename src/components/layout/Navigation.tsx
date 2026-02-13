@@ -44,7 +44,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   };
 
   return (
-    <nav className="fixed top-[85px] left-0 right-0 z-[55] flex justify-center md:py-0 md:px-0">
+    <nav className="fixed left-0 right-0 z-[55] flex justify-center md:py-0 md:px-0" style={{ top: 'calc(85px + env(safe-area-inset-top, 0px))' }}>
       {/* Pill Navigation */}
       <div className="pill-nav glass-nav w-full rounded-none rounded-b-[1.5rem] md:w-auto md:rounded-none md:rounded-b-[1.5rem]">
         {tabs.map((tab, index) => {

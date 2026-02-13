@@ -136,7 +136,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Fixed elements - not affected by pull-to-refresh */}
       <Header />
-      <div className="h-[175px]" />
+      <div style={{ height: 'calc(175px + env(safe-area-inset-top, 0px))' }} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
       {/* Main content with pull-to-refresh */}
