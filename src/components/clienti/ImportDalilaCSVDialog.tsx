@@ -161,7 +161,7 @@ const ImportDalilaCSVDialog = ({ open, onOpenChange }: Props) => {
               <p>• I duplicati (stessa persona, più immobili) sono consolidati</p>
               <p>• Portale, Property, Ref, Date → nelle note</p>
               <p>• Status impostato a "Contacted"</p>
-              <p>• Sede: PERUGIA</p>
+              <p>• Sede: alternata tra CITTÀ DI CASTELLO e AREZZO</p>
               <p>• Buyers già esistenti saranno saltati</p>
             </div>
           </div>
