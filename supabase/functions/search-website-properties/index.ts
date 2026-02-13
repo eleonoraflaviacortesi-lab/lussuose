@@ -70,12 +70,20 @@ Deno.serve(async (req) => {
       const metadata = result.metadata || {};
       
       // Extract ref number from URL, title, description, or markdown content
+      // Site uses formats like "Ref: 1023", "Rif: 1023", "Ref. 1023"
       const refMatch = url.match(/ref[_-]?(\d+)/i) || 
-                       title.match(/Ref[.\s]*(\d+)/i) || 
-                       description.match(/Ref[.\s]*(\d+)/i) ||
-                       markdown.match(/Ref[.\s]*(\d+)/i) ||
+                       title.match(/(?:Ref|Rif)[.:\s]*(\d+)/i) || 
+                       description.match(/(?:Ref|Rif)[.:\s]*(\d+)/i) ||
+                       markdown.match(/(?:Ref|Rif)[.:\s]*(\d+)/i) ||
                        markdown.match(/(?:Reference|Riferimento|Code|Codice)[:\s]*(\d+)/i);
       const refNumber = refMatch ? `Ref. ${refMatch[1]}` : null;
+      
+      // Debug: log first 300 chars of markdown and metadata for ref extraction debugging
+      console.log(`[${title.substring(0, 50)}] URL: ${url}`);
+      console.log(`  ref_number: ${refNumber}`);
+      console.log(`  metadata keys: ${JSON.stringify(Object.keys(metadata))}`);
+      console.log(`  markdown first 500 chars: ${markdown.substring(0, 500)}`);
+      console.log(`  description: ${description.substring(0, 200)}`);
 
       // Try to extract price from description, markdown, or metadata
       let price = null;
