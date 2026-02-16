@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 
 interface Agent {
   user_id: string;
@@ -45,18 +46,7 @@ const PORTALE_OPTIONS = [
 const TIPO_CONTATTO_OPTIONS = ['Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi'];
 const LINGUA_OPTIONS_VALUES = ['ENG', 'ITA', 'FRA', 'DEU', 'ESP'];
 
-const PORTALE_COLORS: Record<string, string> = {
-  'James Edition': '#f59e0b', 'Idealista': '#22c55e', 'Gate-away': '#60a5fa',
-  'Sito Cortesi': '#a855f7', 'Immobiliare.it': '#ef4444', 'Rightmove': '#6366f1',
-  'TALLY': '#ec4899', 'Altro': '#6b7280',
-};
-const TIPO_CONTATTO_COLORS: Record<string, string> = {
-  'Mail': '#ef4444', 'WhatsApp': '#22c55e', 'Call': '#f59e0b',
-  'Idealista': '#22c55e', 'Sito Cortesi': '#a855f7',
-};
-const LINGUA_COLORS: Record<string, string> = {
-  'ENG': '#3b82f6', 'ITA': '#22c55e', 'FRA': '#a855f7', 'DEU': '#f59e0b', 'ESP': '#ef4444', 'DEUTSCH': '#f59e0b',
-};
+// Colors imported from @/lib/colorMaps
 
 type ColumnDef = {
   key: string;
@@ -279,7 +269,7 @@ function EditableCell({
     return (
       <span
         className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-muted/30 rounded min-h-[28px]"
-        onClick={(e) => { setEditing(true); onClick?.(); }}
+        onClick={(e) => { e.stopPropagation(); setEditing(true); }}
         title={value}
       >
         {value || '—'}
@@ -470,7 +460,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     await onUpdate(selectedRowId, { row_text_color: color } as any);
   }, [selectedRowId, onUpdate]);
 
-  const rowNumWidth = 52;
+  const rowNumWidth = 68;
   const totalWidth = rowNumWidth + COLUMNS.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
@@ -549,7 +539,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                           }}
                           onClick={() => setSelectedRowId(cliente.id)}
                         >
-                          {/* Row number + drag handle */}
+                          {/* Row number + drag handle + open detail */}
                           <div
                             className="flex-shrink-0 flex items-center gap-0.5 border-r bg-muted/20 text-muted-foreground"
                             style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
@@ -560,12 +550,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                             >
                               <GripVertical className="w-3 h-3" />
                             </div>
-                            <span
-                              className="text-[10px] font-medium cursor-pointer hover:text-primary flex-1 text-center"
-                              onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
-                            >
+                            <span className="text-[10px] font-medium flex-1 text-center">
                               {idx + 1}
                             </span>
+                            <button
+                              className="flex items-center justify-center w-5 h-full hover:bg-primary/10 hover:text-primary transition-colors"
+                              onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
+                              title="Apri scheda"
+                            >
+                              <Eye className="w-3 h-3" />
+                            </button>
                           </div>
 
                           {/* Data cells */}
@@ -583,7 +577,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                                       onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
                                       type={col.type}
                                       agents={agents}
-                                      onClick={() => onCardClick(cliente)}
                                     />
                                   </div>
                                   {cliente.telefono && (
@@ -605,7 +598,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                                   onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
                                   type={col.type}
                                   agents={agents}
-                                  onClick={() => !col.editable ? onCardClick(cliente) : undefined}
                                 />
                               )}
                             </div>

@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { Cliente } from '@/types';
 import {
   Dialog,
@@ -335,19 +336,43 @@ export function ClienteDetail({
 
                 <div>
                   <label className="text-[10px] text-muted-foreground block mb-0.5">Lingua</label>
-                  <InlineEditSelect
-                    value={cliente.lingua}
-                    options={[
-                      { value: 'ENG', label: 'English' },
-                      { value: 'ITA', label: 'Italiano' },
-                      { value: 'FRA', label: 'Français' },
-                      { value: 'DEU', label: 'Deutsch' },
-                      { value: 'ESP', label: 'Español' },
-                    ]}
-                    onSave={(value) => onUpdate({ lingua: value })}
-                    placeholder="Non specificata"
-                    className="text-sm"
-                  />
+                  {(() => {
+                    const color = LINGUA_COLORS[cliente.lingua || ''];
+                    return color ? (
+                      <div className="flex items-center gap-2">
+                        <InlineEditSelect
+                          value={cliente.lingua}
+                          options={[
+                            { value: 'ENG', label: 'English' },
+                            { value: 'ITA', label: 'Italiano' },
+                            { value: 'FRA', label: 'Français' },
+                            { value: 'DEU', label: 'Deutsch' },
+                            { value: 'ESP', label: 'Español' },
+                          ]}
+                          onSave={(value) => onUpdate({ lingua: value })}
+                          placeholder="Non specificata"
+                          className="text-sm"
+                        />
+                        <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: color }}>
+                          {cliente.lingua}
+                        </span>
+                      </div>
+                    ) : (
+                      <InlineEditSelect
+                        value={cliente.lingua}
+                        options={[
+                          { value: 'ENG', label: 'English' },
+                          { value: 'ITA', label: 'Italiano' },
+                          { value: 'FRA', label: 'Français' },
+                          { value: 'DEU', label: 'Deutsch' },
+                          { value: 'ESP', label: 'Español' },
+                        ]}
+                        onSave={(value) => onUpdate({ lingua: value })}
+                        placeholder="Non specificata"
+                        className="text-sm"
+                      />
+                    );
+                  })()}
                 </div>
                 
                 <div>
@@ -377,20 +402,34 @@ export function ClienteDetail({
                 
                 <div>
                   <label className="text-[10px] text-muted-foreground block mb-0.5">Portale di provenienza</label>
-                  <InlineEditSelect
-                    value={cliente.portale}
-                    options={[
-                      { value: 'James Edition', label: 'James Edition' },
-                      { value: 'Idealista', label: 'Idealista' },
-                      { value: 'Gate-away', label: 'Gate-away' },
-                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
-                      { value: 'Immobiliare.it', label: 'Immobiliare.it' },
-                      { value: 'Altro', label: 'Altro' },
-                    ]}
-                    onSave={(value) => onUpdate({ portale: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
+                  {(() => {
+                    const color = PORTALE_COLORS[cliente.portale || ''];
+                    return (
+                      <div className="flex items-center gap-2">
+                        <InlineEditSelect
+                          value={cliente.portale}
+                          options={[
+                            { value: 'James Edition', label: 'James Edition' },
+                            { value: 'Idealista', label: 'Idealista' },
+                            { value: 'Gate-away', label: 'Gate-away' },
+                            { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                            { value: 'Immobiliare.it', label: 'Immobiliare.it' },
+                            { value: 'Rightmove', label: 'Rightmove' },
+                            { value: 'TALLY', label: 'TALLY' },
+                            { value: 'Altro', label: 'Altro' },
+                          ]}
+                          onSave={(value) => onUpdate({ portale: value })}
+                          placeholder="Non specificato"
+                          className="text-sm"
+                        />
+                        {color && (
+                          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: color }}>
+                            {cliente.portale}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div>
@@ -425,19 +464,31 @@ export function ClienteDetail({
 
                 <div>
                   <label className="text-[10px] text-muted-foreground block mb-0.5">Tipo contatto</label>
-                  <InlineEditSelect
-                    value={cliente.tipo_contatto}
-                    options={[
-                      { value: 'Mail', label: 'Mail' },
-                      { value: 'WhatsApp', label: 'WhatsApp' },
-                      { value: 'Call', label: 'Call' },
-                      { value: 'Idealista', label: 'Idealista' },
-                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
-                    ]}
-                    onSave={(value) => onUpdate({ tipo_contatto: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
+                  {(() => {
+                    const color = TIPO_CONTATTO_COLORS[cliente.tipo_contatto || ''];
+                    return (
+                      <div className="flex items-center gap-2">
+                        <InlineEditSelect
+                          value={cliente.tipo_contatto}
+                          options={[
+                            { value: 'Mail', label: 'Mail' },
+                            { value: 'WhatsApp', label: 'WhatsApp' },
+                            { value: 'Call', label: 'Call' },
+                            { value: 'Idealista', label: 'Idealista' },
+                            { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                          ]}
+                          onSave={(value) => onUpdate({ tipo_contatto: value })}
+                          placeholder="Non specificato"
+                          className="text-sm"
+                        />
+                        {color && (
+                          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: color }}>
+                            {cliente.tipo_contatto}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
 

@@ -30,7 +30,7 @@ Deno.serve(async (req) => {
 
     console.log('Searching website for:', query);
 
-    // Use Firecrawl search with scrapeOptions to get metadata including images
+    // Use Firecrawl search - skip markdown scraping for speed
     const searchResponse = await fetch('https://api.firecrawl.dev/v1/search', {
       method: 'POST',
       headers: {
@@ -39,10 +39,11 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         query: `site:cortesiluxuryrealestate.com/en/ ${query}`,
-        limit: 8,
+        limit: 5,
         scrapeOptions: {
           formats: ['markdown'],
           onlyMainContent: true,
+          waitFor: 0,
         },
       }),
     });
