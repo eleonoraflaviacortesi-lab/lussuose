@@ -28,6 +28,7 @@ import {
   Trash2,
   Plus,
   Search,
+  Copy,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -161,7 +162,18 @@ function PropertyCard({
           <div className="flex items-start justify-between gap-1">
             <div className="flex-1 min-w-0">
               {property.ref_number && (
-                <span className="inline-block font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1">{property.ref_number}</span>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(property.ref_number!);
+                    toast({ title: 'Riferimento copiato', description: property.ref_number! });
+                  }}
+                  className="inline-flex items-center gap-1 font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1 hover:bg-black/80 active:scale-95 transition-all cursor-copy"
+                  title="Copia riferimento"
+                >
+                  {property.ref_number}
+                  <Copy className="h-2.5 w-2.5" />
+                </button>
               )}
               <h4 className="font-medium text-xs leading-tight line-clamp-2">{property.title}</h4>
             </div>
