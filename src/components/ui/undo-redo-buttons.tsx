@@ -6,8 +6,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export function UndoRedoButtons() {
   const { canUndo, canRedo, undoLabel, redoLabel, undo, redo } = useUndoRedo();
 
-  if (!canUndo && !canRedo) return null;
-
   return (
     <div className="flex items-center gap-0.5">
       <Tooltip>
