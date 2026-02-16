@@ -196,13 +196,25 @@ function buildName(row: CSVRow): string {
   return '';
 }
 
+function normalizePhone(phone: string): string {
+  // If it already starts with +, return as-is
+  if (phone.startsWith('+')) return phone;
+  // Clean spaces/dashes for digit check
+  const digits = phone.replace(/[\s\-\(\)]/g, '');
+  // Italian numbers (3xx...) don't need +, others likely international
+  if (/^3\d{8,}$/.test(digits)) return phone; // Italian mobile, no prefix needed
+  if (/^0\d+$/.test(digits)) return phone; // Italian landline
+  // International: add +
+  return `+${phone}`;
+}
+
 function extractPhone(row: CSVRow): string | null {
   const c1 = cleanValue(row.contatto1);
   const c2 = cleanValue(row.contatto2);
   
-  if (c1 && isPhone(c1)) return c1;
-  if (c2 && isPhone(c2)) return c2;
-  if (c1 && !isEmail(c1) && c1.length > 5) return c1;
+  if (c1 && isPhone(c1)) return normalizePhone(c1);
+  if (c2 && isPhone(c2)) return normalizePhone(c2);
+  if (c1 && !isEmail(c1) && c1.length > 5) return normalizePhone(c1);
   return null;
 }
 
