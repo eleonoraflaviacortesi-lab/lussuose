@@ -6,6 +6,8 @@ import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import { NotificationBell } from '@/components/layout/NotificationBell';
+import { FloatingSparkles } from '@/components/ui/floating-sparkles';
+import { MagicCursor } from '@/components/ui/magic-cursor';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import type { Notizia } from '@/hooks/useNotizie';
 
@@ -134,6 +136,9 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      {/* Ambient magic effects */}
+      <FloatingSparkles />
+      <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
       <Header />
       <div style={{ height: 'calc(175px + env(safe-area-inset-top, 0px))' }} />

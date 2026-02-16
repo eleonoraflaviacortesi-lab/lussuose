@@ -446,6 +446,15 @@
   }
 }
 
+/* Wiggle animation for easter egg */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-8deg) scale(1.1); }
+  40% { transform: rotate(8deg) scale(1.1); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(5deg); }
+}
+
 /* Hide number input spinners globally */
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
