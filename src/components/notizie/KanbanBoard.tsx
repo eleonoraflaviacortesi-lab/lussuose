@@ -7,6 +7,7 @@ import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff, Star } from 'lucide-react';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -661,7 +662,8 @@ const AddColumnButton = memo(({ onAdd }: { onAdd: () => void }) => (
 AddColumnButton.displayName = 'AddColumnButton';
 
 const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQuickAdd }: KanbanBoardProps) => {
-  const { updateNotizia, updateOrder, deleteNotizia } = useNotizie();
+  const { updateNotizia, updateOrder, deleteNotizia, addNotizia } = useNotizie();
+  const { pushAction } = useUndoRedo();
   const { columns, updateColumn, addColumn, deleteColumn, reorderColumns, isLoading } = useKanbanColumns();
   const topScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
@@ -844,7 +846,15 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
                                       onStatusChange={(status) => onStatusChange(notizia.id, status)}
                                       onOnlineToggle={(isOnline) => handleOnlineToggle(notizia.id, isOnline)}
-                                      onDelete={() => deleteNotizia.mutate(notizia.id)}
+                                      onDelete={() => {
+                                        const snapshot = notizia;
+                                        deleteNotizia.mutate(notizia.id);
+                                        pushAction({
+                                          description: `Elimina ${snapshot.name}`,
+                                          undo: async () => { await addNotizia.mutateAsync({ name: snapshot.name, zona: snapshot.zona, phone: snapshot.phone, type: snapshot.type, notes: snapshot.notes, status: snapshot.status, emoji: snapshot.emoji, card_color: snapshot.card_color, is_online: snapshot.is_online }); },
+                                          redo: async () => { deleteNotizia.mutate(snapshot.id); },
+                                        });
+                                      }}
                                     />
                                   </div>
                                 )}
