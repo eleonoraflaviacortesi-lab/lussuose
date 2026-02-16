@@ -7,6 +7,8 @@ import ImportCSVDialog from './ImportCSVDialog';
 import ImportDalilaDialog from './ImportDalilaDialog';
 import NotizieStatsChart from './NotizieStatsChart';
 import { Input } from '@/components/ui/input';
+import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 
 // Lazy load drag-drop board for faster initial render
 const KanbanBoard = lazy(() => import('./KanbanBoard'));
@@ -30,6 +32,7 @@ const BoardSkeleton = () => (
 
 const NotiziePage = () => {
   const { notizie, notizieByStatus, isLoading, updateNotizia } = useNotizie();
+  const { pushAction } = useUndoRedo();
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,14 +66,24 @@ const NotiziePage = () => {
   }, [notizieByStatus, searchQuery]);
 
   const handleStatusChange = useCallback((id: string, newStatus: NotiziaStatus) => {
+    const old = (notizie || []).find(n => n.id === id);
+    const oldStatus = old?.status;
     updateNotizia.mutate({ id, status: newStatus, silent: true });
-  }, [updateNotizia]);
+    if (old && oldStatus) {
+      pushAction({
+        description: `Stato ${old.name}`,
+        undo: () => { updateNotizia.mutate({ id, status: oldStatus, silent: true }); return Promise.resolve(); },
+        redo: () => { updateNotizia.mutate({ id, status: newStatus, silent: true }); return Promise.resolve(); },
+      });
+    }
+  }, [updateNotizia, notizie, pushAction]);
 
   return (
     <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col">
       <div className="flex items-center justify-between gap-4">
         <h2 className="text-2xl font-extrabold tracking-wide uppercase shrink-0">Notizie</h2>
         <div className="flex items-center gap-2">
+          <UndoRedoButtons />
           <ImportDalilaDialog />
           <ImportCSVDialog />
           <AddNotiziaDialog />

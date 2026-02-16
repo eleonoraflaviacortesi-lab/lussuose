@@ -15,6 +15,8 @@ import { Input } from '@/components/ui/input';
 import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3 } from 'lucide-react';
 import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
 import { ClientiAnalysisModal } from './ClientiAnalysisModal';
+import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
+import { useUndoRedo } from '@/hooks/useUndoRedo';
 
 // Extract date from note_extra for imported buyers
 function getDataRichiestaFromNotes(noteExtra: string | null): string | null {
@@ -35,6 +37,7 @@ interface ClientiPageProps {
 
 export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPageProps) {
   const { profile } = useAuth();
+  const { pushAction } = useUndoRedo();
   const [groupBy, setGroupBy] = useState<ClienteGroupBy>('status');
   const [filters, setFilters] = useState<Filters>({});
   const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
@@ -115,11 +118,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
   const handleDelete = useCallback(async () => {
     if (selectedCliente) {
+      const snapshot = { ...selectedCliente };
       await deleteCliente(selectedCliente.id);
+      pushAction({
+        description: `Elimina ${snapshot.nome}`,
+        undo: async () => { await createCliente(snapshot); },
+        redo: async () => { await deleteCliente(snapshot.id); },
+      });
       setDetailOpen(false);
       setSelectedCliente(null);
     }
-  }, [selectedCliente, deleteCliente]);
+  }, [selectedCliente, deleteCliente, createCliente, pushAction]);
 
   // Agents see only assigned clients, coordinators see all
   const displayClients = isCoordinator 
@@ -195,6 +204,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           </Button>
         </div>
 
+        <UndoRedoButtons />
         <div className="flex-1" />
 
         {isCoordinator && (
@@ -283,12 +293,31 @@ groupBy={groupBy}
           agents={agents}
           onCardClick={handleCardClick}
           onStatusChange={async (clienteId, status) => {
+            const old = clienti.find(c => c.id === clienteId);
+            const oldStatus = old?.status;
             await updateCliente({ id: clienteId, status });
+            if (old && oldStatus) {
+              pushAction({
+                description: `Stato ${old.nome}`,
+                undo: async () => { await updateCliente({ id: clienteId, status: oldStatus as ClienteStatus }); },
+                redo: async () => { await updateCliente({ id: clienteId, status }); },
+              });
+            }
           }}
           onOrderChange={handleOrderChange}
           onColorChange={handleColorChange}
           onEmojiChange={handleEmojiChange}
-          onDeleteCliente={async (clienteId) => { await deleteCliente(clienteId); }}
+          onDeleteCliente={async (clienteId) => {
+            const snapshot = clienti.find(c => c.id === clienteId);
+            await deleteCliente(clienteId);
+            if (snapshot) {
+              pushAction({
+                description: `Elimina ${snapshot.nome}`,
+                undo: async () => { await createCliente(snapshot); },
+                redo: async () => { await deleteCliente(snapshot.id); },
+              });
+            }
+          }}
           searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
         />
       ) : (
@@ -310,7 +339,17 @@ groupBy={groupBy}
           onUpdate={async (id, updates) => {
             await updateCliente({ id, ...updates });
           }}
-          onDelete={async (id) => { await deleteCliente(id); }}
+          onDelete={async (id) => {
+            const snapshot = clienti.find(c => c.id === id);
+            await deleteCliente(id);
+            if (snapshot) {
+              pushAction({
+                description: `Elimina ${snapshot.nome}`,
+                undo: async () => { await createCliente(snapshot); },
+                redo: async () => { await deleteCliente(snapshot.id); },
+              });
+            }
+          }}
           searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
           onAddNew={async () => {
             const today = new Date().toISOString().split('T')[0];
