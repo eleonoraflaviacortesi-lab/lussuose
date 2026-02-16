@@ -4,13 +4,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
 import { ClientiFilters } from './ClientiFilters';
 import { ClientiKanban } from './ClientiKanban';
+import { ClientiSheetView } from './ClientiSheetView';
 import { ClienteDetail } from './ClienteDetail';
 import { AddClienteDialog } from './AddClienteDialog';
 import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table } from 'lucide-react';
 import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
 
 // Extract date from note_extra for imported buyers
@@ -41,6 +42,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [searchQuery, setSearchQuery] = useState('');
   const [dalilaImportOpen, setDalilaImportOpen] = useState(false);
   const [dateSortDir, setDateSortDir] = useState<'desc' | 'asc' | null>(null);
+  const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
 
   const {
     clienti,
@@ -178,6 +180,25 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           </p>
         </div>
         <div className="flex gap-2">
+          {/* View toggle */}
+          <div className="flex rounded-lg border overflow-hidden">
+            <Button
+              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+              size="sm"
+              className="rounded-none px-2.5"
+              onClick={() => setViewMode('kanban')}
+            >
+              <LayoutGrid className="w-4 h-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'sheet' ? 'default' : 'ghost'}
+              size="sm"
+              className="rounded-none px-2.5"
+              onClick={() => setViewMode('sheet')}
+            >
+              <Table className="w-4 h-4" />
+            </Button>
+          </div>
           {isCoordinator && (
             <>
               <Button variant="outline" size="sm" onClick={() => setDalilaImportOpen(true)}>
@@ -248,20 +269,39 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         </Button>
       </div>
 
-      {/* Kanban Board */}
-      <ClientiKanban
-        clientiGrouped={sortedGrouped}
-        groupBy={isCoordinator ? groupBy : 'status'}
-        agents={agents}
-        onCardClick={handleCardClick}
-        onStatusChange={async (clienteId, status) => {
-          await updateCliente({ id: clienteId, status });
-        }}
-        onOrderChange={handleOrderChange}
-        onColorChange={handleColorChange}
-        onEmojiChange={handleEmojiChange}
-        searchQuery={searchQuery}
-      />
+      {/* Board */}
+      {viewMode === 'kanban' ? (
+        <ClientiKanban
+          clientiGrouped={sortedGrouped}
+          groupBy={isCoordinator ? groupBy : 'status'}
+          agents={agents}
+          onCardClick={handleCardClick}
+          onStatusChange={async (clienteId, status) => {
+            await updateCliente({ id: clienteId, status });
+          }}
+          onOrderChange={handleOrderChange}
+          onColorChange={handleColorChange}
+          onEmojiChange={handleEmojiChange}
+          searchQuery={searchQuery}
+        />
+      ) : (
+        <ClientiSheetView
+          clienti={dateSortDir ? [...displayClients].sort((a, b) => {
+            const dateA = getEffectiveDate(a);
+            const dateB = getEffectiveDate(b);
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            return dateSortDir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+          }) : displayClients}
+          agents={agents}
+          onCardClick={handleCardClick}
+          onUpdate={async (id, updates) => {
+            await updateCliente({ id, ...updates });
+          }}
+          searchQuery={searchQuery}
+        />
+      )}
 
       {/* Detail Modal */}
       <ClienteDetail
