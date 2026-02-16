@@ -73,9 +73,11 @@ export interface ClienteComment {
 export interface Cliente {
   id: string;
   nome: string;
+  cognome: string | null;
   telefono: string | null;
   email: string | null;
   paese: string | null;
+  lingua: string | null;
   budget_max: number | null;
   mutuo: string | null;
   tempo_ricerca: string | null;
@@ -96,6 +98,11 @@ export interface Cliente {
   piscina: string | null;
   uso: string | null;
   interesse_affitto: string | null;
+  portale: string | null;
+  property_name: string | null;
+  ref_number: string | null;
+  contattato_da: string | null;
+  tipo_contatto: string | null;
   status: ClienteStatus;
   display_order: number;
   assigned_to: string | null;

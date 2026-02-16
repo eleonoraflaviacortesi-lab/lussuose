@@ -218,7 +218,9 @@ export type Database = {
           budget_max: number | null
           camere: string | null
           card_color: string | null
+          cognome: string | null
           comments: Json | null
+          contattato_da: string | null
           contesto: string[] | null
           created_at: string
           data_submission: string | null
@@ -234,12 +236,16 @@ export type Database = {
           interesse_affitto: string | null
           last_contact_date: string | null
           layout: string | null
+          lingua: string | null
           motivo_zona: string[] | null
           mutuo: string | null
           nome: string
           note_extra: string | null
           paese: string | null
           piscina: string | null
+          portale: string | null
+          property_name: string | null
+          ref_number: string | null
           regioni: string[] | null
           reminder_date: string | null
           sede: string
@@ -249,6 +255,7 @@ export type Database = {
           telefono: string | null
           tempo_ricerca: string | null
           terreno: string | null
+          tipo_contatto: string | null
           tipologia: string[] | null
           updated_at: string
           uso: string | null
@@ -260,7 +267,9 @@ export type Database = {
           budget_max?: number | null
           camere?: string | null
           card_color?: string | null
+          cognome?: string | null
           comments?: Json | null
+          contattato_da?: string | null
           contesto?: string[] | null
           created_at?: string
           data_submission?: string | null
@@ -276,12 +285,16 @@ export type Database = {
           interesse_affitto?: string | null
           last_contact_date?: string | null
           layout?: string | null
+          lingua?: string | null
           motivo_zona?: string[] | null
           mutuo?: string | null
           nome: string
           note_extra?: string | null
           paese?: string | null
           piscina?: string | null
+          portale?: string | null
+          property_name?: string | null
+          ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
           sede?: string
@@ -291,6 +304,7 @@ export type Database = {
           telefono?: string | null
           tempo_ricerca?: string | null
           terreno?: string | null
+          tipo_contatto?: string | null
           tipologia?: string[] | null
           updated_at?: string
           uso?: string | null
@@ -302,7 +316,9 @@ export type Database = {
           budget_max?: number | null
           camere?: string | null
           card_color?: string | null
+          cognome?: string | null
           comments?: Json | null
+          contattato_da?: string | null
           contesto?: string[] | null
           created_at?: string
           data_submission?: string | null
@@ -318,12 +334,16 @@ export type Database = {
           interesse_affitto?: string | null
           last_contact_date?: string | null
           layout?: string | null
+          lingua?: string | null
           motivo_zona?: string[] | null
           mutuo?: string | null
           nome?: string
           note_extra?: string | null
           paese?: string | null
           piscina?: string | null
+          portale?: string | null
+          property_name?: string | null
+          ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
           sede?: string
@@ -333,6 +353,7 @@ export type Database = {
           telefono?: string | null
           tempo_ricerca?: string | null
           terreno?: string | null
+          tipo_contatto?: string | null
           tipologia?: string[] | null
           updated_at?: string
           uso?: string | null
