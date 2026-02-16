@@ -13,6 +13,7 @@ import {
 import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
@@ -1305,10 +1306,11 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     >
       {/* Add new row button */}
       {onAddNew && (
-        <div className="px-3 py-2 border-b border-border/40">
+        <div className="px-3 py-2 border-b border-border/40 flex items-center gap-2">
           <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
             <Plus className="w-4 h-4" /> Nuova richiesta
           </Button>
+          <UndoRedoButtons />
         </div>
       )}
 
