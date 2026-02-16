@@ -1,52 +1,41 @@
 
+# Magia da Stregoni - Effetti Visivi Mistici
 
-# Riorganizzazione della scheda dettaglio Cliente
+Trasformazione degli effetti visivi attuali da "festosi/rosa" a un'estetica mistica e arcana, come magia da stregoni.
 
-## Problema attuale
-Le informazioni sono distribuite in 3 colonne ma con raggruppamenti poco intuitivi. Ad esempio, "Tracking CRM" interrompe il flusso dei dati personali, "Budget" e "Tempistiche" sono separati da sezioni non correlate, e "Utilizzo" e "Descrizione" sono isolati in fondo alla terza colonna.
+## Cosa cambia
 
-## Nuova organizzazione proposta
+### 1. Floating Sparkles --> Rune Arcane Fluttuanti
+Le particelle rosa che salgono verso l'alto diventano particelle mistiche che si muovono in modo organico e imprevedibile:
+- Colori: dal rosa al **viola profondo, indaco e ciano pallido** (palette arcana)
+- Movimento: non piu' lineari verso l'alto, ma con traiettorie sinuose e spirali lente, come energia magica sospesa nell'aria
+- Forma: oltre ai cerchi, alcune particelle disegnano piccoli "sigilli" (cerchi con raggi) che appaiono e svaniscono
+- Pulsazione: ritmo piu' lento e irregolare, come un battito magico
 
-La logica di riorganizzazione segue il flusso mentale dell'agente: **Chi e --> Cosa cerca --> Come agire**.
+### 2. Magic Cursor --> Scia di Energia Arcana
+La scia del mouse diventa un effetto tipo incantesimo:
+- Colori: gradiente da **viola scuro a ciano elettrico** con un nucleo bianco brillante
+- Scia piu' lunga (30 punti invece di 20) e che si dissipa con un effetto "fumo mistico"
+- Particelle secondarie che si staccano dalla scia e si dissolvono lateralmente, come scintille di magia nera
+- Dimensione variabile: la scia pulsa leggermente come se fosse viva
 
-### Colonna 1 - "CHI E' + OPERATIVITA'"
-Tutto cio' che serve per capire il buyer e agire immediatamente:
-1. **Note** (invariato, resta in cima)
-2. **Assegnazione agente** (invariato)
-3. **Dati Personali** (spostati qui dalla col.2): Cognome, Paese, Lingua, Telefono, Email, Data richiesta
-4. **Tracking CRM** (spostato subito sotto i dati personali, stessa card): Portale, Proprieta' richiesta, Ref, Contattato da, Tipo contatto, Associa a Richiesta
-5. **Azioni Rapide** (invariato): Chiama, Promemoria, Scarica PDF
-6. **Storico Attivita'** + commenti (invariato)
+### 3. Easter Egg del Logo --> Incantesimo
+Il triple-tap sul logo attiva un effetto piu' misterioso:
+- I coriandoli diventano di colori arcani (viola, indaco, ciano, nero, argento)
+- Aggiunta di un breve flash luminoso viola che si espande dal centro
 
-### Colonna 2 - "COSA CERCA"
-Tutti i criteri di ricerca raggruppati per tema:
-1. **Budget e Finanziamento** (spostato in cima): Budget massimo, Mutuo
-2. **Tipologia Immobile**: Tipo, Stile, Camere, Bagni, Layout, Dimensioni min/max
-3. **Caratteristiche Extra**: Piscina, Terreno, Dependance
-4. **Localita' Preferite**: Regioni, Contesto, Motivo zona, Vicinanza citta'
+## File coinvolti
 
-### Colonna 3 - "CONTESTO + PROPRIETA'"
-Informazioni di contesto e matching:
-1. **Tempistiche**: Quando vuole acquistare, Ha visitato la zona
-2. **Utilizzo**: Come usera' la proprieta', Interesse affitto
-3. **Descrizione richiesta** (testo libero del buyer)
-4. **Proprieta' associate** (matching cards)
-
-### Sezione finale (full-width, invariata)
-- Commenti precedenti (legacy)
-- Metadata (date creazione/submission)
-- Elimina Cliente
+| File | Modifica |
+|------|----------|
+| `src/components/ui/floating-sparkles.tsx` | Riscrittura completa: palette arcana, movimento a spirale, sigilli mistici |
+| `src/components/ui/magic-cursor.tsx` | Scia viola-ciano, particelle secondarie, effetto fumo |
+| `src/lib/confetti.ts` | Palette arcana per `celebrateGasiAbbestia` (viola, indaco, ciano, argento) |
 
 ## Dettagli tecnici
 
-### File modificato
-- `src/components/clienti/ClienteDetail.tsx`
-
-### Modifiche
-- Spostamento dei blocchi JSX esistenti tra le colonne senza modificare i singoli campi
-- La colonna 1 diventa piu' densa (dati personali + CRM + azioni) perche' e' il punto di partenza naturale
-- "Dati Personali" e "Tracking CRM" restano due sezioni con header separati ma dentro la stessa card bianca nella colonna 1
-- Su mobile il layout resta a colonna singola con lo stesso ordine: prima col.1, poi col.2, poi col.3
-- Il layout desktop resta `lg:grid-cols-3`
-- Nessun elemento aggiunto o rimosso, solo riposizionamento
-
+- Le particelle ambientali useranno colori HSL nell'intervallo 250-280 (viola/indaco) con accenti a 180-200 (ciano)
+- Il movimento a spirale si ottiene combinando sin/cos con fasi diverse per x e y
+- Le particelle "sigillo" disegnano un cerchio con 4-6 linee radiali che ruotano lentamente
+- La scia del cursor usa `globalCompositeOperation: 'lighter'` per un effetto di energia additiva
+- Opacita' generale ridotta per mantenere la leggibilita' dell'interfaccia
