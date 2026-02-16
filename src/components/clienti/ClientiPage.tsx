@@ -190,25 +190,6 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
               <span className="hidden sm:inline">Analisi</span>
             </Button>
           )}
-          {/* View toggle */}
-          <div className="flex rounded-lg border overflow-hidden">
-            <Button
-              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-              size="sm"
-              className="rounded-none px-2.5"
-              onClick={() => setViewMode('kanban')}
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'sheet' ? 'default' : 'ghost'}
-              size="sm"
-              className="rounded-none px-2.5"
-              onClick={() => setViewMode('sheet')}
-            >
-              <Table className="w-4 h-4" />
-            </Button>
-          </div>
           {isCoordinator && (
             <>
               <Button variant="outline" size="sm" onClick={() => setDalilaImportOpen(true)}>
@@ -225,6 +206,28 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             <Plus className="w-4 h-4" />
           </Button>
         </div>
+      </div>
+
+      {/* View toggle - full width buttons */}
+      <div className="flex rounded-lg border overflow-hidden">
+        <Button
+          variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+          size="sm"
+          className="rounded-none flex-1 gap-1.5"
+          onClick={() => setViewMode('kanban')}
+        >
+          <LayoutGrid className="w-4 h-4" />
+          Kanban
+        </Button>
+        <Button
+          variant={viewMode === 'sheet' ? 'default' : 'ghost'}
+          size="sm"
+          className="rounded-none flex-1 gap-1.5"
+          onClick={() => setViewMode('sheet')}
+        >
+          <Table className="w-4 h-4" />
+          Spreadsheet
+        </Button>
       </div>
 
       {/* Stats Chart - only for coordinators */}
@@ -318,7 +321,10 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             await updateCliente({ id, ...updates });
           }}
           searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
-          onAddNew={() => setAddDialogOpen(true)}
+          onAddNew={async () => {
+            const today = new Date().toISOString().split('T')[0];
+            await createCliente({ nome: '', data_submission: today });
+          }}
         />
       )}
 

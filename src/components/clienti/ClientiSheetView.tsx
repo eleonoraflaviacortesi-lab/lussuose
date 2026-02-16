@@ -31,7 +31,7 @@ interface ClientiSheetViewProps {
   onCardClick: (cliente: Cliente) => void;
   onUpdate: (id: string, updates: Partial<Cliente>) => Promise<void>;
   searchQuery: string;
-  onAddNew?: () => void;
+  onAddNew?: () => void | Promise<void>;
 }
 
 const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] = [
@@ -1390,13 +1390,13 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       </div>
 
       {/* Footer */}
-      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
+      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
         {onAddNew && (
-          <Button variant="ghost" size="sm" className="h-6 px-2 gap-1 text-[10px] font-medium" onClick={onAddNew}>
-            <Plus className="w-3.5 h-3.5" /> Nuova riga
+          <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
+            <Plus className="w-4 h-4" /> Nuova richiesta
           </Button>
         )}
-        <span className="flex-1">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
+        <span className="flex-1 text-right">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
         {Object.values(colFilters).some(s => s.size > 0) && (
           <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2" onClick={() => setColFilters({})}>
             <X className="w-3 h-3 mr-1" /> Rimuovi filtri
