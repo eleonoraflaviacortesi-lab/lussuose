@@ -257,6 +257,7 @@ Deno.serve(async (req) => {
       note_extra: String(getFieldValue(fields, "additional notes", "notes, preferences", "note") || ""),
       
       // Management
+      portale: 'TALLY',
       sede: sede,
       emoji: "🏠",
       

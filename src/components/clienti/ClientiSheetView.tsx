@@ -40,14 +40,15 @@ const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] =
 ];
 
 const PORTALE_OPTIONS = [
-  'James Edition', 'Idealista', 'Gate-away', 'Sito Cortesi', 'Immobiliare.it', 'Altro',
+  'James Edition', 'Idealista', 'Gate-away', 'Sito Cortesi', 'Immobiliare.it', 'Rightmove', 'TALLY', 'Altro',
 ];
 const TIPO_CONTATTO_OPTIONS = ['Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi'];
 const LINGUA_OPTIONS_VALUES = ['ENG', 'ITA', 'FRA', 'DEU', 'ESP'];
 
 const PORTALE_COLORS: Record<string, string> = {
   'James Edition': '#f59e0b', 'Idealista': '#22c55e', 'Gate-away': '#60a5fa',
-  'Sito Cortesi': '#a855f7', 'Immobiliare.it': '#ef4444', 'Altro': '#6b7280',
+  'Sito Cortesi': '#a855f7', 'Immobiliare.it': '#ef4444', 'Rightmove': '#6366f1',
+  'TALLY': '#ec4899', 'Altro': '#6b7280',
 };
 const TIPO_CONTATTO_COLORS: Record<string, string> = {
   'Mail': '#ef4444', 'WhatsApp': '#22c55e', 'Call': '#f59e0b',
