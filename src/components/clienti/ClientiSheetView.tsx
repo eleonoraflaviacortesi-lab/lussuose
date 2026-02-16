@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, memo } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
@@ -45,8 +44,6 @@ const PORTALE_OPTIONS = [
 ];
 const TIPO_CONTATTO_OPTIONS = ['Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi'];
 const LINGUA_OPTIONS_VALUES = ['ENG', 'ITA', 'FRA', 'DEU', 'ESP'];
-
-// Colors imported from @/lib/colorMaps
 
 type ColumnDef = {
   key: string;
@@ -159,15 +156,42 @@ function ColorPalettePopover({
   );
 }
 
-// --- Badge Select ---
-function BadgeSelect({
+// --- Lazy Badge Cell: only mounts Select on click ---
+function LazyBadgeCell({
   value, onChange, options, colorMap,
 }: {
   value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>;
 }) {
+  const [open, setOpen] = useState(false);
   const bgColor = colorMap?.[value] || '#6b7280';
+
+  if (!open && !value) {
+    return (
+      <span
+        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-muted/30"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >—</span>
+    );
+  }
+
+  if (!open) {
+    return (
+      <span
+        className="block px-1 py-1 cursor-pointer hover:bg-muted/30"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >
+        <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+      </span>
+    );
+  }
+
   return (
-    <Select value={value || '__none'} onValueChange={v => onChange(v === '__none' ? '' : v)}>
+    <Select
+      value={value || '__none'}
+      onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
+      open={true}
+      onOpenChange={(o) => { if (!o) setOpen(false); }}
+    >
       <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
         {value ? (
           <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
@@ -190,86 +214,107 @@ function BadgeSelect({
   );
 }
 
-// --- Editable Cell ---
-function EditableCell({
-  value, onChange, type = 'text', agents, onClick,
-}: {
-  value: string; onChange?: (val: string) => void; type?: ColumnDef['type']; agents?: Agent[]; onClick?: () => void;
-}) {
+// --- Lazy Status Cell ---
+function LazyStatusCell({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const status = STATUS_OPTIONS.find(s => s.value === value);
+
+  if (!open) {
+    return (
+      <span
+        className="block px-1 py-1 cursor-pointer hover:bg-muted/30"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >
+        <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>
+          {status?.label || value}
+        </span>
+      </span>
+    );
+  }
+
+  return (
+    <Select
+      value={value}
+      onValueChange={v => { onChange(v); setOpen(false); }}
+      open={true}
+      onOpenChange={(o) => { if (!o) setOpen(false); }}
+    >
+      <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
+        <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>
+          {status?.label || value}
+        </span>
+      </SelectTrigger>
+      <SelectContent>
+        {STATUS_OPTIONS.map(s => (
+          <SelectItem key={s.value} value={s.value}>
+            <span className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+              {s.label}
+            </span>
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+// --- Lazy Agent Cell ---
+function LazyAgentCell({ value, onChange, agents }: { value: string; onChange: (val: string) => void; agents: Agent[] }) {
+  const [open, setOpen] = useState(false);
+  const agent = agents.find(a => a.user_id === value);
+  const display = agent ? `${agent.avatar_emoji || ''} ${agent.full_name}` : 'Not assigned';
+
+  if (!open) {
+    return (
+      <span
+        className="block truncate text-xs px-2 py-1.5 cursor-pointer hover:bg-muted/30 min-h-[28px]"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >{display}</span>
+    );
+  }
+
+  return (
+    <Select
+      value={value || '__none'}
+      onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
+      open={true}
+      onOpenChange={(o) => { if (!o) setOpen(false); }}
+    >
+      <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
+        <SelectValue>{display}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none">Not assigned</SelectItem>
+        {agents.map(a => (
+          <SelectItem key={a.user_id} value={a.user_id}>
+            {a.avatar_emoji || '👤'} {a.full_name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+// --- Inline Text Cell ---
+function InlineTextCell({ value, onChange }: { value: string; onChange?: (val: string) => void }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => { setDraft(value); }, [value]);
-  useEffect(() => { if (editing) inputRef.current?.focus(); }, [editing]);
 
   const commit = useCallback(() => {
     setEditing(false);
     if (draft !== value && onChange) onChange(draft);
   }, [draft, value, onChange]);
 
-  if (type === 'status') {
-    const status = STATUS_OPTIONS.find(s => s.value === value);
-    return (
-      <Select value={value} onValueChange={v => onChange?.(v)}>
-        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-          <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>
-            {status?.label || value}
-          </span>
-        </SelectTrigger>
-        <SelectContent>
-          {STATUS_OPTIONS.map(s => (
-            <SelectItem key={s.value} value={s.value}>
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
-                {s.label}
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-  if (type === 'lingua' && onChange) return <BadgeSelect value={value} onChange={onChange} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />;
-  if (type === 'portale' && onChange) return <BadgeSelect value={value} onChange={onChange} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />;
-  if (type === 'tipo_contatto' && onChange) return <BadgeSelect value={value} onChange={onChange} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />;
-
-  if (type === 'agent' && agents) {
-    return (
-      <Select value={value || '__none'} onValueChange={v => onChange?.(v === '__none' ? '' : v)}>
-        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-          <SelectValue>
-            {(() => {
-              const agent = agents.find(a => a.user_id === value);
-              return agent ? `${agent.avatar_emoji || ''} ${agent.full_name}` : 'Not assigned';
-            })()}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__none">Not assigned</SelectItem>
-          {agents.map(a => (
-            <SelectItem key={a.user_id} value={a.user_id}>
-              {a.avatar_emoji || '👤'} {a.full_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    );
-  }
-
   if (!onChange) {
-    return (
-      <span className="block truncate text-xs px-2 py-1 cursor-pointer" onClick={onClick} title={value}>
-        {value || '—'}
-      </span>
-    );
+    return <span className="block truncate text-xs px-2 py-1 min-h-[28px]" title={value}>{value || '—'}</span>;
   }
 
   if (!editing) {
     return (
       <span
         className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-muted/30 rounded min-h-[28px]"
-        onClick={(e) => { e.stopPropagation(); setEditing(true); }}
+        onClick={(e) => { e.stopPropagation(); setEditing(true); setDraft(value); }}
         title={value}
       >
         {value || '—'}
@@ -279,7 +324,7 @@ function EditableCell({
 
   return (
     <Input
-      ref={inputRef}
+      ref={(el) => { if (el) el.focus(); }}
       className="h-7 text-xs border-0 bg-primary/5 shadow-none rounded-none focus-visible:ring-2 focus-visible:ring-primary px-2"
       value={draft}
       onChange={e => setDraft(e.target.value)}
@@ -311,49 +356,29 @@ function SheetToolbar({
   const fmt = selectedCliente ? rowFormats[selectedCliente.id] || {} : {};
   return (
     <div className="flex items-center gap-1 px-3 py-1.5 bg-muted/60 border-b text-xs">
-      <Button
-        variant="ghost" size="sm"
-        className={cn("h-7 w-7 p-0", fmt.bold && "bg-accent")}
-        disabled={!selectedCliente}
-        onClick={() => onToggleFormat('bold')}
-      >
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.bold && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('bold')}>
         <Bold className="w-3.5 h-3.5" />
       </Button>
-      <Button
-        variant="ghost" size="sm"
-        className={cn("h-7 w-7 p-0", fmt.italic && "bg-accent")}
-        disabled={!selectedCliente}
-        onClick={() => onToggleFormat('italic')}
-      >
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.italic && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('italic')}>
         <Italic className="w-3.5 h-3.5" />
       </Button>
-      <Button
-        variant="ghost" size="sm"
-        className={cn("h-7 w-7 p-0", fmt.strikethrough && "bg-accent")}
-        disabled={!selectedCliente}
-        onClick={() => onToggleFormat('strikethrough')}
-      >
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.strikethrough && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('strikethrough')}>
         <Strikethrough className="w-3.5 h-3.5" />
       </Button>
-
       <div className="h-4 w-px bg-border mx-1" />
-
       <ColorPalettePopover currentColor={selectedCliente?.row_bg_color ?? null} onSelect={onBgColorChange}>
         <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
           <Paintbrush className="w-3.5 h-3.5" />
           <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_bg_color || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
-
       <ColorPalettePopover currentColor={selectedCliente?.row_text_color ?? null} onSelect={onTextColorChange}>
         <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
           <Type className="w-3.5 h-3.5" />
           <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_text_color || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
-
       <div className="h-4 w-px bg-border mx-1" />
-
       <span className="text-muted-foreground">
         {selectedCliente
           ? `Row ${selectedIndex + 1} — ${selectedCliente.cognome || ''} ${selectedCliente.nome}`.trim()
@@ -362,6 +387,108 @@ function SheetToolbar({
     </div>
   );
 }
+
+// --- Memoized Row ---
+const ROW_HEIGHT = 32;
+
+const SheetRow = memo(function SheetRow({
+  cliente,
+  idx,
+  colWidths,
+  agents,
+  rowNumWidth,
+  isSelected,
+  rowFormat,
+  onSelect,
+  onCardClick,
+  onCellChange,
+}: {
+  cliente: Cliente;
+  idx: number;
+  colWidths: Record<string, number>;
+  agents: Agent[];
+  rowNumWidth: number;
+  isSelected: boolean;
+  rowFormat?: { bold?: boolean; italic?: boolean; strikethrough?: boolean };
+  onSelect: (id: string) => void;
+  onCardClick: (c: Cliente) => void;
+  onCellChange: (id: string, key: string, val: string) => void;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex border-b transition-colors",
+        isSelected ? 'ring-2 ring-primary/50 ring-inset' : '',
+        !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'),
+        rowFormat?.bold && 'font-bold',
+        rowFormat?.italic && 'italic',
+        rowFormat?.strikethrough && 'line-through',
+      )}
+      style={{
+        height: ROW_HEIGHT,
+        backgroundColor: cliente.row_bg_color || undefined,
+        color: cliente.row_text_color || undefined,
+      }}
+      onClick={() => onSelect(cliente.id)}
+    >
+      {/* Row number + open detail */}
+      <div
+        className="flex-shrink-0 flex items-center gap-0.5 border-r bg-muted/20 text-muted-foreground"
+        style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
+      >
+        <span className="text-[10px] font-medium flex-1 text-center">{idx + 1}</span>
+        <button
+          className="flex items-center justify-center w-5 h-full hover:bg-primary/10 hover:text-primary transition-colors"
+          onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
+          title="Apri scheda"
+        >
+          <Eye className="w-3 h-3" />
+        </button>
+      </div>
+
+      {/* Data cells */}
+      {COLUMNS.map(col => (
+        <div
+          key={col.key}
+          className="flex-shrink-0 border-r overflow-hidden"
+          style={{ width: colWidths[col.key] }}
+        >
+          {col.type === 'status' && col.editable ? (
+            <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
+          ) : col.type === 'lingua' && col.editable ? (
+            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
+          ) : col.type === 'portale' && col.editable ? (
+            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />
+          ) : col.type === 'tipo_contatto' && col.editable ? (
+            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
+          ) : col.type === 'agent' && col.editable ? (
+            <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
+          ) : col.key === 'telefono' ? (
+            <div className="flex items-center gap-0.5">
+              <div className="flex-1 overflow-hidden">
+                <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
+              </div>
+              {cliente.telefono && (
+                <a
+                  href={`https://wa.me/${cliente.telefono.replace(/[\s\-\(\)\+]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
+                  onClick={e => e.stopPropagation()}
+                  title="Apri WhatsApp"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+                </a>
+              )}
+            </div>
+          ) : (
+            <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+});
 
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery }: ClientiSheetViewProps) {
@@ -373,6 +500,9 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [rowFormats, setRowFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>>({});
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [containerHeight, setContainerHeight] = useState(600);
 
   const filtered = useMemo(() => {
     if (!searchQuery) return clienti;
@@ -401,6 +531,26 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       return sortDir === 'asc' ? cmp : -cmp;
     });
   }, [filtered, sortCol, sortDir]);
+
+  // Virtualization
+  const overscan = 10;
+  const totalHeight = sorted.length * ROW_HEIGHT;
+  const startIdx = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - overscan);
+  const endIdx = Math.min(sorted.length, Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + overscan);
+  const visibleRows = sorted.slice(startIdx, endIdx);
+
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    setScrollTop(e.currentTarget.scrollTop);
+  }, []);
+
+  // Measure container
+  const measureRef = useCallback((el: HTMLDivElement | null) => {
+    if (el) {
+      scrollRef.current = el;
+      const rect = el.getBoundingClientRect();
+      setContainerHeight(rect.height);
+    }
+  }, []);
 
   const handleHeaderClick = useCallback((key: string) => {
     if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
@@ -434,19 +584,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     await onUpdate(clienteId, updates);
   }, [onUpdate]);
 
-  const handleDragEnd = useCallback(async (result: DropResult) => {
-    if (!result.destination || result.source.index === result.destination.index) return;
-    const srcIdx = result.source.index;
-    const destIdx = result.destination.index;
-    const item = sorted[srcIdx];
-    if (!item) return;
-    // Update display_order to reflect new position
-    const targetItem = sorted[destIdx];
-    if (targetItem) {
-      await onUpdate(item.id, { display_order: targetItem.display_order });
-    }
-  }, [sorted, onUpdate]);
-
   const selectedCliente = useMemo(() => sorted.find(c => c.id === selectedRowId) || null, [sorted, selectedRowId]);
   const selectedIndex = useMemo(() => sorted.findIndex(c => c.id === selectedRowId), [sorted, selectedRowId]);
 
@@ -460,7 +597,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     await onUpdate(selectedRowId, { row_text_color: color } as any);
   }, [selectedRowId, onUpdate]);
 
-  const rowNumWidth = 68;
+  const rowNumWidth = 52;
   const totalWidth = rowNumWidth + COLUMNS.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
@@ -482,7 +619,11 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       />
 
       {/* Table */}
-      <div className="overflow-auto flex-1">
+      <div
+        ref={measureRef}
+        className="overflow-auto flex-1"
+        onScroll={handleScroll}
+      >
         <div style={{ minWidth: totalWidth }}>
           {/* Header */}
           <div className="flex sticky top-0 z-10 bg-muted/80 backdrop-blur-sm border-b">
@@ -512,105 +653,26 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
             ))}
           </div>
 
-          {/* Rows with DnD */}
-          <DragDropContext onDragEnd={handleDragEnd}>
-            <Droppable droppableId="sheet-rows">
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {sorted.map((cliente, idx) => (
-                    <Draggable key={cliente.id} draggableId={cliente.id} index={idx}>
-                      {(dragProvided, dragSnapshot) => (
-                        <div
-                          ref={dragProvided.innerRef}
-                          {...dragProvided.draggableProps}
-                          className={cn(
-                            "flex border-b transition-colors group",
-                            selectedRowId === cliente.id ? 'ring-2 ring-primary/50 ring-inset' : '',
-                            dragSnapshot.isDragging && 'shadow-lg opacity-90',
-                            !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'),
-                            rowFormats[cliente.id]?.bold && 'font-bold',
-                            rowFormats[cliente.id]?.italic && 'italic',
-                            rowFormats[cliente.id]?.strikethrough && 'line-through',
-                          )}
-                          style={{
-                            ...dragProvided.draggableProps.style,
-                            backgroundColor: cliente.row_bg_color || undefined,
-                            color: cliente.row_text_color || undefined,
-                          }}
-                          onClick={() => setSelectedRowId(cliente.id)}
-                        >
-                          {/* Row number + drag handle + open detail */}
-                          <div
-                            className="flex-shrink-0 flex items-center gap-0.5 border-r bg-muted/20 text-muted-foreground"
-                            style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
-                          >
-                            <div
-                              {...dragProvided.dragHandleProps}
-                              className="flex items-center justify-center w-5 h-full cursor-grab active:cursor-grabbing hover:bg-muted/40"
-                            >
-                              <GripVertical className="w-3 h-3" />
-                            </div>
-                            <span className="text-[10px] font-medium flex-1 text-center">
-                              {idx + 1}
-                            </span>
-                            <button
-                              className="flex items-center justify-center w-5 h-full hover:bg-primary/10 hover:text-primary transition-colors"
-                              onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
-                              title="Apri scheda"
-                            >
-                              <Eye className="w-3 h-3" />
-                            </button>
-                          </div>
-
-                          {/* Data cells */}
-                          {COLUMNS.map(col => (
-                            <div
-                              key={col.key}
-                              className="flex-shrink-0 border-r overflow-hidden"
-                              style={{ width: colWidths[col.key] }}
-                            >
-                              {col.key === 'telefono' ? (
-                                <div className="flex items-center gap-0.5">
-                                  <div className="flex-1 overflow-hidden">
-                                    <EditableCell
-                                      value={getCellValueStatic(cliente, col)}
-                                      onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
-                                      type={col.type}
-                                      agents={agents}
-                                    />
-                                  </div>
-                                  {cliente.telefono && (
-                                    <a
-                                      href={`https://wa.me/${cliente.telefono.replace(/[\s\-\(\)\+]/g, '')}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
-                                      onClick={e => e.stopPropagation()}
-                                      title="Apri WhatsApp"
-                                    >
-                                      <MessageCircle className="w-3.5 h-3.5 text-green-600" />
-                                    </a>
-                                  )}
-                                </div>
-                              ) : (
-                                <EditableCell
-                                  value={getCellValueStatic(cliente, col)}
-                                  onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
-                                  type={col.type}
-                                  agents={agents}
-                                />
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          {/* Virtualized rows */}
+          <div style={{ height: totalHeight, position: 'relative' }}>
+            <div style={{ position: 'absolute', top: startIdx * ROW_HEIGHT, left: 0, right: 0 }}>
+              {visibleRows.map((cliente, i) => (
+                <SheetRow
+                  key={cliente.id}
+                  cliente={cliente}
+                  idx={startIdx + i}
+                  colWidths={colWidths}
+                  agents={agents}
+                  rowNumWidth={rowNumWidth}
+                  isSelected={selectedRowId === cliente.id}
+                  rowFormat={rowFormats[cliente.id]}
+                  onSelect={setSelectedRowId}
+                  onCardClick={onCardClick}
+                  onCellChange={handleCellChange}
+                />
+              ))}
+            </div>
+          </div>
 
           {sorted.length === 0 && (
             <div className="py-12 text-center text-sm text-muted-foreground">No buyers found</div>
