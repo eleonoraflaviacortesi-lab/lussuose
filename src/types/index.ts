@@ -125,19 +125,11 @@ export interface Cliente {
 export type ClienteGroupBy = 'status' | 'regione' | 'tipologia' | 'budget' | 'agente';
 
 export interface ClienteFilters {
-  mutuo?: string;
-  piscina?: string;
-  nonAssegnati?: boolean;
-  conTerreno?: boolean;
-  urgenti?: boolean;
   search?: string;
-  paese?: string;
-  lingua?: string;
   portale?: string;
   regione?: string;
-  tipologia?: string;
-  stile?: string;
-  uso?: string;
+  ref_number?: string;
+  status?: string;
 }
 
 // Activity Log types
