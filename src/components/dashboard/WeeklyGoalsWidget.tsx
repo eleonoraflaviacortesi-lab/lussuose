@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useMeetings } from '@/hooks/useMeetings';
 import { useWeeklyProductionData } from '@/hooks/useWeeklyProductionData';
-import { celebrateGasiAbbestia } from '@/lib/confetti';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { GasiCelebration } from '@/components/ui/gasi-celebration';
 import { cn } from '@/lib/utils';
 
@@ -68,7 +68,7 @@ export const WeeklyGoalsWidget = () => {
 
       // Trigger celebration
       triggerHaptic('success');
-      celebrateGasiAbbestia();
+      triggerArcaneFog();
       setShowCelebration(true);
       
       // Invalidate queries

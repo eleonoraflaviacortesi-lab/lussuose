@@ -13,7 +13,7 @@ import DailyQuote from './DailyQuote';
 import AcquisitionChart from './AcquisitionChart';
 import TodayRemindersWidget from './TodayRemindersWidget';
 import WeeklyGoalsWidget from './WeeklyGoalsWidget';
-import { celebrateGoal } from '@/lib/confetti';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { Notizia } from '@/hooks/useNotizie';
 
 const PerformanceCharts = lazy(() => import('./PerformanceCharts'));
@@ -49,7 +49,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   useEffect(() => {
     if (previousSalesRef.current !== null && previousSalesRef.current < annualTarget && currentSales >= annualTarget) {
       // Goal just reached!
-      celebrateGoal();
+      triggerArcaneFog();
     }
     previousSalesRef.current = currentSales;
   }, [currentSales, annualTarget]);
