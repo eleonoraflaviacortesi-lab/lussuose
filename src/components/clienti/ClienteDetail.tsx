@@ -287,6 +287,11 @@ export function ClienteDetail({
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
+
+            {/* Property Matches - below activity on desktop */}
+            <div className="hidden lg:block">
+              <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
+            </div>
           </div>
 
           {/* COLUMN 2: Form Fields */}
@@ -725,7 +730,9 @@ export function ClienteDetail({
             </div>
 
             {/* Property Matches Section */}
-            <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
+            <div className="lg:hidden">
+              <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
+            </div>
           </div>
 
           {/* Full-width sections at bottom */}
