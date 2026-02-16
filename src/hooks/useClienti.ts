@@ -141,7 +141,7 @@ export function useClienti(options?: {
   // Create cliente
   const createMutation = useMutation({
     mutationFn: async (clienteData: Partial<Cliente>) => {
-      const insertData = {
+      const insertData: Record<string, unknown> = {
         nome: clienteData.nome || 'Unknown',
         telefono: clienteData.telefono,
         email: clienteData.email,
@@ -154,10 +154,16 @@ export function useClienti(options?: {
         sede: profile?.sede || 'AREZZO',
         comments: JSON.stringify(clienteData.comments || []),
       };
+      if (clienteData.data_submission) insertData.data_submission = clienteData.data_submission;
+      if (clienteData.cognome) insertData.cognome = clienteData.cognome;
+      if (clienteData.lingua) insertData.lingua = clienteData.lingua;
+      if (clienteData.portale) insertData.portale = clienteData.portale;
+      if (clienteData.ref_number) insertData.ref_number = clienteData.ref_number;
+      if (clienteData.note_extra) insertData.note_extra = clienteData.note_extra;
       
       const { data, error } = await supabase
         .from('clienti')
-        .insert(insertData)
+        .insert(insertData as any)
         .select()
         .single();
 
