@@ -239,45 +239,53 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           onFiltersChange={setFilters}
           totalCount={clienti.length}
           filteredCount={displayClients.length}
-        />
-      )}
-
-      {/* Search Bar + Sort */}
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Cerca per nome, paese, regione, email..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-9"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
-            >
-              <X className="w-4 h-4 text-muted-foreground" />
-            </button>
-          )}
-        </div>
-        <Button
-          variant={dateSortDir ? 'default' : 'outline'}
-          size="sm"
-          className="shrink-0 gap-1.5"
-          onClick={() => {
+          dateSortDir={dateSortDir}
+          onDateSortChange={() => {
             setDateSortDir(prev => 
               prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
             );
           }}
-        >
-          <ArrowUpDown className="w-4 h-4" />
-          <span className="hidden sm:inline">
-            {dateSortDir === 'desc' ? 'Recenti ↓' : dateSortDir === 'asc' ? 'Vecchi ↓' : 'Data'}
-          </span>
-        </Button>
-      </div>
+        />
+      )}
+
+      {/* Date Sort - only when not coordinator (coordinators have it in filters) */}
+      {!isCoordinator && (
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Cerca per nome, paese, regione, email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          <Button
+            variant={dateSortDir ? 'default' : 'outline'}
+            size="sm"
+            className="shrink-0 gap-1.5"
+            onClick={() => {
+              setDateSortDir(prev => 
+                prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
+              );
+            }}
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {dateSortDir === 'desc' ? 'Recenti ↓' : dateSortDir === 'asc' ? 'Vecchi ↓' : 'Data'}
+            </span>
+          </Button>
+        </div>
+      )}
 
       {/* Board */}
       {viewMode === 'kanban' ? (
@@ -292,7 +300,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           onOrderChange={handleOrderChange}
           onColorChange={handleColorChange}
           onEmojiChange={handleEmojiChange}
-          searchQuery={searchQuery}
+          searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
         />
       ) : (
         <ClientiSheetView
@@ -309,7 +317,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           onUpdate={async (id, updates) => {
             await updateCliente({ id, ...updates });
           }}
-          searchQuery={searchQuery}
+          searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
           onAddNew={() => setAddDialogOpen(true)}
         />
       )}
