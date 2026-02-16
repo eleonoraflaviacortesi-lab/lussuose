@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,8 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
+import { celebrateGasiAbbestia } from '@/lib/confetti';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
@@ -17,6 +19,29 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
   const { targets } = useSedeTargets();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const [logoWiggle, setLogoWiggle] = useState(false);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Easter egg: triple-tap the logo for a surprise
+  const handleLogoTap = useCallback(() => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    
+    // Wiggle on every tap
+    setLogoWiggle(true);
+    setTimeout(() => setLogoWiggle(false), 400);
+
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      triggerHaptic('success');
+      celebrateGasiAbbestia();
+    } else {
+      tapTimerRef.current = setTimeout(() => {
+        tapCountRef.current = 0;
+      }, 600);
+    }
+  }, []);
 
   const handleSignOut = async () => {
     await signOut();
@@ -69,8 +94,13 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
             {profile?.avatar_emoji || '🖤'}
           </button>
 
-          {/* Brand Logo */}
-          <img src={logo} alt="Logo" className="h-[3.5rem]" />
+          {/* Brand Logo - Easter egg: triple-tap! */}
+          <img 
+            src={logo} 
+            alt="Logo" 
+            className={`h-[3.5rem] transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            onClick={handleLogoTap}
+          />
 
           {/* Logout */}
           <button 
