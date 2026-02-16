@@ -1,63 +1,52 @@
 
-# Spreadsheet View Enhancements
 
-## Overview
-Aggiungere una barra di editing stile Google Sheets, numeri di riga, possibilita di spostare righe tramite drag-and-drop, intestazione fissa durante lo scorrimento, e opzioni per cambiare colore di sfondo e testo delle righe.
+# Riorganizzazione della scheda dettaglio Cliente
 
-## What Changes
+## Problema attuale
+Le informazioni sono distribuite in 3 colonne ma con raggruppamenti poco intuitivi. Ad esempio, "Tracking CRM" interrompe il flusso dei dati personali, "Budget" e "Tempistiche" sono separati da sezioni non correlate, e "Utilizzo" e "Descrizione" sono isolati in fondo alla terza colonna.
 
-### 1. Editing Toolbar (barra superiore stile Google Sheets)
-Una barra fissa sopra la tabella con:
-- **Bold / Italic / Strikethrough** toggle per il testo della cella selezionata (visuale, non persistente -- applicato al livello riga)
-- **Colore sfondo riga** (paint bucket icon) -- apre un color picker per impostare il colore di sfondo della riga selezionata
-- **Colore testo riga** (font color icon) -- apre un color picker per cambiare il colore del testo della riga selezionata
-- Indicatore della cella/riga selezionata (es. "Row 5 - Mario Rossi")
+## Nuova organizzazione proposta
 
-I colori riga/testo verranno salvati nel database (campi `row_bg_color` e `row_text_color` sulla tabella `clienti`).
+La logica di riorganizzazione segue il flusso mentale dell'agente: **Chi e --> Cosa cerca --> Come agire**.
 
-### 2. Numeri di riga
-Gia presenti ma verranno resi piu evidenti con styling migliorato, numeri sequenziali fissi nella colonna sinistra.
+### Colonna 1 - "CHI E' + OPERATIVITA'"
+Tutto cio' che serve per capire il buyer e agire immediatamente:
+1. **Note** (invariato, resta in cima)
+2. **Assegnazione agente** (invariato)
+3. **Dati Personali** (spostati qui dalla col.2): Cognome, Paese, Lingua, Telefono, Email, Data richiesta
+4. **Tracking CRM** (spostato subito sotto i dati personali, stessa card): Portale, Proprieta' richiesta, Ref, Contattato da, Tipo contatto, Associa a Richiesta
+5. **Azioni Rapide** (invariato): Chiama, Promemoria, Scarica PDF
+6. **Storico Attivita'** + commenti (invariato)
 
-### 3. Drag-and-drop per spostare righe
-Aggiungere un handle di trascinamento (grip icon) nella colonna dei numeri di riga. Utilizzo della libreria `@hello-pangea/dnd` (gia installata) per permettere il riordino delle righe.
+### Colonna 2 - "COSA CERCA"
+Tutti i criteri di ricerca raggruppati per tema:
+1. **Budget e Finanziamento** (spostato in cima): Budget massimo, Mutuo
+2. **Tipologia Immobile**: Tipo, Stile, Camere, Bagni, Layout, Dimensioni min/max
+3. **Caratteristiche Extra**: Piscina, Terreno, Dependance
+4. **Localita' Preferite**: Regioni, Contesto, Motivo zona, Vicinanza citta'
 
-### 4. Intestazione sempre visibile
-Gia implementata con `sticky top-0`, verra verificata e migliorata per funzionare correttamente anche con la nuova toolbar.
+### Colonna 3 - "CONTESTO + PROPRIETA'"
+Informazioni di contesto e matching:
+1. **Tempistiche**: Quando vuole acquistare, Ha visitato la zona
+2. **Utilizzo**: Come usera' la proprieta', Interesse affitto
+3. **Descrizione richiesta** (testo libero del buyer)
+4. **Proprieta' associate** (matching cards)
 
-### 5. Colore riga e testo
-- Click su una riga per selezionarla
-- Dalla toolbar, scegliere colore sfondo o colore testo
-- I colori vengono persistiti nel DB e applicati visivamente
+### Sezione finale (full-width, invariata)
+- Commenti precedenti (legacy)
+- Metadata (date creazione/submission)
+- Elimina Cliente
 
----
+## Dettagli tecnici
 
-## Technical Details
+### File modificato
+- `src/components/clienti/ClienteDetail.tsx`
 
-### Database Migration
-```sql
-ALTER TABLE public.clienti 
-ADD COLUMN IF NOT EXISTS row_bg_color text,
-ADD COLUMN IF NOT EXISTS row_text_color text;
-```
+### Modifiche
+- Spostamento dei blocchi JSX esistenti tra le colonne senza modificare i singoli campi
+- La colonna 1 diventa piu' densa (dati personali + CRM + azioni) perche' e' il punto di partenza naturale
+- "Dati Personali" e "Tracking CRM" restano due sezioni con header separati ma dentro la stessa card bianca nella colonna 1
+- Su mobile il layout resta a colonna singola con lo stesso ordine: prima col.1, poi col.2, poi col.3
+- Il layout desktop resta `lg:grid-cols-3`
+- Nessun elemento aggiunto o rimosso, solo riposizionamento
 
-### Type Update (`src/types/index.ts`)
-Aggiungere `row_bg_color: string | null` e `row_text_color: string | null` all'interfaccia `Cliente`.
-
-### Component Changes (`src/components/clienti/ClientiSheetView.tsx`)
-
-1. **State**: aggiungere `selectedRowId` per tracciare la riga selezionata
-2. **Toolbar component** (`SheetToolbar`): barra sopra la tabella con:
-   - Label riga selezionata
-   - Bottone colore sfondo (con popover color picker)
-   - Bottone colore testo (con popover color picker)
-3. **Drag-and-drop**: wrappare le righe con `DragDropContext` e `Droppable`/`Draggable` da `@hello-pangea/dnd`
-4. **Row styling**: applicare `style={{ backgroundColor, color }}` dalle proprietà `row_bg_color` / `row_text_color` di ogni cliente
-5. **Row selection**: click sulla riga la evidenzia con un bordo/sfondo di selezione
-
-### Color Picker
-Utilizzare il componente `color-picker-overlay` o `liquid-glass-color-picker` gia presente nel progetto, oppure un semplice set di colori predefiniti in un Popover (piu leggero e in linea con lo stile Google Sheets).
-
-### File modificati
-- `supabase/migrations/` -- nuova migration per `row_bg_color`, `row_text_color`
-- `src/types/index.ts` -- aggiunta campi
-- `src/components/clienti/ClientiSheetView.tsx` -- toolbar, drag-and-drop, selezione riga, colori
