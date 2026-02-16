@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, Paintbrush, Type, X } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
@@ -308,14 +308,46 @@ function SheetToolbar({
   selectedIndex,
   onBgColorChange,
   onTextColorChange,
+  rowFormats,
+  onToggleFormat,
 }: {
   selectedCliente: Cliente | null;
   selectedIndex: number;
   onBgColorChange: (color: string | null) => void;
   onTextColorChange: (color: string | null) => void;
+  rowFormats: Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>;
+  onToggleFormat: (format: 'bold' | 'italic' | 'strikethrough') => void;
 }) {
+  const fmt = selectedCliente ? rowFormats[selectedCliente.id] || {} : {};
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/60 border-b text-xs">
+    <div className="flex items-center gap-1 px-3 py-1.5 bg-muted/60 border-b text-xs">
+      <Button
+        variant="ghost" size="sm"
+        className={cn("h-7 w-7 p-0", fmt.bold && "bg-accent")}
+        disabled={!selectedCliente}
+        onClick={() => onToggleFormat('bold')}
+      >
+        <Bold className="w-3.5 h-3.5" />
+      </Button>
+      <Button
+        variant="ghost" size="sm"
+        className={cn("h-7 w-7 p-0", fmt.italic && "bg-accent")}
+        disabled={!selectedCliente}
+        onClick={() => onToggleFormat('italic')}
+      >
+        <Italic className="w-3.5 h-3.5" />
+      </Button>
+      <Button
+        variant="ghost" size="sm"
+        className={cn("h-7 w-7 p-0", fmt.strikethrough && "bg-accent")}
+        disabled={!selectedCliente}
+        onClick={() => onToggleFormat('strikethrough')}
+      >
+        <Strikethrough className="w-3.5 h-3.5" />
+      </Button>
+
+      <div className="h-4 w-px bg-border mx-1" />
+
       <ColorPalettePopover currentColor={selectedCliente?.row_bg_color ?? null} onSelect={onBgColorChange}>
         <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
           <Paintbrush className="w-3.5 h-3.5" />
@@ -349,6 +381,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [rowFormats, setRowFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>>({});
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
 
   const filtered = useMemo(() => {
@@ -448,6 +481,14 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
         selectedIndex={selectedIndex}
         onBgColorChange={handleBgColorChange}
         onTextColorChange={handleTextColorChange}
+        rowFormats={rowFormats}
+        onToggleFormat={(fmt) => {
+          if (!selectedRowId) return;
+          setRowFormats(prev => ({
+            ...prev,
+            [selectedRowId]: { ...prev[selectedRowId], [fmt]: !prev[selectedRowId]?.[fmt] }
+          }));
+        }}
       />
 
       {/* Table */}
@@ -496,7 +537,10 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                             "flex border-b transition-colors group",
                             selectedRowId === cliente.id ? 'ring-2 ring-primary/50 ring-inset' : '',
                             dragSnapshot.isDragging && 'shadow-lg opacity-90',
-                            !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10')
+                            !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'),
+                            rowFormats[cliente.id]?.bold && 'font-bold',
+                            rowFormats[cliente.id]?.italic && 'italic',
+                            rowFormats[cliente.id]?.strikethrough && 'line-through',
                           )}
                           style={{
                             ...dragProvided.draggableProps.style,
