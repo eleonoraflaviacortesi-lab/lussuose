@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Cliente, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
+import { Cliente, ClienteGroupBy, ClienteStatus, ClienteFilters as Filters } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,10 +12,6 @@ import {
 import { 
   Search, 
   Filter, 
-  Droplets, 
-  Trees, 
-  Clock, 
-  UserX,
   X,
   LayoutGrid,
   ArrowUpDown,
@@ -42,12 +38,15 @@ const groupByOptions: { value: ClienteGroupBy; label: string }[] = [
   { value: 'agente', label: 'Per Agente' },
 ];
 
-interface FilterChip {
-  key: keyof Filters;
-  label: string;
-  icon: React.ElementType;
-  active: boolean;
-}
+const STATUS_LABELS: Record<string, string> = {
+  new: 'Nuovi',
+  contacted: 'Contattati',
+  qualified: 'Qualificati',
+  proposal: 'Proposta',
+  negotiation: 'Trattativa',
+  closed_won: 'Chiusi ✓',
+  closed_lost: 'Persi',
+};
 
 export function ClientiFilters({
   groupBy,
@@ -60,34 +59,17 @@ export function ClientiFilters({
   dateSortDir,
   onDateSortChange,
 }: ClientiFiltersProps) {
-  // Extract unique values dynamically from data
   const uniqueValues = useMemo(() => {
     const unique = (arr: (string | null | undefined)[]) => 
       [...new Set(arr.filter(Boolean) as string[])].sort();
     
     return {
-      paese: unique(clienti.map(c => c.paese)),
-      lingua: unique(clienti.map(c => c.lingua)),
       portale: unique(clienti.map(c => c.portale)),
       regione: unique(clienti.flatMap(c => c.regioni || [])),
-      tipologia: unique(clienti.flatMap(c => c.tipologia || [])),
-      stile: unique(clienti.map(c => c.stile)),
-      uso: unique(clienti.map(c => c.uso)),
+      ref_number: unique(clienti.map(c => c.ref_number)),
+      status: unique(clienti.map(c => c.status)),
     };
   }, [clienti]);
-
-  const chips: FilterChip[] = [
-    { key: 'urgenti', label: 'Urgenti', icon: Clock, active: !!filters.urgenti },
-    { key: 'nonAssegnati', label: 'Non assegnati', icon: UserX, active: !!filters.nonAssegnati },
-    { key: 'conTerreno', label: 'Con terreno', icon: Trees, active: !!filters.conTerreno },
-  ];
-
-  const toggleFilter = (key: keyof Filters) => {
-    onFiltersChange({
-      ...filters,
-      [key]: !filters[key],
-    });
-  };
 
   const clearFilters = () => {
     onFiltersChange({});
@@ -95,23 +77,17 @@ export function ClientiFilters({
 
   const hasActiveFilters = Object.entries(filters).some(([k, v]) => k !== 'search' && v);
 
-  // Dropdown filter config
-  const dropdownFilters: { key: keyof Filters; label: string; options: string[] }[] = [
-    { key: 'paese', label: 'Paese', options: uniqueValues.paese },
-    { key: 'lingua', label: 'Lingua', options: uniqueValues.lingua },
-    { key: 'regione', label: 'Regione', options: uniqueValues.regione },
+  const dropdownFilters: { key: keyof Filters; label: string; options: string[]; labelMap?: Record<string, string> }[] = [
+    { key: 'status', label: 'Status', options: uniqueValues.status, labelMap: STATUS_LABELS },
     { key: 'portale', label: 'Portale', options: uniqueValues.portale },
-    { key: 'tipologia', label: 'Tipologia', options: uniqueValues.tipologia },
-    { key: 'stile', label: 'Stile', options: uniqueValues.stile },
-    { key: 'uso', label: 'Uso', options: uniqueValues.uso },
-    { key: 'piscina', label: 'Piscina', options: ['Essential', 'Optional', 'Not needed'] },
+    { key: 'regione', label: 'Regione', options: uniqueValues.regione },
+    { key: 'ref_number', label: 'Riferimento', options: uniqueValues.ref_number },
   ];
 
   return (
     <div className="space-y-3">
       {/* Top row: Search + GroupBy */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -122,7 +98,6 @@ export function ClientiFilters({
           />
         </div>
 
-        {/* GroupBy Selector */}
         <Select value={groupBy} onValueChange={v => onGroupByChange(v as ClienteGroupBy)}>
           <SelectTrigger className="w-full sm:w-[180px]">
             <LayoutGrid className="w-4 h-4 mr-2" />
@@ -137,7 +112,6 @@ export function ClientiFilters({
           </SelectContent>
         </Select>
 
-        {/* Date Sort */}
         {onDateSortChange && (
           <Button
             variant={dateSortDir ? 'default' : 'outline'}
@@ -153,30 +127,10 @@ export function ClientiFilters({
         )}
       </div>
 
-      {/* Filter chips + dropdowns */}
+      {/* Filter dropdowns */}
       <div className="flex flex-wrap items-center gap-1.5">
         <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
-        
-        {chips.map(chip => {
-          const Icon = chip.icon;
-          return (
-            <button
-              key={chip.key}
-              onClick={() => toggleFilter(chip.key)}
-              className={cn(
-                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
-                chip.active
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80 text-muted-foreground"
-              )}
-            >
-              <Icon className="w-3 h-3" />
-              {chip.label}
-            </button>
-          );
-        })}
 
-        {/* Dynamic dropdown filters */}
         {dropdownFilters.map(df => df.options.length > 0 && (
           <Select
             key={df.key}
@@ -192,13 +146,14 @@ export function ClientiFilters({
             <SelectContent>
               <SelectItem value="all">{df.label}: Tutti</SelectItem>
               {df.options.map(opt => (
-                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                <SelectItem key={opt} value={opt}>
+                  {df.labelMap?.[opt] || opt}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         ))}
 
-        {/* Clear filters */}
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
@@ -209,7 +164,6 @@ export function ClientiFilters({
           </button>
         )}
 
-        {/* Count */}
         <span className="ml-auto text-xs text-muted-foreground">
           {filteredCount === totalCount
             ? `${totalCount} clienti`
