@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useRef, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
 
 interface UndoAction {
@@ -32,6 +32,12 @@ const MAX_HISTORY = 30;
 export function UndoRedoProvider({ children }: { children: ReactNode }) {
   const [past, setPast] = useState<UndoAction[]>([]);
   const [future, setFuture] = useState<UndoAction[]>([]);
+  
+  // Use refs to avoid stale closures in undo/redo callbacks
+  const pastRef = useRef(past);
+  const futureRef = useRef(future);
+  pastRef.current = past;
+  futureRef.current = future;
 
   const pushAction = useCallback((action: UndoAction) => {
     setPast(prev => [...prev.slice(-MAX_HISTORY + 1), action]);
@@ -39,30 +45,34 @@ export function UndoRedoProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const undo = useCallback(async () => {
-    if (past.length === 0) return;
-    const action = past[past.length - 1];
+    const currentPast = pastRef.current;
+    if (currentPast.length === 0) return;
+    const action = currentPast[currentPast.length - 1];
     try {
       await action.undo();
       setPast(prev => prev.slice(0, -1));
       setFuture(prev => [action, ...prev]);
       toast({ title: `↩ Annullato: ${action.description}` });
-    } catch {
+    } catch (e) {
+      console.error('Undo failed:', e);
       toast({ title: 'Errore nell\'annullare', variant: 'destructive' });
     }
-  }, [past]);
+  }, []);
 
   const redo = useCallback(async () => {
-    if (future.length === 0) return;
-    const action = future[0];
+    const currentFuture = futureRef.current;
+    if (currentFuture.length === 0) return;
+    const action = currentFuture[0];
     try {
       await action.redo();
       setFuture(prev => prev.slice(1));
       setPast(prev => [...prev, action]);
       toast({ title: `↪ Ripristinato: ${action.description}` });
-    } catch {
+    } catch (e) {
+      console.error('Redo failed:', e);
       toast({ title: 'Errore nel ripristinare', variant: 'destructive' });
     }
-  }, [future]);
+  }, []);
 
   // Keyboard shortcuts: Ctrl+Z / Ctrl+Shift+Z
   useEffect(() => {
