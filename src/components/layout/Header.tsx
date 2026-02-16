@@ -34,6 +34,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
   const target = targets.fatturato_target || 500000;
   const current = kpis?.fatturato?.value || 0;
   const remaining = Math.max(0, target - current);
+  const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
 
   return (
     <>
@@ -49,6 +50,8 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
                 <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
                 <span>★</span>
                 <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>
+                <span>★</span>
+                <span>FATTURATO A CREDITO €{formatCurrency(fatturatoCredito)}</span>
                 <span>★</span>
               </span>
             ))}
