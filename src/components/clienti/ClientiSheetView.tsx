@@ -279,8 +279,7 @@ function EditableCell({
     return (
       <span
         className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-muted/30 rounded min-h-[28px]"
-        onDoubleClick={() => setEditing(true)}
-        onClick={onClick}
+        onClick={(e) => { setEditing(true); onClick?.(); }}
         title={value}
       >
         {value || '—'}
