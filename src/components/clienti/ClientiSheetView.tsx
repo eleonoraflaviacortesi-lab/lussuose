@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo, memo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -727,7 +727,19 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
   const [colFilters, setColFilters] = useState<Record<string, Set<string>>>({});
   const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
-  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>({});
+  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => {
+    try {
+      const saved = localStorage.getItem('clienti-sheet-col-formats');
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  // Persist colFormats to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem('clienti-sheet-col-formats', JSON.stringify(colFormats));
+    } catch {}
+  }, [colFormats]);
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
   const dragColRef = useRef<{ key: string; startX: number } | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
