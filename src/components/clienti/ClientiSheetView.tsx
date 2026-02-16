@@ -1281,6 +1281,15 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
         }
       }}
     >
+      {/* Add new row button */}
+      {onAddNew && (
+        <div className="px-3 py-2 border-b border-border/40">
+          <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
+            <Plus className="w-4 h-4" /> Nuova richiesta
+          </Button>
+        </div>
+      )}
+
       {/* Toolbar */}
       <SheetToolbar
         selectedCliente={selectedCliente}
@@ -1390,13 +1399,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       </div>
 
       {/* Footer */}
-      <div className="bg-background border-t border-border/40 px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
-        {onAddNew && (
-          <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
-            <Plus className="w-4 h-4" /> Nuova richiesta
-          </Button>
-        )}
-        <span className="flex-1 text-right">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
+      <div className="bg-background border-t border-border/40 px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
+        <span className="flex-1">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
         {Object.values(colFilters).some(s => s.size > 0) && (
           <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2" onClick={() => setColFilters({})}>
             <X className="w-3 h-3 mr-1" /> Rimuovi filtri
