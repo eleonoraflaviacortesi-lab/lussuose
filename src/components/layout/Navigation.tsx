@@ -50,7 +50,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          const showSeparatorAfter = index === 3; // After clienti
+          const showSeparatorAfter = false;
           
           return (
             <div key={tab.id} className="flex items-center">
@@ -67,7 +67,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 {isActive && (
                   <svg
                     viewBox="0 0 100 100"
-                    className="absolute inset-0 w-[38px] h-[38px] m-auto"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[38px]"
                     style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
                   >
                     <polygon
