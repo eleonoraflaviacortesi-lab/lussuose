@@ -512,6 +512,122 @@ const SheetRow = memo(function SheetRow({
   );
 });
 
+const DATE_COLUMNS = ['data_submission', 'last_contact_date'];
+
+// --- Date (Month) Filter Popover ---
+function DateColumnFilterPopover({
+  colKey,
+  uniqueValues,
+  activeFilter,
+  onFilterChange,
+}: {
+  colKey: string;
+  uniqueValues: string[];
+  activeFilter: Set<string>;
+  onFilterChange: (key: string, values: Set<string>) => void;
+}) {
+  const isActive = activeFilter.size > 0;
+
+  // Extract unique months from date values (dd/MM/yyyy -> MM/yyyy)
+  const months = useMemo(() => {
+    const monthSet = new Map<string, string>();
+    uniqueValues.forEach(v => {
+      if (!v) return;
+      const parts = v.split('/');
+      if (parts.length === 3) {
+        const key = `${parts[1]}/${parts[2]}`; // MM/yyyy
+        const label = `${['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'][parseInt(parts[1], 10) - 1] || parts[1]} ${parts[2]}`;
+        monthSet.set(key, label);
+      }
+    });
+    return Array.from(monthSet.entries())
+      .sort((a, b) => {
+        const [mA, yA] = a[0].split('/');
+        const [mB, yB] = b[0].split('/');
+        return yB.localeCompare(yA) || mB.localeCompare(mA);
+      });
+  }, [uniqueValues]);
+
+  const toggleMonth = (monthKey: string) => {
+    // Get all date values that belong to this month
+    const datesInMonth = uniqueValues.filter(v => {
+      if (!v) return false;
+      const parts = v.split('/');
+      return parts.length === 3 && `${parts[1]}/${parts[2]}` === monthKey;
+    });
+
+    const next = new Set(activeFilter);
+    const allIncluded = datesInMonth.every(d => next.has(d));
+    if (allIncluded) {
+      datesInMonth.forEach(d => next.delete(d));
+    } else {
+      datesInMonth.forEach(d => next.add(d));
+    }
+    // If all selected, clear filter
+    if (next.size === uniqueValues.filter(v => !!v).length) {
+      onFilterChange(colKey, new Set());
+    } else {
+      onFilterChange(colKey, next);
+    }
+  };
+
+  const selectAll = () => onFilterChange(colKey, new Set());
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "p-0.5 rounded hover:bg-muted/60 transition-colors",
+            isActive && "text-primary"
+          )}
+          onClick={e => e.stopPropagation()}
+        >
+          <Filter className={cn("w-3 h-3", isActive ? "opacity-100" : "opacity-30")} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-48 p-2" align="start" onClick={e => e.stopPropagation()}>
+        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Filtra per mese</p>
+        <div className="overflow-y-auto max-h-48 space-y-0.5">
+          {months.map(([monthKey, label]) => {
+            const datesInMonth = uniqueValues.filter(v => {
+              if (!v) return false;
+              const parts = v.split('/');
+              return parts.length === 3 && `${parts[1]}/${parts[2]}` === monthKey;
+            });
+            const checked = activeFilter.size === 0 || datesInMonth.some(d => activeFilter.has(d));
+            const count = datesInMonth.length;
+            return (
+              <button
+                key={monthKey}
+                className={cn(
+                  "flex items-center gap-2 w-full text-left text-xs px-2 py-1.5 rounded hover:bg-muted/60 transition-colors",
+                  !checked && activeFilter.size > 0 && "opacity-40"
+                )}
+                onClick={() => toggleMonth(monthKey)}
+              >
+                <div className={cn(
+                  "w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0",
+                  checked ? "bg-primary border-primary text-primary-foreground" : "border-border"
+                )}>
+                  {checked && <Check className="w-2.5 h-2.5" />}
+                </div>
+                <span className="flex-1">{label}</span>
+                <span className="text-muted-foreground text-[10px]">{count}</span>
+              </button>
+            );
+          })}
+        </div>
+        {isActive && (
+          <Button variant="ghost" size="sm" className="w-full mt-2 h-6 text-[10px]" onClick={selectAll}>
+            <X className="w-3 h-3 mr-1" /> Rimuovi filtro
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 // --- Column Filter Popover ---
 function ColumnFilterPopover({
   colKey,
@@ -887,12 +1003,21 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                 {sortCol === col.key && (
                   <span className="ml-0.5 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
                 )}
-                <ColumnFilterPopover
-                  colKey={col.key}
-                  uniqueValues={uniqueValuesMap[col.key] || []}
-                  activeFilter={colFilters[col.key] || new Set()}
-                  onFilterChange={handleFilterChange}
-                />
+                {DATE_COLUMNS.includes(col.key) ? (
+                  <DateColumnFilterPopover
+                    colKey={col.key}
+                    uniqueValues={uniqueValuesMap[col.key] || []}
+                    activeFilter={colFilters[col.key] || new Set()}
+                    onFilterChange={handleFilterChange}
+                  />
+                ) : (
+                  <ColumnFilterPopover
+                    colKey={col.key}
+                    uniqueValues={uniqueValuesMap[col.key] || []}
+                    activeFilter={colFilters[col.key] || new Set()}
+                    onFilterChange={handleFilterChange}
+                  />
+                )}
                 <div
                   className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50"
                   onMouseDown={e => handleResizeStart(col.key, e)}
