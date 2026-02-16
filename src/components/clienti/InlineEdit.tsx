@@ -388,8 +388,7 @@ export function InlineEditSelect({
         className
       )}
     >
-      {prefix}
-      <span className="flex-1">{displayLabel || placeholder}</span>
+      {prefix || <span className="flex-1">{displayLabel || placeholder}</span>}
       <Pencil className="h-3 w-3 opacity-0 group-hover:opacity-50 transition-opacity" />
     </div>
   );
