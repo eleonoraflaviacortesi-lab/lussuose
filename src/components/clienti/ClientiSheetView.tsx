@@ -10,10 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Agent {
   user_id: string;
@@ -519,16 +520,106 @@ const SheetRow = memo(function SheetRow({
   );
 });
 
+// --- Column Filter Popover ---
+function ColumnFilterPopover({
+  colKey,
+  uniqueValues,
+  activeFilter,
+  onFilterChange,
+}: {
+  colKey: string;
+  uniqueValues: string[];
+  activeFilter: Set<string>;
+  onFilterChange: (key: string, values: Set<string>) => void;
+}) {
+  const [search, setSearch] = useState('');
+  const isActive = activeFilter.size > 0;
+  const filteredValues = useMemo(() => {
+    if (!search) return uniqueValues;
+    const q = search.toLowerCase();
+    return uniqueValues.filter(v => v.toLowerCase().includes(q));
+  }, [uniqueValues, search]);
+
+  const toggleValue = (val: string) => {
+    const next = new Set(activeFilter);
+    if (next.has(val)) next.delete(val);
+    else next.add(val);
+    onFilterChange(colKey, next);
+  };
+
+  const selectAll = () => onFilterChange(colKey, new Set());
+  const selectNone = () => onFilterChange(colKey, new Set(uniqueValues));
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          className={cn(
+            "p-0.5 rounded hover:bg-muted/60 transition-colors",
+            isActive && "text-primary"
+          )}
+          onClick={e => e.stopPropagation()}
+        >
+          <Filter className={cn("w-3 h-3", isActive ? "opacity-100" : "opacity-30")} />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-52 p-2" align="start" onClick={e => e.stopPropagation()}>
+        <Input
+          placeholder="Cerca..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="h-7 text-xs mb-2"
+        />
+        <div className="flex gap-1 mb-2">
+          <Button variant="ghost" size="sm" className="h-6 text-[10px] flex-1" onClick={selectAll}>Tutti</Button>
+          <Button variant="ghost" size="sm" className="h-6 text-[10px] flex-1" onClick={selectNone}>Nessuno</Button>
+        </div>
+        <ScrollArea className="max-h-48">
+          <div className="space-y-0.5">
+            {filteredValues.map(val => {
+              const checked = activeFilter.size === 0 || activeFilter.has(val);
+              return (
+                <button
+                  key={val}
+                  className={cn(
+                    "flex items-center gap-2 w-full text-left text-xs px-2 py-1 rounded hover:bg-muted/60 transition-colors",
+                    !checked && activeFilter.size > 0 && "opacity-40"
+                  )}
+                  onClick={() => toggleValue(val)}
+                >
+                  <div className={cn(
+                    "w-3.5 h-3.5 rounded border flex items-center justify-center flex-shrink-0",
+                    checked ? "bg-primary border-primary text-primary-foreground" : "border-border"
+                  )}>
+                    {checked && <Check className="w-2.5 h-2.5" />}
+                  </div>
+                  <span className="truncate">{val || '(vuoto)'}</span>
+                </button>
+              );
+            })}
+          </div>
+        </ScrollArea>
+        {isActive && (
+          <Button variant="ghost" size="sm" className="w-full mt-2 h-6 text-[10px]" onClick={selectAll}>
+            <X className="w-3 h-3 mr-1" /> Rimuovi filtro
+          </Button>
+        )}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery }: ClientiSheetViewProps) {
   const [colOrder, setColOrder] = useState<string[]>(() => COLUMNS.map(c => c.key));
   const [colWidths, setColWidths] = useState<Record<string, number>>(
     () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
   );
-  const [sortCol, setSortCol] = useState<string | null>(null);
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [sortCol, setSortCol] = useState<string | null>('data_submission');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
+  const [colFilters, setColFilters] = useState<Record<string, Set<string>>>({});
   const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
   const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>({});
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
@@ -559,16 +650,53 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     );
   }, [clienti, searchQuery]);
 
+  // Apply column filters
+  const colFiltered = useMemo(() => {
+    const activeFilters = Object.entries(colFilters).filter(([, vals]) => vals.size > 0);
+    if (activeFilters.length === 0) return filtered;
+    return filtered.filter(c => {
+      return activeFilters.every(([key, allowedVals]) => {
+        const col = COLUMNS.find(cl => cl.key === key)!;
+        const cellVal = getCellValueStatic(c, col);
+        return allowedVals.has(cellVal);
+      });
+    });
+  }, [filtered, colFilters]);
+
   const sorted = useMemo(() => {
-    if (!sortCol) return filtered;
-    return [...filtered].sort((a, b) => {
+    if (!sortCol) return colFiltered;
+    return [...colFiltered].sort((a, b) => {
       const col = COLUMNS.find(c => c.key === sortCol)!;
       const va = getCellValueStatic(a, col);
       const vb = getCellValueStatic(b, col);
+      // Date-aware sorting for date columns
+      if (sortCol === 'data_submission' || sortCol === 'last_contact_date') {
+        const da = va ? new Date(va.split('/').reverse().join('-')).getTime() : 0;
+        const db = vb ? new Date(vb.split('/').reverse().join('-')).getTime() : 0;
+        return sortDir === 'asc' ? da - db : db - da;
+      }
       const cmp = va.localeCompare(vb, undefined, { numeric: true });
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [filtered, sortCol, sortDir]);
+  }, [colFiltered, sortCol, sortDir]);
+
+  // Compute unique values per column for filters
+  const uniqueValuesMap = useMemo(() => {
+    const map: Record<string, string[]> = {};
+    for (const col of COLUMNS) {
+      const valSet = new Set<string>();
+      for (const c of filtered) {
+        const v = getCellValueStatic(c, col);
+        valSet.add(v);
+      }
+      map[col.key] = Array.from(valSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    }
+    return map;
+  }, [filtered]);
+
+  const handleFilterChange = useCallback((key: string, values: Set<string>) => {
+    setColFilters(prev => ({ ...prev, [key]: values }));
+  }, []);
 
   // Virtualization
   const overscan = 10;
@@ -764,11 +892,17 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
               >
-                <GripHorizontal className="w-3 h-3 mr-1 opacity-30 flex-shrink-0" />
-                <span className="truncate">{col.label}</span>
+                <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
+                <span className="truncate flex-1">{col.label}</span>
                 {sortCol === col.key && (
-                  <span className="ml-1 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                  <span className="ml-0.5 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
                 )}
+                <ColumnFilterPopover
+                  colKey={col.key}
+                  uniqueValues={uniqueValuesMap[col.key] || []}
+                  activeFilter={colFilters[col.key] || new Set()}
+                  onFilterChange={handleFilterChange}
+                />
                 <div
                   className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50"
                   onMouseDown={e => handleResizeStart(col.key, e)}
@@ -809,8 +943,13 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       </div>
 
       {/* Footer */}
-      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground">
-        {sorted.length} buyers
+      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
+        <span>{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
+        {Object.values(colFilters).some(s => s.size > 0) && (
+          <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2" onClick={() => setColFilters({})}>
+            <X className="w-3 h-3 mr-1" /> Rimuovi filtri
+          </Button>
+        )}
       </div>
     </div>
   );
