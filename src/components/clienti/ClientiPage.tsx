@@ -310,6 +310,7 @@ groupBy={groupBy}
           onUpdate={async (id, updates) => {
             await updateCliente({ id, ...updates });
           }}
+          onDelete={async (id) => { await deleteCliente(id); }}
           searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
           onAddNew={async () => {
             const today = new Date().toISOString().split('T')[0];

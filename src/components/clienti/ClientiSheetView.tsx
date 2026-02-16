@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus, Trash2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
@@ -30,6 +30,7 @@ interface ClientiSheetViewProps {
   agents: Agent[];
   onCardClick: (cliente: Cliente) => void;
   onUpdate: (id: string, updates: Partial<Cliente>) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
   searchQuery: string;
   onAddNew?: () => void | Promise<void>;
 }
@@ -128,6 +129,7 @@ const SheetContextMenu = memo(function SheetContextMenu({
   onStatusChange,
   onEmojiChange,
   onColorChange,
+  onDelete,
   onClose,
 }: {
   position: { x: number; y: number };
@@ -135,6 +137,7 @@ const SheetContextMenu = memo(function SheetContextMenu({
   onStatusChange: (status: ClienteStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
   onColorChange: (color: string | null) => void;
+  onDelete?: () => void;
   onClose: () => void;
 }) {
   const [customCardColor, setCustomCardColor] = useState(cliente.card_color || '#fef3c7');
@@ -272,6 +275,25 @@ const SheetContextMenu = memo(function SheetContextMenu({
                 ))}
               </div>
             </div>
+          </>
+        )}
+
+        {/* Delete */}
+        {onDelete && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <button
+              onClick={() => {
+                if (window.confirm('Eliminare questo cliente?')) {
+                  onDelete();
+                  onClose();
+                }
+              }}
+              className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 transition-colors py-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Elimina cliente
+            </button>
           </>
         )}
 
@@ -996,7 +1018,7 @@ function ColumnFilterPopover({
 }
 
 // --- Main Component ---
-export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery, onAddNew }: ClientiSheetViewProps) {
+export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, searchQuery, onAddNew }: ClientiSheetViewProps) {
   const [colOrder, setColOrder] = useState<string[]>(() => COLUMNS.map(c => c.key));
   const [colWidths, setColWidths] = useState<Record<string, number>>(
     () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
@@ -1416,6 +1438,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
           onStatusChange={handleContextStatusChange}
           onEmojiChange={handleContextEmojiChange}
           onColorChange={handleContextColorChange}
+          onDelete={onDelete ? async () => { await onDelete(contextMenu.cliente.id); setContextMenu(null); } : undefined}
           onClose={() => setContextMenu(null)}
         />
       )}
