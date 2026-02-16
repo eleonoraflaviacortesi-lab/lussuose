@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -15,6 +15,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
+import { triggerHaptic } from '@/lib/haptics';
 
 interface Agent {
   user_id: string;
@@ -39,6 +41,147 @@ const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] =
   { value: 'closed_won', label: 'Chiuso ✓', color: '#22c55e' },
   { value: 'closed_lost', label: 'Perso', color: '#6b7280' },
 ];
+
+// Card colors and emojis for context menu (same as ClienteCard)
+const CARD_COLORS = [
+  { value: null, label: 'Default', color: 'bg-card border-2 border-muted' },
+  { value: '#fef3c7', label: 'Giallo', color: 'bg-amber-200' },
+  { value: '#fed7aa', label: 'Arancio', color: 'bg-orange-300' },
+  { value: '#fecaca', label: 'Rosso', color: 'bg-red-300' },
+  { value: '#bbf7d0', label: 'Verde', color: 'bg-green-300' },
+];
+const QUICK_EMOJIS = ['🏠', '🏡', '🏰', '🏛️', '🌳', '🌊', '⭐', '🔥', '💎', '🎯', '📞', '📸'];
+
+// Sheet context menu (status + emoji + color)
+const SheetContextMenu = memo(function SheetContextMenu({
+  position,
+  cliente,
+  onStatusChange,
+  onEmojiChange,
+  onColorChange,
+  onClose,
+}: {
+  position: { x: number; y: number };
+  cliente: Cliente;
+  onStatusChange: (status: ClienteStatus) => void;
+  onEmojiChange: (emoji: string | null) => void;
+  onColorChange: (color: string | null) => void;
+  onClose: () => void;
+}) {
+  const [customCardColor, setCustomCardColor] = useState(cliente.card_color || '#fef3c7');
+  const [showCustomPicker, setShowCustomPicker] = useState(false);
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 z-[110]"
+        onClick={onClose}
+        onContextMenu={(e) => { e.preventDefault(); onClose(); }}
+      />
+      <div
+        className="fixed z-[110] flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+        style={{
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
+          top: Math.min(position.y, window.innerHeight - 300),
+        }}
+        onClick={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+        onTouchEnd={(e) => e.stopPropagation()}
+      >
+        {/* Status */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Stato</span>
+          <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+            {STATUS_OPTIONS.map((col) => (
+              <button
+                key={col.value}
+                onClick={() => { onStatusChange(col.value); onClose(); }}
+                className={cn(
+                  "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                  cliente.status === col.value && "ring-2 ring-foreground ring-offset-1"
+                )}
+                style={{
+                  backgroundColor: col.color,
+                  color: isDarkColor(col.color) ? 'white' : 'black'
+                }}
+              >
+                {col.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-px bg-muted/50" />
+
+        {/* Emoji */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
+          <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+            {cliente.emoji && (
+              <button
+                onClick={() => { onEmojiChange(null); onClose(); }}
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                title="Rimuovi emoji"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+            {QUICK_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => { onEmojiChange(emoji); onClose(); }}
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+                  cliente.emoji === emoji && "bg-muted ring-1 ring-foreground"
+                )}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-px bg-muted/50" />
+
+        {/* Color */}
+        <div>
+          <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
+          <div className="flex items-center gap-1.5">
+            {CARD_COLORS.map((c) => (
+              <button
+                key={c.value || 'default'}
+                onClick={() => { onColorChange(c.value); onClose(); }}
+                className={cn(
+                  "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
+                  c.color,
+                  cliente.card_color === c.value && "ring-2 ring-foreground ring-offset-1"
+                )}
+                title={c.label}
+              />
+            ))}
+            <button
+              onClick={() => setShowCustomPicker(!showCustomPicker)}
+              className={cn(
+                "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
+                showCustomPicker && "ring-2 ring-foreground ring-offset-1"
+              )}
+            >
+              +
+            </button>
+          </div>
+        </div>
+
+        <ColorPickerOverlay
+          open={showCustomPicker}
+          color={customCardColor}
+          onChange={(newColor) => { onColorChange(newColor); onClose(); }}
+          onClose={() => setShowCustomPicker(false)}
+        />
+      </div>
+    </>
+  );
+});
+SheetContextMenu.displayName = 'SheetContextMenu';
 
 const PORTALE_OPTIONS = [
   'James Edition', 'Idealista', 'Gate-away', 'Sito Cortesi', 'Immobiliare.it', 'Rightmove', 'TALLY', 'Altro',
@@ -408,6 +551,7 @@ const SheetRow = memo(function SheetRow({
   onSelect,
   onCardClick,
   onCellChange,
+  onContextMenu,
 }: {
   cliente: Cliente;
   idx: number;
@@ -422,7 +566,35 @@ const SheetRow = memo(function SheetRow({
   onSelect: (id: string) => void;
   onCardClick: (c: Cliente) => void;
   onCellChange: (id: string, key: string, val: string) => void;
+  onContextMenu: (cliente: Cliente, x: number, y: number) => void;
 }) {
+  const longPressRef = useRef<NodeJS.Timeout | null>(null);
+  const longPressTriggered = useRef(false);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    longPressTriggered.current = false;
+    const touch = e.touches[0];
+    const x = touch.clientX;
+    const y = touch.clientY;
+    longPressRef.current = setTimeout(() => {
+      longPressTriggered.current = true;
+      triggerHaptic('medium');
+      onContextMenu(cliente, x, y);
+    }, 500);
+  }, [cliente, onContextMenu]);
+
+  const handleTouchEnd = useCallback(() => {
+    if (longPressRef.current) clearTimeout(longPressRef.current);
+  }, []);
+
+  const handleTouchMove = useCallback(() => {
+    if (longPressRef.current) clearTimeout(longPressRef.current);
+  }, []);
+
+  const handleRightClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    onContextMenu(cliente, e.clientX, e.clientY);
+  }, [cliente, onContextMenu]);
   return (
     <div
       className={cn(
@@ -439,6 +611,10 @@ const SheetRow = memo(function SheetRow({
         color: cliente.row_text_color || undefined,
       }}
       onClick={() => onSelect(cliente.id)}
+      onContextMenu={handleRightClick}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onTouchMove={handleTouchMove}
     >
       {/* Row number + open detail */}
       <div
@@ -743,6 +919,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
   const dragColRef = useRef<{ key: string; startX: number } | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ cliente: Cliente; x: number; y: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
@@ -918,6 +1095,22 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     }
   }, [selectedRowId, selectedColKey]);
 
+  const handleRowContextMenu = useCallback((cliente: Cliente, x: number, y: number) => {
+    setContextMenu({ cliente, x, y });
+  }, []);
+
+  const handleContextStatusChange = useCallback(async (status: ClienteStatus) => {
+    if (contextMenu) await onUpdate(contextMenu.cliente.id, { status } as any);
+  }, [contextMenu, onUpdate]);
+
+  const handleContextEmojiChange = useCallback(async (emoji: string | null) => {
+    if (contextMenu) await onUpdate(contextMenu.cliente.id, { emoji } as any);
+  }, [contextMenu, onUpdate]);
+
+  const handleContextColorChange = useCallback(async (color: string | null) => {
+    if (contextMenu) await onUpdate(contextMenu.cliente.id, { card_color: color } as any);
+  }, [contextMenu, onUpdate]);
+
   const currentFormat = useMemo(() => {
     if (selectedColKey) return colFormats[selectedColKey] || {};
     if (selectedRowId) return rowFormats[selectedRowId] || {};
@@ -1058,6 +1251,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                   onSelect={setSelectedRowId}
                   onCardClick={onCardClick}
                   onCellChange={handleCellChange}
+                  onContextMenu={handleRowContextMenu}
                 />
               ))}
             </div>
@@ -1078,6 +1272,18 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
           </Button>
         )}
       </div>
+
+      {/* Context menu */}
+      {contextMenu && (
+        <SheetContextMenu
+          position={{ x: contextMenu.x, y: contextMenu.y }}
+          cliente={contextMenu.cliente}
+          onStatusChange={handleContextStatusChange}
+          onEmojiChange={handleContextEmojiChange}
+          onColorChange={handleContextColorChange}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </div>
   );
 }
