@@ -60,18 +60,18 @@ const COLUMNS: ColumnDef[] = [
   { key: 'cognome', label: 'Surname', width: 130, minWidth: 80, editable: true, type: 'text' },
   { key: 'nome', label: 'Name', width: 140, minWidth: 100, editable: true, type: 'text' },
   { key: 'portale', label: 'Portale', width: 130, minWidth: 90, editable: true, type: 'portale' },
-  { key: 'data_submission', label: 'Data', width: 110, minWidth: 80, editable: false, type: 'date' },
+  { key: 'data_submission', label: 'Data', width: 110, minWidth: 80, editable: true, type: 'text' },
   { key: 'property_name', label: 'Property', width: 150, minWidth: 100, editable: true, type: 'text' },
   { key: 'ref_number', label: 'Ref.', width: 80, minWidth: 60, editable: true, type: 'text' },
-  { key: 'last_contact_date', label: 'Data Contatto', width: 120, minWidth: 80, editable: false, type: 'date' },
+  { key: 'last_contact_date', label: 'Data Contatto', width: 120, minWidth: 80, editable: true, type: 'text' },
   { key: 'contattato_da', label: 'Contattato da', width: 120, minWidth: 80, editable: true, type: 'text' },
   { key: 'tipo_contatto', label: 'Tipo Contatto', width: 120, minWidth: 90, editable: true, type: 'tipo_contatto' },
   { key: 'telefono', label: 'Contatto 1', width: 150, minWidth: 100, editable: true, type: 'text' },
   { key: 'email', label: 'Contatto 2', width: 200, minWidth: 120, editable: true, type: 'text' },
   { key: 'status', label: 'Status', width: 130, minWidth: 100, editable: true, type: 'status' },
-  { key: 'regioni', label: 'Regions', width: 160, minWidth: 100, editable: false, type: 'regions' },
+  { key: 'regioni', label: 'Regions', width: 160, minWidth: 100, editable: true, type: 'text' },
   { key: 'budget_max', label: 'Budget Max', width: 120, minWidth: 80, editable: true, type: 'number' },
-  { key: 'tipologia', label: 'Type', width: 150, minWidth: 100, editable: false, type: 'types' },
+  { key: 'tipologia', label: 'Type', width: 150, minWidth: 100, editable: true, type: 'text' },
   { key: 'assigned_to', label: 'Agent', width: 140, minWidth: 100, editable: true, type: 'agent' },
   { key: 'camere', label: 'Rooms', width: 80, minWidth: 60, editable: true, type: 'text' },
   { key: 'piscina', label: 'Pool', width: 80, minWidth: 60, editable: true, type: 'text' },
@@ -398,6 +398,7 @@ const SheetRow = memo(function SheetRow({
   agents,
   rowNumWidth,
   isSelected,
+  selectedColKey,
   rowFormat,
   onSelect,
   onCardClick,
@@ -409,6 +410,7 @@ const SheetRow = memo(function SheetRow({
   agents: Agent[];
   rowNumWidth: number;
   isSelected: boolean;
+  selectedColKey: string | null;
   rowFormat?: { bold?: boolean; italic?: boolean; strikethrough?: boolean };
   onSelect: (id: string) => void;
   onCardClick: (c: Cliente) => void;
@@ -450,7 +452,7 @@ const SheetRow = memo(function SheetRow({
       {COLUMNS.map(col => (
         <div
           key={col.key}
-          className="flex-shrink-0 border-r overflow-hidden"
+          className={cn("flex-shrink-0 border-r overflow-hidden", selectedColKey === col.key && "bg-primary/5")}
           style={{ width: colWidths[col.key] }}
         >
           {col.type === 'status' && col.editable ? (
@@ -498,6 +500,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
+  const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
   const [rowFormats, setRowFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>>({});
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -553,9 +556,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   }, []);
 
   const handleHeaderClick = useCallback((key: string) => {
-    if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
-    else { setSortCol(key); setSortDir('asc'); }
-  }, [sortCol]);
+    if (selectedColKey === key) {
+      // Already selected this column, toggle sort
+      if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+      else { setSortCol(key); setSortDir('asc'); }
+    } else {
+      // Select column
+      setSelectedColKey(key);
+      setSelectedRowId(null);
+    }
+  }, [sortCol, selectedColKey]);
 
   const handleResizeStart = useCallback((key: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -578,6 +588,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     if (key === 'budget_max') {
       const num = parseFloat(rawValue.replace(/[^0-9.]/g, ''));
       updates[key] = isNaN(num) ? null : num;
+    } else if (key === 'regioni' || key === 'tipologia') {
+      updates[key] = rawValue ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [];
+    } else if (key === 'data_submission' || key === 'last_contact_date') {
+      // Accept dd/mm/yyyy or yyyy-mm-dd
+      const dmy = rawValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (dmy) {
+        updates[key] = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
+      } else {
+        updates[key] = rawValue || null;
+      }
     } else {
       updates[key] = rawValue || null;
     }
@@ -635,7 +655,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                 key={col.key}
                 className={cn(
                   "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-pointer hover:bg-muted/50",
-                  sortCol === col.key && "bg-muted/60 text-foreground"
+                  sortCol === col.key && "bg-muted/60 text-foreground",
+                  selectedColKey === col.key && "bg-primary/10 text-primary"
                 )}
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
@@ -665,6 +686,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                   agents={agents}
                   rowNumWidth={rowNumWidth}
                   isSelected={selectedRowId === cliente.id}
+                  selectedColKey={selectedColKey}
                   rowFormat={rowFormats[cliente.id]}
                   onSelect={setSelectedRowId}
                   onCardClick={onCardClick}
