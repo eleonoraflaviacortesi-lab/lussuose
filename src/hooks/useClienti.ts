@@ -167,7 +167,6 @@ export function useClienti(options?: {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['clienti'] });
-      toast({ title: 'Cliente aggiunto' });
     },
     onError: (error: any) => {
       toast({ title: 'Errore', description: error.message, variant: 'destructive' });
