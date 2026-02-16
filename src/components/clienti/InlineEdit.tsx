@@ -14,6 +14,7 @@ interface InlineEditTextProps {
   multiline?: boolean;
   prefix?: ReactNode;
   formatDisplay?: (value: string) => string;
+  noHighlight?: boolean;
 }
 
 export function InlineEditText({
@@ -24,6 +25,7 @@ export function InlineEditText({
   multiline = false,
   prefix,
   formatDisplay,
+  noHighlight = false,
 }: InlineEditTextProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
@@ -112,7 +114,8 @@ export function InlineEditText({
       <div
         onClick={() => setIsEditing(true)}
         className={cn(
-          'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-amber-100/40 transition-colors bg-amber-50/60',
+          'group cursor-pointer rounded-lg px-2 -mx-1 py-1 transition-colors',
+          noHighlight ? 'hover:bg-muted/80' : 'hover:bg-amber-100/40 bg-amber-50/60',
           className
         )}
       >
@@ -128,7 +131,8 @@ export function InlineEditText({
       className={cn(
         'group cursor-pointer rounded-lg px-2 -mx-1 py-1 hover:bg-muted/80 transition-colors flex items-center gap-1',
         !value && 'text-muted-foreground italic',
-        value && 'bg-amber-50/60 font-medium',
+        value && !noHighlight && 'bg-amber-50/60 font-medium',
+        value && noHighlight && 'font-medium',
         className
       )}
     >
