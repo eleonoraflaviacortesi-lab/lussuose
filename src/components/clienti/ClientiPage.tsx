@@ -172,44 +172,44 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   return (
     <div className="py-4 space-y-4 overflow-x-hidden">
       {/* Header row: view toggle + actions */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2">
         {/* View toggle */}
         <div className="flex rounded-lg border overflow-hidden">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
-            className="rounded-none gap-1.5 px-4"
+            className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
             onClick={() => setViewMode('kanban')}
           >
             <LayoutGrid className="w-4 h-4" />
-            Kanban
+            <span className="hidden sm:inline">Kanban</span>
           </Button>
           <Button
             variant={viewMode === 'sheet' ? 'default' : 'ghost'}
             size="sm"
-            className="rounded-none gap-1.5 px-4"
+            className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
             onClick={() => setViewMode('sheet')}
           >
             <Table className="w-4 h-4" />
-            Spreadsheet
+            <span className="hidden sm:inline">Spreadsheet</span>
           </Button>
         </div>
 
         <div className="flex-1" />
 
         {isCoordinator && (
-          <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
+          <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Analisi</span>
           </Button>
         )}
         {isCoordinator && (
-          <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-1.5" />
-            CSV
+          <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+            <Upload className="w-4 h-4" />
+            <span className="hidden sm:inline">CSV</span>
           </Button>
         )}
-        <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
+        <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-9 h-9 p-0">
           <Plus className="w-4 h-4" />
         </Button>
       </div>
