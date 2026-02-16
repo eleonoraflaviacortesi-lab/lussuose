@@ -3,6 +3,7 @@ import { Calendar, Save } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useDailyData, DailyDataInput } from '@/hooks/useDailyData';
 
 const defaultFormData = {
@@ -23,6 +24,7 @@ const defaultFormData = {
   trattative_chiuse: 0,
   trattative_chiuse_ideali: 1,
   fatturato_a_credito: 0,
+  notes: '',
 };
 
 interface DataEntryProps {
@@ -58,6 +60,7 @@ const DataEntry = ({ onComplete }: DataEntryProps) => {
           trattative_chiuse: existingRecord.trattative_chiuse || 0,
           trattative_chiuse_ideali: existingRecord.trattative_chiuse_ideali || 1,
           fatturato_a_credito: Number(existingRecord.fatturato_a_credito) || 0,
+          notes: existingRecord.notes || '',
         });
       } else {
         setFormData(defaultFormData);
@@ -70,10 +73,12 @@ const DataEntry = ({ onComplete }: DataEntryProps) => {
   };
 
   const handleSave = () => {
+    const { notes, ...numericData } = formData;
     const input: DailyDataInput = {
       date,
-      ...formData,
+      ...numericData,
       valutazioni_fatte: 0,
+      notes: notes || null,
     };
     saveDailyData.mutate(input, {
       onSuccess: () => {
@@ -196,8 +201,21 @@ const DataEntry = ({ onComplete }: DataEntryProps) => {
                 </div>
               </div>
             </div>
-          </div>
         </div>
+
+        {/* Note */}
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h3 className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground mb-4">
+            NOTE
+          </h3>
+          <Textarea
+            placeholder="Aggiungi note o osservazioni sulla giornata..."
+            value={formData.notes}
+            onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+            className="min-h-[80px] bg-background text-sm resize-none"
+          />
+        </div>
+      </div>
       </div>
 
       {/* Save Button */}
