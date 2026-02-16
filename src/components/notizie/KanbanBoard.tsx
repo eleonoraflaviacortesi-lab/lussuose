@@ -278,6 +278,7 @@ const ColorStatusPickerPill = memo(({
   onColorSelect, 
   onStatusChange,
   onEmojiSelect,
+  onDelete,
   onClose 
 }: { 
   position: { x: number; y: number }; 
@@ -288,6 +289,7 @@ const ColorStatusPickerPill = memo(({
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiSelect: (emoji: string | null) => void;
+  onDelete?: () => void;
   onClose: () => void;
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
@@ -421,6 +423,25 @@ const ColorStatusPickerPill = memo(({
             </div>
           </>
         )}
+
+        {/* Delete */}
+        {onDelete && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <button
+              onClick={() => {
+                if (window.confirm('Eliminare questa notizia?')) {
+                  onDelete();
+                  onClose();
+                }
+              }}
+              className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 transition-colors py-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Elimina notizia
+            </button>
+          </>
+        )}
       </div>
       {/* Custom color picker overlay - outside scrollable container */}
       <ColorPickerOverlay
@@ -472,7 +493,7 @@ const EmojiPickerPill = memo(({
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card component
-const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange, onOnlineToggle }: { 
+const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange, onOnlineToggle, onDelete }: { 
   notizia: Notizia; 
   columns: KanbanColumn[];
   onClick: () => void;
@@ -480,6 +501,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
   onEmojiChange: (emoji: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
   onOnlineToggle: (isOnline: boolean) => void;
+  onDelete?: () => void;
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
@@ -608,6 +630,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
           onEmojiSelect={onEmojiChange}
+          onDelete={onDelete}
           onClose={() => setPickerOpen(false)}
         />
       )}
@@ -638,7 +661,7 @@ const AddColumnButton = memo(({ onAdd }: { onAdd: () => void }) => (
 AddColumnButton.displayName = 'AddColumnButton';
 
 const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQuickAdd }: KanbanBoardProps) => {
-  const { updateNotizia, updateOrder } = useNotizie();
+  const { updateNotizia, updateOrder, deleteNotizia } = useNotizie();
   const { columns, updateColumn, addColumn, deleteColumn, reorderColumns, isLoading } = useKanbanColumns();
   const topScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
@@ -821,6 +844,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
                                       onStatusChange={(status) => onStatusChange(notizia.id, status)}
                                       onOnlineToggle={(isOnline) => handleOnlineToggle(notizia.id, isOnline)}
+                                      onDelete={() => deleteNotizia.mutate(notizia.id)}
                                     />
                                   </div>
                                 )}
