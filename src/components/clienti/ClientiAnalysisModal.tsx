@@ -184,10 +184,10 @@ export function ClientiAnalysisModal({ open, onOpenChange, clienti }: ClientiAna
                     cy="50%"
                     innerRadius={50}
                     outerRadius={90}
-                    paddingAngle={2}
+                    paddingAngle={1}
                     dataKey="value"
                     nameKey="name"
-                    label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+                    label={({ name, percent }) => percent >= 0.03 ? `${name} (${(percent * 100).toFixed(0)}%)` : null}
                     labelLine={false}
                     style={{ fontSize: '10px' }}
                   >
