@@ -1,10 +1,11 @@
-import { memo, useState, useCallback, useMemo, useRef } from 'react';
+import { memo, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { cn, isDarkColor } from '@/lib/utils';
-import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle } from 'lucide-react';
+import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle, Star } from 'lucide-react';
 import { isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
+import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 
 interface ClienteCardProps {
   cliente: Cliente & { reminder_date?: string | null };
@@ -48,6 +49,73 @@ const isUrgent = (tempoRicerca: string | null): boolean => {
   return lower.includes('less than 3') || lower.includes('< 3') || lower.includes('1 month');
 };
 
+// Emoji grid with custom "+" input
+const EmojiGridWithCustom = memo(({ currentEmoji, onSelect, onRemove }: {
+  currentEmoji: string | null;
+  onSelect: (emoji: string) => void;
+  onRemove: () => void;
+}) => {
+  const [showInput, setShowInput] = useState(false);
+  const [customEmoji, setCustomEmoji] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showInput && inputRef.current) inputRef.current.focus();
+  }, [showInput]);
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+      {currentEmoji && (
+        <button
+          onClick={onRemove}
+          className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+          title="Rimuovi emoji"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {QUICK_EMOJIS.map((emoji) => (
+        <button
+          key={emoji}
+          onClick={() => onSelect(emoji)}
+          className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+            currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
+          )}
+        >
+          {emoji}
+        </button>
+      ))}
+      {showInput ? (
+        <input
+          ref={inputRef}
+          value={customEmoji}
+          onChange={(e) => setCustomEmoji(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && customEmoji.trim()) {
+              onSelect(customEmoji.trim());
+              setCustomEmoji('');
+              setShowInput(false);
+            }
+          }}
+          onBlur={() => { setShowInput(false); setCustomEmoji(''); }}
+          className="w-10 h-7 text-center text-base bg-muted rounded-lg border-0 outline-none focus:ring-1 focus:ring-foreground"
+          placeholder="😀"
+          maxLength={2}
+        />
+      ) : (
+        <button
+          onClick={() => setShowInput(true)}
+          className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted"
+        >
+          +
+        </button>
+      )}
+    </div>
+  );
+});
+EmojiGridWithCustom.displayName = 'EmojiGridWithCustom';
+
 // Unified picker pill component
 const ColorStatusPickerPill = memo(({ 
   position, 
@@ -72,6 +140,7 @@ const ColorStatusPickerPill = memo(({
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
   const [showCustomPicker, setShowCustomPicker] = useState(false);
+  const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
   
   return (
     <>
@@ -81,10 +150,11 @@ const ColorStatusPickerPill = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-[110] flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+        className="fixed z-[110] flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-h-[85vh] overflow-y-auto"
         style={{
           left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
-          top: Math.min(position.y, window.innerHeight - 300),
+          top: Math.min(Math.max(10, position.y), window.innerHeight - 40),
+          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -113,38 +183,18 @@ const ColorStatusPickerPill = memo(({
           </div>
         </div>
         
-        {/* Separator */}
         <div className="h-px bg-muted/50" />
         
         {/* Emoji picker */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
-          <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-            {currentEmoji && (
-              <button
-                onClick={() => { onEmojiSelect(null); onClose(); }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-                title="Rimuovi emoji"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {QUICK_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => { onEmojiSelect(emoji); onClose(); }}
-                className={cn(
-                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-                  currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
-                )}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+          <EmojiGridWithCustom
+            currentEmoji={currentEmoji}
+            onSelect={(emoji) => { onEmojiSelect(emoji); onClose(); }}
+            onRemove={() => { onEmojiSelect(null); onClose(); }}
+          />
         </div>
 
-        {/* Separator */}
         <div className="h-px bg-muted/50" />
         
         {/* Card color picker */}
@@ -163,7 +213,6 @@ const ColorStatusPickerPill = memo(({
                 title={c.label}
               />
             ))}
-            {/* Custom color toggle */}
             <button
               onClick={() => setShowCustomPicker(!showCustomPicker)}
               className={cn(
@@ -174,19 +223,58 @@ const ColorStatusPickerPill = memo(({
               +
             </button>
           </div>
+          {/* Save current color as favorite */}
+          {currentColor && !cardColors.some(c => c.value === currentColor) && !favorites.includes(currentColor) && (
+            <button
+              onClick={() => { addFavorite(currentColor); triggerHaptic('light'); }}
+              className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Star className="w-3 h-3" />
+              Salva come preferito
+            </button>
+          )}
         </div>
-        
-        {/* Custom color picker overlay */}
-        <ColorPickerOverlay
-          open={showCustomPicker}
-          color={customCardColor}
-          onChange={(newColor) => {
-            onColorSelect(newColor);
-            onClose();
-          }}
-          onClose={() => setShowCustomPicker(false)}
-        />
+
+        {/* Favorite colors */}
+        {favorites.length > 0 && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                Preferiti
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+                {favorites.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => { onColorSelect(color); onClose(); }}
+                    onContextMenu={(e) => { e.preventDefault(); removeFavorite(color); triggerHaptic('light'); }}
+                    className={cn(
+                      "w-7 h-7 rounded-lg transition-all hover:scale-110 relative group",
+                      currentColor === color && "ring-2 ring-offset-1 ring-foreground"
+                    )}
+                    style={{ backgroundColor: color }}
+                    title="Click: applica · Tasto destro: rimuovi"
+                  >
+                    <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-destructive text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </div>
+      
+      <ColorPickerOverlay
+        open={showCustomPicker}
+        color={customCardColor}
+        onChange={(newColor) => {
+          onColorSelect(newColor);
+          onClose();
+        }}
+        onClose={() => setShowCustomPicker(false)}
+      />
     </>
   );
 });

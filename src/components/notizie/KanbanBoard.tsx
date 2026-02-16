@@ -201,6 +201,73 @@ const ColumnHeader = memo(({
 });
 ColumnHeader.displayName = 'ColumnHeader';
 
+// Shared emoji grid with custom "+" input
+const EmojiGridWithCustom = memo(({ currentEmoji, onSelect, onRemove }: {
+  currentEmoji: string | null;
+  onSelect: (emoji: string) => void;
+  onRemove: () => void;
+}) => {
+  const [showInput, setShowInput] = useState(false);
+  const [customEmoji, setCustomEmoji] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (showInput && inputRef.current) inputRef.current.focus();
+  }, [showInput]);
+
+  return (
+    <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+      {currentEmoji && (
+        <button
+          onClick={onRemove}
+          className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+          title="Rimuovi emoji"
+        >
+          <X className="w-3.5 h-3.5" />
+        </button>
+      )}
+      {QUICK_EMOJIS.map((emoji) => (
+        <button
+          key={emoji}
+          onClick={() => onSelect(emoji)}
+          className={cn(
+            "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+            currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
+          )}
+        >
+          {emoji}
+        </button>
+      ))}
+      {showInput ? (
+        <input
+          ref={inputRef}
+          value={customEmoji}
+          onChange={(e) => setCustomEmoji(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && customEmoji.trim()) {
+              onSelect(customEmoji.trim());
+              setCustomEmoji('');
+              setShowInput(false);
+            }
+          }}
+          onBlur={() => { setShowInput(false); setCustomEmoji(''); }}
+          className="w-10 h-7 text-center text-base bg-muted rounded-lg border-0 outline-none focus:ring-1 focus:ring-foreground"
+          placeholder="😀"
+          maxLength={2}
+        />
+      ) : (
+        <button
+          onClick={() => setShowInput(true)}
+          className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted"
+        >
+          +
+        </button>
+      )}
+    </div>
+  );
+});
+EmojiGridWithCustom.displayName = 'EmojiGridWithCustom';
+
 // Color, Status, and Emoji picker pill component - uses dynamic columns
 const ColorStatusPickerPill = memo(({ 
   position, 
@@ -276,29 +343,11 @@ const ColorStatusPickerPill = memo(({
         {/* Emoji picker */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
-          <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-            {currentEmoji && (
-              <button
-                onClick={() => { onEmojiSelect(null); onClose(); }}
-                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-                title="Rimuovi emoji"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
-            )}
-            {QUICK_EMOJIS.map((emoji) => (
-              <button
-                key={emoji}
-                onClick={() => { onEmojiSelect(emoji); onClose(); }}
-                className={cn(
-                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-                  currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
-                )}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
+          <EmojiGridWithCustom
+            currentEmoji={currentEmoji}
+            onSelect={(emoji) => { onEmojiSelect(emoji); onClose(); }}
+            onRemove={() => { onEmojiSelect(null); onClose(); }}
+          />
         </div>
 
         {/* Separator */}
@@ -404,34 +453,18 @@ const EmojiPickerPill = memo(({
     <>
       <div className="fixed inset-0 z-50" onClick={onClose} />
       <div
-        className="fixed z-50 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[200px]"
+        className="fixed z-50 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[250px]"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 210),
-          top: Math.min(position.y, window.innerHeight - 80),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
+          top: Math.min(position.y, window.innerHeight - 60),
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {currentEmoji && (
-          <button
-            onClick={() => { onSelect(null); onClose(); }}
-            className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-            title="Rimuovi emoji"
-          >
-            <X className="w-3.5 h-3.5" />
-          </button>
-        )}
-        {QUICK_EMOJIS.map((emoji) => (
-          <button
-            key={emoji}
-            onClick={() => { onSelect(emoji); onClose(); }}
-            className={cn(
-              "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-              currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
-            )}
-          >
-            {emoji}
-          </button>
-        ))}
+        <EmojiGridWithCustom
+          currentEmoji={currentEmoji}
+          onSelect={(emoji) => { onSelect(emoji); onClose(); }}
+          onRemove={() => { onSelect(null); onClose(); }}
+        />
       </div>
     </>
   );
