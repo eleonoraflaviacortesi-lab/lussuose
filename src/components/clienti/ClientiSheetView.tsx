@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
@@ -338,52 +338,62 @@ function InlineTextCell({ value, onChange }: { value: string; onChange?: (val: s
 }
 
 // --- Sheet Toolbar ---
+type FormatState = { bold?: boolean; italic?: boolean; strikethrough?: boolean };
+
 function SheetToolbar({
   selectedCliente,
   selectedIndex,
+  selectedColKey,
   onBgColorChange,
   onTextColorChange,
-  rowFormats,
+  currentFormat,
   onToggleFormat,
+  currentBgColor,
+  currentTextColor,
 }: {
   selectedCliente: Cliente | null;
   selectedIndex: number;
+  selectedColKey: string | null;
   onBgColorChange: (color: string | null) => void;
   onTextColorChange: (color: string | null) => void;
-  rowFormats: Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>;
+  currentFormat: FormatState;
   onToggleFormat: (format: 'bold' | 'italic' | 'strikethrough') => void;
+  currentBgColor: string | null;
+  currentTextColor: string | null;
 }) {
-  const fmt = selectedCliente ? rowFormats[selectedCliente.id] || {} : {};
+  const hasSelection = !!selectedCliente || !!selectedColKey;
+  const selectionLabel = selectedColKey
+    ? `Column — ${COLUMNS.find(c => c.key === selectedColKey)?.label || selectedColKey}`
+    : selectedCliente
+      ? `Row ${selectedIndex + 1} — ${selectedCliente.cognome || ''} ${selectedCliente.nome}`.trim()
+      : 'Seleziona una riga o colonna';
+
   return (
     <div className="flex items-center gap-1 px-3 py-1.5 bg-muted/60 border-b text-xs">
-      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.bold && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('bold')}>
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", currentFormat.bold && "bg-accent")} disabled={!hasSelection} onClick={() => onToggleFormat('bold')}>
         <Bold className="w-3.5 h-3.5" />
       </Button>
-      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.italic && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('italic')}>
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", currentFormat.italic && "bg-accent")} disabled={!hasSelection} onClick={() => onToggleFormat('italic')}>
         <Italic className="w-3.5 h-3.5" />
       </Button>
-      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", fmt.strikethrough && "bg-accent")} disabled={!selectedCliente} onClick={() => onToggleFormat('strikethrough')}>
+      <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", currentFormat.strikethrough && "bg-accent")} disabled={!hasSelection} onClick={() => onToggleFormat('strikethrough')}>
         <Strikethrough className="w-3.5 h-3.5" />
       </Button>
       <div className="h-4 w-px bg-border mx-1" />
-      <ColorPalettePopover currentColor={selectedCliente?.row_bg_color ?? null} onSelect={onBgColorChange}>
-        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
+      <ColorPalettePopover currentColor={currentBgColor} onSelect={onBgColorChange}>
+        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!hasSelection}>
           <Paintbrush className="w-3.5 h-3.5" />
-          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_bg_color || 'transparent' }} />
+          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: currentBgColor || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
-      <ColorPalettePopover currentColor={selectedCliente?.row_text_color ?? null} onSelect={onTextColorChange}>
-        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
+      <ColorPalettePopover currentColor={currentTextColor} onSelect={onTextColorChange}>
+        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!hasSelection}>
           <Type className="w-3.5 h-3.5" />
-          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_text_color || 'transparent' }} />
+          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: currentTextColor || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
       <div className="h-4 w-px bg-border mx-1" />
-      <span className="text-muted-foreground">
-        {selectedCliente
-          ? `Row ${selectedIndex + 1} — ${selectedCliente.cognome || ''} ${selectedCliente.nome}`.trim()
-          : 'Seleziona una riga'}
-      </span>
+      <span className="text-muted-foreground">{selectionLabel}</span>
     </div>
   );
 }
@@ -400,6 +410,8 @@ const SheetRow = memo(function SheetRow({
   isSelected,
   selectedColKey,
   rowFormat,
+  colFormats,
+  orderedColumns,
   onSelect,
   onCardClick,
   onCellChange,
@@ -411,7 +423,9 @@ const SheetRow = memo(function SheetRow({
   rowNumWidth: number;
   isSelected: boolean;
   selectedColKey: string | null;
-  rowFormat?: { bold?: boolean; italic?: boolean; strikethrough?: boolean };
+  rowFormat?: FormatState;
+  colFormats: Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>;
+  orderedColumns: ColumnDef[];
   onSelect: (id: string) => void;
   onCardClick: (c: Cliente) => void;
   onCellChange: (id: string, key: string, val: string) => void;
@@ -449,51 +463,65 @@ const SheetRow = memo(function SheetRow({
       </div>
 
       {/* Data cells */}
-      {COLUMNS.map(col => (
-        <div
-          key={col.key}
-          className={cn("flex-shrink-0 border-r overflow-hidden", selectedColKey === col.key && "bg-primary/5")}
-          style={{ width: colWidths[col.key] }}
-        >
-          {col.type === 'status' && col.editable ? (
-            <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
-          ) : col.type === 'lingua' && col.editable ? (
-            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
-          ) : col.type === 'portale' && col.editable ? (
-            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />
-          ) : col.type === 'tipo_contatto' && col.editable ? (
-            <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
-          ) : col.type === 'agent' && col.editable ? (
-            <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
-          ) : col.key === 'telefono' ? (
-            <div className="flex items-center gap-0.5">
-              <div className="flex-1 overflow-hidden">
-                <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
+      {orderedColumns.map(col => {
+        const cf = colFormats[col.key];
+        return (
+          <div
+            key={col.key}
+            className={cn(
+              "flex-shrink-0 border-r overflow-hidden",
+              selectedColKey === col.key && "bg-primary/5",
+              cf?.bold && 'font-bold',
+              cf?.italic && 'italic',
+              cf?.strikethrough && 'line-through',
+            )}
+            style={{
+              width: colWidths[col.key],
+              backgroundColor: cf?.bgColor || undefined,
+              color: cf?.textColor || undefined,
+            }}
+          >
+            {col.type === 'status' && col.editable ? (
+              <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
+            ) : col.type === 'lingua' && col.editable ? (
+              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
+            ) : col.type === 'portale' && col.editable ? (
+              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />
+            ) : col.type === 'tipo_contatto' && col.editable ? (
+              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
+            ) : col.type === 'agent' && col.editable ? (
+              <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
+            ) : col.key === 'telefono' ? (
+              <div className="flex items-center gap-0.5">
+                <div className="flex-1 overflow-hidden">
+                  <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
+                </div>
+                {cliente.telefono && (
+                  <a
+                    href={`https://wa.me/${cliente.telefono.replace(/[\s\-\(\)\+]/g, '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
+                    onClick={e => e.stopPropagation()}
+                    title="Apri WhatsApp"
+                  >
+                    <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+                  </a>
+                )}
               </div>
-              {cliente.telefono && (
-                <a
-                  href={`https://wa.me/${cliente.telefono.replace(/[\s\-\(\)\+]/g, '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
-                  onClick={e => e.stopPropagation()}
-                  title="Apri WhatsApp"
-                >
-                  <MessageCircle className="w-3.5 h-3.5 text-green-600" />
-                </a>
-              )}
-            </div>
-          ) : (
-            <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
-          )}
-        </div>
-      ))}
+            ) : (
+              <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 });
 
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery }: ClientiSheetViewProps) {
+  const [colOrder, setColOrder] = useState<string[]>(() => COLUMNS.map(c => c.key));
   const [colWidths, setColWidths] = useState<Record<string, number>>(
     () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
   );
@@ -501,11 +529,18 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
-  const [rowFormats, setRowFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean }>>({});
+  const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
+  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>({});
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
+  const dragColRef = useRef<{ key: string; startX: number } | null>(null);
+  const [dragOverCol, setDragOverCol] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
+
+  const orderedColumns = useMemo(() => {
+    return colOrder.map(key => COLUMNS.find(c => c.key === key)!).filter(Boolean);
+  }, [colOrder]);
 
   const filtered = useMemo(() => {
     if (!searchQuery) return clienti;
@@ -608,17 +643,82 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const selectedIndex = useMemo(() => sorted.findIndex(c => c.id === selectedRowId), [sorted, selectedRowId]);
 
   const handleBgColorChange = useCallback(async (color: string | null) => {
-    if (!selectedRowId) return;
-    await onUpdate(selectedRowId, { row_bg_color: color } as any);
-  }, [selectedRowId, onUpdate]);
+    if (selectedColKey) {
+      setColFormats(prev => ({ ...prev, [selectedColKey]: { ...prev[selectedColKey], bgColor: color } }));
+    } else if (selectedRowId) {
+      await onUpdate(selectedRowId, { row_bg_color: color } as any);
+    }
+  }, [selectedRowId, selectedColKey, onUpdate]);
 
   const handleTextColorChange = useCallback(async (color: string | null) => {
-    if (!selectedRowId) return;
-    await onUpdate(selectedRowId, { row_text_color: color } as any);
-  }, [selectedRowId, onUpdate]);
+    if (selectedColKey) {
+      setColFormats(prev => ({ ...prev, [selectedColKey]: { ...prev[selectedColKey], textColor: color } }));
+    } else if (selectedRowId) {
+      await onUpdate(selectedRowId, { row_text_color: color } as any);
+    }
+  }, [selectedRowId, selectedColKey, onUpdate]);
+
+  const handleToggleFormat = useCallback((fmt: 'bold' | 'italic' | 'strikethrough') => {
+    if (selectedColKey) {
+      setColFormats(prev => ({
+        ...prev,
+        [selectedColKey]: { ...prev[selectedColKey], [fmt]: !prev[selectedColKey]?.[fmt] }
+      }));
+    } else if (selectedRowId) {
+      setRowFormats(prev => ({
+        ...prev,
+        [selectedRowId]: { ...prev[selectedRowId], [fmt]: !prev[selectedRowId]?.[fmt] }
+      }));
+    }
+  }, [selectedRowId, selectedColKey]);
+
+  const currentFormat = useMemo(() => {
+    if (selectedColKey) return colFormats[selectedColKey] || {};
+    if (selectedRowId) return rowFormats[selectedRowId] || {};
+    return {};
+  }, [selectedColKey, selectedRowId, colFormats, rowFormats]);
+
+  const currentBgColor = useMemo(() => {
+    if (selectedColKey) return colFormats[selectedColKey]?.bgColor || null;
+    return selectedCliente?.row_bg_color || null;
+  }, [selectedColKey, colFormats, selectedCliente]);
+
+  const currentTextColor = useMemo(() => {
+    if (selectedColKey) return colFormats[selectedColKey]?.textColor || null;
+    return selectedCliente?.row_text_color || null;
+  }, [selectedColKey, colFormats, selectedCliente]);
+
+  // Column drag-and-drop
+  const handleColDragStart = useCallback((key: string, e: React.DragEvent) => {
+    e.dataTransfer.setData('text/plain', key);
+    e.dataTransfer.effectAllowed = 'move';
+    dragColRef.current = { key, startX: e.clientX };
+  }, []);
+
+  const handleColDragOver = useCallback((key: string, e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverCol(key);
+  }, []);
+
+  const handleColDrop = useCallback((targetKey: string, e: React.DragEvent) => {
+    e.preventDefault();
+    const sourceKey = e.dataTransfer.getData('text/plain');
+    setDragOverCol(null);
+    if (!sourceKey || sourceKey === targetKey) return;
+    setColOrder(prev => {
+      const newOrder = [...prev];
+      const fromIdx = newOrder.indexOf(sourceKey);
+      const toIdx = newOrder.indexOf(targetKey);
+      if (fromIdx === -1 || toIdx === -1) return prev;
+      newOrder.splice(fromIdx, 1);
+      newOrder.splice(toIdx, 0, sourceKey);
+      return newOrder;
+    });
+  }, []);
 
   const rowNumWidth = 52;
-  const totalWidth = rowNumWidth + COLUMNS.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
+  const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
     <div className="border rounded-lg bg-card overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
@@ -626,16 +726,13 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       <SheetToolbar
         selectedCliente={selectedCliente}
         selectedIndex={selectedIndex}
+        selectedColKey={selectedColKey}
         onBgColorChange={handleBgColorChange}
         onTextColorChange={handleTextColorChange}
-        rowFormats={rowFormats}
-        onToggleFormat={(fmt) => {
-          if (!selectedRowId) return;
-          setRowFormats(prev => ({
-            ...prev,
-            [selectedRowId]: { ...prev[selectedRowId], [fmt]: !prev[selectedRowId]?.[fmt] }
-          }));
-        }}
+        currentFormat={currentFormat}
+        onToggleFormat={handleToggleFormat}
+        currentBgColor={currentBgColor}
+        currentTextColor={currentTextColor}
       />
 
       {/* Table */}
@@ -650,17 +747,24 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
             <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r bg-muted/60" style={{ width: rowNumWidth }}>
               #
             </div>
-            {COLUMNS.map(col => (
+            {orderedColumns.map(col => (
               <div
                 key={col.key}
+                draggable
+                onDragStart={e => handleColDragStart(col.key, e)}
+                onDragOver={e => handleColDragOver(col.key, e)}
+                onDrop={e => handleColDrop(col.key, e)}
+                onDragLeave={() => setDragOverCol(null)}
                 className={cn(
-                  "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-pointer hover:bg-muted/50",
+                  "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-grab hover:bg-muted/50",
                   sortCol === col.key && "bg-muted/60 text-foreground",
-                  selectedColKey === col.key && "bg-primary/10 text-primary"
+                  selectedColKey === col.key && "bg-primary/10 text-primary",
+                  dragOverCol === col.key && "bg-primary/20 border-l-2 border-l-primary"
                 )}
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
               >
+                <GripHorizontal className="w-3 h-3 mr-1 opacity-30 flex-shrink-0" />
                 <span className="truncate">{col.label}</span>
                 {sortCol === col.key && (
                   <span className="ml-1 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
@@ -688,6 +792,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                   isSelected={selectedRowId === cliente.id}
                   selectedColKey={selectedColKey}
                   rowFormat={rowFormats[cliente.id]}
+                  colFormats={colFormats}
+                  orderedColumns={orderedColumns}
                   onSelect={setSelectedRowId}
                   onCardClick={onCardClick}
                   onCellChange={handleCellChange}
