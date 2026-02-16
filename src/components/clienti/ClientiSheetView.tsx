@@ -744,7 +744,7 @@ const SheetRow = memo(function SheetRow({
             className={cn(
               "flex-shrink-0 border-r overflow-hidden",
               selectedColKey === col.key && "bg-primary/5",
-              cf?.bold && 'font-bold',
+              (cf?.bold || col.key === 'nome' || col.key === 'cognome') && 'font-bold',
               cf?.italic && 'italic',
               cf?.strikethrough && 'line-through',
             )}
