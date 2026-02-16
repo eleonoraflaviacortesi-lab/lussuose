@@ -173,16 +173,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     <div className="py-4 space-y-4 overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-wide uppercase">
-            {isCoordinator ? '✱' : 'ASSIGNED BUYERS'}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {isCoordinator 
-              ? 'Gestisci i clienti internazionali in cerca di immobili'
-              : `${displayClients.length} clienti assegnati a te`}
-          </p>
-        </div>
+        <div />
         <div className="flex gap-2">
           {isCoordinator && (
             <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
