@@ -177,7 +177,7 @@ export function ClienteDetail({
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
         <div className="lg:grid lg:grid-cols-3 lg:gap-4 space-y-3 lg:space-y-0">
-          {/* COLUMN 1: Notes + Assignment + Quick Actions */}
+          {/* COLUMN 1: CHI È + OPERATIVITÀ */}
           <div className="space-y-3">
             {/* Notes at top */}
             <div className="bg-white rounded-2xl shadow-lg p-3 space-y-2">
@@ -222,6 +222,188 @@ export function ClienteDetail({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            {/* Dati Personali + Tracking CRM in same card */}
+            <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
+              {/* Personal Info */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Dati Personali</h3>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Data richiesta</label>
+                  {(() => {
+                    const dataRichiesta = getDataRichiesta();
+                    return dataRichiesta ? (
+                      <div className="flex items-center gap-1.5 text-sm">
+                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                        <span className="font-medium bg-amber-100 px-1.5 py-0.5 rounded">
+                          {format(new Date(dataRichiesta), 'dd MMM yyyy', { locale: it })}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-sm text-muted-foreground italic">Non specificata</span>
+                    );
+                  })()}
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Cognome</label>
+                  <InlineEditText
+                    value={cliente.cognome}
+                    onSave={(value) => onUpdate({ cognome: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Paese di provenienza</label>
+                  <InlineEditText
+                    value={cliente.paese}
+                    onSave={(value) => onUpdate({ paese: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Lingua</label>
+                  <InlineEditSelect
+                    value={cliente.lingua}
+                    options={[
+                      { value: 'ENG', label: 'English' },
+                      { value: 'ITA', label: 'Italiano' },
+                      { value: 'FRA', label: 'Français' },
+                      { value: 'DEU', label: 'Deutsch' },
+                      { value: 'ESP', label: 'Español' },
+                    ]}
+                    onSave={(value) => onUpdate({ lingua: value })}
+                    placeholder="Non specificata"
+                    className="text-sm"
+                    prefix={LINGUA_COLORS[cliente.lingua || ''] ? (
+                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: LINGUA_COLORS[cliente.lingua || ''] }}>
+                        {cliente.lingua}
+                      </span>
+                    ) : undefined}
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Telefono</label>
+                  <InlineEditText
+                    value={cliente.telefono}
+                    onSave={(value) => onUpdate({ telefono: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Email</label>
+                  <InlineEditText
+                    value={cliente.email}
+                    onSave={(value) => onUpdate({ email: value })}
+                    placeholder="Non specificato"
+                    className="text-sm break-all"
+                  />
+                </div>
+              </div>
+
+              {/* Tracking CRM */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tracking CRM</h3>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Portale di provenienza</label>
+                  <InlineEditSelect
+                    value={cliente.portale}
+                    options={[
+                      { value: 'James Edition', label: 'James Edition' },
+                      { value: 'Idealista', label: 'Idealista' },
+                      { value: 'Gate-away', label: 'Gate-away' },
+                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                      { value: 'Immobiliare.it', label: 'Immobiliare.it' },
+                      { value: 'Rightmove', label: 'Rightmove' },
+                      { value: 'TALLY', label: 'TALLY' },
+                      { value: 'Altro', label: 'Altro' },
+                    ]}
+                    onSave={(value) => onUpdate({ portale: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                    prefix={PORTALE_COLORS[cliente.portale || ''] ? (
+                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: PORTALE_COLORS[cliente.portale || ''] }}>
+                        {cliente.portale}
+                      </span>
+                    ) : undefined}
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Proprietà richiesta</label>
+                  <InlineEditText
+                    value={cliente.property_name}
+                    onSave={(value) => onUpdate({ property_name: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Ref.</label>
+                  <InlineEditText
+                    value={cliente.ref_number}
+                    onSave={(value) => onUpdate({ ref_number: value })}
+                    placeholder="Non specificato"
+                    className="text-sm font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Contattato da</label>
+                  <InlineEditText
+                    value={cliente.contattato_da}
+                    onSave={(value) => onUpdate({ contattato_da: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Tipo contatto</label>
+                  <InlineEditSelect
+                    value={cliente.tipo_contatto}
+                    options={[
+                      { value: 'Mail', label: 'Mail' },
+                      { value: 'WhatsApp', label: 'WhatsApp' },
+                      { value: 'Call', label: 'Call' },
+                      { value: 'Idealista', label: 'Idealista' },
+                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                    ]}
+                    onSave={(value) => onUpdate({ tipo_contatto: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                    prefix={TIPO_CONTATTO_COLORS[cliente.tipo_contatto || ''] ? (
+                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: TIPO_CONTATTO_COLORS[cliente.tipo_contatto || ''] }}>
+                        {cliente.tipo_contatto}
+                      </span>
+                    ) : undefined}
+                  />
+                </div>
+
+                {/* Merge button - only for Tally submissions */}
+                {cliente.portale === 'TALLY' && allClienti.length > 1 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 mt-1"
+                    onClick={() => setMergeOpen(true)}
+                  >
+                    <Merge className="w-3.5 h-3.5" />
+                    Associa a Richiesta
+                  </Button>
+                )}
+              </div>
             </div>
 
             {/* Quick Actions + Reminder + PDF Export */}
@@ -295,196 +477,11 @@ export function ClienteDetail({
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
-
-            {/* Property Matches - below activity on desktop */}
-            <div className="hidden lg:block">
-              <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
-            </div>
           </div>
 
-          {/* COLUMN 2: Form Fields */}
+          {/* COLUMN 2: COSA CERCA */}
           <div className="space-y-3">
             <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
-              {/* Personal Info */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Dati Personali</h3>
-                
-                {/* Data richiesta */}
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Data richiesta</label>
-                  {(() => {
-                    const dataRichiesta = getDataRichiesta();
-                    return dataRichiesta ? (
-                      <div className="flex items-center gap-1.5 text-sm">
-                        <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
-                        <span className="font-medium bg-amber-100 px-1.5 py-0.5 rounded">
-                          {format(new Date(dataRichiesta), 'dd MMM yyyy', { locale: it })}
-                        </span>
-                      </div>
-                    ) : (
-                      <span className="text-sm text-muted-foreground italic">Non specificata</span>
-                    );
-                  })()}
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Cognome</label>
-                  <InlineEditText
-                    value={cliente.cognome}
-                    onSave={(value) => onUpdate({ cognome: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Paese di provenienza</label>
-                  <InlineEditText
-                    value={cliente.paese}
-                    onSave={(value) => onUpdate({ paese: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Lingua</label>
-                <InlineEditSelect
-                    value={cliente.lingua}
-                    options={[
-                      { value: 'ENG', label: 'English' },
-                      { value: 'ITA', label: 'Italiano' },
-                      { value: 'FRA', label: 'Français' },
-                      { value: 'DEU', label: 'Deutsch' },
-                      { value: 'ESP', label: 'Español' },
-                    ]}
-                    onSave={(value) => onUpdate({ lingua: value })}
-                    placeholder="Non specificata"
-                    className="text-sm"
-                    prefix={LINGUA_COLORS[cliente.lingua || ''] ? (
-                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: LINGUA_COLORS[cliente.lingua || ''] }}>
-                        {cliente.lingua}
-                      </span>
-                    ) : undefined}
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Telefono</label>
-                  <InlineEditText
-                    value={cliente.telefono}
-                    onSave={(value) => onUpdate({ telefono: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Email</label>
-                  <InlineEditText
-                    value={cliente.email}
-                    onSave={(value) => onUpdate({ email: value })}
-                    placeholder="Non specificato"
-                    className="text-sm break-all"
-                  />
-                </div>
-              </div>
-
-              {/* Tracking / CRM Section - new fields from spreadsheet */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tracking CRM</h3>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Portale di provenienza</label>
-                <InlineEditSelect
-                    value={cliente.portale}
-                    options={[
-                      { value: 'James Edition', label: 'James Edition' },
-                      { value: 'Idealista', label: 'Idealista' },
-                      { value: 'Gate-away', label: 'Gate-away' },
-                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
-                      { value: 'Immobiliare.it', label: 'Immobiliare.it' },
-                      { value: 'Rightmove', label: 'Rightmove' },
-                      { value: 'TALLY', label: 'TALLY' },
-                      { value: 'Altro', label: 'Altro' },
-                    ]}
-                    onSave={(value) => onUpdate({ portale: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                    prefix={PORTALE_COLORS[cliente.portale || ''] ? (
-                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: PORTALE_COLORS[cliente.portale || ''] }}>
-                        {cliente.portale}
-                      </span>
-                    ) : undefined}
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Proprietà richiesta</label>
-                  <InlineEditText
-                    value={cliente.property_name}
-                    onSave={(value) => onUpdate({ property_name: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Ref.</label>
-                  <InlineEditText
-                    value={cliente.ref_number}
-                    onSave={(value) => onUpdate({ ref_number: value })}
-                    placeholder="Non specificato"
-                    className="text-sm font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Contattato da</label>
-                  <InlineEditText
-                    value={cliente.contattato_da}
-                    onSave={(value) => onUpdate({ contattato_da: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Tipo contatto</label>
-                <InlineEditSelect
-                    value={cliente.tipo_contatto}
-                    options={[
-                      { value: 'Mail', label: 'Mail' },
-                      { value: 'WhatsApp', label: 'WhatsApp' },
-                      { value: 'Call', label: 'Call' },
-                      { value: 'Idealista', label: 'Idealista' },
-                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
-                    ]}
-                    onSave={(value) => onUpdate({ tipo_contatto: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                    prefix={TIPO_CONTATTO_COLORS[cliente.tipo_contatto || ''] ? (
-                      <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold flex-shrink-0" style={{ backgroundColor: TIPO_CONTATTO_COLORS[cliente.tipo_contatto || ''] }}>
-                        {cliente.tipo_contatto}
-                      </span>
-                    ) : undefined}
-                  />
-              </div>
-
-              {/* Merge button - only for Tally submissions */}
-              {cliente.portale === 'TALLY' && allClienti.length > 1 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full gap-2 mt-1"
-                  onClick={() => setMergeOpen(true)}
-                >
-                  <Merge className="w-3.5 h-3.5" />
-                  Associa a Richiesta
-                </Button>
-              )}
-              </div>
-
               {/* Budget Section */}
               <div className="space-y-2">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Budget e Finanziamento</h3>
@@ -512,86 +509,6 @@ export function ClienteDetail({
                 </div>
               </div>
 
-              {/* Timeline Section */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tempistiche</h3>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Quando vuole acquistare?</label>
-                  <InlineEditText
-                    value={cliente.tempo_ricerca}
-                    onSave={(value) => onUpdate({ tempo_ricerca: value })}
-                    placeholder="Non specificato"
-                    className="text-sm"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Ha già visitato la zona?</label>
-                  <InlineEditBoolean
-                    value={cliente.ha_visitato}
-                    onSave={(value) => onUpdate({ ha_visitato: value })}
-                    labelTrue="Sì, ha visitato"
-                    labelFalse="No, non ancora"
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Location Section */}
-              <div className="space-y-2">
-                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Località Preferite</h3>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Regioni di interesse</label>
-                  <InlineEditBadges
-                    values={cliente.regioni}
-                    onSave={(values) => onUpdate({ regioni: values })}
-                    placeholder="Nessuna specificata"
-                    variant="secondary"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Contesto desiderato (campagna, collina, mare...)</label>
-                  <InlineEditBadges
-                    values={cliente.contesto}
-                    onSave={(values) => onUpdate({ contesto: values })}
-                    placeholder="Non specificato"
-                    variant="outline"
-                  />
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Perché questa zona?</label>
-                  <div className="flex flex-wrap gap-1">
-                    {cliente.motivo_zona && cliente.motivo_zona.length > 0 ? (
-                      cliente.motivo_zona.map((m, i) => (
-                        <Badge key={i} variant="outline" className="text-[10px]">{m}</Badge>
-                      ))
-                    ) : (
-                      <span className="text-sm text-muted-foreground italic">Non specificato</span>
-                    )}
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="text-[10px] text-muted-foreground block mb-0.5">Deve essere vicino a città/aeroporti?</label>
-                  <InlineEditBoolean
-                    value={cliente.vicinanza_citta}
-                    onSave={(value) => onUpdate({ vicinanza_citta: value })}
-                    labelTrue="Sì, importante"
-                    labelFalse="No, non necessario"
-                    className="text-sm"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* COLUMN 3: Property details + Features + Properties */}
-          <div className="space-y-3">
-            <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
               {/* Property Type Section */}
               <div className="space-y-2">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tipologia Immobile</h3>
@@ -707,6 +624,86 @@ export function ClienteDetail({
                 </div>
               </div>
 
+              {/* Location Section */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Località Preferite</h3>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Regioni di interesse</label>
+                  <InlineEditBadges
+                    values={cliente.regioni}
+                    onSave={(values) => onUpdate({ regioni: values })}
+                    placeholder="Nessuna specificata"
+                    variant="secondary"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Contesto desiderato (campagna, collina, mare...)</label>
+                  <InlineEditBadges
+                    values={cliente.contesto}
+                    onSave={(values) => onUpdate({ contesto: values })}
+                    placeholder="Non specificato"
+                    variant="outline"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Perché questa zona?</label>
+                  <div className="flex flex-wrap gap-1">
+                    {cliente.motivo_zona && cliente.motivo_zona.length > 0 ? (
+                      cliente.motivo_zona.map((m, i) => (
+                        <Badge key={i} variant="outline" className="text-[10px]">{m}</Badge>
+                      ))
+                    ) : (
+                      <span className="text-sm text-muted-foreground italic">Non specificato</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Deve essere vicino a città/aeroporti?</label>
+                  <InlineEditBoolean
+                    value={cliente.vicinanza_citta}
+                    onSave={(value) => onUpdate({ vicinanza_citta: value })}
+                    labelTrue="Sì, importante"
+                    labelFalse="No, non necessario"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* COLUMN 3: CONTESTO + PROPRIETÀ */}
+          <div className="space-y-3">
+            <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
+              {/* Timeline Section */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tempistiche</h3>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Quando vuole acquistare?</label>
+                  <InlineEditText
+                    value={cliente.tempo_ricerca}
+                    onSave={(value) => onUpdate({ tempo_ricerca: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Ha già visitato la zona?</label>
+                  <InlineEditBoolean
+                    value={cliente.ha_visitato}
+                    onSave={(value) => onUpdate({ ha_visitato: value })}
+                    labelTrue="Sì, ha visitato"
+                    labelFalse="No, non ancora"
+                    className="text-sm"
+                  />
+                </div>
+              </div>
+
               {/* Usage Section */}
               <div className="space-y-2">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Utilizzo</h3>
@@ -751,9 +748,7 @@ export function ClienteDetail({
             </div>
 
             {/* Property Matches Section */}
-            <div className="lg:hidden">
-              <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
-            </div>
+            <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />
           </div>
 
           {/* Full-width sections at bottom */}
