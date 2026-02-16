@@ -101,12 +101,13 @@ export const celebrateMini = () => {
 export const celebrateGasiAbbestia = () => {
   const duration = 4000;
   const animationEnd = Date.now() + duration;
+  const arcaneColors = ['#6B21A8', '#4338CA', '#06B6D4', '#1E1B4B', '#C0C0C0', '#7C3AED'];
   const defaults = { 
     startVelocity: 45, 
     spread: 360, 
     ticks: 100, 
     zIndex: 9998,
-    colors: ['#FFD700', '#FFA500', '#FF6347', '#FF4500', '#FFD700'],
+    colors: arcaneColors,
   };
 
   function randomInRange(min: number, max: number) {
@@ -118,7 +119,7 @@ export const celebrateGasiAbbestia = () => {
     particleCount: 100,
     spread: 70,
     origin: { x: 0.5, y: 0.5 },
-    colors: ['#FFD700', '#FFA500', '#FF6347'],
+    colors: arcaneColors,
     zIndex: 9998,
     startVelocity: 50,
   });
@@ -133,14 +134,12 @@ export const celebrateGasiAbbestia = () => {
 
     const particleCount = 30 * (timeLeft / duration);
 
-    // From left
     confetti({
       ...defaults,
       particleCount: Math.floor(particleCount),
       origin: { x: randomInRange(0.1, 0.3), y: randomInRange(0.2, 0.6) },
     });
     
-    // From right
     confetti({
       ...defaults,
       particleCount: Math.floor(particleCount),
@@ -154,7 +153,7 @@ export const celebrateGasiAbbestia = () => {
       particleCount: 150,
       spread: 100,
       origin: { x: 0.5, y: 0.6 },
-      colors: ['#FFD700', '#FFA500', '#FF6347', '#FF1493', '#00CED1'],
+      colors: arcaneColors,
       zIndex: 9998,
       startVelocity: 60,
       shapes: ['star', 'circle'],
