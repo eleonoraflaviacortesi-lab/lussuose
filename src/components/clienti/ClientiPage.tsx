@@ -310,6 +310,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             await updateCliente({ id, ...updates });
           }}
           searchQuery={searchQuery}
+          onAddNew={() => setAddDialogOpen(true)}
         />
       )}
 

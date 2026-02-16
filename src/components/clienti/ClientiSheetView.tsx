@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
@@ -31,6 +31,7 @@ interface ClientiSheetViewProps {
   onCardClick: (cliente: Cliente) => void;
   onUpdate: (id: string, updates: Partial<Cliente>) => Promise<void>;
   searchQuery: string;
+  onAddNew?: () => void;
 }
 
 const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] = [
@@ -995,7 +996,7 @@ function ColumnFilterPopover({
 }
 
 // --- Main Component ---
-export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery }: ClientiSheetViewProps) {
+export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery, onAddNew }: ClientiSheetViewProps) {
   const [colOrder, setColOrder] = useState<string[]>(() => COLUMNS.map(c => c.key));
   const [colWidths, setColWidths] = useState<Record<string, number>>(
     () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
@@ -1376,7 +1377,12 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
 
       {/* Footer */}
       <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
-        <span>{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
+        {onAddNew && (
+          <Button variant="ghost" size="sm" className="h-6 px-2 gap-1 text-[10px] font-medium" onClick={onAddNew}>
+            <Plus className="w-3.5 h-3.5" /> Nuova riga
+          </Button>
+        )}
+        <span className="flex-1">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
         {Object.values(colFilters).some(s => s.size > 0) && (
           <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2" onClick={() => setColFilters({})}>
             <X className="w-3 h-3 mr-1" /> Rimuovi filtri
