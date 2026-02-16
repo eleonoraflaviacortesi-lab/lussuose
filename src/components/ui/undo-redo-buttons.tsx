@@ -6,18 +6,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 export function UndoRedoButtons() {
   const { canUndo, canRedo, undoLabel, redoLabel, undo, redo } = useUndoRedo();
 
-  const handleUndo = async () => {
-    console.log('[UNDO-BTN] Undo clicked, canUndo:', canUndo);
-    await undo();
-  };
-
-  const handleRedo = async () => {
-    console.log('[UNDO-BTN] Redo clicked, canRedo:', canRedo);
-    await redo();
-  };
-
-  console.log('[UNDO-BTN] Render - canUndo:', canUndo, 'canRedo:', canRedo);
-
   return (
     <div className="flex items-center gap-0.5">
       <Tooltip>
@@ -27,7 +15,7 @@ export function UndoRedoButtons() {
             size="icon"
             className="w-8 h-8"
             disabled={!canUndo}
-            onClick={handleUndo}
+            onClick={() => undo()}
           >
             <Undo2 className="w-4 h-4" />
           </Button>
@@ -43,7 +31,7 @@ export function UndoRedoButtons() {
             size="icon"
             className="w-8 h-8"
             disabled={!canRedo}
-            onClick={handleRedo}
+            onClick={() => redo()}
           >
             <Redo2 className="w-4 h-4" />
           </Button>
