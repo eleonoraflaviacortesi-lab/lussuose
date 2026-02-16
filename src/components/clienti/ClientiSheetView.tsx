@@ -408,7 +408,7 @@ function LazyBadgeCell({
   if (!open && !value) {
     return (
       <span
-        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-muted/30"
+        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-secondary/50"
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >—</span>
     );
@@ -417,7 +417,7 @@ function LazyBadgeCell({
   if (!open) {
     return (
       <span
-        className="block px-1 py-1 cursor-pointer hover:bg-muted/30"
+        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50"
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >
         <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
@@ -462,7 +462,7 @@ function LazyStatusCell({ value, onChange }: { value: string; onChange: (val: st
   if (!open) {
     return (
       <span
-        className="block px-1 py-1 cursor-pointer hover:bg-muted/30"
+        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50"
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >
         <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>
@@ -507,7 +507,7 @@ function LazyAgentCell({ value, onChange, agents }: { value: string; onChange: (
   if (!open) {
     return (
       <span
-        className="block truncate text-xs px-2 py-1.5 cursor-pointer hover:bg-muted/30 min-h-[28px]"
+        className="block truncate text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 min-h-[28px]"
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >{display}</span>
     );
@@ -553,7 +553,7 @@ function InlineTextCell({ value, onChange }: { value: string; onChange?: (val: s
   if (!editing) {
     return (
       <span
-        className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-muted/30 rounded min-h-[28px]"
+        className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-secondary/50 rounded min-h-[28px]"
         onClick={(e) => { e.stopPropagation(); setEditing(true); setDraft(value); }}
         title={value}
       >
@@ -609,7 +609,7 @@ function SheetToolbar({
       : 'Seleziona una riga o colonna';
 
   return (
-    <div className="flex items-center gap-1 px-3 py-1.5 bg-muted/60 border-b text-xs">
+    <div className="flex items-center gap-1 px-3 py-1.5 border-b border-border/40 text-xs bg-background">
       <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", currentFormat.bold && "bg-accent")} disabled={!hasSelection} onClick={() => onToggleFormat('bold')}>
         <Bold className="w-3.5 h-3.5" />
       </Button>
@@ -619,21 +619,21 @@ function SheetToolbar({
       <Button variant="ghost" size="sm" className={cn("h-7 w-7 p-0", currentFormat.strikethrough && "bg-accent")} disabled={!hasSelection} onClick={() => onToggleFormat('strikethrough')}>
         <Strikethrough className="w-3.5 h-3.5" />
       </Button>
-      <div className="h-4 w-px bg-border mx-1" />
+      <div className="h-4 w-px bg-border/30 mx-1" />
       <ColorPalettePopover currentColor={currentBgColor} onSelect={onBgColorChange}>
         <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!hasSelection}>
           <Paintbrush className="w-3.5 h-3.5" />
-          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: currentBgColor || 'transparent' }} />
+          <span className="w-3 h-3 rounded-sm border border-border/30" style={{ backgroundColor: currentBgColor || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
       <ColorPalettePopover currentColor={currentTextColor} onSelect={onTextColorChange}>
         <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!hasSelection}>
           <Type className="w-3.5 h-3.5" />
-          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: currentTextColor || 'transparent' }} />
+          <span className="w-3 h-3 rounded-sm border border-border/30" style={{ backgroundColor: currentTextColor || 'transparent' }} />
         </Button>
       </ColorPalettePopover>
-      <div className="h-4 w-px bg-border mx-1" />
-      <span className="text-muted-foreground">{selectionLabel}</span>
+      <div className="h-4 w-px bg-border/30 mx-1" />
+      <span className="text-muted-foreground tracking-wide">{selectionLabel}</span>
     </div>
   );
 }
@@ -702,9 +702,9 @@ const SheetRow = memo(function SheetRow({
   return (
     <div
       className={cn(
-        "flex border-b transition-colors",
-        isSelected ? 'ring-2 ring-primary/50 ring-inset' : '',
-        !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'),
+        "flex border-b border-border/20 transition-colors",
+        isSelected ? 'ring-1 ring-foreground/20 ring-inset' : '',
+        !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-background' : 'bg-secondary/30'),
         rowFormat?.bold && 'font-bold',
         rowFormat?.italic && 'italic',
         rowFormat?.strikethrough && 'line-through',
@@ -722,12 +722,12 @@ const SheetRow = memo(function SheetRow({
     >
       {/* Row number + open detail */}
       <div
-        className="flex-shrink-0 flex items-center gap-0.5 border-r bg-muted/20 text-muted-foreground"
+        className="flex-shrink-0 flex items-center gap-0.5 border-r border-border/20 text-muted-foreground"
         style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
       >
         <span className="text-[10px] font-medium flex-1 text-center">{idx + 1}</span>
         <button
-          className="flex items-center justify-center w-5 h-full hover:bg-primary/10 hover:text-primary transition-colors"
+          className="flex items-center justify-center w-5 h-full hover:text-foreground transition-colors"
           onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
           title="Apri scheda"
         >
@@ -742,8 +742,8 @@ const SheetRow = memo(function SheetRow({
           <div
             key={col.key}
             className={cn(
-              "flex-shrink-0 border-r overflow-hidden",
-              selectedColKey === col.key && "bg-primary/5",
+              "flex-shrink-0 border-r border-border/20 overflow-hidden",
+              selectedColKey === col.key && "bg-accent/30",
               (cf?.bold || col.key === 'nome' || col.key === 'cognome') && 'font-bold',
               cf?.italic && 'italic',
               cf?.strikethrough && 'line-through',
@@ -1272,7 +1272,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
 
   return (
     <div
-      className="border rounded-lg bg-card overflow-hidden flex flex-col max-h-[calc(100vh-280px)]"
+      className="border border-border/30 rounded-2xl bg-background overflow-hidden flex flex-col max-h-[calc(100vh-280px)] shadow-sm"
       onClick={(e) => {
         // Deselect when clicking on the container background (not on rows/headers)
         if (e.target === e.currentTarget) {
@@ -1308,8 +1308,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       >
         <div style={{ minWidth: totalWidth }}>
           {/* Header */}
-          <div className="flex sticky top-0 z-10 bg-muted/80 backdrop-blur-sm border-b">
-            <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r bg-muted/60" style={{ width: rowNumWidth }}>
+          <div className="flex sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/40">
+            <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r border-border/20" style={{ width: rowNumWidth }}>
               #
             </div>
             {orderedColumns.map(col => (
@@ -1321,10 +1321,10 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                 onDrop={e => handleColDrop(col.key, e)}
                 onDragLeave={() => setDragOverCol(null)}
                 className={cn(
-                  "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-grab hover:bg-muted/50",
-                  sortCol === col.key && "bg-muted/60 text-foreground",
-                  selectedColKey === col.key && "bg-primary/10 text-primary",
-                  dragOverCol === col.key && "bg-primary/20 border-l-2 border-l-primary"
+                  "relative flex items-center border-r border-border/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-grab hover:bg-secondary/50 transition-colors",
+                  DATE_COLUMNS.includes(col.key) && sortCol === col.key && "text-foreground",
+                  selectedColKey === col.key && "bg-accent/40 text-foreground",
+                  dragOverCol === col.key && "bg-accent/60 border-l-2 border-l-foreground/30"
                 )}
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
@@ -1350,7 +1350,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                   />
                 )}
                 <div
-                  className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50"
+                  className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-foreground/10 active:bg-foreground/20"
                   onMouseDown={e => handleResizeStart(col.key, e)}
                   onClick={e => e.stopPropagation()}
                 />
@@ -1390,7 +1390,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       </div>
 
       {/* Footer */}
-      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
+      <div className="bg-background border-t border-border/40 px-3 py-2 text-xs text-muted-foreground flex items-center gap-2">
         {onAddNew && (
           <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
             <Plus className="w-4 h-4" /> Nuova richiesta
