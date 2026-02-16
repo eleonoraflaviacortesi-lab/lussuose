@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { isDarkColor } from '@/lib/utils';
 import { useClienti } from '@/hooks/useClienti';
 import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
@@ -94,7 +95,8 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }, [updateOrder]);
 
   const handleColorChange = useCallback(async (clienteId: string, color: string | null) => {
-    await updateCliente({ id: clienteId, card_color: color });
+    const autoTextColor = color ? (isDarkColor(color) ? '#ffffff' : '#000000') : null;
+    await updateCliente({ id: clienteId, card_color: color, row_bg_color: color, row_text_color: autoTextColor });
   }, [updateCliente]);
 
   const handleEmojiChange = useCallback(async (clienteId: string, emoji: string) => {
