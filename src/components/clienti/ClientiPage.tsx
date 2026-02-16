@@ -58,6 +58,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     createCliente,
     updateCliente,
     deleteCliente,
+    restoreCliente,
     assignCliente,
     updateOrder,
     addComment,
@@ -122,7 +123,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       await deleteCliente(selectedCliente.id);
       pushAction({
         description: `Elimina ${snapshot.nome}`,
-        undo: async () => { await createCliente(snapshot); },
+        undo: async () => { await restoreCliente(snapshot); },
         redo: async () => { await deleteCliente(snapshot.id); },
       });
       setDetailOpen(false);
@@ -313,7 +314,7 @@ groupBy={groupBy}
             if (snapshot) {
               pushAction({
                 description: `Elimina ${snapshot.nome}`,
-                undo: async () => { await createCliente(snapshot); },
+                undo: async () => { await restoreCliente(snapshot); },
                 redo: async () => { await deleteCliente(snapshot.id); },
               });
             }
@@ -345,7 +346,7 @@ groupBy={groupBy}
             if (snapshot) {
               pushAction({
                 description: `Elimina ${snapshot.nome}`,
-                undo: async () => { await createCliente(snapshot); },
+                undo: async () => { await restoreCliente(snapshot); },
                 redo: async () => { await deleteCliente(snapshot.id); },
               });
             }
