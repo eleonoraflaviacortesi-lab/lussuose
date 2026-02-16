@@ -17,6 +17,7 @@ import {
   UserX,
   X,
   LayoutGrid,
+  ArrowUpDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -27,6 +28,8 @@ interface ClientiFiltersProps {
   onFiltersChange: (filters: Filters) => void;
   totalCount: number;
   filteredCount: number;
+  dateSortDir?: 'desc' | 'asc' | null;
+  onDateSortChange?: () => void;
 }
 
 const groupByOptions: { value: ClienteGroupBy; label: string }[] = [
@@ -51,6 +54,8 @@ export function ClientiFilters({
   onFiltersChange,
   totalCount,
   filteredCount,
+  dateSortDir,
+  onDateSortChange,
 }: ClientiFiltersProps) {
   const chips: FilterChip[] = [
     { key: 'urgenti', label: 'Urgenti', icon: Clock, active: !!filters.urgenti },
@@ -100,6 +105,21 @@ export function ClientiFilters({
             ))}
           </SelectContent>
         </Select>
+
+        {/* Date Sort */}
+        {onDateSortChange && (
+          <Button
+            variant={dateSortDir ? 'default' : 'outline'}
+            size="sm"
+            className="shrink-0 gap-1.5"
+            onClick={onDateSortChange}
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            <span className="hidden sm:inline">
+              {dateSortDir === 'desc' ? 'Recenti ↓' : dateSortDir === 'asc' ? 'Vecchi ↓' : 'Data'}
+            </span>
+          </Button>
+        )}
       </div>
 
       {/* Filter chips */}
