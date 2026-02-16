@@ -17,6 +17,7 @@ interface ClientiKanbanProps {
   onOrderChange: (items: { id: string; display_order: number; status?: ClienteStatus }[]) => void;
   onColorChange: (clienteId: string, color: string | null) => void;
   onEmojiChange: (clienteId: string, emoji: string | null) => void;
+  onDeleteCliente?: (clienteId: string) => void;
   searchQuery?: string;
 }
 
@@ -199,6 +200,7 @@ export function ClientiKanban({
   onOrderChange,
   onColorChange,
   onEmojiChange,
+  onDeleteCliente,
   searchQuery = '',
 }: ClientiKanbanProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -421,6 +423,7 @@ export function ClientiKanban({
                             onColorChange={(color) => onColorChange(cliente.id, color)}
                             onEmojiChange={(emoji) => onEmojiChange(cliente.id, emoji)}
                             onStatusChange={(status) => onStatusChange(cliente.id, status)}
+                            onDelete={onDeleteCliente ? () => onDeleteCliente(cliente.id) : undefined}
                             isDragging={snapshot.isDragging}
                             showAgent={groupBy !== 'agente'}
                             agentName={getAgent(cliente.assigned_to).name}

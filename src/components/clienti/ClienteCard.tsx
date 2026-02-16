@@ -1,7 +1,7 @@
 import { memo, useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Cliente, ClienteStatus } from '@/types';
 import { cn, isDarkColor } from '@/lib/utils';
-import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle, Star } from 'lucide-react';
+import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle, Star, Trash2 } from 'lucide-react';
 import { isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
@@ -13,6 +13,7 @@ interface ClienteCardProps {
   onColorChange?: (color: string | null) => void;
   onEmojiChange?: (emoji: string | null) => void;
   onStatusChange?: (status: ClienteStatus) => void;
+  onDelete?: () => void;
   isDragging?: boolean;
   showAgent?: boolean;
   agentName?: string | null;
@@ -127,6 +128,7 @@ const ColorStatusPickerPill = memo(({
   onColorSelect, 
   onStatusChange,
   onEmojiSelect,
+  onDelete,
   onClose 
 }: { 
   position: { x: number; y: number }; 
@@ -137,6 +139,7 @@ const ColorStatusPickerPill = memo(({
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: ClienteStatus) => void;
   onEmojiSelect: (emoji: string | null) => void;
+  onDelete?: () => void;
   onClose: () => void;
 }) => {
   const [customCardColor, setCustomCardColor] = useState(currentColor || '#fef3c7');
@@ -276,6 +279,25 @@ const ColorStatusPickerPill = memo(({
             </div>
           </>
         )}
+
+        {/* Delete button */}
+        {onDelete && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <button
+              onClick={() => {
+                if (window.confirm('Eliminare questo cliente?')) {
+                  onDelete();
+                  onClose();
+                }
+              }}
+              className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 transition-colors py-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Elimina cliente
+            </button>
+          </>
+        )}
       </div>
       
       <ColorPickerOverlay
@@ -298,6 +320,7 @@ export const ClienteCard = memo(({
   onColorChange,
   onEmojiChange,
   onStatusChange,
+  onDelete,
   isDragging,
   showAgent = true,
   agentName,
@@ -491,6 +514,7 @@ export const ClienteCard = memo(({
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
           onEmojiSelect={(emoji) => onEmojiChange?.(emoji)}
+          onDelete={onDelete}
           onClose={() => setPickerOpen(false)}
         />
       )}
