@@ -1118,16 +1118,15 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   }, []);
 
   const handleHeaderClick = useCallback((key: string) => {
-    if (selectedColKey === key) {
-      // Already selected this column, toggle sort
+    // Only date columns are sortable
+    const isSortable = DATE_COLUMNS.includes(key);
+    if (isSortable) {
       if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
-      else { setSortCol(key); setSortDir('asc'); }
-    } else {
-      // Select column
-      setSelectedColKey(key);
-      setSelectedRowId(null);
+      else { setSortCol(key); setSortDir('desc'); }
     }
-  }, [sortCol, selectedColKey]);
+    setSelectedColKey(key);
+    setSelectedRowId(null);
+  }, [sortCol]);
 
   const handleResizeStart = useCallback((key: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -1272,7 +1271,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
-    <div className="border rounded-lg bg-card overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
+    <div
+      className="border rounded-lg bg-card overflow-hidden flex flex-col max-h-[calc(100vh-280px)]"
+      onClick={(e) => {
+        // Deselect when clicking on the container background (not on rows/headers)
+        if (e.target === e.currentTarget) {
+          setSelectedRowId(null);
+          setSelectedColKey(null);
+        }
+      }}
+    >
       {/* Toolbar */}
       <SheetToolbar
         selectedCliente={selectedCliente}
@@ -1291,6 +1299,12 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
         ref={measureRef}
         className="overflow-auto flex-1"
         onScroll={handleScroll}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelectedRowId(null);
+            setSelectedColKey(null);
+          }
+        }}
       >
         <div style={{ minWidth: totalWidth }}>
           {/* Header */}
@@ -1317,7 +1331,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
               >
                 <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
                 <span className="truncate flex-1">{col.label}</span>
-                {sortCol === col.key && (
+                {DATE_COLUMNS.includes(col.key) && sortCol === col.key && (
                   <span className="ml-0.5 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
                 )}
                 {DATE_COLUMNS.includes(col.key) ? (
