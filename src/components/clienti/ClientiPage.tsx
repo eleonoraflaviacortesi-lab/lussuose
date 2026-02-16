@@ -171,44 +171,46 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
   return (
     <div className="py-4 space-y-4 overflow-x-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-end gap-2">
-          {isCoordinator && (
-            <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">Analisi</span>
-            </Button>
-          )}
-          {isCoordinator && (
-            <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
-              <Upload className="w-4 h-4 mr-1.5" />
-              CSV
-            </Button>
-          )}
-          <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
-            <Plus className="w-4 h-4" />
+      {/* Header row: view toggle + actions */}
+      <div className="flex items-center gap-2">
+        {/* View toggle */}
+        <div className="flex rounded-lg border overflow-hidden">
+          <Button
+            variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+            size="sm"
+            className="rounded-none gap-1.5 px-4"
+            onClick={() => setViewMode('kanban')}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            Kanban
           </Button>
-      </div>
+          <Button
+            variant={viewMode === 'sheet' ? 'default' : 'ghost'}
+            size="sm"
+            className="rounded-none gap-1.5 px-4"
+            onClick={() => setViewMode('sheet')}
+          >
+            <Table className="w-4 h-4" />
+            Spreadsheet
+          </Button>
+        </div>
 
-      {/* View toggle - full width buttons */}
-      <div className="flex rounded-lg border overflow-hidden">
-        <Button
-          variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-          size="sm"
-          className="rounded-none flex-1 gap-1.5"
-          onClick={() => setViewMode('kanban')}
-        >
-          <LayoutGrid className="w-4 h-4" />
-          Kanban
-        </Button>
-        <Button
-          variant={viewMode === 'sheet' ? 'default' : 'ghost'}
-          size="sm"
-          className="rounded-none flex-1 gap-1.5"
-          onClick={() => setViewMode('sheet')}
-        >
-          <Table className="w-4 h-4" />
-          Spreadsheet
+        <div className="flex-1" />
+
+        {isCoordinator && (
+          <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
+            <BarChart3 className="w-4 h-4" />
+            <span className="hidden sm:inline">Analisi</span>
+          </Button>
+        )}
+        {isCoordinator && (
+          <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
+            <Upload className="w-4 h-4 mr-1.5" />
+            CSV
+          </Button>
+        )}
+        <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
+          <Plus className="w-4 h-4" />
         </Button>
       </div>
 
