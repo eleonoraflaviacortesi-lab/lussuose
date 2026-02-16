@@ -6,7 +6,6 @@ import Header from '@/components/layout/Header';
 import Navigation from '@/components/layout/Navigation';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import { NotificationBell } from '@/components/layout/NotificationBell';
-import { MoonPhaseIndicator } from '@/components/layout/MoonPhaseIndicator';
 import { FloatingSparkles } from '@/components/ui/floating-sparkles';
 import { MagicCursor } from '@/components/ui/magic-cursor';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
@@ -165,8 +164,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         </main>
       </PullToRefresh>
       
-      {/* Fixed Notification Bell & Moon Phase */}
-      <MoonPhaseIndicator />
+      {/* Fixed Notification Bell */}
       <NotificationBell onOpenCliente={handleOpenCliente} />
 
       {/* Global Notizia Detail Modal (can be opened from any tab) */}

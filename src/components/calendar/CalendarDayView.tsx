@@ -188,7 +188,7 @@ const CalendarDayView = ({
                     "rounded-xl p-4 transition-all cursor-pointer relative active:scale-[0.98]",
                     styles.bg,
                     styles.border,
-                    event.urgent && "ring-2 ring-red-500 animate-breath-pulse"
+                    event.urgent && "ring-2 ring-red-500"
                   )}
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
                   onClick={() => handleEventClick(event)}

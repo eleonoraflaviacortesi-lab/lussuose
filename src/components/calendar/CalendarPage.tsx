@@ -1381,7 +1381,7 @@ const EventCard = memo(({
         "rounded-lg p-2 transition-all hover:scale-[1.02] cursor-pointer relative",
         styles.bg,
         styles.border,
-        event.urgent && "ring-2 ring-red-500 animate-breath-pulse"
+        event.urgent && "ring-2 ring-red-500"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
       onClick={(e) => {
@@ -1534,7 +1534,7 @@ const DraggableEventCard = memo(({
         "rounded-lg p-2 transition-all relative cursor-grab active:cursor-grabbing touch-none",
         styles.bg,
         styles.border,
-        event.urgent && "ring-2 ring-red-500 animate-breath-pulse",
+        event.urgent && "ring-2 ring-red-500",
         isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}

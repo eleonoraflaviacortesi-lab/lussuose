@@ -107,10 +107,6 @@ export default {
           from: { transform: "translateX(0)" },
           to: { transform: "translateX(-50%)" },
         },
-        "breath-pulse": {
-          "0%, 100%": { boxShadow: "0 0 0 0 rgba(239, 68, 68, 0.3)" },
-          "50%": { boxShadow: "0 0 12px 4px rgba(239, 68, 68, 0.15)" },
-        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -118,7 +114,6 @@ export default {
         "fade-in": "fade-in 0.4s ease-out",
         "slide-in": "slide-in 0.3s ease-out",
         "ticker": "ticker 20s linear infinite",
-        "breath-pulse": "breath-pulse 5s ease-in-out infinite",
       },
     },
   },

@@ -52,29 +52,16 @@ export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button 
-            className="relative w-12 h-12 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+            className={cn(
+              "relative w-12 h-12 rounded-full flex items-center justify-center",
+              "bg-white/80 backdrop-blur-xl shadow-lg",
+              "hover:scale-105 active:scale-95 transition-transform"
+            )}
             aria-label={`Notifiche${unreadCount > 0 ? ` (${unreadCount} non lette)` : ''}`}
           >
-            {/* Starburst background */}
-            <svg
-              viewBox="0 0 100 100"
-              className="absolute inset-0 w-full h-full"
-              style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
-            >
-              <polygon
-                fill="white"
-                points={Array.from({ length: 16 }, (_, i) => {
-                  const angle = (i * 360) / 16 - 90;
-                  const r = i % 2 === 0 ? 50 : 35;
-                  const x = 50 + r * Math.cos((angle * Math.PI) / 180);
-                  const y = 50 + r * Math.sin((angle * Math.PI) / 180);
-                  return `${x},${y}`;
-                }).join(' ')}
-              />
-            </svg>
-            <Bell className="w-5 h-5 relative z-10" />
+            <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[hsl(var(--banner))] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md z-10">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-[hsl(var(--banner))] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
                 {unreadCount > 9 ? '9+' : unreadCount}
               </span>
             )}
