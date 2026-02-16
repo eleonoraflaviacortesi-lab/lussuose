@@ -1,16 +1,23 @@
 /**
  * Parser for Dalila's buyer CSV (Cortesi Luxury Real Estate - Requests)
  * 
- * CSV columns: Country, Language, Surname, Name, Portale, Data, Property, Ref., 
+ * CSV columns: [Country], Language, Surname, Name, Portale, Data, Property, Ref.,
  *              Data Contatto, Contattato da, Tipo Contatto, Contatto fornito 1, Contatto fornito 2
  * 
  * Mapping to clienti:
  *   - nome = Name Surname
+ *   - cognome = Surname
  *   - paese = Country
+ *   - lingua = Language
  *   - telefono = phone-like contact
  *   - email = email-like contact
+ *   - portale = Portale
+ *   - property_name = Property
+ *   - ref_number = Ref.
+ *   - contattato_da = Contattato da
+ *   - tipo_contatto = Tipo Contatto
  *   - status = 'contacted'
- *   - note_extra = all unmapped fields (Language, Portale, Property, Ref, dates, contact info)
+ *   - note_extra = consolidated property interests for duplicates
  * 
  * Duplicates (same person, multiple properties) are consolidated into one cliente.
  */
@@ -33,12 +40,20 @@ interface CSVRow {
 
 interface ParsedBuyer {
   nome: string;
+  cognome: string | null;
   paese: string | null;
+  lingua: string | null;
   telefono: string | null;
   email: string | null;
+  portale: string | null;
+  property_name: string | null;
+  ref_number: string | null;
+  contattato_da: string | null;
+  tipo_contatto: string | null;
   status: string;
   note_extra: string;
   last_contact_date: string | null;
+  data_submission: string | null;
   sede: string;
 }
 
@@ -48,7 +63,6 @@ const isEmail = (val: string): boolean => {
 
 const isPhone = (val: string): boolean => {
   if (!val || val === '-' || val === '?') return false;
-  // Remove spaces, dashes, parens - if mostly digits, it's a phone
   const digits = val.replace(/[\s\-\(\)\+]/g, '');
   return digits.length >= 7 && /^\d+$/.test(digits);
 };
@@ -62,53 +76,56 @@ const cleanValue = (val: string): string | null => {
 const parseDate = (dateStr: string): string | null => {
   const clean = cleanValue(dateStr);
   if (!clean) return null;
-  // Format: DD/MM/YYYY
   const match = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (!match) return null;
   const [, day, month, year] = match;
   const y = parseInt(year);
-  // Skip obviously wrong years
   if (y < 2020 || y > 2030) return null;
   return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
 };
 
 /**
- * Parse the CSV text, handling multiline quoted fields
+ * Parse the CSV text, handling multiline quoted fields.
+ * Header: ,Language,Surname,Name,Portale,Data,Property,Ref.,Data Contatto,Contattato da,Tipo Contatto,Contatto fornito 1,Contatto fornito 2,
  */
 function parseCSVText(text: string): CSVRow[] {
   const rows: CSVRow[] = [];
   const lines = text.split('\n');
   
   let i = 0;
-  // Skip empty lines and header
+  // Skip empty lines and find header (starts with ,Language or Country,)
   while (i < lines.length) {
     const line = lines[i].trim();
-    if (line.startsWith('Country,')) {
+    if (line.includes(',Language,Surname,') || line.startsWith('Country,')) {
       i++;
       break;
     }
     i++;
   }
   
-  // Parse data rows, handling multiline quoted fields
+  // Parse data rows
   while (i < lines.length) {
     let line = lines[i].trim();
     if (!line) { i++; continue; }
     
-    // Handle multiline quoted fields (e.g., "Ponte Pattoli -\nBotteghi")
+    // Handle multiline quoted fields
     while ((line.match(/"/g) || []).length % 2 !== 0 && i + 1 < lines.length) {
       i++;
       line += ' ' + lines[i].trim();
     }
     
-    // Parse CSV fields respecting quotes
     const fields = parseCSVLine(line);
     if (fields.length >= 13) {
+      const name = fields[3].trim();
+      const surname = fields[2].trim();
+      // Skip empty/header rows
+      if (!name && !surname) { i++; continue; }
+      
       rows.push({
         country: fields[0].trim(),
         language: fields[1].trim(),
-        surname: fields[2].trim(),
-        name: fields[3].trim(),
+        surname,
+        name,
         portale: fields[4].trim(),
         data: fields[5].trim(),
         property: fields[6].trim(),
@@ -156,7 +173,6 @@ function consolidateRows(rows: CSVRow[]): Map<string, CSVRow[]> {
     const name = buildName(row);
     if (!name || name === '?') continue;
     
-    // Build a key from name + primary contact
     const phone = extractPhone(row);
     const email = extractEmail(row);
     const key = `${name.toLowerCase()}|${phone || email || ''}`;
@@ -186,7 +202,6 @@ function extractPhone(row: CSVRow): string | null {
   
   if (c1 && isPhone(c1)) return c1;
   if (c2 && isPhone(c2)) return c2;
-  // Sometimes contatto2 has a phone number too
   if (c1 && !isEmail(c1) && c1.length > 5) return c1;
   return null;
 }
@@ -205,18 +220,11 @@ function buildNoteExtra(rows: CSVRow[]): string {
   
   if (rows.length === 1) {
     const r = rows[0];
-    if (cleanValue(r.language)) lines.push(`🌐 Lingua: ${r.language}`);
-    if (cleanValue(r.portale)) lines.push(`📱 Portale: ${r.portale}`);
     if (cleanValue(r.data)) lines.push(`📅 Data richiesta: ${r.data}`);
     if (cleanValue(r.property)) lines.push(`🏠 Immobile: ${r.property} (Ref. ${r.ref})`);
     if (cleanValue(r.dataContatto)) lines.push(`📞 Data contatto: ${r.dataContatto}`);
-    if (cleanValue(r.contattatoDa)) lines.push(`👤 Contattato da: ${r.contattatoDa}`);
-    if (cleanValue(r.tipoContatto)) lines.push(`💬 Tipo contatto: ${r.tipoContatto}`);
   } else {
     // Multiple property interests
-    const lang = cleanValue(rows[0].language);
-    if (lang) lines.push(`🌐 Lingua: ${lang}`);
-    
     lines.push('');
     lines.push(`🏠 IMMOBILI DI INTERESSE (${rows.length}):`);
     
@@ -228,9 +236,6 @@ function buildNoteExtra(rows: CSVRow[]): string {
       if (cleanValue(r.tipoContatto)) parts.push(`[${r.tipoContatto}]`);
       lines.push(`• ${parts.join(' - ')}`);
     }
-    
-    const contattatoDa = cleanValue(rows[0].contattatoDa);
-    if (contattatoDa) lines.push(`\n👤 Contattato da: ${contattatoDa}`);
   }
   
   return lines.join('\n');
@@ -254,23 +259,40 @@ export async function fetchAndParseDalilaCSV(): Promise<ParsedBuyer[]> {
     const paese = cleanValue(firstRow.country);
     const telefono = extractPhone(firstRow);
     const email = extractEmail(firstRow);
+    const cognome = cleanValue(firstRow.surname);
+    const lingua = cleanValue(firstRow.language);
+    const portale = cleanValue(firstRow.portale);
+    const property_name = cleanValue(firstRow.property);
+    const ref_number = cleanValue(firstRow.ref);
+    const contattato_da = cleanValue(firstRow.contattatoDa);
+    const tipo_contatto = cleanValue(firstRow.tipoContatto);
     
+    // Get latest contact date and earliest request date
     let latestDate: string | null = null;
+    let earliestRequestDate: string | null = null;
     for (const r of groupRows) {
       const d = parseDate(r.dataContatto);
-      if (d && (!latestDate || d > latestDate)) {
-        latestDate = d;
-      }
+      if (d && (!latestDate || d > latestDate)) latestDate = d;
+      const rd = parseDate(r.data);
+      if (rd && (!earliestRequestDate || rd < earliestRequestDate)) earliestRequestDate = rd;
     }
     
     buyers.push({
       nome,
+      cognome,
       paese,
+      lingua,
       telefono,
       email,
+      portale,
+      property_name,
+      ref_number,
+      contattato_da,
+      tipo_contatto,
       status: 'contacted',
       note_extra: buildNoteExtra(groupRows),
       last_contact_date: latestDate,
+      data_submission: earliestRequestDate,
       sede: sedi[index % 2],
     });
     index++;
@@ -286,7 +308,6 @@ export function getDalilaCSVSummary(buyers: ParsedBuyer[]) {
     byCountry.set(key, (byCountry.get(key) || 0) + 1);
   }
   
-  // Sort by count descending, take top 8
   const topCountries = [...byCountry.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 8);
