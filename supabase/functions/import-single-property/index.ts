@@ -145,8 +145,11 @@ Deno.serve(async (req) => {
     const metadata = scrapeData.data?.metadata || scrapeData.metadata || {};
 
     // Extract reference number from URL or content
-    const refMatch = url.match(/ref[_-]?(\d+)/i) || content.match(/Ref[.\s]*(\d+)/i);
-    const refNumber = refMatch ? `Ref. ${refMatch[1]}` : null;
+    const refMatch = url.match(/ref[_-]?(\d+)/i) || 
+                     content.match(/Ref[.\s:]*(\d+)/i) ||
+                     content.match(/(?:Rif|Code|Codice)[.\s:]*(\d+)/i) ||
+                     url.match(/[-/](\d{4,6})\/?(?:\?|$|#)?$/);
+    const refNumber = refMatch ? refMatch[1] : null;
 
     // Extract title
     const title = metadata.title || 
