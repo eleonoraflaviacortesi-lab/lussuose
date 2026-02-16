@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
@@ -54,7 +54,7 @@ const TIPO_CONTATTO_COLORS: Record<string, string> = {
   'Idealista': '#22c55e', 'Sito Cortesi': '#a855f7',
 };
 const LINGUA_COLORS: Record<string, string> = {
-  'ENG': '#22c55e', 'ITA': '#22c55e', 'FRA': '#3b82f6', 'DEU': '#f59e0b', 'ESP': '#ef4444',
+  'ENG': '#3b82f6', 'ITA': '#22c55e', 'FRA': '#a855f7', 'DEU': '#f59e0b', 'ESP': '#ef4444', 'DEUTSCH': '#f59e0b',
 };
 
 type ColumnDef = {
@@ -575,13 +575,39 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
                               className="flex-shrink-0 border-r overflow-hidden"
                               style={{ width: colWidths[col.key] }}
                             >
-                              <EditableCell
-                                value={getCellValueStatic(cliente, col)}
-                                onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
-                                type={col.type}
-                                agents={agents}
-                                onClick={() => !col.editable ? onCardClick(cliente) : undefined}
-                              />
+                              {col.key === 'telefono' ? (
+                                <div className="flex items-center gap-0.5">
+                                  <div className="flex-1 overflow-hidden">
+                                    <EditableCell
+                                      value={getCellValueStatic(cliente, col)}
+                                      onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
+                                      type={col.type}
+                                      agents={agents}
+                                      onClick={() => onCardClick(cliente)}
+                                    />
+                                  </div>
+                                  {cliente.telefono && (
+                                    <a
+                                      href={`https://wa.me/${cliente.telefono.replace(/[\s\-\(\)\+]/g, '')}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors"
+                                      onClick={e => e.stopPropagation()}
+                                      title="Apri WhatsApp"
+                                    >
+                                      <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+                                    </a>
+                                  )}
+                                </div>
+                              ) : (
+                                <EditableCell
+                                  value={getCellValueStatic(cliente, col)}
+                                  onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
+                                  type={col.type}
+                                  agents={agents}
+                                  onClick={() => !col.editable ? onCardClick(cliente) : undefined}
+                                />
+                              )}
                             </div>
                           ))}
                         </div>
