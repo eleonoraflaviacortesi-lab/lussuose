@@ -1,4 +1,4 @@
-const STAR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+const STAR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="black"><path d="M50 0 L58 36 L85.36 14.64 L64 42 L100 50 L64 58 L85.36 85.36 L58 64 L50 100 L42 64 L14.64 85.36 L36 58 L0 50 L36 42 L14.64 14.64 L42 36 Z"/></svg>`;
 
 interface Star {
   x: number;
