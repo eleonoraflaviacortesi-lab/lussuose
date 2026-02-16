@@ -295,7 +295,7 @@ export function ClienteDetail({
               <div className="space-y-2">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Dati Personali</h3>
                 
-                {/* Data richiesta - deduced from notes for imported buyers */}
+                {/* Data richiesta */}
                 <div>
                   <label className="text-[10px] text-muted-foreground block mb-0.5">Data richiesta</label>
                   {(() => {
@@ -314,11 +314,38 @@ export function ClienteDetail({
                 </div>
 
                 <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Cognome</label>
+                  <InlineEditText
+                    value={cliente.cognome}
+                    onSave={(value) => onUpdate({ cognome: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
                   <label className="text-[10px] text-muted-foreground block mb-0.5">Paese di provenienza</label>
                   <InlineEditText
                     value={cliente.paese}
                     onSave={(value) => onUpdate({ paese: value })}
                     placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Lingua</label>
+                  <InlineEditSelect
+                    value={cliente.lingua}
+                    options={[
+                      { value: 'ENG', label: 'English' },
+                      { value: 'ITA', label: 'Italiano' },
+                      { value: 'FRA', label: 'Français' },
+                      { value: 'DEU', label: 'Deutsch' },
+                      { value: 'ESP', label: 'Español' },
+                    ]}
+                    onSave={(value) => onUpdate({ lingua: value })}
+                    placeholder="Non specificata"
                     className="text-sm"
                   />
                 </div>
@@ -340,6 +367,76 @@ export function ClienteDetail({
                     onSave={(value) => onUpdate({ email: value })}
                     placeholder="Non specificato"
                     className="text-sm break-all"
+                  />
+                </div>
+              </div>
+
+              {/* Tracking / CRM Section - new fields from spreadsheet */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Tracking CRM</h3>
+                
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Portale di provenienza</label>
+                  <InlineEditSelect
+                    value={cliente.portale}
+                    options={[
+                      { value: 'James Edition', label: 'James Edition' },
+                      { value: 'Idealista', label: 'Idealista' },
+                      { value: 'Gate-away', label: 'Gate-away' },
+                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                      { value: 'Immobiliare.it', label: 'Immobiliare.it' },
+                      { value: 'Altro', label: 'Altro' },
+                    ]}
+                    onSave={(value) => onUpdate({ portale: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Proprietà richiesta</label>
+                  <InlineEditText
+                    value={cliente.property_name}
+                    onSave={(value) => onUpdate({ property_name: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Ref.</label>
+                  <InlineEditText
+                    value={cliente.ref_number}
+                    onSave={(value) => onUpdate({ ref_number: value })}
+                    placeholder="Non specificato"
+                    className="text-sm font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Contattato da</label>
+                  <InlineEditText
+                    value={cliente.contattato_da}
+                    onSave={(value) => onUpdate({ contattato_da: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] text-muted-foreground block mb-0.5">Tipo contatto</label>
+                  <InlineEditSelect
+                    value={cliente.tipo_contatto}
+                    options={[
+                      { value: 'Mail', label: 'Mail' },
+                      { value: 'WhatsApp', label: 'WhatsApp' },
+                      { value: 'Call', label: 'Call' },
+                      { value: 'Idealista', label: 'Idealista' },
+                      { value: 'Sito Cortesi', label: 'Sito Cortesi' },
+                    ]}
+                    onSave={(value) => onUpdate({ tipo_contatto: value })}
+                    placeholder="Non specificato"
+                    className="text-sm"
                   />
                 </div>
               </div>
