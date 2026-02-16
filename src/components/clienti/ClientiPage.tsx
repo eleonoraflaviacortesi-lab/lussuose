@@ -293,14 +293,18 @@ groupBy={groupBy}
         />
       ) : (
         <ClientiSheetView
-          clienti={dateSortDir ? [...displayClients].sort((a, b) => {
-            const dateA = getEffectiveDate(a);
-            const dateB = getEffectiveDate(b);
-            if (!dateA && !dateB) return 0;
-            if (!dateA) return 1;
-            if (!dateB) return -1;
-            return dateSortDir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
-          }) : displayClients}
+          clienti={[...displayClients].sort((a, b) => {
+            if (dateSortDir) {
+              const dateA = getEffectiveDate(a);
+              const dateB = getEffectiveDate(b);
+              if (!dateA && !dateB) return 0;
+              if (!dateA) return 1;
+              if (!dateB) return -1;
+              return dateSortDir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+            }
+            // Default: newest first by created_at
+            return b.created_at.localeCompare(a.created_at);
+          })}
           agents={agents}
           onCardClick={handleCardClick}
           onUpdate={async (id, updates) => {
