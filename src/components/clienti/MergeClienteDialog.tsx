@@ -23,9 +23,10 @@ interface MergeClienteDialogProps {
   cliente: Cliente;
   allClienti: Cliente[];
   onMerged: () => void;
+  tallyOnly?: boolean;
 }
 
-export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, onMerged }: MergeClienteDialogProps) {
+export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, onMerged, tallyOnly = false }: MergeClienteDialogProps) {
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [merging, setMerging] = useState(false);
@@ -38,7 +39,8 @@ export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, on
     return allClienti
       .filter(c => {
         if (c.id === cliente.id) return false;
-        // Only show Tally submissions or those with matching data
+        // If tallyOnly, only show TALLY submissions
+        if (tallyOnly && c.portale !== 'TALLY') return false;
         if (search) {
           const q = search.toLowerCase();
           return (
@@ -49,6 +51,8 @@ export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, on
             c.portale?.toLowerCase().includes(q)
           );
         }
+        // If tallyOnly, show all TALLY submissions (already filtered above)
+        if (tallyOnly) return true;
         // Auto-suggest: same phone or email
         const samePhone = cliente.telefono && c.telefono && 
           c.telefono.replace(/\s/g, '') === cliente.telefono.replace(/\s/g, '');
@@ -64,7 +68,7 @@ export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, on
         if (b.portale === 'TALLY' && a.portale !== 'TALLY') return 1;
         return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
-  }, [allClienti, cliente, search]);
+  }, [allClienti, cliente, search, tallyOnly]);
 
   const selectedCliente = candidates.find(c => c.id === selectedId);
 
@@ -174,10 +178,13 @@ export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, on
       <DialogContent className="max-w-md w-full max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-base font-bold flex items-center gap-2">
-            <Merge className="w-4 h-4" /> Associa a Richiesta
+            <Merge className="w-4 h-4" /> {tallyOnly ? 'Associa Questionario Tally' : 'Associa a Richiesta'}
           </DialogTitle>
           <p className="text-xs text-muted-foreground">
-            Unisci un duplicato a <strong>{cliente.nome}</strong>. I dati mancanti verranno compilati e il duplicato eliminato.
+            {tallyOnly 
+              ? <>Cerca una submission Tally da associare a <strong>{cliente.nome}</strong>. I dati verranno uniti e il duplicato eliminato.</>
+              : <>Unisci un duplicato a <strong>{cliente.nome}</strong>. I dati mancanti verranno compilati e il duplicato eliminato.</>
+            }
           </p>
         </DialogHeader>
 
