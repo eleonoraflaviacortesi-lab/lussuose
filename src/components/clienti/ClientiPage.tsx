@@ -80,6 +80,27 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     }
   }, [initialClienteId, clienti, onClienteOpened]);
 
+  // Tracked update: captures old values and pushes undo action for every change
+  const trackedUpdate = useCallback(async (id: string, updates: Partial<Cliente>, label?: string) => {
+    const old = clienti.find(c => c.id === id);
+    if (!old) { await updateCliente({ id, ...updates }); return; }
+    
+    // Capture only the fields being changed
+    const oldValues: Record<string, unknown> = {};
+    for (const key of Object.keys(updates)) {
+      oldValues[key] = (old as any)[key];
+    }
+    
+    await updateCliente({ id, ...updates });
+    
+    const desc = label || Object.keys(updates).join(', ');
+    pushAction({
+      description: `${old.nome}: ${desc}`,
+      undo: async () => { await updateCliente({ id, ...oldValues } as any); },
+      redo: async () => { await updateCliente({ id, ...updates } as any); },
+    });
+  }, [clienti, updateCliente, pushAction]);
+
   const handleCardClick = useCallback((cliente: Cliente) => {
     setSelectedCliente(cliente);
     setDetailOpen(true);
@@ -88,9 +109,15 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const handleAssignInline = useCallback(async (agentId: string | null) => {
     if (selectedCliente) {
       await assignCliente({ id: selectedCliente.id, agentId });
+      const oldAgent = selectedCliente.assigned_to;
+      pushAction({
+        description: `${selectedCliente.nome}: assegnazione`,
+        undo: async () => { await assignCliente({ id: selectedCliente.id, agentId: oldAgent }); },
+        redo: async () => { await assignCliente({ id: selectedCliente.id, agentId }); },
+      });
       setSelectedCliente(prev => prev ? { ...prev, assigned_to: agentId } : null);
     }
-  }, [selectedCliente, assignCliente]);
+  }, [selectedCliente, assignCliente, pushAction]);
 
   const handleOrderChange = useCallback(async (
     items: { id: string; display_order: number; status?: ClienteStatus }[]
@@ -100,12 +127,12 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
   const handleColorChange = useCallback(async (clienteId: string, color: string | null) => {
     const autoTextColor = color ? (isDarkColor(color) ? '#ffffff' : '#000000') : null;
-    await updateCliente({ id: clienteId, card_color: color, row_bg_color: color, row_text_color: autoTextColor });
-  }, [updateCliente]);
+    await trackedUpdate(clienteId, { card_color: color, row_bg_color: color, row_text_color: autoTextColor } as any, 'colore');
+  }, [trackedUpdate]);
 
   const handleEmojiChange = useCallback(async (clienteId: string, emoji: string) => {
-    await updateCliente({ id: clienteId, emoji });
-  }, [updateCliente]);
+    await trackedUpdate(clienteId, { emoji } as any, 'emoji');
+  }, [trackedUpdate]);
 
 
   const handleAddComment = useCallback(async (comment: string) => {
@@ -294,16 +321,7 @@ groupBy={groupBy}
           agents={agents}
           onCardClick={handleCardClick}
           onStatusChange={async (clienteId, status) => {
-            const old = clienti.find(c => c.id === clienteId);
-            const oldStatus = old?.status;
-            await updateCliente({ id: clienteId, status });
-            if (old && oldStatus) {
-              pushAction({
-                description: `Stato ${old.nome}`,
-                undo: async () => { await updateCliente({ id: clienteId, status: oldStatus as ClienteStatus }); },
-                redo: async () => { await updateCliente({ id: clienteId, status }); },
-              });
-            }
+            await trackedUpdate(clienteId, { status } as any, 'stato');
           }}
           onOrderChange={handleOrderChange}
           onColorChange={handleColorChange}
@@ -338,7 +356,7 @@ groupBy={groupBy}
           agents={agents}
           onCardClick={handleCardClick}
           onUpdate={async (id, updates) => {
-            await updateCliente({ id, ...updates });
+            await trackedUpdate(id, updates);
           }}
           onDelete={async (id) => {
             const snapshot = clienti.find(c => c.id === id);
@@ -370,7 +388,7 @@ groupBy={groupBy}
         onDelete={handleDelete}
         onUpdate={async (updates) => {
           if (selectedCliente) {
-            await updateCliente({ id: selectedCliente.id, ...updates });
+            await trackedUpdate(selectedCliente.id, updates);
           }
         }}
         allClienti={clienti}
