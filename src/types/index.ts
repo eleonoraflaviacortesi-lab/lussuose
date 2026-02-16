@@ -131,6 +131,13 @@ export interface ClienteFilters {
   conTerreno?: boolean;
   urgenti?: boolean;
   search?: string;
+  paese?: string;
+  lingua?: string;
+  portale?: string;
+  regione?: string;
+  tipologia?: string;
+  stile?: string;
+  uso?: string;
 }
 
 // Activity Log types

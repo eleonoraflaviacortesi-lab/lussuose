@@ -220,12 +220,13 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       {/* Filters - only for coordinators */}
       {isCoordinator && (
         <ClientiFilters
-          groupBy={groupBy}
+groupBy={groupBy}
           onGroupByChange={setGroupBy}
           filters={filters}
           onFiltersChange={setFilters}
           totalCount={clienti.length}
           filteredCount={displayClients.length}
+          clienti={clienti}
           dateSortDir={dateSortDir}
           onDateSortChange={() => {
             setDateSortDir(prev => 

@@ -1,4 +1,5 @@
-import { ClienteGroupBy, ClienteFilters as Filters } from '@/types';
+import { useMemo } from 'react';
+import { Cliente, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +29,7 @@ interface ClientiFiltersProps {
   onFiltersChange: (filters: Filters) => void;
   totalCount: number;
   filteredCount: number;
+  clienti: Cliente[];
   dateSortDir?: 'desc' | 'asc' | null;
   onDateSortChange?: () => void;
 }
@@ -54,9 +56,26 @@ export function ClientiFilters({
   onFiltersChange,
   totalCount,
   filteredCount,
+  clienti,
   dateSortDir,
   onDateSortChange,
 }: ClientiFiltersProps) {
+  // Extract unique values dynamically from data
+  const uniqueValues = useMemo(() => {
+    const unique = (arr: (string | null | undefined)[]) => 
+      [...new Set(arr.filter(Boolean) as string[])].sort();
+    
+    return {
+      paese: unique(clienti.map(c => c.paese)),
+      lingua: unique(clienti.map(c => c.lingua)),
+      portale: unique(clienti.map(c => c.portale)),
+      regione: unique(clienti.flatMap(c => c.regioni || [])),
+      tipologia: unique(clienti.flatMap(c => c.tipologia || [])),
+      stile: unique(clienti.map(c => c.stile)),
+      uso: unique(clienti.map(c => c.uso)),
+    };
+  }, [clienti]);
+
   const chips: FilterChip[] = [
     { key: 'urgenti', label: 'Urgenti', icon: Clock, active: !!filters.urgenti },
     { key: 'nonAssegnati', label: 'Non assegnati', icon: UserX, active: !!filters.nonAssegnati },
@@ -74,7 +93,19 @@ export function ClientiFilters({
     onFiltersChange({});
   };
 
-  const hasActiveFilters = Object.values(filters).some(v => v);
+  const hasActiveFilters = Object.entries(filters).some(([k, v]) => k !== 'search' && v);
+
+  // Dropdown filter config
+  const dropdownFilters: { key: keyof Filters; label: string; options: string[] }[] = [
+    { key: 'paese', label: 'Paese', options: uniqueValues.paese },
+    { key: 'lingua', label: 'Lingua', options: uniqueValues.lingua },
+    { key: 'regione', label: 'Regione', options: uniqueValues.regione },
+    { key: 'portale', label: 'Portale', options: uniqueValues.portale },
+    { key: 'tipologia', label: 'Tipologia', options: uniqueValues.tipologia },
+    { key: 'stile', label: 'Stile', options: uniqueValues.stile },
+    { key: 'uso', label: 'Uso', options: uniqueValues.uso },
+    { key: 'piscina', label: 'Piscina', options: ['Essential', 'Optional', 'Not needed'] },
+  ];
 
   return (
     <div className="space-y-3">
@@ -122,9 +153,9 @@ export function ClientiFilters({
         )}
       </div>
 
-      {/* Filter chips */}
-      <div className="flex flex-wrap items-center gap-2">
-        <Filter className="w-4 h-4 text-muted-foreground" />
+      {/* Filter chips + dropdowns */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <Filter className="w-4 h-4 text-muted-foreground shrink-0" />
         
         {chips.map(chip => {
           const Icon = chip.icon;
@@ -133,7 +164,7 @@ export function ClientiFilters({
               key={chip.key}
               onClick={() => toggleFilter(chip.key)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
+                "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
                 chip.active
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted hover:bg-muted/80 text-muted-foreground"
@@ -145,31 +176,33 @@ export function ClientiFilters({
           );
         })}
 
-        {/* Piscina dropdown */}
-        <Select
-          value={filters.piscina || 'all'}
-          onValueChange={v => onFiltersChange({ ...filters, piscina: v === 'all' ? undefined : v })}
-        >
-          <SelectTrigger className={cn(
-            "h-7 w-auto px-3 text-xs rounded-full",
-            filters.piscina ? "bg-primary text-primary-foreground" : "bg-muted"
-          )}>
-            <Droplets className="w-3 h-3 mr-1" />
-            <SelectValue placeholder="Piscina" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tutte</SelectItem>
-            <SelectItem value="Essential">Essenziale</SelectItem>
-            <SelectItem value="Optional">Opzionale</SelectItem>
-            <SelectItem value="Not needed">Non necessaria</SelectItem>
-          </SelectContent>
-        </Select>
+        {/* Dynamic dropdown filters */}
+        {dropdownFilters.map(df => df.options.length > 0 && (
+          <Select
+            key={df.key}
+            value={(filters[df.key] as string) || 'all'}
+            onValueChange={v => onFiltersChange({ ...filters, [df.key]: v === 'all' ? undefined : v })}
+          >
+            <SelectTrigger className={cn(
+              "h-7 w-auto px-2.5 text-xs rounded-full border-0",
+              filters[df.key] ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+            )}>
+              <SelectValue placeholder={df.label} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{df.label}: Tutti</SelectItem>
+              {df.options.map(opt => (
+                <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ))}
 
         {/* Clear filters */}
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground"
+            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
           >
             <X className="w-3 h-3" />
             Cancella

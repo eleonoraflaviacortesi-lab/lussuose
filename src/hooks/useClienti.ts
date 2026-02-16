@@ -63,6 +63,13 @@ export function useClienti(options?: {
     if (filters.nonAssegnati && cliente.assigned_to) return false;
     if (filters.conTerreno && cliente.terreno?.toLowerCase() !== 'yes') return false;
     if (filters.urgenti && !isUrgent(cliente.tempo_ricerca)) return false;
+    if (filters.paese && cliente.paese?.toLowerCase() !== filters.paese.toLowerCase()) return false;
+    if (filters.lingua && cliente.lingua?.toLowerCase() !== filters.lingua.toLowerCase()) return false;
+    if (filters.portale && cliente.portale?.toLowerCase() !== filters.portale.toLowerCase()) return false;
+    if (filters.regione && !cliente.regioni.some(r => r.toLowerCase() === filters.regione!.toLowerCase())) return false;
+    if (filters.tipologia && !cliente.tipologia.some(t => t.toLowerCase() === filters.tipologia!.toLowerCase())) return false;
+    if (filters.stile && cliente.stile?.toLowerCase() !== filters.stile.toLowerCase()) return false;
+    if (filters.uso && cliente.uso?.toLowerCase() !== filters.uso.toLowerCase()) return false;
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       const matchesSearch = 
