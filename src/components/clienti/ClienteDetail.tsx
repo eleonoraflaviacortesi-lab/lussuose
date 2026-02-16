@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
+import { MergeClienteDialog } from './MergeClienteDialog';
 import { Cliente } from '@/types';
 import {
   Dialog,
@@ -39,6 +40,7 @@ import {
   History,
   Bell,
   X,
+  Merge,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -65,6 +67,7 @@ interface ClienteDetailProps {
   onAddComment: (comment: string) => void;
   onDelete: () => void;
   onUpdate: (updates: Partial<Cliente>) => void;
+  allClienti?: Cliente[];
 }
 
 const REGION_OPTIONS = [
@@ -93,10 +96,12 @@ export function ClienteDetail({
   onAddComment,
   onDelete,
   onUpdate,
+  allClienti = [],
 }: ClienteDetailProps) {
   const [newComment, setNewComment] = useState('');
   const { sendMentionNotifications } = useMentionNotifications();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [mergeOpen, setMergeOpen] = useState(false);
 
   // Deduce data_submission from notes if not set
   const getDataRichiesta = (): string | null => {
@@ -149,6 +154,7 @@ export function ClienteDetail({
   const assignedAgent = agents.find(a => a.user_id === cliente.assigned_to);
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg lg:max-w-5xl w-full h-[100dvh] max-h-[100dvh] flex flex-col p-0 rounded-none sm:rounded-none border-0 gap-0 [&>button]:hidden animate-in slide-in-from-bottom duration-300">
         <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
@@ -463,7 +469,20 @@ export function ClienteDetail({
                       </span>
                     ) : undefined}
                   />
-                </div>
+              </div>
+
+              {/* Merge button - only for Tally submissions */}
+              {cliente.portale === 'TALLY' && allClienti.length > 1 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full gap-2 mt-1"
+                  onClick={() => setMergeOpen(true)}
+                >
+                  <Merge className="w-3.5 h-3.5" />
+                  Associa a Richiesta
+                </Button>
+              )}
               </div>
 
               {/* Budget Section */}
@@ -808,6 +827,19 @@ export function ClienteDetail({
         </div>
       </DialogContent>
     </Dialog>
+
+    {cliente && (
+      <MergeClienteDialog
+        open={mergeOpen}
+        onOpenChange={setMergeOpen}
+        cliente={cliente}
+        allClienti={allClienti}
+        onMerged={() => {
+          onOpenChange(false);
+        }}
+      />
+    )}
+    </>
   );
 }
 
