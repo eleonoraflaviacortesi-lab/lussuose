@@ -69,12 +69,20 @@ const ImportDalilaCSVDialog = ({ open, onOpenChange }: Props) => {
           .from('clienti')
           .insert({
             nome: buyer.nome,
+            cognome: buyer.cognome,
             paese: buyer.paese,
+            lingua: buyer.lingua,
             telefono: buyer.telefono,
             email: buyer.email,
+            portale: buyer.portale,
+            property_name: buyer.property_name,
+            ref_number: buyer.ref_number,
+            contattato_da: buyer.contattato_da,
+            tipo_contatto: buyer.tipo_contatto,
             status: buyer.status,
             note_extra: buyer.note_extra,
             last_contact_date: buyer.last_contact_date,
+            data_submission: buyer.data_submission,
             sede: buyer.sede,
           });
         
