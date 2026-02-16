@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from './use-toast';
 import { Json } from '@/integrations/supabase/types';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
 
 // Default statuses + any custom status string
 export type NotiziaStatus = 'new' | 'in_progress' | 'done' | 'on_shot' | 'taken' | 'credit' | 'no' | 'sold' | string;
@@ -108,6 +109,7 @@ export const useNotizie = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notizie', user?.id] });
       toast({ title: 'Notizia aggiunta!' });
+      triggerArcaneFog();
     },
     onError: (error) => {
       toast({
