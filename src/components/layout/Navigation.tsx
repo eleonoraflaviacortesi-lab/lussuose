@@ -57,14 +57,32 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               <button
                 onClick={() => handleTabChange(tab.id)}
                 className={cn(
-                  'pill-nav-item',
+                  'pill-nav-item relative',
                   isActive && 'active'
                 )}
                 title={tab.label}
                 aria-label={tab.label}
                 aria-current={isActive ? 'page' : undefined}
               >
-                <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
+                {isActive && (
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="absolute inset-0 w-[38px] h-[38px] m-auto"
+                    style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
+                  >
+                    <polygon
+                      fill="white"
+                      points={Array.from({ length: 16 }, (_, i) => {
+                        const angle = (i * 360) / 16 - 90;
+                        const r = i % 2 === 0 ? 50 : 35;
+                        const x = 50 + r * Math.cos((angle * Math.PI) / 180);
+                        const y = 50 + r * Math.sin((angle * Math.PI) / 180);
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                  </svg>
+                )}
+                <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
               </button>
               {showSeparatorAfter && (
                 <div className="w-px h-5 bg-border mx-0.5" />

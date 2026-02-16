@@ -364,11 +364,9 @@
 
   .pill-nav-item.active {
     @apply bg-transparent text-foreground;
-    box-shadow:
-      0 3px 10px rgba(0, 0, 0, 0.15),
-      0 1px 4px rgba(0, 0, 0, 0.1),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-    background: rgba(255, 255, 255, 0.7);
+    background: none;
+    box-shadow: none;
+    overflow: visible;
   }
 
   .pill-nav-item:not(.active) {
