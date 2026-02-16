@@ -201,10 +201,11 @@ function normalizePhone(phone: string): string {
   if (phone.startsWith('+')) return phone;
   // Clean spaces/dashes for digit check
   const digits = phone.replace(/[\s\-\(\)]/g, '');
-  // Italian numbers (3xx...) don't need +, others likely international
-  if (/^3\d{8,}$/.test(digits)) return phone; // Italian mobile, no prefix needed
-  if (/^0\d+$/.test(digits)) return phone; // Italian landline
-  // International: add +
+  // Italian mobile: exactly 10 digits starting with 3 (e.g. 3xx xxx xxxx)
+  if (/^3\d{9}$/.test(digits)) return phone;
+  // Italian landline: starts with 0
+  if (/^0\d+$/.test(digits)) return phone;
+  // Everything else is international: add +
   return `+${phone}`;
 }
 
