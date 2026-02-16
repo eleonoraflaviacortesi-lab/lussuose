@@ -1,41 +1,34 @@
 
-# Magia da Stregoni - Effetti Visivi Mistici
 
-Trasformazione degli effetti visivi attuali da "festosi/rosa" a un'estetica mistica e arcana, come magia da stregoni.
+# Nebbia Oscura Arcana al Triple-Tap del Logo
+
+Sostituire i coriandoli con un effetto di **nebbia oscura** che si espande dallo schermo, come un incantesimo arcano.
 
 ## Cosa cambia
 
-### 1. Floating Sparkles --> Rune Arcane Fluttuanti
-Le particelle rosa che salgono verso l'alto diventano particelle mistiche che si muovono in modo organico e imprevedibile:
-- Colori: dal rosa al **viola profondo, indaco e ciano pallido** (palette arcana)
-- Movimento: non piu' lineari verso l'alto, ma con traiettorie sinuose e spirali lente, come energia magica sospesa nell'aria
-- Forma: oltre ai cerchi, alcune particelle disegnano piccoli "sigilli" (cerchi con raggi) che appaiono e svaniscono
-- Pulsazione: ritmo piu' lento e irregolare, come un battito magico
+Il triple-tap sul logo non lancera' piu' coriandoli (`canvas-confetti`), ma attivera' un **overlay canvas a schermo intero** con nebbia scura animata:
 
-### 2. Magic Cursor --> Scia di Energia Arcana
-La scia del mouse diventa un effetto tipo incantesimo:
-- Colori: gradiente da **viola scuro a ciano elettrico** con un nucleo bianco brillante
-- Scia piu' lunga (30 punti invece di 20) e che si dissipa con un effetto "fumo mistico"
-- Particelle secondarie che si staccano dalla scia e si dissolvono lateralmente, come scintille di magia nera
-- Dimensione variabile: la scia pulsa leggermente come se fosse viva
+- **Nubi di fumo viola/indaco** che si espandono dal centro dello schermo
+- **Bagliori mistici** (lampi viola pallido) che pulsano attraverso la nebbia
+- **Dissolvenza lenta** (~3-4 secondi) che avvolge lo schermo e poi svanisce gradualmente
+- Palette: nero, viola profondo (#1E1B4B), indaco (#312E81), ciano scuro (#164E63)
 
-### 3. Easter Egg del Logo --> Incantesimo
-Il triple-tap sul logo attiva un effetto piu' misterioso:
-- I coriandoli diventano di colori arcani (viola, indaco, ciano, nero, argento)
-- Aggiunta di un breve flash luminoso viola che si espande dal centro
+## Come funziona tecnicamente
+
+1. **Nuovo file `src/lib/arcaneFog.ts`** - Contiene la funzione `triggerArcaneFog()` che:
+   - Crea un canvas temporaneo a schermo intero (z-index alto, pointer-events: none)
+   - Disegna 15-20 cerchi sfumati (radial gradient) con posizioni casuali che si espandono
+   - Aggiunge 2-3 "lampi" viola che appaiono e scompaiono rapidamente
+   - Dopo ~3.5 secondi, dissolve tutto e rimuove il canvas dal DOM
+
+2. **Modifica `src/components/layout/Header.tsx`** - Sostituisce la chiamata a `celebrateGasiAbbestia()` con `triggerArcaneFog()`
+
+3. **Nessuna modifica a `src/lib/confetti.ts`** - Le altre celebrazioni (report, obiettivi) restano invariate
 
 ## File coinvolti
 
 | File | Modifica |
 |------|----------|
-| `src/components/ui/floating-sparkles.tsx` | Riscrittura completa: palette arcana, movimento a spirale, sigilli mistici |
-| `src/components/ui/magic-cursor.tsx` | Scia viola-ciano, particelle secondarie, effetto fumo |
-| `src/lib/confetti.ts` | Palette arcana per `celebrateGasiAbbestia` (viola, indaco, ciano, argento) |
+| `src/lib/arcaneFog.ts` | **Nuovo** - Effetto nebbia oscura su canvas |
+| `src/components/layout/Header.tsx` | Sostituire import e chiamata da confetti a arcaneFog |
 
-## Dettagli tecnici
-
-- Le particelle ambientali useranno colori HSL nell'intervallo 250-280 (viola/indaco) con accenti a 180-200 (ciano)
-- Il movimento a spirale si ottiene combinando sin/cos con fasi diverse per x e y
-- Le particelle "sigillo" disegnano un cerchio con 4-6 linee radiali che ruotano lentamente
-- La scia del cursor usa `globalCompositeOperation: 'lighter'` per un effetto di energia additiva
-- Opacita' generale ridotta per mantenere la leggibilita' dell'interfaccia
