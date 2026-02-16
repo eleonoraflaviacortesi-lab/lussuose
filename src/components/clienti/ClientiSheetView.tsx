@@ -43,13 +43,14 @@ const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] =
   { value: 'closed_lost', label: 'Perso', color: '#6b7280' },
 ];
 
-// Card colors and emojis for context menu (same as ClienteCard)
-const CARD_COLORS = [
-  { value: null, label: 'Default', color: 'bg-card border-2 border-muted' },
-  { value: '#fef3c7', label: 'Giallo', color: 'bg-amber-200' },
-  { value: '#fed7aa', label: 'Arancio', color: 'bg-orange-300' },
-  { value: '#fecaca', label: 'Rosso', color: 'bg-red-300' },
-  { value: '#bbf7d0', label: 'Verde', color: 'bg-green-300' },
+// Full color palette for context menu (matches ClienteCard)
+const CONTEXT_PALETTE_COLORS: (string | null)[] = [
+  null,      '#f8f9fa', '#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d', '#495057', '#343a40', '#212529',
+  '#fff3cd', '#fef9c3', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f',
+  '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#022c22',
+  '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554',
+  '#fce7f3', '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9d174d', '#831843', '#500724',
+  '#fee2e2', '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a',
 ];
 const QUICK_EMOJIS = ['🏠', '🏡', '🏰', '🏛️', '🌳', '🌊', '⭐', '🔥', '💎', '🎯', '📞', '📸'];
 
@@ -197,37 +198,48 @@ const SheetContextMenu = memo(function SheetContextMenu({
         {/* Color */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
-          <div className="flex items-center gap-1.5">
-            {CARD_COLORS.map((c) => (
+          <div className="grid grid-cols-10 gap-1 max-w-[240px]">
+            {CONTEXT_PALETTE_COLORS.map((c) => (
               <button
-                key={c.value || 'default'}
-                onClick={() => { onColorChange(c.value); onClose(); }}
+                key={c || 'default'}
+                onClick={() => { onColorChange(c); onClose(); }}
                 className={cn(
-                  "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
-                  c.color,
-                  cliente.card_color === c.value && "ring-2 ring-foreground ring-offset-1"
+                  "w-5 h-5 rounded-sm border border-border/30 hover:scale-125 transition-transform",
+                  !c && "bg-card border-2 border-muted",
+                  cliente.card_color === c && "ring-2 ring-foreground ring-offset-1"
                 )}
-                title={c.label}
+                style={c ? { backgroundColor: c } : undefined}
+                title={c || 'Default'}
               />
             ))}
+          </div>
+          <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => setShowCustomPicker(!showCustomPicker)}
               className={cn(
-                "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
-                showCustomPicker && "ring-2 ring-foreground ring-offset-1"
+                "text-[10px] text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1",
+                showCustomPicker && "text-foreground font-medium"
               )}
             >
-              +
+              + Colore personalizzato
             </button>
+            {cliente.card_color && !CONTEXT_PALETTE_COLORS.includes(cliente.card_color) && !favorites.includes(cliente.card_color) && (
+              <button
+                onClick={() => { addFavorite(cliente.card_color!); triggerHaptic('light'); }}
+                className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Star className="w-3 h-3" />
+                Salva
+              </button>
+            )}
           </div>
-          {/* Save current color as favorite */}
-          {cliente.card_color && !CARD_COLORS.some(c => c.value === cliente.card_color) && !favorites.includes(cliente.card_color) && (
+          {cliente.card_color && (
             <button
-              onClick={() => { addFavorite(cliente.card_color!); triggerHaptic('light'); }}
+              onClick={() => { onColorChange(null); onClose(); }}
               className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
             >
-              <Star className="w-3 h-3" />
-              Salva come preferito
+              <X className="w-3 h-3" />
+              Rimuovi colore
             </button>
           )}
         </div>
@@ -698,8 +710,8 @@ const SheetRow = memo(function SheetRow({
       )}
       style={{
         height: ROW_HEIGHT,
-        backgroundColor: cliente.row_bg_color || undefined,
-        color: cliente.row_text_color || undefined,
+        backgroundColor: cliente.row_bg_color || cliente.card_color || undefined,
+        color: cliente.row_text_color || (cliente.card_color ? (isDarkColor(cliente.card_color) ? '#ffffff' : '#000000') : undefined),
       }}
       onClick={() => onSelect(cliente.id)}
       onContextMenu={handleRightClick}
@@ -1199,7 +1211,15 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   }, [contextMenu, onUpdate]);
 
   const handleContextColorChange = useCallback(async (color: string | null) => {
-    if (contextMenu) await onUpdate(contextMenu.cliente.id, { card_color: color } as any);
+    if (contextMenu) {
+      // Sync card_color + row_bg_color + auto text color
+      const autoTextColor = color ? (isDarkColor(color) ? '#ffffff' : '#000000') : null;
+      await onUpdate(contextMenu.cliente.id, { 
+        card_color: color, 
+        row_bg_color: color, 
+        row_text_color: autoTextColor 
+      } as any);
+    }
   }, [contextMenu, onUpdate]);
 
   const currentFormat = useMemo(() => {
