@@ -25,6 +25,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Phone, 
   Mail, 
@@ -102,6 +103,7 @@ export function ClienteDetail({
   const { sendMentionNotifications } = useMentionNotifications();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
+  const [mergeTallyOnly, setMergeTallyOnly] = useState(false);
 
   // Deduce data_submission from notes if not set
   const getDataRichiesta = (): string | null => {
@@ -397,11 +399,37 @@ export function ClienteDetail({
                     variant="outline"
                     size="sm"
                     className="w-full gap-2 mt-1"
-                    onClick={() => setMergeOpen(true)}
+                    onClick={() => { setMergeTallyOnly(false); setMergeOpen(true); }}
                   >
                     <Merge className="w-3.5 h-3.5" />
                     Associa a Richiesta
                   </Button>
+                )}
+              </div>
+
+              {/* Questionario - Tally association */}
+              <div className="space-y-2">
+                <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Questionario</h3>
+                
+                {cliente.tally_submission_id ? (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Checkbox checked disabled className="data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600" />
+                    <span className="text-green-700 font-medium">Compilato</span>
+                    <span className="text-[10px] text-muted-foreground font-mono">({cliente.tally_submission_id.slice(0, 8)}...)</span>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Checkbox
+                        checked={false}
+                        onCheckedChange={() => { setMergeTallyOnly(true); setMergeOpen(true); }}
+                      />
+                      <span>Associa questionario Tally</span>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground italic">
+                      Tick per cercare e associare una submission Tally a questa richiesta
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -826,12 +854,13 @@ export function ClienteDetail({
     {cliente && (
       <MergeClienteDialog
         open={mergeOpen}
-        onOpenChange={setMergeOpen}
+        onOpenChange={(v) => { setMergeOpen(v); if (!v) setMergeTallyOnly(false); }}
         cliente={cliente}
         allClienti={allClienti}
         onMerged={() => {
           onOpenChange(false);
         }}
+        tallyOnly={mergeTallyOnly}
       />
     )}
     </>
