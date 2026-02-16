@@ -205,7 +205,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           </Button>
         </div>
 
-        <UndoRedoButtons />
+        {viewMode === 'kanban' && <UndoRedoButtons />}
         <div className="flex-1" />
 
         {isCoordinator && (
