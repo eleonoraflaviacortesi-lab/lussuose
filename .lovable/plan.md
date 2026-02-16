@@ -1,34 +1,27 @@
 
+## Sostituzione indicatore pagina attiva nella barra di navigazione
 
-# Nebbia Oscura Arcana al Triple-Tap del Logo
+L'attuale indicatore di pagina attiva e un cerchio liscio con ombra. Lo sostituiremo con una forma a "stella/sole" (starburst) come nello screenshot fornito, bianca con ombra per effetto rilievo.
 
-Sostituire i coriandoli con un effetto di **nebbia oscura** che si espande dallo schermo, come un incantesimo arcano.
+### Cosa cambia
 
-## Cosa cambia
+**1. Aggiunta forma starburst come sfondo dell'icona attiva**
 
-Il triple-tap sul logo non lancera' piu' coriandoli (`canvas-confetti`), ma attivera' un **overlay canvas a schermo intero** con nebbia scura animata:
+Nel file `src/components/layout/Navigation.tsx`, aggiungeremo un elemento SVG inline dietro l'icona quando il tab e attivo. La forma sara quella del primo screenshot (cerchio a punte, circa 16 punte), colorata di bianco con un'ombra `drop-shadow` per l'effetto rilievo.
 
-- **Nubi di fumo viola/indaco** che si espandono dal centro dello schermo
-- **Bagliori mistici** (lampi viola pallido) che pulsano attraverso la nebbia
-- **Dissolvenza lenta** (~3-4 secondi) che avvolge lo schermo e poi svanisce gradualmente
-- Palette: nero, viola profondo (#1E1B4B), indaco (#312E81), ciano scuro (#164E63)
+**2. Aggiornamento stili CSS**
 
-## Come funziona tecnicamente
+Nel file `src/index.css`, la classe `.pill-nav-item.active` verra modificata:
+- Rimossa l'ombra e il background attuale (cerchio liscio)
+- L'effetto rilievo sara gestito dall'SVG starburst stesso tramite `filter: drop-shadow()`
 
-1. **Nuovo file `src/lib/arcaneFog.ts`** - Contiene la funzione `triggerArcaneFog()` che:
-   - Crea un canvas temporaneo a schermo intero (z-index alto, pointer-events: none)
-   - Disegna 15-20 cerchi sfumati (radial gradient) con posizioni casuali che si espandono
-   - Aggiunge 2-3 "lampi" viola che appaiono e scompaiono rapidamente
-   - Dopo ~3.5 secondi, dissolve tutto e rimuove il canvas dal DOM
+### Dettagli tecnici
 
-2. **Modifica `src/components/layout/Header.tsx`** - Sostituisce la chiamata a `celebrateGasiAbbestia()` con `triggerArcaneFog()`
+**`src/components/layout/Navigation.tsx`**
+- Il bottone attivo conterra un SVG starburst posizionato in absolute dietro l'icona (z-index negativo)
+- L'SVG usera un path poligonale a 16 punte, fill bianco, con `filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18))`
+- Dimensione della forma: circa 38-40px per coprire l'area del bottone
 
-3. **Nessuna modifica a `src/lib/confetti.ts`** - Le altre celebrazioni (report, obiettivi) restano invariate
-
-## File coinvolti
-
-| File | Modifica |
-|------|----------|
-| `src/lib/arcaneFog.ts` | **Nuovo** - Effetto nebbia oscura su canvas |
-| `src/components/layout/Header.tsx` | Sostituire import e chiamata da confetti a arcaneFog |
-
+**`src/index.css`**
+- `.pill-nav-item.active`: rimozione di `box-shadow` e `background`, aggiunta di `position: relative` e `overflow: visible`
+- L'icona attiva mantiene il colore `text-foreground` e strokeWidth 2
