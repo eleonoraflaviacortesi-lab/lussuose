@@ -163,6 +163,7 @@ export function ClienteDetail({
                 onSave={(value) => onUpdate({ nome: value })}
                 className="text-lg font-semibold break-words"
                 placeholder="Nome cliente"
+                noHighlight
               />
             </div>
           </div>
@@ -180,6 +181,7 @@ export function ClienteDetail({
                 onSave={(value) => onUpdate({ note_extra: value })}
                 placeholder="Nessuna nota"
                 multiline
+                noHighlight
                 className="text-sm break-words whitespace-pre-wrap"
               />
             </div>
