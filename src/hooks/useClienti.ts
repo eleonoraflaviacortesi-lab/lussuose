@@ -382,6 +382,31 @@ export function useClienti(options?: {
       }
     },
   });
+  // Restore a deleted cliente (for undo) - preserves original ID and all fields
+  const restoreMutation = useMutation({
+    mutationFn: async (cliente: Cliente) => {
+      const { created_at, updated_at, ...rest } = cliente;
+      const insertData: Record<string, unknown> = {
+        ...rest,
+        comments: JSON.stringify(rest.comments || []),
+      };
+      
+      const { data, error } = await supabase
+        .from('clienti')
+        .insert(insertData as any)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return transformCliente(data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
+    },
+    onError: (error: any) => {
+      toast({ title: 'Errore nel ripristino', description: error.message, variant: 'destructive' });
+    },
+  });
 
   return {
     clienti: filteredClienti,
@@ -392,6 +417,7 @@ export function useClienti(options?: {
     createCliente: createMutation.mutateAsync,
     updateCliente: updateMutation.mutateAsync,
     deleteCliente: deleteMutation.mutateAsync,
+    restoreCliente: restoreMutation.mutateAsync,
     assignCliente: assignMutation.mutateAsync,
     updateOrder: updateOrderMutation.mutateAsync,
     addComment: addCommentMutation.mutateAsync,
