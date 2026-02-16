@@ -574,8 +574,7 @@ function ColumnFilterPopover({
           <Button variant="ghost" size="sm" className="h-6 text-[10px] flex-1" onClick={selectAll}>Tutti</Button>
           <Button variant="ghost" size="sm" className="h-6 text-[10px] flex-1" onClick={selectNone}>Nessuno</Button>
         </div>
-        <ScrollArea className="max-h-48">
-          <div className="space-y-0.5">
+        <div className="overflow-y-auto max-h-48 space-y-0.5">
             {filteredValues.map(val => {
               const checked = activeFilter.size === 0 || activeFilter.has(val);
               return (
@@ -597,8 +596,7 @@ function ColumnFilterPopover({
                 </button>
               );
             })}
-          </div>
-        </ScrollArea>
+        </div>
         {isActive && (
           <Button variant="ghost" size="sm" className="w-full mt-2 h-6 text-[10px]" onClick={selectAll}>
             <X className="w-3 h-3 mr-1" /> Rimuovi filtro
