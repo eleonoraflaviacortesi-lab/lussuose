@@ -248,6 +248,8 @@ export type Database = {
           ref_number: string | null
           regioni: string[] | null
           reminder_date: string | null
+          row_bg_color: string | null
+          row_text_color: string | null
           sede: string
           status: string
           stile: string | null
@@ -297,6 +299,8 @@ export type Database = {
           ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
+          row_bg_color?: string | null
+          row_text_color?: string | null
           sede?: string
           status?: string
           stile?: string | null
@@ -346,6 +350,8 @@ export type Database = {
           ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
+          row_bg_color?: string | null
+          row_text_color?: string | null
           sede?: string
           status?: string
           stile?: string | null

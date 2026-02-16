@@ -116,6 +116,8 @@ export interface Cliente {
   data_submission: string | null;
   reminder_date: string | null;
   last_contact_date: string | null;
+  row_bg_color: string | null;
+  row_text_color: string | null;
   created_at: string;
   updated_at: string;
 }

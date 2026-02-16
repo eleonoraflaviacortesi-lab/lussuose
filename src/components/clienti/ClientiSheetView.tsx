@@ -10,6 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { GripVertical, Paintbrush, Type, X } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 interface Agent {
   user_id: string;
@@ -38,18 +42,20 @@ const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] =
 const PORTALE_OPTIONS = [
   'James Edition', 'Idealista', 'Gate-away', 'Sito Cortesi', 'Immobiliare.it', 'Altro',
 ];
+const TIPO_CONTATTO_OPTIONS = ['Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi'];
+const LINGUA_OPTIONS_VALUES = ['ENG', 'ITA', 'FRA', 'DEU', 'ESP'];
 
-const TIPO_CONTATTO_OPTIONS = [
-  'Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi',
-];
-
-const LINGUA_OPTIONS = [
-  { value: 'ENG', label: 'ENG', color: '#22c55e' },
-  { value: 'ITA', label: 'ITA', color: '#22c55e' },
-  { value: 'FRA', label: 'FRA', color: '#3b82f6' },
-  { value: 'DEU', label: 'DEU', color: '#f59e0b' },
-  { value: 'ESP', label: 'ESP', color: '#ef4444' },
-];
+const PORTALE_COLORS: Record<string, string> = {
+  'James Edition': '#f59e0b', 'Idealista': '#22c55e', 'Gate-away': '#60a5fa',
+  'Sito Cortesi': '#a855f7', 'Immobiliare.it': '#ef4444', 'Altro': '#6b7280',
+};
+const TIPO_CONTATTO_COLORS: Record<string, string> = {
+  'Mail': '#ef4444', 'WhatsApp': '#22c55e', 'Call': '#f59e0b',
+  'Idealista': '#22c55e', 'Sito Cortesi': '#a855f7',
+};
+const LINGUA_COLORS: Record<string, string> = {
+  'ENG': '#22c55e', 'ITA': '#22c55e', 'FRA': '#3b82f6', 'DEU': '#f59e0b', 'ESP': '#ef4444',
+};
 
 type ColumnDef = {
   key: string;
@@ -85,46 +91,95 @@ const COLUMNS: ColumnDef[] = [
   { key: 'note_extra', label: 'Notes', width: 250, minWidth: 150, editable: true, type: 'text' },
 ];
 
+// --- Helpers ---
 function getDataRichiestaFromNotes(noteExtra: string | null): string | null {
   if (!noteExtra) return null;
   const match = noteExtra.match(/📅\s*Data richiesta:\s*(\d{2})\/(\d{2})\/(\d{4})/);
   if (match) return `${match[3]}-${match[2]}-${match[1]}`;
   return null;
 }
-
 function getEffectiveDate(cliente: Cliente): string | null {
   return cliente.data_submission || getDataRichiestaFromNotes(cliente.note_extra) || null;
 }
-
 function formatBudget(val: number | null): string {
   if (!val) return '';
   if (val >= 1000000) return `€${(val / 1000000).toFixed(1)}M`;
   return `€${(val / 1000).toFixed(0)}k`;
 }
+function getCellValueStatic(cliente: Cliente, col: ColumnDef): string {
+  switch (col.key) {
+    case 'budget_max': return formatBudget(cliente.budget_max);
+    case 'data_submission': {
+      const d = getEffectiveDate(cliente);
+      if (!d) return '';
+      try { return format(new Date(d), 'dd/MM/yyyy'); } catch { return d; }
+    }
+    case 'last_contact_date': {
+      if (!cliente.last_contact_date) return '';
+      try { return format(new Date(cliente.last_contact_date), 'dd/MM/yyyy'); } catch { return ''; }
+    }
+    case 'regioni': return cliente.regioni.join(', ');
+    case 'tipologia': return cliente.tipologia.join(', ');
+    default: return String((cliente as any)[col.key] ?? '');
+  }
+}
 
-// Badge-style select for colored dropdowns (lingua, portale, tipo_contatto)
-function BadgeSelect({
-  value,
-  onChange,
-  options,
-  colorMap,
+// --- Color Palette Picker ---
+const PALETTE_COLORS = [
+  '#ffffff', '#f8f9fa', '#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d', '#495057', '#343a40', '#212529',
+  '#fff3cd', '#fef9c3', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f',
+  '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#022c22',
+  '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554',
+  '#fce7f3', '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9d174d', '#831843', '#500724',
+  '#fee2e2', '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a',
+];
+
+function ColorPalettePopover({
+  currentColor,
+  onSelect,
+  children,
 }: {
-  value: string;
-  onChange: (val: string) => void;
-  options: string[];
-  colorMap?: Record<string, string>;
+  currentColor: string | null;
+  onSelect: (color: string | null) => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Popover>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-[260px] p-2" align="start">
+        <div className="grid grid-cols-10 gap-1">
+          {PALETTE_COLORS.map(c => (
+            <button
+              key={c}
+              className={cn(
+                "w-5 h-5 rounded-sm border border-border/50 hover:scale-125 transition-transform",
+                currentColor === c && "ring-2 ring-primary ring-offset-1"
+              )}
+              style={{ backgroundColor: c }}
+              onClick={() => onSelect(c)}
+            />
+          ))}
+        </div>
+        <Button variant="ghost" size="sm" className="w-full mt-2 text-xs" onClick={() => onSelect(null)}>
+          <X className="w-3 h-3 mr-1" /> Rimuovi colore
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+// --- Badge Select ---
+function BadgeSelect({
+  value, onChange, options, colorMap,
+}: {
+  value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>;
 }) {
   const bgColor = colorMap?.[value] || '#6b7280';
   return (
     <Select value={value || '__none'} onValueChange={v => onChange(v === '__none' ? '' : v)}>
       <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
         {value ? (
-          <span
-            className="px-2 py-0.5 rounded text-white text-[10px] font-semibold"
-            style={{ backgroundColor: bgColor }}
-          >
-            {value}
-          </span>
+          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
         ) : (
           <span className="text-muted-foreground text-xs">—</span>
         )}
@@ -144,44 +199,11 @@ function BadgeSelect({
   );
 }
 
-const PORTALE_COLORS: Record<string, string> = {
-  'James Edition': '#f59e0b',
-  'Idealista': '#22c55e',
-  'Gate-away': '#60a5fa',
-  'Sito Cortesi': '#a855f7',
-  'Immobiliare.it': '#ef4444',
-  'Altro': '#6b7280',
-};
-
-const TIPO_CONTATTO_COLORS: Record<string, string> = {
-  'Mail': '#ef4444',
-  'WhatsApp': '#22c55e',
-  'Call': '#f59e0b',
-  'Idealista': '#22c55e',
-  'Sito Cortesi': '#a855f7',
-};
-
-const LINGUA_COLORS: Record<string, string> = {
-  'ENG': '#22c55e',
-  'ITA': '#22c55e',
-  'FRA': '#3b82f6',
-  'DEU': '#f59e0b',
-  'ESP': '#ef4444',
-};
-
-// Inline editable cell
+// --- Editable Cell ---
 function EditableCell({
-  value,
-  onChange,
-  type = 'text',
-  agents,
-  onClick,
+  value, onChange, type = 'text', agents, onClick,
 }: {
-  value: string;
-  onChange?: (val: string) => void;
-  type?: ColumnDef['type'];
-  agents?: Agent[];
-  onClick?: () => void;
+  value: string; onChange?: (val: string) => void; type?: ColumnDef['type']; agents?: Agent[]; onClick?: () => void;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
@@ -200,10 +222,7 @@ function EditableCell({
     return (
       <Select value={value} onValueChange={v => onChange?.(v)}>
         <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-          <span
-            className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold"
-            style={{ backgroundColor: status?.color || '#666' }}
-          >
+          <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>
             {status?.label || value}
           </span>
         </SelectTrigger>
@@ -220,18 +239,9 @@ function EditableCell({
       </Select>
     );
   }
-
-  if (type === 'lingua' && onChange) {
-    return <BadgeSelect value={value} onChange={onChange} options={LINGUA_OPTIONS.map(l => l.value)} colorMap={LINGUA_COLORS} />;
-  }
-
-  if (type === 'portale' && onChange) {
-    return <BadgeSelect value={value} onChange={onChange} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />;
-  }
-
-  if (type === 'tipo_contatto' && onChange) {
-    return <BadgeSelect value={value} onChange={onChange} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />;
-  }
+  if (type === 'lingua' && onChange) return <BadgeSelect value={value} onChange={onChange} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />;
+  if (type === 'portale' && onChange) return <BadgeSelect value={value} onChange={onChange} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />;
+  if (type === 'tipo_contatto' && onChange) return <BadgeSelect value={value} onChange={onChange} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />;
 
   if (type === 'agent' && agents) {
     return (
@@ -258,11 +268,7 @@ function EditableCell({
 
   if (!onChange) {
     return (
-      <span
-        className="block truncate text-xs px-2 py-1 cursor-pointer"
-        onClick={onClick}
-        title={value}
-      >
+      <span className="block truncate text-xs px-2 py-1 cursor-pointer" onClick={onClick} title={value}>
         {value || '—'}
       </span>
     );
@@ -296,15 +302,55 @@ function EditableCell({
   );
 }
 
+// --- Sheet Toolbar ---
+function SheetToolbar({
+  selectedCliente,
+  selectedIndex,
+  onBgColorChange,
+  onTextColorChange,
+}: {
+  selectedCliente: Cliente | null;
+  selectedIndex: number;
+  onBgColorChange: (color: string | null) => void;
+  onTextColorChange: (color: string | null) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/60 border-b text-xs">
+      <ColorPalettePopover currentColor={selectedCliente?.row_bg_color ?? null} onSelect={onBgColorChange}>
+        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
+          <Paintbrush className="w-3.5 h-3.5" />
+          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_bg_color || 'transparent' }} />
+        </Button>
+      </ColorPalettePopover>
+
+      <ColorPalettePopover currentColor={selectedCliente?.row_text_color ?? null} onSelect={onTextColorChange}>
+        <Button variant="ghost" size="sm" className="h-7 px-2 gap-1" disabled={!selectedCliente}>
+          <Type className="w-3.5 h-3.5" />
+          <span className="w-3 h-3 rounded-sm border border-border/50" style={{ backgroundColor: selectedCliente?.row_text_color || 'transparent' }} />
+        </Button>
+      </ColorPalettePopover>
+
+      <div className="h-4 w-px bg-border mx-1" />
+
+      <span className="text-muted-foreground">
+        {selectedCliente
+          ? `Row ${selectedIndex + 1} — ${selectedCliente.cognome || ''} ${selectedCliente.nome}`.trim()
+          : 'Seleziona una riga'}
+      </span>
+    </div>
+  );
+}
+
+// --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searchQuery }: ClientiSheetViewProps) {
   const [colWidths, setColWidths] = useState<Record<string, number>>(
     () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
   );
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
 
-  // Filter by search
   const filtered = useMemo(() => {
     if (!searchQuery) return clienti;
     const q = searchQuery.toLowerCase();
@@ -322,7 +368,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     );
   }, [clienti, searchQuery]);
 
-  // Sort
   const sorted = useMemo(() => {
     if (!sortCol) return filtered;
     return [...filtered].sort((a, b) => {
@@ -335,20 +380,14 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
   }, [filtered, sortCol, sortDir]);
 
   const handleHeaderClick = useCallback((key: string) => {
-    if (sortCol === key) {
-      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortCol(key);
-      setSortDir('asc');
-    }
+    if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    else { setSortCol(key); setSortDir('asc'); }
   }, [sortCol]);
 
-  // Column resize handlers
   const handleResizeStart = useCallback((key: string, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     resizingRef.current = { key, startX: e.clientX, startWidth: colWidths[key] };
-
     const onMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return;
       const diff = ev.clientX - resizingRef.current.startX;
@@ -356,11 +395,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
       const newW = Math.max(col.minWidth, resizingRef.current.startWidth + diff);
       setColWidths(prev => ({ ...prev, [resizingRef.current!.key]: newW }));
     };
-    const onUp = () => {
-      resizingRef.current = null;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
+    const onUp = () => { resizingRef.current = null; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
   }, [colWidths]);
@@ -370,114 +405,163 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, searc
     if (key === 'budget_max') {
       const num = parseFloat(rawValue.replace(/[^0-9.]/g, ''));
       updates[key] = isNaN(num) ? null : num;
-    } else if (key === 'assigned_to') {
-      updates[key] = rawValue || null;
     } else {
       updates[key] = rawValue || null;
     }
     await onUpdate(clienteId, updates);
   }, [onUpdate]);
 
-  const rowNumWidth = 40;
+  const handleDragEnd = useCallback(async (result: DropResult) => {
+    if (!result.destination || result.source.index === result.destination.index) return;
+    const srcIdx = result.source.index;
+    const destIdx = result.destination.index;
+    const item = sorted[srcIdx];
+    if (!item) return;
+    // Update display_order to reflect new position
+    const targetItem = sorted[destIdx];
+    if (targetItem) {
+      await onUpdate(item.id, { display_order: targetItem.display_order });
+    }
+  }, [sorted, onUpdate]);
+
+  const selectedCliente = useMemo(() => sorted.find(c => c.id === selectedRowId) || null, [sorted, selectedRowId]);
+  const selectedIndex = useMemo(() => sorted.findIndex(c => c.id === selectedRowId), [sorted, selectedRowId]);
+
+  const handleBgColorChange = useCallback(async (color: string | null) => {
+    if (!selectedRowId) return;
+    await onUpdate(selectedRowId, { row_bg_color: color } as any);
+  }, [selectedRowId, onUpdate]);
+
+  const handleTextColorChange = useCallback(async (color: string | null) => {
+    if (!selectedRowId) return;
+    await onUpdate(selectedRowId, { row_text_color: color } as any);
+  }, [selectedRowId, onUpdate]);
+
+  const rowNumWidth = 52;
   const totalWidth = rowNumWidth + COLUMNS.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
-    <div className="border rounded-lg bg-card overflow-auto max-h-[calc(100vh-280px)]">
-      <div style={{ minWidth: totalWidth }}>
-        {/* Header row */}
-        <div className="flex sticky top-0 z-10 bg-muted/80 backdrop-blur-sm border-b">
-          <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r bg-muted/60" style={{ width: rowNumWidth }}>
-            #
-          </div>
-          {COLUMNS.map(col => (
-            <div
-              key={col.key}
-              className={cn(
-                "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-pointer hover:bg-muted/50",
-                sortCol === col.key && "bg-muted/60 text-foreground"
-              )}
-              style={{ width: colWidths[col.key], flexShrink: 0 }}
-              onClick={() => handleHeaderClick(col.key)}
-            >
-              <span className="truncate">{col.label}</span>
-              {sortCol === col.key && (
-                <span className="ml-1 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
-              )}
-              <div
-                className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50"
-                onMouseDown={e => handleResizeStart(col.key, e)}
-                onClick={e => e.stopPropagation()}
-              />
-            </div>
-          ))}
-        </div>
+    <div className="border rounded-lg bg-card overflow-hidden flex flex-col max-h-[calc(100vh-280px)]">
+      {/* Toolbar */}
+      <SheetToolbar
+        selectedCliente={selectedCliente}
+        selectedIndex={selectedIndex}
+        onBgColorChange={handleBgColorChange}
+        onTextColorChange={handleTextColorChange}
+      />
 
-        {/* Data rows */}
-        {sorted.map((cliente, idx) => (
-          <div
-            key={cliente.id}
-            className={cn(
-              "flex border-b hover:bg-muted/30 transition-colors group",
-              idx % 2 === 0 ? 'bg-card' : 'bg-muted/10'
-            )}
-          >
-            <div
-              className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground border-r bg-muted/20 cursor-pointer hover:bg-primary/10"
-              style={{ width: rowNumWidth }}
-              onClick={() => onCardClick(cliente)}
-            >
-              {idx + 1}
+      {/* Table */}
+      <div className="overflow-auto flex-1">
+        <div style={{ minWidth: totalWidth }}>
+          {/* Header */}
+          <div className="flex sticky top-0 z-10 bg-muted/80 backdrop-blur-sm border-b">
+            <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r bg-muted/60" style={{ width: rowNumWidth }}>
+              #
             </div>
-
             {COLUMNS.map(col => (
               <div
                 key={col.key}
-                className="flex-shrink-0 border-r overflow-hidden"
-                style={{ width: colWidths[col.key] }}
+                className={cn(
+                  "relative flex items-center border-r text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-pointer hover:bg-muted/50",
+                  sortCol === col.key && "bg-muted/60 text-foreground"
+                )}
+                style={{ width: colWidths[col.key], flexShrink: 0 }}
+                onClick={() => handleHeaderClick(col.key)}
               >
-                <EditableCell
-                  value={getCellValueStatic(cliente, col)}
-                  onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
-                  type={col.type}
-                  agents={agents}
-                  onClick={() => !col.editable ? onCardClick(cliente) : undefined}
+                <span className="truncate">{col.label}</span>
+                {sortCol === col.key && (
+                  <span className="ml-1 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
+                )}
+                <div
+                  className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/30 active:bg-primary/50"
+                  onMouseDown={e => handleResizeStart(col.key, e)}
+                  onClick={e => e.stopPropagation()}
                 />
               </div>
             ))}
           </div>
-        ))}
 
-        {sorted.length === 0 && (
-          <div className="py-12 text-center text-sm text-muted-foreground">
-            No buyers found
-          </div>
-        )}
+          {/* Rows with DnD */}
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="sheet-rows">
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {sorted.map((cliente, idx) => (
+                    <Draggable key={cliente.id} draggableId={cliente.id} index={idx}>
+                      {(dragProvided, dragSnapshot) => (
+                        <div
+                          ref={dragProvided.innerRef}
+                          {...dragProvided.draggableProps}
+                          className={cn(
+                            "flex border-b transition-colors group",
+                            selectedRowId === cliente.id ? 'ring-2 ring-primary/50 ring-inset' : '',
+                            dragSnapshot.isDragging && 'shadow-lg opacity-90',
+                            !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-muted/10')
+                          )}
+                          style={{
+                            ...dragProvided.draggableProps.style,
+                            backgroundColor: cliente.row_bg_color || undefined,
+                            color: cliente.row_text_color || undefined,
+                          }}
+                          onClick={() => setSelectedRowId(cliente.id)}
+                        >
+                          {/* Row number + drag handle */}
+                          <div
+                            className="flex-shrink-0 flex items-center gap-0.5 border-r bg-muted/20 text-muted-foreground"
+                            style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
+                          >
+                            <div
+                              {...dragProvided.dragHandleProps}
+                              className="flex items-center justify-center w-5 h-full cursor-grab active:cursor-grabbing hover:bg-muted/40"
+                            >
+                              <GripVertical className="w-3 h-3" />
+                            </div>
+                            <span
+                              className="text-[10px] font-medium cursor-pointer hover:text-primary flex-1 text-center"
+                              onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
+                            >
+                              {idx + 1}
+                            </span>
+                          </div>
+
+                          {/* Data cells */}
+                          {COLUMNS.map(col => (
+                            <div
+                              key={col.key}
+                              className="flex-shrink-0 border-r overflow-hidden"
+                              style={{ width: colWidths[col.key] }}
+                            >
+                              <EditableCell
+                                value={getCellValueStatic(cliente, col)}
+                                onChange={col.editable ? (val) => handleCellChange(cliente.id, col.key, val) : undefined}
+                                type={col.type}
+                                agents={agents}
+                                onClick={() => !col.editable ? onCardClick(cliente) : undefined}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+
+          {sorted.length === 0 && (
+            <div className="py-12 text-center text-sm text-muted-foreground">No buyers found</div>
+          )}
+        </div>
       </div>
 
-      <div className="sticky bottom-0 bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground">
+      {/* Footer */}
+      <div className="bg-muted/60 backdrop-blur-sm border-t px-3 py-1.5 text-xs text-muted-foreground">
         {sorted.length} buyers
       </div>
     </div>
   );
-}
-
-// Static helper (no hooks)
-function getCellValueStatic(cliente: Cliente, col: ColumnDef): string {
-  switch (col.key) {
-    case 'budget_max': return formatBudget(cliente.budget_max);
-    case 'data_submission': {
-      const d = getEffectiveDate(cliente);
-      if (!d) return '';
-      try { return format(new Date(d), 'dd/MM/yyyy'); } catch { return d; }
-    }
-    case 'last_contact_date': {
-      if (!cliente.last_contact_date) return '';
-      try { return format(new Date(cliente.last_contact_date), 'dd/MM/yyyy'); } catch { return ''; }
-    }
-    case 'regioni': return cliente.regioni.join(', ');
-    case 'tipologia': return cliente.tipologia.join(', ');
-    default: return String((cliente as any)[col.key] ?? '');
-  }
 }
 
 export default ClientiSheetView;
