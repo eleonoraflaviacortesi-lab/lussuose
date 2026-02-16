@@ -6,7 +6,7 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
-import { celebrateGasiAbbestia } from '@/lib/confetti';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 
 interface HeaderProps {
@@ -35,7 +35,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     if (tapCountRef.current >= 3) {
       tapCountRef.current = 0;
       triggerHaptic('success');
-      celebrateGasiAbbestia();
+      triggerArcaneFog();
     } else {
       tapTimerRef.current = setTimeout(() => {
         tapCountRef.current = 0;
