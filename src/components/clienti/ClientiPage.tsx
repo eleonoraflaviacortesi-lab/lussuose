@@ -11,8 +11,9 @@ import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3 } from 'lucide-react';
 import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
+import { ClientiAnalysisModal } from './ClientiAnalysisModal';
 
 // Extract date from note_extra for imported buyers
 function getDataRichiestaFromNotes(noteExtra: string | null): string | null {
@@ -43,6 +44,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [dalilaImportOpen, setDalilaImportOpen] = useState(false);
   const [dateSortDir, setDateSortDir] = useState<'desc' | 'asc' | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   const {
     clienti,
@@ -180,6 +182,12 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           </p>
         </div>
         <div className="flex gap-2">
+          {isCoordinator && (
+            <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Analisi</span>
+            </Button>
+          )}
           {/* View toggle */}
           <div className="flex rounded-lg border overflow-hidden">
             <Button
@@ -317,6 +325,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             await updateCliente({ id: selectedCliente.id, ...updates });
           }
         }}
+        allClienti={clienti}
       />
 
       {/* Add Dialog */}
@@ -341,6 +350,13 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       <ImportDalilaCSVDialog
         open={dalilaImportOpen}
         onOpenChange={setDalilaImportOpen}
+      />
+
+      {/* Analysis Modal */}
+      <ClientiAnalysisModal
+        open={analysisOpen}
+        onOpenChange={setAnalysisOpen}
+        clienti={clienti}
       />
     </div>
   );
