@@ -288,6 +288,7 @@ groupBy={groupBy}
           onOrderChange={handleOrderChange}
           onColorChange={handleColorChange}
           onEmojiChange={handleEmojiChange}
+          onDeleteCliente={async (clienteId) => { await deleteCliente(clienteId); }}
           searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
         />
       ) : (
