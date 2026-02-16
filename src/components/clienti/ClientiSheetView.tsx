@@ -70,14 +70,6 @@ const COLUMNS: ColumnDef[] = [
   { key: 'telefono', label: 'Contatto 1', width: 150, minWidth: 100, editable: true, type: 'text' },
   { key: 'email', label: 'Contatto 2', width: 200, minWidth: 120, editable: true, type: 'text' },
   { key: 'status', label: 'Status', width: 130, minWidth: 100, editable: true, type: 'status' },
-  { key: 'regioni', label: 'Regions', width: 160, minWidth: 100, editable: true, type: 'text' },
-  { key: 'budget_max', label: 'Budget Max', width: 120, minWidth: 80, editable: true, type: 'number' },
-  { key: 'tipologia', label: 'Type', width: 150, minWidth: 100, editable: true, type: 'text' },
-  { key: 'assigned_to', label: 'Agent', width: 140, minWidth: 100, editable: true, type: 'agent' },
-  { key: 'camere', label: 'Rooms', width: 80, minWidth: 60, editable: true, type: 'text' },
-  { key: 'piscina', label: 'Pool', width: 80, minWidth: 60, editable: true, type: 'text' },
-  { key: 'terreno', label: 'Land', width: 80, minWidth: 60, editable: true, type: 'text' },
-  { key: 'note_extra', label: 'Notes', width: 250, minWidth: 150, editable: true, type: 'text' },
 ];
 
 // --- Helpers ---
