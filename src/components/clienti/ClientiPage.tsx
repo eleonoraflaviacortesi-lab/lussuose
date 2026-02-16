@@ -172,9 +172,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   return (
     <div className="py-4 space-y-4 overflow-x-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div />
-        <div className="flex gap-2">
+      <div className="flex items-center justify-end gap-2">
           {isCoordinator && (
             <Button variant="outline" size="sm" onClick={() => setAnalysisOpen(true)} className="gap-1.5">
               <BarChart3 className="w-4 h-4" />
@@ -182,21 +180,14 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             </Button>
           )}
           {isCoordinator && (
-            <>
-              <Button variant="outline" size="sm" onClick={() => setDalilaImportOpen(true)}>
-                <FileSpreadsheet className="w-4 h-4 mr-1.5" />
-                Import Dalila
-              </Button>
-              <Button variant="outline" onClick={() => setImportDialogOpen(true)}>
-                <Upload className="w-4 h-4 mr-1.5" />
-                CSV
-              </Button>
-            </>
+            <Button variant="outline" size="sm" onClick={() => setImportDialogOpen(true)}>
+              <Upload className="w-4 h-4 mr-1.5" />
+              CSV
+            </Button>
           )}
           <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-10 h-10 p-0">
             <Plus className="w-4 h-4" />
           </Button>
-        </div>
       </div>
 
       {/* View toggle - full width buttons */}
