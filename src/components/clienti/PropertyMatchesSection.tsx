@@ -74,6 +74,12 @@ function PropertyCard({
   const property = match.property;
   if (!property) return null;
 
+  // Extract ref from URL as fallback
+  const displayRef = property.ref_number || (() => {
+    const urlMatch = property.url?.match(/[-/](\d{4,6})\/?(?:\?|$|#)/);
+    return urlMatch ? urlMatch[1] : null;
+  })();
+
   const formatPrice = (price: number | null) => {
     if (!price) return 'N/D';
     return new Intl.NumberFormat('it-IT', {
@@ -161,17 +167,17 @@ function PropertyCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-1">
             <div className="flex-1 min-w-0">
-              {property.ref_number && (
+              {displayRef && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigator.clipboard.writeText(property.ref_number!);
-                    toast({ title: 'Riferimento copiato', description: property.ref_number! });
+                    navigator.clipboard.writeText(displayRef);
+                    toast({ title: 'Riferimento copiato', description: displayRef });
                   }}
                   className="inline-flex items-center gap-1 font-mono text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-1 hover:bg-black/80 active:scale-95 transition-all cursor-copy"
                   title="Copia riferimento"
                 >
-                  {property.ref_number}
+                  Ref. {displayRef}
                   <Copy className="h-2.5 w-2.5" />
                 </button>
               )}
