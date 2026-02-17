@@ -390,6 +390,7 @@ const CellContextMenu = memo(function CellContextMenu({
     return undefined;
   });
 
+  const [colorTarget, setColorTarget] = useState<string | null>(null);
   const isPill = colType === 'lingua' || colType === 'portale' || colType === 'tipo_contatto';
   const isDate = colKey === 'data_submission' || colKey === 'last_contact_date';
 
@@ -411,22 +412,23 @@ const CellContextMenu = memo(function CellContextMenu({
     onClose();
   };
 
-  // Pill color change (global for lingua, per-portal for portale)
+  // Pill color change — uses colorTarget to know which option to color
   const handlePillColorChange = (color: string) => {
-    if (colType === 'lingua' && value) {
-      const updated = { ...getCustomLinguaColors(), [value]: color };
+    const target = colorTarget || value;
+    if (!target) return;
+    if (colType === 'lingua') {
+      const updated = { ...getCustomLinguaColors(), [target]: color };
       saveCustomLinguaColors(updated);
       setLinguaColors({ ...LINGUA_COLORS, ...updated });
-    } else if (colType === 'portale' && value) {
-      const updated = { ...getCustomPortaleColors(), [value]: color };
+    } else if (colType === 'portale') {
+      const updated = { ...getCustomPortaleColors(), [target]: color };
       saveCustomPortaleColors(updated);
       setPortaleColors({ ...PORTALE_COLORS, ...updated });
-    } else if (colType === 'tipo_contatto' && value) {
-      // tipo_contatto uses same mechanism as portale for simplicity
-      const updated = { ...getCustomPortaleColors(), [`tc_${value}`]: color };
+    } else if (colType === 'tipo_contatto') {
+      const updated = { ...getCustomPortaleColors(), [`tc_${target}`]: color };
       saveCustomPortaleColors(updated);
     }
-    onClose();
+    setColorTarget(null);
   };
 
   const handleResetPillColor = () => {
@@ -494,36 +496,55 @@ const CellContextMenu = memo(function CellContextMenu({
         {isPill && (
           <>
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
-            <div className="flex flex-wrap gap-1 px-2 py-1 max-w-[220px]">
+            <div className="flex flex-wrap gap-1 px-2 py-1 max-w-[260px]">
               {pillOptions.map(opt => (
                 <button
                   key={opt}
-                  onClick={() => { onCellChange(cliente.id, colKey, opt); onClose(); }}
+                  onClick={() => {
+                    if (value === opt) {
+                      // Already selected → toggle color picker for this option
+                      setColorTarget(prev => prev === opt ? null : opt);
+                    } else {
+                      onCellChange(cliente.id, colKey, opt);
+                      onClose();
+                    }
+                  }}
                   className={cn(
                     "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
-                    value === opt && "ring-2 ring-foreground ring-offset-1"
+                    value === opt && "ring-2 ring-foreground ring-offset-1",
+                    colorTarget === opt && "ring-2 ring-amber-400 ring-offset-1"
                   )}
                   style={{ backgroundColor: pillColorMap[opt] || '#6b7280' }}
                 >
-                  {opt}
+                  {opt} {colorTarget === opt && '🎨'}
                 </button>
               ))}
             </div>
-            <div className="h-px bg-muted/50" />
-            <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Cambia colore</span>
-            <div className="grid grid-cols-10 gap-1 px-2 py-1">
-              {CONTEXT_PALETTE_COLORS.filter(Boolean).slice(0, 30).map(c => (
-                <button
-                  key={c}
-                  className="w-4 h-4 rounded-full border border-border/30 hover:scale-125 transition-transform"
-                  style={{ backgroundColor: c! }}
-                  onClick={() => handlePillColorChange(c!)}
-                />
-              ))}
-            </div>
-            <button onClick={handleResetPillColor} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors">
-              <RotateCcw className="w-3 h-3" /> Reset colore
-            </button>
+            {/* Color palette — shown when a pill is targeted */}
+            {colorTarget && (
+              <>
+                <div className="h-px bg-muted/50" />
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">
+                  Colore: {colorTarget}
+                </span>
+                <div className="grid grid-cols-10 gap-1 px-2 py-1">
+                  {CONTEXT_PALETTE_COLORS.filter(Boolean).slice(0, 30).map(c => (
+                    <button
+                      key={c}
+                      className={cn(
+                        "w-4 h-4 rounded-full border border-border/30 hover:scale-125 transition-transform",
+                        pillColorMap[colorTarget] === c && "ring-2 ring-foreground ring-offset-1"
+                      )}
+                      style={{ backgroundColor: c! }}
+                      onClick={() => handlePillColorChange(c!)}
+                    />
+                  ))}
+                </div>
+                <button onClick={() => { handleResetPillColor(); setColorTarget(null); }} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors">
+                  <RotateCcw className="w-3 h-3" /> Reset colore
+                </button>
+              </>
+            )}
             <div className="h-px bg-muted/50" />
           </>
         )}
@@ -950,7 +971,6 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
 
   // When color menu opens, close the Select to remove Radix's pointer-blocking overlay
   const selectOpen = !colorMenuPortal;
-
 
   return (
     <>
