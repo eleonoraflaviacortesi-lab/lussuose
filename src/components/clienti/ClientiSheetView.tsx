@@ -1763,7 +1763,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       return saved ? { ...defaults, ...saved } : defaults;
     }
   );
-  const [sortCol, setSortCol] = useState<string | null>(null);
+  const [sortCol, setSortCol] = useState<string | null>('data_submission');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
