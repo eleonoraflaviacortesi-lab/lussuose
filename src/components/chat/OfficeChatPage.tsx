@@ -2,13 +2,12 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
-import { Send, Reply, X, ChevronDown, Mic, Square, Paperclip, Megaphone, Wallet, Play, Pause } from 'lucide-react';
+import { Send, Reply, X, ChevronDown, Mic, Square, Megaphone, Wallet, Play, Pause, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { getMentionedUserIds } from '@/components/ui/mention-input';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
-import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import type { Notizia } from '@/hooks/useNotizie';
 import type { Cliente } from '@/types';
 import {
@@ -49,13 +48,13 @@ const OfficeChatPage = () => {
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingTimerRef = useRef<ReturnType<typeof setInterval>>();
 
-  // Attachment state
-  const [showAttachMenu, setShowAttachMenu] = useState(false);
-  const [showNotiziePicker, setShowNotiziePicker] = useState(false);
-  const [showClientiPicker, setShowClientiPicker] = useState(false);
-  const [notizie, setNotizie] = useState<any[]>([]);
-  const [clienti, setClienti] = useState<any[]>([]);
-  const [attachSearch, setAttachSearch] = useState('');
+  // # hashtag attachment state
+  const [showHashDropdown, setShowHashDropdown] = useState(false);
+  const [hashQuery, setHashQuery] = useState('');
+  const [hashMode, setHashMode] = useState<'choose' | 'notizia' | 'cliente'>('choose');
+  const [hashResults, setHashResults] = useState<any[]>([]);
+  const [hashIndex, setHashIndex] = useState(0);
+  const [hashLoading, setHashLoading] = useState(false);
 
   // Linked data cache
   const [linkedNotizie, setLinkedNotizie] = useState<Record<string, any>>({});
@@ -292,19 +291,35 @@ const OfficeChatPage = () => {
     setReplyTo(null);
   };
 
-  // Play audio
-  const toggleAudio = (msgId: string, url: string) => {
+  // Play audio — unlock Audio element synchronously on user gesture, then set src
+  const toggleAudio = async (msgId: string, url: string) => {
     if (playingAudioId === msgId) {
       audioElementRef.current?.pause();
       setPlayingAudioId(null);
       return;
     }
-    if (audioElementRef.current) audioElementRef.current.pause();
-    const audio = new Audio(url);
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      audioElementRef.current = null;
+    }
+    // Create and unlock audio element synchronously inside click handler
+    const audio = new Audio();
+    audio.preload = 'auto';
     audioElementRef.current = audio;
+    // Unlock on iOS/Safari by playing empty
+    try { await audio.play(); } catch {}
+    audio.pause();
+    audio.currentTime = 0;
+    // Now set the real source
+    audio.src = url;
     audio.onended = () => setPlayingAudioId(null);
-    audio.play();
-    setPlayingAudioId(msgId);
+    audio.onerror = () => setPlayingAudioId(null);
+    try {
+      await audio.play();
+      setPlayingAudioId(msgId);
+    } catch {
+      setPlayingAudioId(null);
+    }
   };
 
   // Reactions
@@ -330,17 +345,44 @@ const OfficeChatPage = () => {
     await supabase.from('chat_messages').update({ reactions }).eq('id', msg.id);
   };
 
-  // Load notizie/clienti for picker
-  const loadNotizie = async () => {
-    const { data } = await supabase.from('notizie').select('*').order('created_at', { ascending: false }).limit(50);
-    if (data) setNotizie(data);
-  };
-  const loadClienti = async () => {
-    const { data } = await supabase.from('clienti').select('*').eq('sede', sede).order('created_at', { ascending: false }).limit(50);
-    if (data) setClienti(data);
-  };
+  // # hashtag search — global across all agents in sede
+  const searchHashtag = useCallback(async (query: string, mode: 'notizia' | 'cliente') => {
+    setHashLoading(true);
+    if (mode === 'notizia') {
+      // Search all notizie in same sede (RLS allows via is_same_sede)
+      const { data } = await supabase
+        .from('notizie')
+        .select('*')
+        .ilike('name', `%${query}%`)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      setHashResults(data || []);
+    } else {
+      // Search all clienti in sede
+      const { data } = await supabase
+        .from('clienti')
+        .select('*')
+        .eq('sede', sede)
+        .or(`nome.ilike.%${query}%,cognome.ilike.%${query}%`)
+        .order('created_at', { ascending: false })
+        .limit(8);
+      setHashResults(data || []);
+    }
+    setHashLoading(false);
+  }, [sede]);
 
-  // Mention detection in textarea
+  // Debounced hash search
+  const hashSearchTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (!showHashDropdown || hashMode === 'choose') return;
+    if (hashSearchTimerRef.current) clearTimeout(hashSearchTimerRef.current);
+    hashSearchTimerRef.current = setTimeout(() => {
+      searchHashtag(hashQuery, hashMode);
+    }, 200);
+    return () => { if (hashSearchTimerRef.current) clearTimeout(hashSearchTimerRef.current); };
+  }, [hashQuery, hashMode, showHashDropdown, searchHashtag]);
+
+  // Mention & hashtag detection in textarea
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value;
     const pos = e.target.selectionStart || 0;
@@ -348,6 +390,8 @@ const OfficeChatPage = () => {
     setCursorPos(pos);
 
     const beforeCursor = val.slice(0, pos);
+
+    // Check for @ mentions
     const atIdx = beforeCursor.lastIndexOf('@');
     if (atIdx >= 0 && (atIdx === 0 || beforeCursor[atIdx - 1] === ' ' || beforeCursor[atIdx - 1] === '\n')) {
       const q = beforeCursor.slice(atIdx + 1);
@@ -355,10 +399,64 @@ const OfficeChatPage = () => {
         setMentionQuery(q);
         setMentionIndex(0);
         setShowMentionDropdown(true);
+        setShowHashDropdown(false);
         return;
       }
     }
     setShowMentionDropdown(false);
+
+    // Check for # hashtag
+    const hashIdx = beforeCursor.lastIndexOf('#');
+    if (hashIdx >= 0 && (hashIdx === 0 || beforeCursor[hashIdx - 1] === ' ' || beforeCursor[hashIdx - 1] === '\n')) {
+      const q = beforeCursor.slice(hashIdx + 1);
+      if (!q.includes('\n')) {
+        setShowHashDropdown(true);
+        // Parse mode from query: #n or #b prefix or just #
+        if (q.length === 0) {
+          setHashMode('choose');
+          setHashQuery('');
+        } else if (q.startsWith('n ') || q.startsWith('n')) {
+          if (q.length > 1) {
+            setHashMode('notizia');
+            setHashQuery(q.slice(q.startsWith('n ') ? 2 : 1));
+          } else {
+            setHashMode('notizia');
+            setHashQuery('');
+          }
+        } else if (q.startsWith('b ') || q.startsWith('b')) {
+          if (q.length > 1) {
+            setHashMode('cliente');
+            setHashQuery(q.slice(q.startsWith('b ') ? 2 : 1));
+          } else {
+            setHashMode('cliente');
+            setHashQuery('');
+          }
+        } else {
+          // Default: search both — show choose
+          setHashMode('choose');
+          setHashQuery(q);
+        }
+        setHashIndex(0);
+        return;
+      }
+    }
+    setShowHashDropdown(false);
+  };
+
+  const selectHashItem = (item: any, type: 'notizia' | 'cliente') => {
+    // Remove the # and everything after it from the message
+    const beforeCursor = newMessage.slice(0, cursorPos);
+    const hashIdx = beforeCursor.lastIndexOf('#');
+    const after = newMessage.slice(cursorPos);
+    const cleaned = newMessage.slice(0, hashIdx).trimEnd();
+    setNewMessage(cleaned + (cleaned ? ' ' : '') + after);
+    setShowHashDropdown(false);
+
+    if (type === 'notizia') {
+      sendMessage(item.id, undefined);
+    } else {
+      sendMessage(undefined, item.id);
+    }
   };
 
   const selectMention = (p: { full_name: string; user_id: string }) => {
@@ -372,13 +470,29 @@ const OfficeChatPage = () => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Hash dropdown navigation
+    if (showHashDropdown && hashMode !== 'choose' && hashResults.length > 0) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); setHashIndex(i => Math.min(i + 1, hashResults.length - 1)); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setHashIndex(i => Math.max(i - 1, 0)); return; }
+      if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        selectHashItem(hashResults[hashIndex], hashMode as 'notizia' | 'cliente');
+        return;
+      }
+      if (e.key === 'Escape') { setShowHashDropdown(false); return; }
+    }
+    if (showHashDropdown && hashMode === 'choose') {
+      if (e.key === 'Escape') { setShowHashDropdown(false); return; }
+    }
+
+    // Mention dropdown navigation
     if (showMentionDropdown && filteredMentionProfiles.length > 0) {
       if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => Math.min(i + 1, filteredMentionProfiles.length - 1)); return; }
       if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => Math.max(i - 1, 0)); return; }
       if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); selectMention(filteredMentionProfiles[mentionIndex]); return; }
       if (e.key === 'Escape') { setShowMentionDropdown(false); return; }
     }
-    if (e.key === 'Enter' && !e.shiftKey && !showMentionDropdown) {
+    if (e.key === 'Enter' && !e.shiftKey && !showMentionDropdown && !showHashDropdown) {
       e.preventDefault();
       sendMessage();
     }
@@ -676,6 +790,96 @@ const OfficeChatPage = () => {
         </div>
       )}
 
+      {/* # Hashtag dropdown */}
+      {showHashDropdown && (
+        <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl shadow-xl border border-border z-50 overflow-hidden max-h-64 overflow-y-auto">
+          {hashMode === 'choose' ? (
+            <div className="p-1">
+              <p className="text-xs text-muted-foreground px-3 py-2">Cosa vuoi allegare?</p>
+              <button
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  // Insert 'n ' after #
+                  const beforeCursor = newMessage.slice(0, cursorPos);
+                  const hashIdx = beforeCursor.lastIndexOf('#');
+                  const after = newMessage.slice(cursorPos);
+                  const val = newMessage.slice(0, hashIdx) + '#n ' + after;
+                  setNewMessage(val);
+                  setCursorPos(hashIdx + 3);
+                  setHashMode('notizia');
+                  setHashQuery('');
+                  setTimeout(() => {
+                    textareaRef.current?.focus();
+                    textareaRef.current?.setSelectionRange(hashIdx + 3, hashIdx + 3);
+                  }, 0);
+                }}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted rounded-lg"
+              >
+                <Megaphone className="w-4 h-4" />
+                <span className="font-medium">Notizia</span>
+                <span className="text-xs text-muted-foreground ml-auto">#n</span>
+              </button>
+              <button
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  const beforeCursor = newMessage.slice(0, cursorPos);
+                  const hashIdx = beforeCursor.lastIndexOf('#');
+                  const after = newMessage.slice(cursorPos);
+                  const val = newMessage.slice(0, hashIdx) + '#b ' + after;
+                  setNewMessage(val);
+                  setCursorPos(hashIdx + 3);
+                  setHashMode('cliente');
+                  setHashQuery('');
+                  setTimeout(() => {
+                    textareaRef.current?.focus();
+                    textareaRef.current?.setSelectionRange(hashIdx + 3, hashIdx + 3);
+                  }, 0);
+                }}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted rounded-lg"
+              >
+                <Wallet className="w-4 h-4" />
+                <span className="font-medium">Buyer</span>
+                <span className="text-xs text-muted-foreground ml-auto">#b</span>
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="px-3 py-2 border-b border-border flex items-center gap-2 text-xs text-muted-foreground">
+                {hashMode === 'notizia' ? <Megaphone className="w-3.5 h-3.5" /> : <Wallet className="w-3.5 h-3.5" />}
+                <span>Cerca {hashMode === 'notizia' ? 'notizia' : 'buyer'}...</span>
+                {hashLoading && <span className="ml-auto animate-pulse">⏳</span>}
+              </div>
+              {hashResults.length === 0 && !hashLoading && (
+                <p className="text-xs text-muted-foreground text-center py-4">Nessun risultato</p>
+              )}
+              {hashResults.map((item, idx) => (
+                <button
+                  key={item.id}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    selectHashItem(item, hashMode as 'notizia' | 'cliente');
+                  }}
+                  className={cn(
+                    'w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm',
+                    idx === hashIndex ? 'bg-muted' : 'hover:bg-muted/50'
+                  )}
+                >
+                  <span className="text-base">{hashMode === 'notizia' ? (item.emoji || '📋') : (item.emoji || '🏠')}</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium truncate">
+                      {hashMode === 'notizia' ? item.name : `${item.nome} ${item.cognome || ''}`}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {hashMode === 'notizia' ? (item.zona || item.status) : (item.paese || item.status)}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Reply bar */}
       {replyTo && (
         <div className="px-3 pt-2 flex items-center gap-2 glass-surface mx-3 rounded-t-xl">
@@ -692,31 +896,6 @@ const OfficeChatPage = () => {
 
       {/* Input area */}
       <div className={cn('px-3 pb-3 pt-2 flex items-end gap-2', replyTo && 'pt-0')}>
-        {/* Attachment button */}
-        <Popover open={showAttachMenu} onOpenChange={setShowAttachMenu}>
-          <PopoverTrigger asChild>
-            <button className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 text-muted-foreground hover:text-foreground transition-colors">
-              <Paperclip className="w-5 h-5" />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-1" side="top" align="start">
-            <button
-              onClick={() => { setShowAttachMenu(false); setShowNotiziePicker(true); loadNotizie(); setAttachSearch(''); }}
-              className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-muted flex items-center gap-2.5 text-sm"
-            >
-              <Megaphone className="w-4 h-4" />
-              Allega Notizia
-            </button>
-            <button
-              onClick={() => { setShowAttachMenu(false); setShowClientiPicker(true); loadClienti(); setAttachSearch(''); }}
-              className="w-full text-left px-3 py-2.5 rounded-lg hover:bg-muted flex items-center gap-2.5 text-sm"
-            >
-              <Wallet className="w-4 h-4" />
-              Allega Buyer
-            </button>
-          </PopoverContent>
-        </Popover>
-
         {isRecording ? (
           // Recording UI
           <div className="flex-1 flex items-center gap-3 glass-surface rounded-2xl px-4 py-2.5">
@@ -736,7 +915,7 @@ const OfficeChatPage = () => {
               value={newMessage}
               onChange={handleTextChange}
               onKeyDown={handleKeyDown}
-              placeholder="Scrivi... usa @ per taggare"
+              placeholder="Scrivi... @ per taggare, # per allegare"
               rows={1}
               className="flex-1 resize-none glass-surface rounded-2xl px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground/50 max-h-[120px]"
             />
@@ -760,82 +939,6 @@ const OfficeChatPage = () => {
         )}
       </div>
 
-      {/* Notizia picker modal */}
-      {showNotiziePicker && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowNotiziePicker(false)}>
-          <div className="bg-background rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[70vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold">Allega Notizia</h3>
-              <button onClick={() => setShowNotiziePicker(false)}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-3">
-              <input
-                value={attachSearch}
-                onChange={e => setAttachSearch(e.target.value)}
-                placeholder="Cerca notizia..."
-                className="w-full glass-surface rounded-xl px-3 py-2 text-sm outline-none"
-                autoFocus
-              />
-            </div>
-            <div className="overflow-y-auto max-h-[50vh] p-3 space-y-1">
-              {notizie
-                .filter(n => !attachSearch || n.name.toLowerCase().includes(attachSearch.toLowerCase()))
-                .map(n => (
-                  <button
-                    key={n.id}
-                    onClick={() => { setShowNotiziePicker(false); sendMessage(n.id, undefined); }}
-                    className="w-full text-left p-3 rounded-xl hover:bg-muted flex items-center gap-3"
-                  >
-                    <span className="text-lg">{n.emoji || '📋'}</span>
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{n.name}</p>
-                      <p className="text-xs text-muted-foreground truncate">{n.zona || n.status}</p>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Clienti picker modal */}
-      {showClientiPicker && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center" onClick={() => setShowClientiPicker(false)}>
-          <div className="bg-background rounded-t-2xl sm:rounded-2xl w-full max-w-lg max-h-[70vh] overflow-hidden" onClick={e => e.stopPropagation()}>
-            <div className="p-4 border-b border-border flex items-center justify-between">
-              <h3 className="font-semibold">Allega Buyer</h3>
-              <button onClick={() => setShowClientiPicker(false)}><X className="w-5 h-5" /></button>
-            </div>
-            <div className="p-3">
-              <input
-                value={attachSearch}
-                onChange={e => setAttachSearch(e.target.value)}
-                placeholder="Cerca buyer..."
-                className="w-full glass-surface rounded-xl px-3 py-2 text-sm outline-none"
-                autoFocus
-              />
-            </div>
-            <div className="overflow-y-auto max-h-[50vh] p-3 space-y-1">
-              {clienti
-                .filter(c => !attachSearch || `${c.nome} ${c.cognome || ''}`.toLowerCase().includes(attachSearch.toLowerCase()))
-                .map(c => (
-                  <button
-                    key={c.id}
-                    onClick={() => { setShowClientiPicker(false); sendMessage(undefined, c.id); }}
-                    className="w-full text-left p-3 rounded-xl hover:bg-muted flex items-center gap-3"
-                  >
-                    <span className="text-lg">{c.emoji || '🏠'}</span>
-                    <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{c.nome} {c.cognome || ''}</p>
-                      <p className="text-xs text-muted-foreground truncate">{c.paese || c.status}</p>
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Notizia detail modal */}
       <NotiziaDetail
         notizia={selectedNotizia}
@@ -843,7 +946,7 @@ const OfficeChatPage = () => {
         onOpenChange={(open) => !open && setSelectedNotizia(null)}
       />
 
-      {/* Cliente detail modal - simplified view */}
+      {/* Cliente detail modal */}
       {selectedCliente && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" onClick={() => setSelectedCliente(null)}>
           <div className="bg-background rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto mx-4 p-6" onClick={e => e.stopPropagation()}>
@@ -862,7 +965,6 @@ const OfficeChatPage = () => {
               {selectedCliente.regioni && selectedCliente.regioni.length > 0 && <p>📍 {selectedCliente.regioni.join(', ')}</p>}
               {selectedCliente.tipologia && selectedCliente.tipologia.length > 0 && <p>🏠 {selectedCliente.tipologia.join(', ')}</p>}
               {selectedCliente.descrizione && <p className="text-muted-foreground">{selectedCliente.descrizione}</p>}
-              {selectedCliente.note_extra && <p className="text-muted-foreground italic">{selectedCliente.note_extra}</p>}
             </div>
           </div>
         </div>
