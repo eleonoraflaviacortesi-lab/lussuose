@@ -1,28 +1,22 @@
 import { useState, lazy, Suspense } from 'react';
-import { User, TrendingUp, Building2 } from 'lucide-react';
+import { Building2, UsersRound, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import type { Notizia } from '@/hooks/useNotizie';
 
-const PersonalDashboard = lazy(() => import('./PersonalDashboard'));
-const ReportAnalysisTab = lazy(() => import('./ReportAnalysisTab'));
 const AgencyDashboard = lazy(() => import('./AgencyDashboard'));
+const ReportAnalysisTab = lazy(() => import('./ReportAnalysisTab'));
+const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
 
-type Tab = 'personal' | 'report' | 'agency';
+type Tab = 'agency' | 'meetings' | 'report';
 
-type UnifiedDashboardProps = {
-  onGoToCalendar?: () => void;
-  onOpenNotizia?: (notizia: Notizia) => void;
-};
-
-const tabs: { id: Tab; icon: typeof User; label: string }[] = [
-  { id: 'personal', icon: User, label: 'Personale' },
-  { id: 'report', icon: TrendingUp, label: 'Report' },
+const tabs: { id: Tab; icon: typeof Building2; label: string }[] = [
   { id: 'agency', icon: Building2, label: 'Ufficio' },
+  { id: 'meetings', icon: UsersRound, label: 'Riunioni' },
+  { id: 'report', icon: TrendingUp, label: 'Analisi' },
 ];
 
-const UnifiedDashboard = ({ onGoToCalendar, onOpenNotizia }: UnifiedDashboardProps) => {
-  const [activeTab, setActiveTab] = useState<Tab>('personal');
+const UnifiedDashboard = () => {
+  const [activeTab, setActiveTab] = useState<Tab>('agency');
 
   const handleTabChange = (tab: Tab) => {
     triggerHaptic('selection');
@@ -43,7 +37,7 @@ const UnifiedDashboard = ({ onGoToCalendar, onOpenNotizia }: UnifiedDashboardPro
               className={cn(
                 'flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-medium tracking-[0.1em] uppercase transition-all duration-200',
                 isActive
-                  ? 'bg-card text-foreground shadow-md'
+                  ? 'text-foreground shadow-md'
                   : 'text-muted-foreground active:scale-95'
               )}
               style={isActive ? {
@@ -52,7 +46,7 @@ const UnifiedDashboard = ({ onGoToCalendar, onOpenNotizia }: UnifiedDashboardPro
               } : undefined}
             >
               <Icon className="w-4 h-4" strokeWidth={isActive ? 2 : 1.5} />
-              <span className="hidden sm:inline">{tab.label}</span>
+              <span>{tab.label}</span>
             </button>
           );
         })}
@@ -67,11 +61,9 @@ const UnifiedDashboard = ({ onGoToCalendar, onOpenNotizia }: UnifiedDashboardPro
         }
       >
         <div key={activeTab} className="animate-fade-in">
-          {activeTab === 'personal' && (
-            <PersonalDashboard onGoToCalendar={onGoToCalendar} onOpenNotizia={onOpenNotizia} />
-          )}
-          {activeTab === 'report' && <ReportAnalysisTab />}
           {activeTab === 'agency' && <AgencyDashboard />}
+          {activeTab === 'meetings' && <MeetingsPage />}
+          {activeTab === 'report' && <ReportAnalysisTab />}
         </div>
       </Suspense>
     </div>

@@ -12,13 +12,13 @@ import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import type { Notizia } from '@/hooks/useNotizie';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
+const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
 const UnifiedDashboard = lazy(() => import('@/components/dashboard/UnifiedDashboard'));
 const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
 
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
-const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 
 // Map URL paths to tab ids
@@ -27,7 +27,10 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
-  '/riunioni': 'riunioni',
+  '/ufficio': 'ufficio',
+  '/riunioni': 'ufficio',
+  '/report': 'ufficio',
+  '/agenzia': 'ufficio',
   '/impostazioni': 'impostazioni',
   '/inserisci': 'inserisci',
 };
@@ -104,7 +107,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
     switch (activeTab) {
       case 'numeri':
         return (
-          <UnifiedDashboard
+          <PersonalDashboard
             onGoToCalendar={() => setActiveTab('calendario')}
             onOpenNotizia={handleOpenNotiziaFromReminder}
           />
@@ -115,14 +118,14 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'calendario':
         return <CalendarPage />;
-      case 'riunioni':
-        return <MeetingsPage />;
+      case 'ufficio':
+        return <UnifiedDashboard />;
       case 'inserisci':
         return <ReportForm />;
       case 'impostazioni':
         return <SettingsPage />;
       default:
-        return <UnifiedDashboard />;
+        return <PersonalDashboard />;
     }
   };
 
