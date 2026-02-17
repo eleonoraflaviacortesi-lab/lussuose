@@ -36,35 +36,37 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   };
 
   return (
-    <div className="flex items-center gap-1 px-1">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        
-        return (
-          <button
-            key={tab.id}
-            onClick={() => handleTabChange(tab.id)}
-            className={cn(
-              'relative flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100',
-              isActive ? 'text-foreground' : 'text-muted-foreground'
-            )}
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-            title={tab.label}
-            aria-label={tab.label}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            {isActive && (
-              <span
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34px] h-[34px] rounded-full bg-white"
-                style={{ boxShadow: '0 3px 8px rgba(0,0,0,0.18)' }}
-              />
-            )}
-            <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
-          </button>
-        );
-      })}
-    </div>
+    <nav className="fixed left-0 right-0 z-[55] flex justify-center" style={{ top: 'calc(85px + env(safe-area-inset-top, 0px))' }}>
+      <div className="glass-nav rounded-full px-3 py-2 flex items-center gap-1">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          
+          return (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className={cn(
+                'relative flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100',
+                isActive ? 'text-foreground' : 'text-muted-foreground'
+              )}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+              title={tab.label}
+              aria-label={tab.label}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {isActive && (
+                <span
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34px] h-[34px] rounded-full bg-white"
+                  style={{ boxShadow: '0 3px 8px rgba(0,0,0,0.18)' }}
+                />
+              )}
+              <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
+            </button>
+          );
+        })}
+      </div>
+    </nav>
   );
 };
 

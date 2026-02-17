@@ -9,16 +9,13 @@ import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
-import Navigation from '@/components/layout/Navigation';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
   onOpenSettings?: () => void;
-  activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
-const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: HeaderProps) => {
+const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
@@ -28,42 +25,27 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Listen for broadcast from other users
   useEffect(() => {
     const channel = supabase.channel('arcane-fog-broadcast')
       .on('broadcast', { event: 'arcane-fog' }, () => {
         triggerArcaneFog();
       })
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Easter egg: triple-tap the logo for a surprise (broadcast to all)
   const handleLogoTap = useCallback(() => {
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-    
-    // Wiggle on every tap
     setLogoWiggle(true);
     setTimeout(() => setLogoWiggle(false), 400);
-
     if (tapCountRef.current >= 3) {
       tapCountRef.current = 0;
       triggerHaptic('success');
       triggerArcaneFog();
-      // Broadcast to all other connected users
-      supabase.channel('arcane-fog-broadcast').send({
-        type: 'broadcast',
-        event: 'arcane-fog',
-        payload: {},
-      });
+      supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
     } else {
-      tapTimerRef.current = setTimeout(() => {
-        tapCountRef.current = 0;
-      }, 600);
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
     }
   }, []);
 
@@ -73,13 +55,9 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('it-IT', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-    }).format(value);
+    return new Intl.NumberFormat('it-IT', { style: 'decimal', minimumFractionDigits: 0 }).format(value);
   };
 
-  // Use fatturato_target from sede_targets (annual value)
   const target = targets.fatturato_target || 500000;
   const current = kpis?.fatturato?.value || 0;
   const remaining = Math.max(0, target - current);
@@ -88,10 +66,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-[60]">
-        {/* iOS Safe Area Background */}
         <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black" />
-        
-        {/* Ticker Banner - Black with smooth scroll */}
         <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
           <div className="flex ticker-smooth whitespace-nowrap pt-2">
             {[...Array(3)].map((_, i) => (
@@ -106,40 +81,29 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
             ))}
           </div>
         </div>
-
-        {/* Main Header - Liquid Glass Effect with integrated nav */}
         <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
-          {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
-            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl flex-shrink-0"
+            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
             aria-label="Apri profilo"
           >
             {profile?.avatar_emoji || '🖤'}
           </button>
-
-          {/* Center: Nav Pill */}
-          <Navigation activeTab={activeTab} onTabChange={onTabChange} />
-
-          {/* Brand Logo */}
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[5.5rem] w-auto max-w-[25vw] -my-4 transition-transform cursor-pointer select-none flex-shrink-0 ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[5.5rem] w-auto max-w-[70vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
-
-          {/* Logout */}
           <button 
             onClick={handleSignOut}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
             aria-label="Esci"
           >
             <LogOut className="w-4 h-4" />
           </button>
         </div>
       </header>
-
       <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} onOpenSettings={onOpenSettings} />
     </>
   );
