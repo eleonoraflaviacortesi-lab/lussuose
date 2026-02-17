@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2, UserRound } from 'lucide-react';
+import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
@@ -10,12 +10,14 @@ import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
   onOpenSettings?: () => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  onOpenCliente?: (clienteId: string) => void;
 }
 
 const tabToPath: Record<string, string> = {
@@ -34,7 +36,7 @@ const menuItems = [
   { id: 'ufficio', icon: Building2, label: 'Ufficio' },
 ];
 
-const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: HeaderProps) => {
+const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenCliente }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
@@ -132,13 +134,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
             className={`h-[5.5rem] w-auto max-w-[70vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
-          <button 
-            onClick={handleSignOut}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Esci"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+          <NotificationBell onOpenCliente={onOpenCliente} inline />
         </div>
       </header>
 

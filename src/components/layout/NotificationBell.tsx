@@ -9,9 +9,10 @@ import { it } from 'date-fns/locale';
 
 interface NotificationBellProps {
   onOpenCliente?: (clienteId: string) => void;
+  inline?: boolean;
 }
 
-export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
+export function NotificationBell({ onOpenCliente, inline }: NotificationBellProps) {
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
   const [open, setOpen] = useState(false);
 
@@ -48,18 +49,19 @@ export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
   };
 
   return (
-    <div className="fixed bottom-24 left-4 z-40">
+    <div className={inline ? "relative" : "fixed bottom-24 left-4 z-40"}>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button 
             className={cn(
-              "relative w-12 h-12 rounded-full flex items-center justify-center",
-              "bg-white/80 backdrop-blur-xl shadow-lg",
-              "hover:scale-105 active:scale-95 transition-transform"
+              "relative flex items-center justify-center",
+              inline
+                ? "w-9 h-9 rounded-full hover:bg-muted/60 transition-colors"
+                : "w-12 h-12 rounded-full bg-white/80 backdrop-blur-xl shadow-lg hover:scale-105 active:scale-95 transition-transform"
             )}
             aria-label={`Notifiche${unreadCount > 0 ? ` (${unreadCount} non lette)` : ''}`}
           >
-            <Bell className="w-5 h-5" />
+            <Bell className={inline ? "w-4 h-4" : "w-5 h-5"} />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-5 h-5 bg-[hsl(var(--banner))] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-md">
                 {unreadCount > 9 ? '9+' : unreadCount}
@@ -68,10 +70,10 @@ export function NotificationBell({ onOpenCliente }: NotificationBellProps) {
           </button>
         </PopoverTrigger>
         <PopoverContent 
-          side="top"
-          align="start"
+          side={inline ? "bottom" : "top"}
+          align={inline ? "end" : "start"}
           sideOffset={12}
-          className="w-80 p-0 bg-white rounded-2xl shadow-xl"
+          className="w-80 p-0 bg-white rounded-2xl shadow-xl z-[100]"
         >
           <div className="flex items-center justify-between p-3">
             <h3 className="font-semibold text-sm">Notifiche</h3>
