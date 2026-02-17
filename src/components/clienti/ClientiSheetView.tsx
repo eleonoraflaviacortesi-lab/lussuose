@@ -1888,7 +1888,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     let result = filtered;
     // Qualified filter
     if (qualifiedFilter) {
-      result = result.filter(c => !!c.tally_submission_id);
+      result = result.filter(c => c.status === 'qualified');
     }
     const activeFilters = Object.entries(colFilters).filter(([, vals]) => vals.size > 0);
     if (activeFilters.length === 0) return result;
