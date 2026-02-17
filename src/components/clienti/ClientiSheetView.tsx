@@ -1329,6 +1329,11 @@ const SheetRow = memo(function SheetRow({
   onContextMenu,
   onCellContextMenu,
   onCellSelect,
+  isDragOver,
+  onRowDragStart,
+  onRowDragOver,
+  onRowDrop,
+  onRowDragEnd,
 }: {
   cliente: Cliente;
   idx: number;
@@ -1346,6 +1351,11 @@ const SheetRow = memo(function SheetRow({
   onContextMenu: (cliente: Cliente, x: number, y: number) => void;
   onCellContextMenu: (cliente: Cliente, col: ColumnDef, value: string, x: number, y: number) => void;
   onCellSelect?: (clienteId: string, colKey: string) => void;
+  isDragOver?: boolean;
+  onRowDragStart?: (e: React.DragEvent) => void;
+  onRowDragOver?: (e: React.DragEvent) => void;
+  onRowDrop?: (e: React.DragEvent) => void;
+  onRowDragEnd?: () => void;
 }) {
   const longPressRef = useRef<NodeJS.Timeout | null>(null);
   const longPressTriggered = useRef(false);
@@ -1400,6 +1410,7 @@ const SheetRow = memo(function SheetRow({
         rowFormat?.bold && 'font-bold',
         rowFormat?.italic && 'italic',
         rowFormat?.strikethrough && 'line-through',
+        isDragOver && 'border-t-2 border-t-primary',
       )}
       style={{
         minHeight: MIN_ROW_HEIGHT,
@@ -1408,16 +1419,26 @@ const SheetRow = memo(function SheetRow({
       }}
       onClick={() => onSelect(cliente.id)}
       onContextMenu={handleRowContextMenu}
+      onDragOver={onRowDragOver}
+      onDrop={onRowDrop}
     >
-      {/* Row number + open detail — RIGHT CLICK HERE = ROW MENU */}
+      {/* Row number + drag handle + open detail */}
       <div
-        className="flex-shrink-0 flex items-center gap-0.5 border-r border-border/20 text-muted-foreground cursor-pointer hover:bg-muted/40 transition-colors"
+        className="flex-shrink-0 flex items-center gap-0 border-r border-border/20 text-muted-foreground cursor-pointer hover:bg-muted/40 transition-colors"
         style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
         onContextMenu={handleRowNumRightClick}
         onTouchStart={handleRowNumTouchStart}
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
       >
+        <div
+          className="flex items-center justify-center w-4 h-full cursor-grab active:cursor-grabbing opacity-30 hover:opacity-70 transition-opacity"
+          draggable
+          onDragStart={onRowDragStart}
+          onDragEnd={onRowDragEnd}
+        >
+          <GripVertical className="w-3 h-3" />
+        </div>
         <span className="text-[10px] font-medium flex-1 text-center select-none flex items-center justify-center gap-0.5">
           {idx + 1}
           {cliente.tally_submission_id && (
@@ -1435,7 +1456,7 @@ const SheetRow = memo(function SheetRow({
         </button>
       </div>
 
-      {/* Data cells — RIGHT CLICK HERE = CELL MENU */}
+      {/* Data cells */}
       {orderedColumns.map(col => {
         const cf = colFormats[col.key];
         return (
@@ -1793,6 +1814,10 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   const [contextMenu, setContextMenu] = useState<{ cliente: Cliente; x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Row drag-and-drop state
+  const [dragRowId, setDragRowId] = useState<string | null>(null);
+  const [dragOverRowId, setDragOverRowId] = useState<string | null>(null);
+
   // Copy/Paste keyboard handler
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -2085,7 +2110,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     });
   }, []);
 
-  const rowNumWidth = 52;
+  const rowNumWidth = 62;
   const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
@@ -2238,6 +2263,46 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 onContextMenu={handleRowContextMenu}
                 onCellContextMenu={handleCellContextMenu}
                 onCellSelect={(clienteId, colKey) => { setSelectedRowId(clienteId); setSelectedCellCol(colKey); }}
+                isDragOver={dragOverRowId === cliente.id}
+                onRowDragStart={(e) => {
+                  e.dataTransfer.effectAllowed = 'move';
+                  e.dataTransfer.setData('text/row-id', cliente.id);
+                  setDragRowId(cliente.id);
+                }}
+                onRowDragOver={(e) => {
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  if (dragRowId && dragRowId !== cliente.id) {
+                    setDragOverRowId(cliente.id);
+                  }
+                }}
+                onRowDrop={async (e) => {
+                  e.preventDefault();
+                  const sourceId = e.dataTransfer.getData('text/row-id');
+                  setDragOverRowId(null);
+                  setDragRowId(null);
+                  if (!sourceId || sourceId === cliente.id) return;
+                  // Find indices in sorted array
+                  const fromIdx = sorted.findIndex(c => c.id === sourceId);
+                  const toIdx = sorted.findIndex(c => c.id === cliente.id);
+                  if (fromIdx === -1 || toIdx === -1) return;
+                  // Update display_order for moved row
+                  const targetOrder = sorted[toIdx].display_order;
+                  await onUpdate(sourceId, { display_order: targetOrder } as any);
+                  // Shift other rows
+                  const direction = fromIdx < toIdx ? -1 : 1;
+                  const start = Math.min(fromIdx, toIdx);
+                  const end = Math.max(fromIdx, toIdx);
+                  for (let j = start; j <= end; j++) {
+                    if (sorted[j].id !== sourceId) {
+                      await onUpdate(sorted[j].id, { display_order: sorted[j].display_order + direction * 10 } as any);
+                    }
+                  }
+                }}
+                onRowDragEnd={() => {
+                  setDragRowId(null);
+                  setDragOverRowId(null);
+                }}
               />
             ))}
           </div>
