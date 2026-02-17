@@ -12,7 +12,7 @@ import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3 } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3, Sparkles } from 'lucide-react';
 import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
 import { ClientiAnalysisModal } from './ClientiAnalysisModal';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
@@ -49,6 +49,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [dateSortDir, setDateSortDir] = useState<'desc' | 'asc' | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
   const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [filterQualified, setFilterQualified] = useState(false);
 
   const {
     clienti,
@@ -198,6 +199,16 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     return sorted;
   }, [displayGrouped, dateSortDir]);
 
+  // Apply qualified filter
+  const finalGrouped = useMemo(() => {
+    if (!filterQualified) return sortedGrouped;
+    const filtered = new Map<string, Cliente[]>();
+    sortedGrouped.forEach((clients, key) => {
+      filtered.set(key, clients.filter(c => c.status === 'qualified'));
+    });
+    return filtered;
+  }, [sortedGrouped, filterQualified]);
+
   if (isLoading) {
     return (
       <div className="py-20 flex items-center justify-center">
@@ -233,6 +244,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         </div>
 
         {viewMode === 'kanban' && <UndoRedoButtons />}
+        {viewMode === 'kanban' && (
+          <Button
+            variant={filterQualified ? 'default' : 'outline'}
+            size="sm"
+            className="gap-1.5 px-2.5 sm:px-3 h-9"
+            onClick={() => setFilterQualified(prev => !prev)}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="hidden sm:inline">Qualificati</span>
+          </Button>
+        )}
         <div className="flex-1" />
 
         {isCoordinator &&
@@ -316,7 +338,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       {/* Board */}
       {viewMode === 'kanban' ?
       <ClientiKanban
-        clientiGrouped={sortedGrouped}
+        clientiGrouped={finalGrouped}
         groupBy={isCoordinator ? groupBy : 'status'}
         agents={agents}
         onCardClick={handleCardClick}
