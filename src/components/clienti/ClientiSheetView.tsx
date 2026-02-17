@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
+import { createPortal } from 'react-dom';
 import { Cliente, ClienteStatus } from '@/types';
 import { format } from 'date-fns';
 import { cn, isDarkColor } from '@/lib/utils';
@@ -621,17 +622,18 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
         </SelectContent>
       </Select>
 
-      {/* Portal color picker overlay */}
-      {colorMenuPortal && (
+      {/* Portal color picker overlay - rendered via portal to escape Select */}
+      {colorMenuPortal && createPortal(
         <>
-          <div className="fixed inset-0 z-[200]" onClick={() => setColorMenuPortal(null)} />
+          <div className="fixed inset-0 z-[9999]" onClick={() => setColorMenuPortal(null)} onPointerDown={(e) => e.stopPropagation()} />
           <div
-            className="fixed z-[200] p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
             style={{
               left: Math.min(colorMenuPos.x, window.innerWidth - 280),
               top: Math.min(colorMenuPos.y, window.innerHeight - 200),
             }}
             onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
           >
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
               Colore: {colorMenuPortal}
@@ -642,15 +644,21 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
                   key={c}
                   className={cn(
                     "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
-                    mergedColors[colorMenuPortal] === c && "ring-2 ring-foreground ring-offset-1"
+                    mergedColors[colorMenuPortal!] === c && "ring-2 ring-foreground ring-offset-1"
                   )}
                   style={{ backgroundColor: c }}
-                  onClick={() => handleColorSelect(colorMenuPortal, c)}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    handleColorSelect(colorMenuPortal!, c);
+                  }}
                 />
               ))}
             </div>
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );
