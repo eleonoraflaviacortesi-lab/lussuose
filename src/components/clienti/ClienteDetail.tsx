@@ -587,13 +587,15 @@ export function ClienteDetail({
 
           {/* ===== SECTION 5: Legacy + Metadata + Delete ===== */}
           <div className="space-y-3">
-            {cliente.comments.length > 0 && (
+            {(() => {
+              const comments = Array.isArray(cliente.comments) ? cliente.comments : [];
+              return comments.length > 0 ? (
               <div className="bg-white rounded-2xl shadow-lg p-3">
                 <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
                   <MessageSquare className="w-4 h-4" /> Commenti Precedenti
                 </h3>
                 <div className="space-y-3">
-                  {cliente.comments.map(comment => (
+                  {comments.map((comment: any) => (
                     <div key={comment.id} className="bg-muted/50 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-xs font-medium">{comment.author}</span>
@@ -606,7 +608,8 @@ export function ClienteDetail({
                   ))}
                 </div>
               </div>
-            )}
+            ) : null;
+            })()}
 
             <div className="text-xs text-muted-foreground bg-white rounded-2xl shadow-lg p-3 space-y-1">
               <p>Creato: {format(new Date(cliente.created_at), 'dd MMM yyyy HH:mm', { locale: it })}</p>
