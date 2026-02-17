@@ -59,7 +59,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 {isActive && (
                   <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full animate-spring-scale"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full transition-all duration-300 ease-out"
                     style={{
                       background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.95) 100%)',
                       backdropFilter: 'blur(24px) saturate(220%)',
