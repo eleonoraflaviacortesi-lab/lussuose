@@ -154,7 +154,7 @@ export function ClienteDetail({
 
   return (
     <>
-    <div className={cn("fixed inset-0 z-[100] flex flex-col bg-background", "animate-in slide-in-from-bottom duration-300")}>
+    <div className={cn("fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background", "animate-in slide-in-from-bottom duration-300")} style={{ top: 'calc(env(safe-area-inset-top) + 85px)' }}>
       <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
             <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
