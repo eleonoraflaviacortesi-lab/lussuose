@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
-import logo from '@/assets/brand_logo.svg';
+import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
@@ -104,7 +104,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         </div>
 
         {/* Main Header - Liquid Glass Effect */}
-        <div className="glass-header flex items-center justify-between px-4 py-2 rounded-b-[2.5rem]">
+        <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
@@ -118,7 +118,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[6.5rem] w-auto max-w-[80vw] -my-8 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[5.5rem] w-auto max-w-[70vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
 

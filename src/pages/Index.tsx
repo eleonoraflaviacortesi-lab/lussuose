@@ -13,12 +13,14 @@ import type { Notizia } from '@/hooks/useNotizie';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
-const UnifiedDashboard = lazy(() => import('@/components/dashboard/UnifiedDashboard'));
 const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
 
+const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
+const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
+const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 
 // Map URL paths to tab ids
@@ -27,10 +29,9 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
-  '/ufficio': 'ufficio',
-  '/riunioni': 'ufficio',
-  '/report': 'ufficio',
-  '/agenzia': 'ufficio',
+  '/riunioni': 'riunioni',
+  '/report': 'report',
+  '/agenzia': 'agenzia',
   '/impostazioni': 'impostazioni',
   '/inserisci': 'inserisci',
 };
@@ -114,12 +115,16 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         );
       case 'notizie':
         return <NotiziePage />;
+      case 'report':
+        return <ReportAnalysisTab />;
+      case 'agenzia':
+        return <AgencyDashboard />;
       case 'clienti':
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'calendario':
         return <CalendarPage />;
-      case 'ufficio':
-        return <UnifiedDashboard />;
+      case 'riunioni':
+        return <MeetingsPage />;
       case 'inserisci':
         return <ReportForm />;
       case 'impostazioni':

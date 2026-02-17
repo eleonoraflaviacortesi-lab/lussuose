@@ -26,10 +26,9 @@ const App = () => (
             <Route path="/calendario" element={<Index initialTab="calendario" />} />
             <Route path="/notizie" element={<Index initialTab="notizie" />} />
             <Route path="/clienti" element={<Index initialTab="clienti" />} />
-            <Route path="/ufficio" element={<Index initialTab="ufficio" />} />
-            <Route path="/report" element={<Index initialTab="ufficio" />} />
-            <Route path="/riunioni" element={<Index initialTab="ufficio" />} />
-            <Route path="/agenzia" element={<Index initialTab="ufficio" />} />
+            <Route path="/report" element={<Index initialTab="report" />} />
+            <Route path="/riunioni" element={<Index initialTab="riunioni" />} />
+            <Route path="/agenzia" element={<Index initialTab="agenzia" />} />
             <Route path="/impostazioni" element={<Index initialTab="impostazioni" />} />
             <Route path="/inserisci" element={<Index initialTab="inserisci" />} />
             <Route path="/auth" element={<Auth />} />

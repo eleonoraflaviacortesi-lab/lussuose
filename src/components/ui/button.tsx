@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils";
 import { triggerHaptic } from "@/lib/haptics";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium ring-offset-background transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.95]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all duration-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] active:opacity-90",
   {
     variants: {
       variant: {
-        default: "bg-foreground text-background shadow-lg active:bg-foreground/90",
+        default: "bg-black text-white shadow-lg active:bg-black/90",
         destructive: "bg-destructive text-destructive-foreground shadow-lg active:bg-destructive/90",
-        outline: "border border-border bg-background/80 backdrop-blur-sm shadow-sm active:bg-muted text-foreground",
-        secondary: "bg-card text-foreground shadow-lg active:bg-muted",
+        outline: "border-0 bg-white shadow-lg active:bg-muted text-foreground",
+        secondary: "bg-white text-foreground shadow-lg active:bg-muted",
         ghost: "active:bg-accent active:text-accent-foreground",
         link: "text-primary underline-offset-4 active:opacity-70",
       },
       size: {
-        default: "h-10 px-5 py-2",
-        sm: "h-9 px-4",
-        lg: "h-11 px-8",
+        default: "h-10 px-4 py-2",
+        sm: "h-9 rounded-xl px-3",
+        lg: "h-11 rounded-xl px-8",
         icon: "h-10 w-10",
       },
     },

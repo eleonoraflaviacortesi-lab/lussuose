@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Settings, Calendar, Wallet, Newspaper } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Calendar, UsersRound, Wallet } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -14,7 +14,10 @@ const tabToPath: Record<string, string> = {
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
-  ufficio: '/ufficio',
+  // separator after clienti
+  riunioni: '/riunioni',
+  report: '/report',
+  agenzia: '/agenzia',
   impostazioni: '/impostazioni',
 };
 
@@ -26,7 +29,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'calendario', icon: Calendar, label: 'Calendario' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Wallet, label: 'Buyers' },
-    { id: 'ufficio', icon: Newspaper, label: 'Ufficio' },
+    // separator after index 3 (clienti)
+    { id: 'riunioni', icon: UsersRound, label: 'Riunioni' },
+    { id: 'report', icon: TrendingUp, label: 'I Miei Report' },
+    { id: 'agenzia', icon: Building2, label: 'Performance Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
@@ -40,10 +46,11 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   return (
     <nav className="fixed left-0 right-0 z-[55] flex justify-center md:py-0 md:px-0" style={{ top: 'calc(85px + env(safe-area-inset-top, 0px))' }}>
       {/* Pill Navigation */}
-      <div className="pill-nav glass-nav w-full rounded-none rounded-b-[2rem] md:w-auto md:rounded-none md:rounded-b-[2rem]">
+      <div className="pill-nav glass-nav w-full rounded-none rounded-b-[1.5rem] md:w-auto md:rounded-none md:rounded-b-[1.5rem]">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
+          const showSeparatorAfter = false;
           
           return (
             <div key={tab.id} className="flex items-center">
@@ -58,18 +65,28 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 aria-current={isActive ? 'page' : undefined}
               >
                 {isActive && (
-                  <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full transition-all duration-300 ease-out"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.95) 100%)',
-                      backdropFilter: 'blur(24px) saturate(220%)',
-                      WebkitBackdropFilter: 'blur(24px) saturate(220%)',
-                      boxShadow: '0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04), inset 0 1px 2px rgba(255,255,255,1), inset 0 -1px 3px rgba(255,255,255,0.5)',
-                    }}
-                  />
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[38px]"
+                    style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
+                  >
+                    <polygon
+                      fill="white"
+                      points={Array.from({ length: 16 }, (_, i) => {
+                        const angle = (i * 360) / 16 - 90;
+                        const r = i % 2 === 0 ? 50 : 35;
+                        const x = 50 + r * Math.cos((angle * Math.PI) / 180);
+                        const y = 50 + r * Math.sin((angle * Math.PI) / 180);
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                  </svg>
                 )}
                 <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
               </button>
+              {showSeparatorAfter && (
+                <div className="w-px h-5 bg-border mx-0.5" />
+              )}
             </div>
           );
         })}

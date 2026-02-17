@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import logoLarge from '@/assets/brand_logo.svg';
+import logoLarge from '@/assets/app_logo.svg';
 import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
 
@@ -179,7 +179,7 @@ const Auth = () => {
         <img 
           src={logoLarge} 
           alt="Logo" 
-          className="h-[8rem] -my-6" 
+          className="h-[5.5rem] -my-4" 
         />
       </div>
 

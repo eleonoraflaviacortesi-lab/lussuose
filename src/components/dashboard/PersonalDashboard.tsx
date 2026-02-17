@@ -98,7 +98,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   };
 
   return (
-    <div className="px-4 pb-6 space-y-4 animate-slide-up-spring">
+    <div className="px-4 pb-6 space-y-4 animate-fade-in">
       {/* Daily Quote at top */}
       <DailyQuote />
 
@@ -164,7 +164,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
       {/* Volume Generato & Volume a Credito */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="dark-card py-3 px-4 rounded-3xl">
+        <div className="dark-card py-3 px-4">
           <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME GENERATO
           </p>
@@ -172,7 +172,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
             {formatCompactCurrency(fatturato)}
           </p>
         </div>
-        <div className="dark-card py-3 px-4 rounded-3xl">
+        <div className="dark-card py-3 px-4">
           <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME A CREDITO
           </p>
@@ -187,8 +187,8 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
       <Suspense
         fallback={
-            <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_8px_30px_-8px_rgba(0,0,0,0.08)] border border-white/60 p-4">
-            <div className="h-24 rounded-2xl bg-muted animate-pulse" />
+          <div className="bg-card rounded-2xl shadow-lg p-4">
+            <div className="h-24 rounded-xl bg-muted animate-pulse" />
           </div>
         }
       >
@@ -204,7 +204,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <div className="grid grid-cols-4 gap-2">
         <button
           onClick={() => setSelectedKPI('contatti')}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_6px_20px_-6px_rgba(0,0,0,0.08)] border border-white/60 p-3 text-center transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.93]"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
           <p className="text-xl font-bold text-foreground">{contatti}</p>
@@ -212,7 +212,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </button>
         <button
           onClick={() => setSelectedKPI('notizie')}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_6px_20px_-6px_rgba(0,0,0,0.08)] border border-white/60 p-3 text-center transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.93]"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
           <p className="text-xl font-bold text-foreground">{notizie}</p>
@@ -220,7 +220,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </button>
         <button
           onClick={() => setSelectedKPI('chiusure')}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_6px_20px_-6px_rgba(0,0,0,0.08)] border border-white/60 p-3 text-center transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.93]"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Award className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
           <p className="text-xl font-bold text-foreground">{chiusure}</p>
@@ -228,7 +228,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </button>
         <button
           onClick={() => setSelectedKPI('conversioni')}
-          className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_6px_20px_-6px_rgba(0,0,0,0.08)] border border-white/60 p-3 text-center transition-all duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] active:scale-[0.93]"
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
         >
           <Zap className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
           <p className="text-xl font-bold text-foreground">{conversioni}%</p>
@@ -263,7 +263,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       </Suspense>
 
       {/* Incarichi Team Card */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-[0_8px_30px_-8px_rgba(0,0,0,0.08)] border border-white/60 p-4 relative overflow-hidden">
+      <div className="bg-card rounded-2xl shadow p-4 relative overflow-hidden">
         <div className="absolute right-2 top-2 opacity-5">
           <Gift className="w-20 h-20 text-foreground" />
         </div>
