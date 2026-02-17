@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +8,7 @@ import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
+import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
@@ -23,7 +24,20 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Easter egg: triple-tap the logo for a surprise
+  // Listen for broadcast from other users
+  useEffect(() => {
+    const channel = supabase.channel('arcane-fog-broadcast')
+      .on('broadcast', { event: 'arcane-fog' }, () => {
+        triggerArcaneFog();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Easter egg: triple-tap the logo for a surprise (broadcast to all)
   const handleLogoTap = useCallback(() => {
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
@@ -36,6 +50,12 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
       tapCountRef.current = 0;
       triggerHaptic('success');
       triggerArcaneFog();
+      // Broadcast to all other connected users
+      supabase.channel('arcane-fog-broadcast').send({
+        type: 'broadcast',
+        event: 'arcane-fog',
+        payload: {},
+      });
     } else {
       tapTimerRef.current = setTimeout(() => {
         tapCountRef.current = 0;
