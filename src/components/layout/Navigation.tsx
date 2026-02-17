@@ -1,19 +1,23 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Calendar, Wallet, Building2, Settings } from 'lucide-react';
+import { Home, Megaphone, Building2, Settings, TrendingUp, Calendar, UsersRound, Wallet } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
 }
 
+// Map tab ids to URL paths
 const tabToPath: Record<string, string> = {
   numeri: '/',
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
-  ufficio: '/ufficio',
+  // separator after clienti
+  riunioni: '/riunioni',
+  report: '/report',
+  agenzia: '/agenzia',
   impostazioni: '/impostazioni',
 };
 
@@ -25,45 +29,65 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'calendario', icon: Calendar, label: 'Calendario' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Wallet, label: 'Buyers' },
-    { id: 'ufficio', icon: Building2, label: 'Ufficio' },
+    // separator after index 3 (clienti)
+    { id: 'riunioni', icon: UsersRound, label: 'Riunioni' },
+    { id: 'report', icon: TrendingUp, label: 'I Miei Report' },
+    { id: 'agenzia', icon: Building2, label: 'Performance Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
   const handleTabChange = (tabId: string) => {
     triggerHaptic('selection');
     onTabChange(tabId);
+    // Update URL to match the tab (enables refresh persistence)
     navigate(tabToPath[tabId] || '/');
   };
 
-  const resolvedActiveTab = ['riunioni', 'report', 'agenzia'].includes(activeTab) ? 'ufficio' : activeTab;
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[60] flex justify-center px-3 pb-[env(safe-area-inset-bottom,0px)]">
-      <div className="bottom-nav-bar w-full max-w-md mb-2 rounded-full px-4 py-2 flex items-center justify-around">
-        {tabs.map((tab) => {
+    <nav className="fixed left-0 right-0 z-[55] flex justify-center md:py-0 md:px-0" style={{ top: 'calc(85px + env(safe-area-inset-top, 0px))' }}>
+      {/* Pill Navigation */}
+      <div className="pill-nav glass-nav w-full rounded-none rounded-b-[1.5rem] md:w-auto md:rounded-none md:rounded-b-[1.5rem]">
+        {tabs.map((tab, index) => {
           const Icon = tab.icon;
-          const isActive = resolvedActiveTab === tab.id;
+          const isActive = activeTab === tab.id;
+          const showSeparatorAfter = false;
           
           return (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={cn(
-                'bottom-nav-item relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-150',
-                isActive ? 'active' : ''
-              )}
-              title={tab.label}
-              aria-label={tab.label}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              <Icon 
+            <div key={tab.id} className="flex items-center">
+              <button
+                onClick={() => handleTabChange(tab.id)}
                 className={cn(
-                  'w-5 h-5 transition-all duration-150',
-                  isActive ? 'text-white scale-110' : 'text-white/40'
-                )} 
-                strokeWidth={isActive ? 2.2 : 1.5} 
-              />
-            </button>
+                  'pill-nav-item relative',
+                  isActive && 'active'
+                )}
+                title={tab.label}
+                aria-label={tab.label}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {isActive && (
+                  <svg
+                    viewBox="0 0 100 100"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[38px]"
+                    style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
+                  >
+                    <polygon
+                      fill="white"
+                      points={Array.from({ length: 16 }, (_, i) => {
+                        const angle = (i * 360) / 16 - 90;
+                        const r = i % 2 === 0 ? 50 : 35;
+                        const x = 50 + r * Math.cos((angle * Math.PI) / 180);
+                        const y = 50 + r * Math.sin((angle * Math.PI) / 180);
+                        return `${x},${y}`;
+                      }).join(' ')}
+                    />
+                  </svg>
+                )}
+                <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
+              </button>
+              {showSeparatorAfter && (
+                <div className="w-px h-5 bg-border mx-0.5" />
+              )}
+            </div>
           );
         })}
       </div>

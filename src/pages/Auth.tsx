@@ -160,7 +160,7 @@ const Auth = () => {
       {/* iOS Safe Area Background */}
       <div className="fixed inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black z-50" />
       
-      {/* Ticker Banner */}
+      {/* Ticker Banner - Black with smooth scroll */}
       <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
         <div className="flex animate-ticker whitespace-nowrap pt-2">
           {[...Array(8)].map((_, i) => (
@@ -174,7 +174,7 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Header */}
+      {/* Header - Same glass style as app */}
       <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem]">
         <img 
           src={logoLarge} 

@@ -15,10 +15,12 @@ import type { Notizia } from '@/hooks/useNotizie';
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
 const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
 
-const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
+const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
+const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
+const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then(m => ({ default: m.MeetingsPage })));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 
 // Map URL paths to tab ids
@@ -27,10 +29,9 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
-  '/ufficio': 'ufficio',
-  '/riunioni': 'ufficio',
-  '/report': 'ufficio',
-  '/agenzia': 'ufficio',
+  '/riunioni': 'riunioni',
+  '/report': 'report',
+  '/agenzia': 'agenzia',
   '/impostazioni': 'impostazioni',
   '/inserisci': 'inserisci',
 };
@@ -114,12 +115,17 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         );
       case 'notizie':
         return <NotiziePage />;
-      case 'ufficio':
-        return <UfficioPage />;
+      case 'report':
+        return <ReportAnalysisTab />;
+      case 'agenzia':
+        return <AgencyDashboard />;
       case 'clienti':
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'calendario':
         return <CalendarPage />;
+      case 'riunioni':
+        return <MeetingsPage />;
+      case 'inserisci':
         return <ReportForm />;
       case 'impostazioni':
         return <SettingsPage />;
@@ -135,17 +141,15 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
       <Header />
-      <div style={{ height: 'calc(105px + env(safe-area-inset-top, 0px))' }} />
-
-      {/* Bottom Navigation */}
+      <div style={{ height: 'calc(175px + env(safe-area-inset-top, 0px))' }} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
-      {/* Main content mega-pill - edge to edge, no padding */}
+      {/* Main content with pull-to-refresh */}
       <PullToRefresh 
         onRefresh={handleRefresh}
         className="overflow-x-hidden"
       >
-        <main className={`mx-auto animate-in fade-in duration-150 overflow-x-hidden pb-20 bg-card rounded-t-[2rem] min-h-[80vh] ${activeTab === 'clienti' ? 'max-w-full px-2 pt-4 lg:px-4' : 'max-w-3xl lg:max-w-7xl px-3 pt-4 lg:px-6'}`}>
+        <main className={`mx-auto animate-in fade-in duration-150 overflow-x-hidden ${activeTab === 'clienti' ? 'max-w-full px-2 lg:px-4' : 'max-w-3xl lg:max-w-7xl px-3 lg:px-6'}`}>
           <Suspense
             fallback={
               <div className="py-10 flex items-center justify-center">
