@@ -49,14 +49,14 @@ const STATUS_OPTIONS: { value: ClienteStatus; label: string; color: string }[] =
   { value: 'closed_lost', label: 'Perso', color: '#6b7280' },
 ];
 
-// Full color palette for context menu (matches ClienteCard)
+// Full color palette for context menu — 8 columns × 8 rows
 const CONTEXT_PALETTE_COLORS: (string | null)[] = [
-  null,      '#f8f9fa', '#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d', '#495057', '#343a40', '#212529',
-  '#fff3cd', '#fef9c3', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f',
-  '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#022c22',
-  '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554',
-  '#fce7f3', '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9d174d', '#831843', '#500724',
-  '#fee2e2', '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a',
+  null,      '#f0eeec', '#e0ddda', '#c8c4c0', '#a8a4a0', '#808080', '#585858', '#303030',
+  '#fef9e7', '#fef3c7', '#fde68a', '#f5c842', '#e8a317', '#c47f17', '#8b5e14', '#6b3f0d',
+  '#e8f8e8', '#b5f0c0', '#6ddba0', '#38c77e', '#1a9a6c', '#0f7a5a', '#0a5e44', '#053d2e',
+  '#dce8fc', '#b0ccf8', '#6fa2f0', '#3b7de8', '#2060d8', '#1648b8', '#0e3490', '#091e5c',
+  '#f8e0ec', '#f0b0cc', '#e87aaa', '#d8488a', '#c02a70', '#981e5a', '#701644', '#480e2e',
+  null,      null,      null,      null,      null,      null,      null,      null,
 ];
 const QUICK_EMOJIS = ['🏠', '🏡', '🏰', '🏛️', '🌳', '🌊', '⭐', '🔥', '💎', '🎯', '📞', '📸'];
 
@@ -240,7 +240,7 @@ const SheetContextMenu = memo(function SheetContextMenu({
         {/* Color */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
-          <div className="grid grid-cols-10 gap-1 max-w-[240px]">
+          <div className="grid grid-cols-8 gap-1 max-w-[220px]">
             {CONTEXT_PALETTE_COLORS.map((c) => (
               <button
                 key={c || 'default'}
@@ -527,8 +527,8 @@ const CellContextMenu = memo(function CellContextMenu({
                 <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">
                   Colore: {colorTarget}
                 </span>
-                <div className="grid grid-cols-10 gap-1 px-2 py-1">
-                  {CONTEXT_PALETTE_COLORS.filter(Boolean).slice(0, 30).map(c => (
+                <div className="grid grid-cols-8 gap-1 px-2 py-1">
+                  {CONTEXT_PALETTE_COLORS.filter(Boolean).map(c => (
                     <button
                       key={c}
                       className={cn(
@@ -692,14 +692,13 @@ function getCellValueStatic(cliente: Cliente, col: ColumnDef): string {
   }
 }
 
-// --- Color Palette Picker ---
+// --- Color Palette Picker (8-col matching CONTEXT_PALETTE_COLORS) ---
 const PALETTE_COLORS = [
-  '#ffffff', '#f8f9fa', '#e9ecef', '#dee2e6', '#ced4da', '#adb5bd', '#6c757d', '#495057', '#343a40', '#212529',
-  '#fff3cd', '#fef9c3', '#fde68a', '#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309', '#92400e', '#78350f',
-  '#d1fae5', '#a7f3d0', '#6ee7b7', '#34d399', '#10b981', '#059669', '#047857', '#065f46', '#064e3b', '#022c22',
-  '#dbeafe', '#bfdbfe', '#93c5fd', '#60a5fa', '#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a', '#172554',
-  '#fce7f3', '#fbcfe8', '#f9a8d4', '#f472b6', '#ec4899', '#db2777', '#be185d', '#9d174d', '#831843', '#500724',
-  '#fee2e2', '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a',
+  '#ffffff', '#f0eeec', '#e0ddda', '#c8c4c0', '#a8a4a0', '#808080', '#585858', '#303030',
+  '#fef9e7', '#fef3c7', '#fde68a', '#f5c842', '#e8a317', '#c47f17', '#8b5e14', '#6b3f0d',
+  '#e8f8e8', '#b5f0c0', '#6ddba0', '#38c77e', '#1a9a6c', '#0f7a5a', '#0a5e44', '#053d2e',
+  '#dce8fc', '#b0ccf8', '#6fa2f0', '#3b7de8', '#2060d8', '#1648b8', '#0e3490', '#091e5c',
+  '#f8e0ec', '#f0b0cc', '#e87aaa', '#d8488a', '#c02a70', '#981e5a', '#701644', '#480e2e',
 ];
 
 function ColorPalettePopover({
@@ -715,7 +714,7 @@ function ColorPalettePopover({
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-[260px] p-2" align="start">
-        <div className="grid grid-cols-10 gap-1">
+        <div className="grid grid-cols-8 gap-1">
           {PALETTE_COLORS.map(c => (
             <button
               key={c}
@@ -864,7 +863,7 @@ function SimpleBadgeCell({
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
               Colore: {colorMenuItem}
             </p>
-            <div className="grid grid-cols-10 gap-1">
+            <div className="grid grid-cols-8 gap-1">
               {PALETTE_COLORS.map(c => (
                 <button
                   key={c}
@@ -1046,7 +1045,7 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
               Colore: {colorMenuPortal}
             </p>
-            <div className="grid grid-cols-10 gap-1">
+            <div className="grid grid-cols-8 gap-1">
               {PALETTE_COLORS.map(c => (
                 <button
                   key={c}
