@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Building2, Settings, TrendingUp, Calendar, UsersRound, Wallet } from 'lucide-react';
+import { Home, Megaphone, Settings, Calendar, UsersRound, Wallet } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -16,8 +16,6 @@ const tabToPath: Record<string, string> = {
   clienti: '/clienti',
   // separator after clienti
   riunioni: '/riunioni',
-  report: '/report',
-  agenzia: '/agenzia',
   impostazioni: '/impostazioni',
 };
 
@@ -31,8 +29,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'clienti', icon: Wallet, label: 'Buyers' },
     // separator after index 3 (clienti)
     { id: 'riunioni', icon: UsersRound, label: 'Riunioni' },
-    { id: 'report', icon: TrendingUp, label: 'I Miei Report' },
-    { id: 'agenzia', icon: Building2, label: 'Performance Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
@@ -46,11 +42,10 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
   return (
     <nav className="fixed left-0 right-0 z-[55] flex justify-center md:py-0 md:px-0" style={{ top: 'calc(85px + env(safe-area-inset-top, 0px))' }}>
       {/* Pill Navigation */}
-      <div className="pill-nav glass-nav w-full rounded-none rounded-b-[1.5rem] md:w-auto md:rounded-none md:rounded-b-[1.5rem]">
+      <div className="pill-nav glass-nav w-full rounded-none rounded-b-[2rem] md:w-auto md:rounded-none md:rounded-b-[2rem]">
         {tabs.map((tab, index) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
-          const showSeparatorAfter = false;
           
           return (
             <div key={tab.id} className="flex items-center">
@@ -65,28 +60,18 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
                 aria-current={isActive ? 'page' : undefined}
               >
                 {isActive && (
-                  <svg
-                    viewBox="0 0 100 100"
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[38px] h-[38px]"
-                    style={{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.18))' }}
-                  >
-                    <polygon
-                      fill="white"
-                      points={Array.from({ length: 16 }, (_, i) => {
-                        const angle = (i * 360) / 16 - 90;
-                        const r = i % 2 === 0 ? 50 : 35;
-                        const x = 50 + r * Math.cos((angle * Math.PI) / 180);
-                        const y = 50 + r * Math.sin((angle * Math.PI) / 180);
-                        return `${x},${y}`;
-                      }).join(' ')}
-                    />
-                  </svg>
+                  <div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full"
+                    style={{
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 100%)',
+                      backdropFilter: 'blur(20px) saturate(200%)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(200%)',
+                      boxShadow: '0 4px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,1), inset 0 -1px 2px rgba(255,255,255,0.4)',
+                    }}
+                  />
                 )}
                 <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />
               </button>
-              {showSeparatorAfter && (
-                <div className="w-px h-5 bg-border mx-0.5" />
-              )}
             </div>
           );
         })}
