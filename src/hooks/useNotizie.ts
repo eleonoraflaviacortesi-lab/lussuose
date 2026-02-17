@@ -31,6 +31,8 @@ export interface Notizia {
   card_color: string | null;
   display_order: number;
   is_online: boolean;
+  prezzo_richiesto: number | null;
+  valore: number | null;
 }
 
 export interface NotiziaInput {
@@ -47,6 +49,8 @@ export interface NotiziaInput {
   card_color?: string | null;
   display_order?: number;
   is_online?: boolean;
+  prezzo_richiesto?: number | null;
+  valore?: number | null;
 }
 
 // Helper to parse comments from JSON
@@ -70,7 +74,7 @@ export const useNotizie = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
-        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online,prezzo_richiesto,valore')
         .eq('user_id', user.id) // Only user's own notizie
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });

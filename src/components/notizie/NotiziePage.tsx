@@ -1,12 +1,14 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
-import { Search, X } from 'lucide-react';
+import { Search, X, LayoutGrid, Table2 } from 'lucide-react';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
 import ImportDalilaDialog from './ImportDalilaDialog';
 import NotizieStatsChart from './NotizieStatsChart';
+import NotizieSheetView from './NotizieSheetView';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
 
@@ -37,6 +39,14 @@ const NotiziePage = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [quickAddStatus, setQuickAddStatus] = useState<NotiziaStatus | null>(null);
+  const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>(() => {
+    try { return (localStorage.getItem('notizie-view-mode') as any) || 'kanban'; } catch { return 'kanban'; }
+  });
+
+  const handleViewChange = useCallback((mode: 'kanban' | 'sheet') => {
+    setViewMode(mode);
+    try { localStorage.setItem('notizie-view-mode', mode); } catch {}
+  }, []);
 
   const handleNotiziaClick = useCallback((notizia: Notizia) => {
     setSelectedNotizia(notizia);
@@ -57,7 +67,6 @@ const NotiziePage = () => {
     n.zona?.toLowerCase().includes(q)
     );
 
-    // Filter all status groups dynamically
     const filtered: Record<string, Notizia[]> = {};
     Object.keys(notizieByStatus).forEach((key) => {
       filtered[key] = filter(notizieByStatus[key] || []);
@@ -78,9 +87,34 @@ const NotiziePage = () => {
     }
   }, [updateNotizia, notizie, pushAction]);
 
+  const handleSheetUpdate = useCallback((id: string, updates: Partial<Notizia>) => {
+    updateNotizia.mutate({ id, ...updates, silent: true } as any);
+  }, [updateNotizia]);
+
   return (
     <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col">
       <div className="flex items-center justify-between gap-4 pt-[25px] shadow-none">
+        {/* View toggle */}
+        <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+          <Button
+            variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => handleViewChange('kanban')}
+          >
+            <LayoutGrid className="w-3.5 h-3.5 mr-1" />
+            <span className="hidden sm:inline">Kanban</span>
+          </Button>
+          <Button
+            variant={viewMode === 'sheet' ? 'default' : 'ghost'}
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => handleViewChange('sheet')}
+          >
+            <Table2 className="w-3.5 h-3.5 mr-1" />
+            <span className="hidden sm:inline">Spreadsheet</span>
+          </Button>
+        </div>
         
         <div className="flex items-center gap-2">
           <UndoRedoButtons />
@@ -104,27 +138,34 @@ const NotiziePage = () => {
         <button
           onClick={() => setSearchQuery('')}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted">
-
             <X className="w-4 h-4 text-muted-foreground" />
           </button>
         }
       </div>
 
-      <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
+      {viewMode === 'kanban' && (
+        <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
+      )}
 
       <div className="lg:flex-1 lg:min-h-0">
-        {isLoading ?
-        <BoardSkeleton /> :
-
-        <Suspense fallback={<BoardSkeleton />}>
-            <KanbanBoard
-            notizieByStatus={filteredNotizieByStatus}
+        {viewMode === 'kanban' ? (
+          isLoading ?
+          <BoardSkeleton /> :
+          <Suspense fallback={<BoardSkeleton />}>
+              <KanbanBoard
+              notizieByStatus={filteredNotizieByStatus}
+              onNotiziaClick={handleNotiziaClick}
+              onStatusChange={handleStatusChange}
+              onQuickAdd={handleQuickAdd} />
+            </Suspense>
+        ) : (
+          <NotizieSheetView
+            notizie={notizie || []}
             onNotiziaClick={handleNotiziaClick}
-            onStatusChange={handleStatusChange}
-            onQuickAdd={handleQuickAdd} />
-
-          </Suspense>
-        }
+            onUpdate={handleSheetUpdate}
+            searchQuery={searchQuery}
+          />
+        )}
       </div>
 
       <NotiziaDetail notizia={selectedNotizia} open={detailOpen} onOpenChange={setDetailOpen} />
@@ -136,10 +177,8 @@ const NotiziePage = () => {
         open={true}
         onOpenChange={(open) => !open && setQuickAddStatus(null)}
         showTrigger={false} />
-
       }
     </div>);
-
 };
 
 export default NotiziePage;
