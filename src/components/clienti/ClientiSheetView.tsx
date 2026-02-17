@@ -742,6 +742,7 @@ function SimpleBadgeCell({
   }, [colorMap]);
 
   const bgColor = localColors[value] || '#6b7280';
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   const handleContextMenuItem = useCallback((o: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -749,6 +750,16 @@ function SimpleBadgeCell({
     setColorMenuItem(o);
     setColorMenuPos({ x: e.clientX, y: e.clientY });
   }, []);
+
+  const handleItemClick = useCallback((o: string, e: React.MouseEvent) => {
+    if (o === value) {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      setColorMenuItem(o);
+      setColorMenuPos({ x: rect.right + 8, y: rect.top });
+    }
+  }, [value]);
 
   const handleColorSelect = (item: string, color: string) => {
     if (colType === 'lingua') {
@@ -759,6 +770,8 @@ function SimpleBadgeCell({
     // For tipo_contatto: could add persistence if needed
     setColorMenuItem(null);
   };
+
+  const selectOpen = !colorMenuItem;
 
   if (!open && !value) {
     return (
@@ -780,8 +793,6 @@ function SimpleBadgeCell({
     );
   }
 
-  const selectOpen = !colorMenuItem;
-
   return (
     <>
       <Select
@@ -790,7 +801,7 @@ function SimpleBadgeCell({
         open={selectOpen}
         onOpenChange={(o) => { if (!o && !colorMenuItem) setOpen(false); }}
       >
-        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
+        <SelectTrigger ref={triggerRef} className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
           {value ? (
             <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
           ) : (
@@ -804,11 +815,13 @@ function SimpleBadgeCell({
               key={o}
               className="relative"
               onContextMenu={(e) => handleContextMenuItem(o, e)}
+              onClick={(e) => handleItemClick(o, e)}
             >
               <SelectItem value={o}>
                 <span className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: localColors[o] || '#6b7280' }} />
                   {o}
+                  {o === value && <span className="text-[9px] text-muted-foreground ml-1">🎨</span>}
                 </span>
               </SelectItem>
             </div>
@@ -905,6 +918,16 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     setColorMenuPos({ x: e.clientX, y: e.clientY });
   }, []);
 
+  const handleItemClick = useCallback((o: string, e: React.MouseEvent) => {
+    if (o === value) {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      setColorMenuPortal(o);
+      setColorMenuPos({ x: rect.right + 8, y: rect.top });
+    }
+  }, [value]);
+
   if (!open && !value) {
     return (
       <span
@@ -951,11 +974,13 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
               key={o}
               className="relative"
               onContextMenu={(e) => handleContextMenuPortal(o, e)}
+              onClick={(e) => handleItemClick(o, e)}
             >
               <SelectItem value={o}>
                 <span className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: mergedColors[o] || '#6b7280' }} />
                   {o}
+                  {o === value && <span className="text-[9px] text-muted-foreground ml-1">🎨</span>}
                 </span>
               </SelectItem>
             </div>
