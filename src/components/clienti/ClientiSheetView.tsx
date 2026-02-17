@@ -613,6 +613,28 @@ function saveCustomPortals(portals: string[]) {
   localStorage.setItem('custom-portals', JSON.stringify(portals));
 }
 
+// Custom lingua options persistence
+function getCustomLinguaOptions(): string[] {
+  try {
+    const saved = localStorage.getItem('custom-lingua-options');
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+function saveCustomLinguaOptions(opts: string[]) {
+  localStorage.setItem('custom-lingua-options', JSON.stringify(opts));
+}
+
+// Custom tipo_contatto options persistence
+function getCustomTipoContattoOptions(): string[] {
+  try {
+    const saved = localStorage.getItem('custom-tipo-contatto-options');
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+function saveCustomTipoContattoOptions(opts: string[]) {
+  localStorage.setItem('custom-tipo-contatto-options', JSON.stringify(opts));
+}
+
 function getCustomPortaleColors(): Record<string, string> {
   try {
     const saved = localStorage.getItem('custom-portale-colors');
@@ -737,14 +759,22 @@ function ColorPalettePopover({
 
 // --- Simple Badge Cell (for lingua, tipo_contatto) — click opens pill context menu ---
 function SimpleBadgeCell({
-  value, onChange, options, colorMap, colType,
+  value, onChange, defaultOptions, colorMap, colType,
 }: {
-  value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>; colType?: string;
+  value: string; onChange: (val: string) => void; defaultOptions: string[]; colorMap?: Record<string, string>; colType?: string;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
   const [colorTarget, setColorTarget] = useState<string | null>(null);
   const [localColors, setLocalColors] = useState(colorMap || {});
+  const [addingNew, setAddingNew] = useState(false);
+  const [newValue, setNewValue] = useState('');
+  const newInputRef = useRef<HTMLInputElement>(null);
+
+  const getCustomOpts = colType === 'lingua' ? getCustomLinguaOptions : getCustomTipoContattoOptions;
+  const saveCustomOpts = colType === 'lingua' ? saveCustomLinguaOptions : saveCustomTipoContattoOptions;
+  const [customOpts, setCustomOpts] = useState(getCustomOpts);
+  const allOptions = useMemo(() => [...defaultOptions, ...customOpts], [defaultOptions, customOpts]);
 
   useEffect(() => {
     if (colType === 'lingua') {
@@ -757,6 +787,7 @@ function SimpleBadgeCell({
   }, [colType]);
 
   useEffect(() => { setLocalColors(colorMap || {}); }, [colorMap]);
+  useEffect(() => { if (addingNew && newInputRef.current) newInputRef.current.focus(); }, [addingNew]);
 
   const bgColor = localColors[value] || '#6b7280';
 
@@ -767,6 +798,7 @@ function SimpleBadgeCell({
     setMenuPos({ x: rect.left, y: rect.bottom + 4 });
     setMenuOpen(true);
     setColorTarget(null);
+    setAddingNew(false);
   };
 
   const handleColorChange = (item: string, color: string) => {
@@ -776,6 +808,29 @@ function SimpleBadgeCell({
       setLocalColors({ ...LINGUA_COLORS, ...updated });
     }
     setColorTarget(null);
+  };
+
+  const handleAddOption = () => {
+    const trimmed = newValue.trim().toUpperCase();
+    if (trimmed && !allOptions.includes(trimmed)) {
+      const updated = [...customOpts, trimmed];
+      setCustomOpts(updated);
+      saveCustomOpts(updated);
+      onChange(trimmed);
+    }
+    setNewValue('');
+    setAddingNew(false);
+    setMenuOpen(false);
+  };
+
+  const handleDeleteOption = (opt: string) => {
+    // Only allow deleting custom options
+    if (customOpts.includes(opt)) {
+      const updated = customOpts.filter(o => o !== opt);
+      setCustomOpts(updated);
+      saveCustomOpts(updated);
+      if (value === opt) onChange('');
+    }
   };
 
   return (
@@ -805,26 +860,36 @@ function SimpleBadgeCell({
           >
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
             <div className="flex flex-wrap gap-1 px-2 py-1.5 max-w-[260px]">
-              {options.map(opt => (
-                <button
-                  key={opt}
-                  onClick={() => {
-                    if (value === opt) {
-                      setColorTarget(prev => prev === opt ? null : opt);
-                    } else {
-                      onChange(opt);
-                      setMenuOpen(false);
-                    }
-                  }}
-                  className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
-                    value === opt && "ring-2 ring-foreground ring-offset-1",
-                    colorTarget === opt && "ring-2 ring-amber-400 ring-offset-1"
+              {allOptions.map(opt => (
+                <div key={opt} className="relative group">
+                  <button
+                    onClick={() => {
+                      if (value === opt) {
+                        setColorTarget(prev => prev === opt ? null : opt);
+                      } else {
+                        onChange(opt);
+                        setMenuOpen(false);
+                      }
+                    }}
+                    className={cn(
+                      "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
+                      value === opt && "ring-2 ring-foreground ring-offset-1",
+                      colorTarget === opt && "ring-2 ring-amber-400 ring-offset-1"
+                    )}
+                    style={{ backgroundColor: localColors[opt] || '#6b7280' }}
+                  >
+                    {opt}
+                  </button>
+                  {/* Delete button for custom options */}
+                  {customOpts.includes(opt) && (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleDeleteOption(opt); }}
+                      className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 rounded-full bg-destructive text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:scale-110"
+                    >
+                      ×
+                    </button>
                   )}
-                  style={{ backgroundColor: localColors[opt] || '#6b7280' }}
-                >
-                  {opt}
-                </button>
+                </div>
               ))}
             </div>
             {colorTarget && (
@@ -847,6 +912,29 @@ function SimpleBadgeCell({
               </>
             )}
             <div className="h-px bg-muted/50" />
+            {addingNew ? (
+              <div className="px-2 py-1 flex items-center gap-1">
+                <input
+                  ref={newInputRef}
+                  value={newValue}
+                  onChange={(e) => setNewValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddOption();
+                    if (e.key === 'Escape') { setAddingNew(false); setNewValue(''); }
+                  }}
+                  className="flex-1 h-6 text-xs bg-muted rounded px-2 outline-none focus:ring-1 focus:ring-foreground/20"
+                  placeholder="Nuovo valore..."
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            ) : (
+              <button
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors w-full"
+                onClick={() => setAddingNew(true)}
+              >
+                <Plus className="w-3 h-3" /> Aggiungi
+              </button>
+            )}
             <button
               onClick={() => { onChange(''); setMenuOpen(false); }}
               className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors w-full"
@@ -1356,11 +1444,11 @@ const SheetRow = memo(function SheetRow({
             {col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'lingua' && col.editable ? (
-              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} colType="lingua" />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} defaultOptions={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} colType="lingua" />
             ) : col.type === 'portale' && col.editable ? (
               <PortalBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'tipo_contatto' && col.editable ? (
-              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} colType="tipo_contatto" />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} defaultOptions={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} colType="tipo_contatto" />
             ) : col.type === 'agent' && col.editable ? (
               <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
             ) : col.key === 'telefono' ? (
