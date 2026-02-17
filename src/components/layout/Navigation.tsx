@@ -36,7 +36,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
 
   return (
     <nav
-      className="flex justify-center py-2"
+      className="flex justify-center pt-4 pb-2"
     >
       <div className="glass-nav rounded-full px-3 py-2 flex items-center gap-1">
         {tabs.map((tab) => {
