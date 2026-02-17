@@ -140,12 +140,12 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       {/* Bottom Navigation */}
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
-      {/* Main content with pull-to-refresh */}
+      {/* Main content mega-pill */}
       <PullToRefresh 
         onRefresh={handleRefresh}
-        className="overflow-x-hidden"
+        className="overflow-x-hidden px-2"
       >
-        <main className={`mx-auto animate-in fade-in duration-150 overflow-x-hidden pb-24 ${activeTab === 'clienti' ? 'max-w-full px-2 lg:px-4' : 'max-w-3xl lg:max-w-7xl px-3 lg:px-6'}`}>
+        <main className={`mx-auto animate-in fade-in duration-150 overflow-x-hidden pb-24 bg-card rounded-[2rem] shadow-lg min-h-[60vh] ${activeTab === 'clienti' ? 'max-w-full p-2 lg:p-4' : 'max-w-3xl lg:max-w-7xl p-4 lg:p-6'}`}>
           <Suspense
             fallback={
               <div className="py-10 flex items-center justify-center">
