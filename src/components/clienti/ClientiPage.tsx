@@ -62,7 +62,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     assignCliente,
     updateOrder,
     addComment,
-    isCreating,
+    isCreating
   } = useClienti({ groupBy, filters });
 
   // Check if user is coordinator/admin
@@ -71,7 +71,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   // Handle opening cliente from notification
   useEffect(() => {
     if (initialClienteId && clienti.length > 0) {
-      const cliente = clienti.find(c => c.id === initialClienteId);
+      const cliente = clienti.find((c) => c.id === initialClienteId);
       if (cliente) {
         setSelectedCliente(cliente);
         setDetailOpen(true);
@@ -82,22 +82,22 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
   // Tracked update: captures old values and pushes undo action for every change
   const trackedUpdate = useCallback(async (id: string, updates: Partial<Cliente>, label?: string) => {
-    const old = clienti.find(c => c.id === id);
-    if (!old) { await updateCliente({ id, ...updates }); return; }
-    
+    const old = clienti.find((c) => c.id === id);
+    if (!old) {await updateCliente({ id, ...updates });return;}
+
     // Capture only the fields being changed
     const oldValues: Record<string, unknown> = {};
     for (const key of Object.keys(updates)) {
       oldValues[key] = (old as any)[key];
     }
-    
+
     await updateCliente({ id, ...updates });
-    
+
     const desc = label || Object.keys(updates).join(', ');
     pushAction({
       description: `${old.nome}: ${desc}`,
-      undo: async () => { await updateCliente({ id, ...oldValues } as any); },
-      redo: async () => { await updateCliente({ id, ...updates } as any); },
+      undo: async () => {await updateCliente({ id, ...oldValues } as any);},
+      redo: async () => {await updateCliente({ id, ...updates } as any);}
     });
   }, [clienti, updateCliente, pushAction]);
 
@@ -112,21 +112,21 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       const oldAgent = selectedCliente.assigned_to;
       pushAction({
         description: `${selectedCliente.nome}: assegnazione`,
-        undo: async () => { await assignCliente({ id: selectedCliente.id, agentId: oldAgent }); },
-        redo: async () => { await assignCliente({ id: selectedCliente.id, agentId }); },
+        undo: async () => {await assignCliente({ id: selectedCliente.id, agentId: oldAgent });},
+        redo: async () => {await assignCliente({ id: selectedCliente.id, agentId });}
       });
-      setSelectedCliente(prev => prev ? { ...prev, assigned_to: agentId } : null);
+      setSelectedCliente((prev) => prev ? { ...prev, assigned_to: agentId } : null);
     }
   }, [selectedCliente, assignCliente, pushAction]);
 
   const handleOrderChange = useCallback(async (
-    items: { id: string; display_order: number; status?: ClienteStatus }[]
-  ) => {
+  items: {id: string;display_order: number;status?: ClienteStatus;}[]) =>
+  {
     await updateOrder(items);
   }, [updateOrder]);
 
   const handleColorChange = useCallback(async (clienteId: string, color: string | null) => {
-    const autoTextColor = color ? (isDarkColor(color) ? '#ffffff' : '#000000') : null;
+    const autoTextColor = color ? isDarkColor(color) ? '#ffffff' : '#000000' : null;
     await trackedUpdate(clienteId, { card_color: color, row_bg_color: color, row_text_color: autoTextColor } as any, 'colore');
   }, [trackedUpdate]);
 
@@ -139,7 +139,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     if (selectedCliente) {
       await addComment({ id: selectedCliente.id, comment });
       // Refresh selected cliente
-      const updated = clienti.find(c => c.id === selectedCliente.id);
+      const updated = clienti.find((c) => c.id === selectedCliente.id);
       if (updated) setSelectedCliente(updated);
     }
   }, [selectedCliente, addComment, clienti]);
@@ -150,8 +150,8 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       await deleteCliente(selectedCliente.id);
       pushAction({
         description: `Elimina ${snapshot.nome}`,
-        undo: async () => { await restoreCliente(snapshot); },
-        redo: async () => { await deleteCliente(snapshot.id); },
+        undo: async () => {await restoreCliente(snapshot);},
+        redo: async () => {await deleteCliente(snapshot.id);}
       });
       setDetailOpen(false);
       setSelectedCliente(null);
@@ -159,17 +159,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }, [selectedCliente, deleteCliente, createCliente, pushAction]);
 
   // Agents see only assigned clients, coordinators see all
-  const displayClients = isCoordinator 
-    ? clienti 
-    : clienti.filter(c => c.assigned_to === profile?.user_id);
+  const displayClients = isCoordinator ?
+  clienti :
+  clienti.filter((c) => c.assigned_to === profile?.user_id);
 
   // Create grouped data for display (for agents, use only their clients)
   const displayGrouped = useMemo(() => {
     if (isCoordinator) return clientiGrouped;
-    
+
     // Group display clients by status for agents
     const groups = new Map<string, Cliente[]>();
-    displayClients.forEach(cliente => {
+    displayClients.forEach((cliente) => {
       const key = cliente.status;
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key)!.push(cliente);
@@ -180,7 +180,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   // Apply date sorting within groups if active
   const sortedGrouped = useMemo(() => {
     if (!dateSortDir) return displayGrouped;
-    
+
     const sorted = new Map<string, Cliente[]>();
     displayGrouped.forEach((clients, key) => {
       const sortedClients = [...clients].sort((a, b) => {
@@ -189,9 +189,9 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         if (!dateA && !dateB) return 0;
         if (!dateA) return 1;
         if (!dateB) return -1;
-        return dateSortDir === 'desc'
-          ? dateB.localeCompare(dateA)
-          : dateA.localeCompare(dateB);
+        return dateSortDir === 'desc' ?
+        dateB.localeCompare(dateA) :
+        dateA.localeCompare(dateB);
       });
       sorted.set(key, sortedClients);
     });
@@ -202,22 +202,22 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     return (
       <div className="py-20 flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-      </div>
-    );
+      </div>);
+
   }
 
   return (
     <div className="py-4 space-y-4 overflow-x-hidden">
       {/* Header row: view toggle + actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2">
+      <div className="flex items-center gap-1.5 sm:gap-2 pt-[15px]">
         {/* View toggle */}
         <div className="flex rounded-lg border overflow-hidden">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
             className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
-            onClick={() => setViewMode('kanban')}
-          >
+            onClick={() => setViewMode('kanban')}>
+
             <LayoutGrid className="w-4 h-4" />
             <span className="hidden sm:inline">Kanban</span>
           </Button>
@@ -225,8 +225,8 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             variant={viewMode === 'sheet' ? 'default' : 'ghost'}
             size="sm"
             className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
-            onClick={() => setViewMode('sheet')}
-          >
+            onClick={() => setViewMode('sheet')}>
+
             <Table className="w-4 h-4" />
             <span className="hidden sm:inline">Spreadsheet</span>
           </Button>
@@ -235,18 +235,18 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         {viewMode === 'kanban' && <UndoRedoButtons />}
         <div className="flex-1" />
 
-        {isCoordinator && (
-          <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+        {isCoordinator &&
+        <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Analisi</span>
           </Button>
-        )}
-        {isCoordinator && (
-          <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+        }
+        {isCoordinator &&
+        <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">CSV</span>
           </Button>
-        )}
+        }
         <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-9 h-9 p-0">
           <Plus className="w-4 h-4" />
         </Button>
@@ -256,126 +256,126 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       {isCoordinator && <ClientiStatsChart clienti={clienti} />}
 
       {/* Filters - only for coordinators */}
-      {isCoordinator && (
-        <ClientiFilters
-groupBy={groupBy}
-          onGroupByChange={setGroupBy}
-          filters={filters}
-          onFiltersChange={setFilters}
-          totalCount={clienti.length}
-          filteredCount={displayClients.length}
-          clienti={clienti}
-          dateSortDir={dateSortDir}
-          onDateSortChange={() => {
-            setDateSortDir(prev => 
-              prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
-            );
-          }}
-        />
-      )}
+      {isCoordinator &&
+      <ClientiFilters
+        groupBy={groupBy}
+        onGroupByChange={setGroupBy}
+        filters={filters}
+        onFiltersChange={setFilters}
+        totalCount={clienti.length}
+        filteredCount={displayClients.length}
+        clienti={clienti}
+        dateSortDir={dateSortDir}
+        onDateSortChange={() => {
+          setDateSortDir((prev) =>
+          prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
+          );
+        }} />
+
+      }
 
       {/* Date Sort - only when not coordinator (coordinators have it in filters) */}
-      {!isCoordinator && (
-        <div className="flex gap-2">
+      {!isCoordinator &&
+      <div className="flex gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              type="text"
-              placeholder="Cerca per nome, paese, regione, email..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-9"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
-              >
+            type="text"
+            placeholder="Cerca per nome, paese, regione, email..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 pr-9" />
+
+            {searchQuery &&
+          <button
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted">
+
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
-            )}
+          }
           </div>
           <Button
-            variant={dateSortDir ? 'default' : 'outline'}
-            size="sm"
-            className="shrink-0 gap-1.5"
-            onClick={() => {
-              setDateSortDir(prev => 
-                prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
-              );
-            }}
-          >
+          variant={dateSortDir ? 'default' : 'outline'}
+          size="sm"
+          className="shrink-0 gap-1.5"
+          onClick={() => {
+            setDateSortDir((prev) =>
+            prev === null ? 'desc' : prev === 'desc' ? 'asc' : null
+            );
+          }}>
+
             <ArrowUpDown className="w-4 h-4" />
             <span className="hidden sm:inline">
               {dateSortDir === 'desc' ? 'Recenti ↓' : dateSortDir === 'asc' ? 'Vecchi ↓' : 'Data'}
             </span>
           </Button>
         </div>
-      )}
+      }
 
       {/* Board */}
-      {viewMode === 'kanban' ? (
-        <ClientiKanban
-          clientiGrouped={sortedGrouped}
-          groupBy={isCoordinator ? groupBy : 'status'}
-          agents={agents}
-          onCardClick={handleCardClick}
-          onStatusChange={async (clienteId, status) => {
-            await trackedUpdate(clienteId, { status } as any, 'stato');
-          }}
-          onOrderChange={handleOrderChange}
-          onColorChange={handleColorChange}
-          onEmojiChange={handleEmojiChange}
-          onDeleteCliente={async (clienteId) => {
-            const snapshot = clienti.find(c => c.id === clienteId);
-            await deleteCliente(clienteId);
-            if (snapshot) {
-              pushAction({
-                description: `Elimina ${snapshot.nome}`,
-                undo: async () => { await restoreCliente(snapshot); },
-                redo: async () => { await deleteCliente(snapshot.id); },
-              });
-            }
-          }}
-          searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
-        />
-      ) : (
-        <ClientiSheetView
-          clienti={[...displayClients].sort((a, b) => {
-            if (dateSortDir) {
-              const dateA = getEffectiveDate(a);
-              const dateB = getEffectiveDate(b);
-              if (!dateA && !dateB) return 0;
-              if (!dateA) return 1;
-              if (!dateB) return -1;
-              return dateSortDir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
-            }
-            // Default: newest first by created_at
-            return b.created_at.localeCompare(a.created_at);
-          })}
-          agents={agents}
-          onCardClick={handleCardClick}
-          onUpdate={async (id, updates) => {
-            await trackedUpdate(id, updates);
-          }}
-          onDelete={async (id) => {
-            const snapshot = clienti.find(c => c.id === id);
-            await deleteCliente(id);
-            if (snapshot) {
-              pushAction({
-                description: `Elimina ${snapshot.nome}`,
-                undo: async () => { await restoreCliente(snapshot); },
-                redo: async () => { await deleteCliente(snapshot.id); },
-              });
-            }
-          }}
-          searchQuery={isCoordinator ? (filters.search || '') : searchQuery}
-          onAddNew={async () => {
-            const today = new Date().toISOString().split('T')[0];
-            await createCliente({ nome: '', data_submission: today });
-          }}
-        />
-      )}
+      {viewMode === 'kanban' ?
+      <ClientiKanban
+        clientiGrouped={sortedGrouped}
+        groupBy={isCoordinator ? groupBy : 'status'}
+        agents={agents}
+        onCardClick={handleCardClick}
+        onStatusChange={async (clienteId, status) => {
+          await trackedUpdate(clienteId, { status } as any, 'stato');
+        }}
+        onOrderChange={handleOrderChange}
+        onColorChange={handleColorChange}
+        onEmojiChange={handleEmojiChange}
+        onDeleteCliente={async (clienteId) => {
+          const snapshot = clienti.find((c) => c.id === clienteId);
+          await deleteCliente(clienteId);
+          if (snapshot) {
+            pushAction({
+              description: `Elimina ${snapshot.nome}`,
+              undo: async () => {await restoreCliente(snapshot);},
+              redo: async () => {await deleteCliente(snapshot.id);}
+            });
+          }
+        }}
+        searchQuery={isCoordinator ? filters.search || '' : searchQuery} /> :
+
+
+      <ClientiSheetView
+        clienti={[...displayClients].sort((a, b) => {
+          if (dateSortDir) {
+            const dateA = getEffectiveDate(a);
+            const dateB = getEffectiveDate(b);
+            if (!dateA && !dateB) return 0;
+            if (!dateA) return 1;
+            if (!dateB) return -1;
+            return dateSortDir === 'desc' ? dateB.localeCompare(dateA) : dateA.localeCompare(dateB);
+          }
+          // Default: newest first by created_at
+          return b.created_at.localeCompare(a.created_at);
+        })}
+        agents={agents}
+        onCardClick={handleCardClick}
+        onUpdate={async (id, updates) => {
+          await trackedUpdate(id, updates);
+        }}
+        onDelete={async (id) => {
+          const snapshot = clienti.find((c) => c.id === id);
+          await deleteCliente(id);
+          if (snapshot) {
+            pushAction({
+              description: `Elimina ${snapshot.nome}`,
+              undo: async () => {await restoreCliente(snapshot);},
+              redo: async () => {await deleteCliente(snapshot.id);}
+            });
+          }
+        }}
+        searchQuery={isCoordinator ? filters.search || '' : searchQuery}
+        onAddNew={async () => {
+          const today = new Date().toISOString().split('T')[0];
+          await createCliente({ nome: '', data_submission: today });
+        }} />
+
+      }
 
       {/* Detail Modal */}
       <ClienteDetail
@@ -391,17 +391,17 @@ groupBy={groupBy}
             await trackedUpdate(selectedCliente.id, updates);
           }
         }}
-        allClienti={clienti}
-      />
+        allClienti={clienti} />
+
 
       {/* Add Dialog */}
       <AddClienteDialog
         open={addDialogOpen}
         onOpenChange={setAddDialogOpen}
-        onAdd={async (data) => { await createCliente(data); }}
+        onAdd={async (data) => {await createCliente(data);}}
         agents={agents}
-        isLoading={isCreating}
-      />
+        isLoading={isCreating} />
+
 
       {/* Import Dialog */}
       <ImportTallyDialog
@@ -409,23 +409,23 @@ groupBy={groupBy}
         onOpenChange={setImportDialogOpen}
         onSuccess={() => {
           setImportDialogOpen(false);
-        }}
-      />
+        }} />
+
 
       {/* Dalila CSV Import Dialog */}
       <ImportDalilaCSVDialog
         open={dalilaImportOpen}
-        onOpenChange={setDalilaImportOpen}
-      />
+        onOpenChange={setDalilaImportOpen} />
+
 
       {/* Analysis Modal */}
       <ClientiAnalysisModal
         open={analysisOpen}
         onOpenChange={setAnalysisOpen}
-        clienti={clienti}
-      />
-    </div>
-  );
+        clienti={clienti} />
+
+    </div>);
+
 }
 
 export default ClientiPage;
