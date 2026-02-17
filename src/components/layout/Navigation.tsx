@@ -59,12 +59,12 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               >
                 {isActive && (
                   <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[36px] h-[36px] rounded-full animate-spring-scale"
                     style={{
-                      background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.9) 100%)',
-                      backdropFilter: 'blur(20px) saturate(200%)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(200%)',
-                      boxShadow: '0 4px 16px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,1), inset 0 -1px 2px rgba(255,255,255,0.4)',
+                      background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.75) 50%, rgba(255,255,255,0.95) 100%)',
+                      backdropFilter: 'blur(24px) saturate(220%)',
+                      WebkitBackdropFilter: 'blur(24px) saturate(220%)',
+                      boxShadow: '0 6px 20px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04), inset 0 1px 2px rgba(255,255,255,1), inset 0 -1px 3px rgba(255,255,255,0.5)',
                     }}
                   />
                 )}

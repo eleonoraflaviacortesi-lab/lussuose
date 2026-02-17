@@ -61,7 +61,7 @@ const KPICard = ({ title, value, target, delta, icon, format = 'number' }: KPICa
   };
 
   return (
-    <div className="group relative bg-card rounded-xl p-5 border border-border hover:border-accent/30 transition-all duration-300 hover:shadow-lg animate-fade-in">
+    <div className="group relative bg-white/90 backdrop-blur-sm rounded-3xl p-5 border border-white/60 shadow-[0_8px_30px_-8px_rgba(0,0,0,0.08)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12)] transition-all duration-300 animate-spring-in">
       <div className="flex items-start justify-between mb-3">
         <span className="text-sm text-muted-foreground font-medium tracking-wide">{title}</span>
         <div className="p-2 rounded-lg bg-muted/50 text-muted-foreground group-hover:bg-accent/10 group-hover:text-accent transition-colors">
