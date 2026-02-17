@@ -95,23 +95,12 @@ const ProfileModal = ({ open, onClose, onOpenSettings }: ProfileModalProps) => {
 
   return (
     <div 
-      className="fixed inset-0 z-[80] flex items-center justify-center p-4"
-      onClick={onClose}
+      className={cn(
+        "fixed inset-0 z-[100] flex flex-col bg-background",
+        "animate-in slide-in-from-bottom duration-300",
+      )}
     >
-      {/* Blur backdrop */}
-      <div className="absolute inset-0 bg-black/10 backdrop-blur-md" />
-      
-      {/* Liquid Glass Card */}
-      <div 
-        onClick={(e) => e.stopPropagation()}
-        className={cn(
-          "relative z-10 w-full max-w-sm",
-          "bg-white/85 backdrop-blur-2xl",
-          "rounded-3xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]",
-          "p-6 animate-in zoom-in-95 fade-in duration-200",
-          "max-h-[90vh] overflow-y-auto"
-        )}
-      >
+      <div className="flex-1 overflow-y-auto px-4 py-6 max-w-sm mx-auto w-full">
         {/* Close button */}
         <button 
           onClick={onClose}
