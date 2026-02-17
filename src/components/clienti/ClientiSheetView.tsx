@@ -332,6 +332,8 @@ function getCustomPortaleColors(): Record<string, string> {
 
 function saveCustomPortaleColors(colors: Record<string, string>) {
   localStorage.setItem('custom-portale-colors', JSON.stringify(colors));
+  // Dispatch storage event so other PortalBadgeCell instances sync
+  window.dispatchEvent(new StorageEvent('storage', { key: 'custom-portale-colors' }));
 }
 
 const DEFAULT_PORTALE_OPTIONS = [
@@ -516,6 +518,15 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
   const allOptions = useMemo(() => [...DEFAULT_PORTALE_OPTIONS, ...customPortals], [customPortals]);
   const mergedColors = useMemo(() => ({ ...PORTALE_COLORS, ...customColors }), [customColors]);
   const bgColor = mergedColors[value] || '#6b7280';
+
+  // Sync colors from other cells via storage event
+  useEffect(() => {
+    const handler = (e: StorageEvent) => {
+      if (e.key === 'custom-portale-colors') setCustomColors(getCustomPortaleColors());
+    };
+    window.addEventListener('storage', handler);
+    return () => window.removeEventListener('storage', handler);
+  }, []);
 
   useEffect(() => {
     if (addingNew && newInputRef.current) newInputRef.current.focus();
