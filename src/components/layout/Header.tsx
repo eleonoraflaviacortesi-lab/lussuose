@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Menu, X, Home, Calendar, Megaphone, Wallet, Newspaper, User } from 'lucide-react';
+import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2, UserRound } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
@@ -27,11 +27,11 @@ const tabToPath: Record<string, string> = {
 };
 
 const menuItems = [
-  { id: 'numeri', icon: Home, label: 'Home' },
-  { id: 'calendario', icon: Calendar, label: 'Calendario' },
-  { id: 'notizie', icon: Megaphone, label: 'Notizie' },
-  { id: 'clienti', icon: Wallet, label: 'Buyers' },
-  { id: 'ufficio', icon: Newspaper, label: 'Ufficio' },
+  { id: 'numeri', icon: House, label: 'Home' },
+  { id: 'calendario', icon: CalendarDays, label: 'Calendario' },
+  { id: 'notizie', icon: Send, label: 'Notizie' },
+  { id: 'clienti', icon: Briefcase, label: 'Buyers' },
+  { id: 'ufficio', icon: Building2, label: 'Ufficio' },
 ];
 
 const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: HeaderProps) => {
@@ -185,13 +185,13 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
                     key={item.id}
                     onClick={() => handleNavigate(item.id)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium",
+                      "w-full flex items-center gap-3 px-4 py-3 rounded-full transition-all text-sm font-medium",
                       isActive
                         ? "bg-foreground text-background"
                         : "text-foreground hover:bg-muted/60"
                     )}
                   >
-                    <Icon className="w-4.5 h-4.5" strokeWidth={isActive ? 2 : 1.5} />
+                    <Icon className="w-5 h-5" strokeWidth={isActive ? 2 : 1.5} />
                     {item.label}
                   </button>
                 );
