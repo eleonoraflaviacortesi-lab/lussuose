@@ -1,61 +1,37 @@
 
+# Semplificazione Menu + Cerchio Nav Bar
 
-## Tre nuove feature mistiche
+## Cosa cambia
 
-### 1. Breath Pulse sulle card urgenti del calendario
+### 1. Raggruppamento "Ufficio"
+Le 3 voci **Riunioni**, **I Miei Report** e **Performance Ufficio** vengono unificate in una singola icona "Ufficio" (icona `Newspaper`) nella nav bar. Cliccandoci si apre una pagina con un selettore a pillola interno per navigare tra le 3 sotto-sezioni.
 
-Le card segnate come "urgent" nel calendario avranno un'animazione lentissima di ombra che si espande e contrae ogni 4-5 secondi, quasi impercettibile.
+La nav bar passa da **8 icone** a **6 icone**:
+Home | Calendario | Notizie | Buyers | **Ufficio** | Impostazioni
 
-**File: `tailwind.config.ts`**
-- Aggiunta keyframe `breath-pulse`: ombra che oscilla tra `box-shadow` minimo e leggermente espanso su ciclo di 5 secondi
-- Aggiunta classe `animate-breath-pulse`
-
-**File: `src/components/calendar/CalendarPage.tsx`** (2 punti: riga ~1384 e ~1537)
-- Sostituzione di `event.urgent && "ring-2 ring-red-500"` con `event.urgent && "ring-2 ring-red-500 animate-breath-pulse"`
-
-**File: `src/components/calendar/CalendarDayView.tsx`** (riga ~191)
-- Stessa aggiunta di `animate-breath-pulse` sulle card urgenti
+### 2. Cerchio al posto della stella
+L'indicatore della pagina attiva torna a essere un **cerchio bianco** con ombra (drop-shadow), sostituendo l'attuale poligono a 16 punte (stella).
 
 ---
 
-### 2. Indicatore fase lunare reale
+## Dettagli tecnici
 
-Un piccolo indicatore della fase lunare calcolata in tempo reale, posizionato in basso a sinistra accanto alla campanella notifiche.
+### File: `src/components/layout/Navigation.tsx`
+- Rimuovere le 3 voci separate (riunioni, report, agenzia) dalla lista `tabs`
+- Aggiungere una singola voce `{ id: 'ufficio', icon: Newspaper, label: 'Ufficio' }`
+- Aggiornare `tabToPath` con la nuova rotta `/ufficio`
+- Sostituire l'SVG `<polygon>` (stella) con un semplice `<circle cx="50" cy="50" r="44" fill="white" />` con drop-shadow
 
-**File: `src/components/layout/MoonPhaseIndicator.tsx`** (nuovo)
-- Componente che calcola la fase lunare reale usando l'algoritmo di John Conway (basato sulla data corrente)
-- Mostra l'emoji lunare corrispondente (da 🌑 a 🌘, 8 fasi)
-- Stile: cerchietto bianco/glass con backdrop-blur, dimensione simile alla campanella (~w-10 h-10)
-- Posizionato fixed, sopra la campanella (`bottom-[8.5rem] left-4`)
+### File: `src/pages/Index.tsx`
+- Aggiornare `pathToTab` aggiungendo `'/ufficio': 'ufficio'` e rimuovendo le rotte singole di riunioni/report/agenzia
+- Nel `renderContent`, il case `'ufficio'` renderizza il nuovo componente `UfficioPage`
 
-**File: `src/pages/Index.tsx`**
-- Import e rendering del componente `MoonPhaseIndicator`
+### File: `src/App.tsx`
+- Aggiungere la rotta `/ufficio`
+- Mantenere le vecchie rotte `/riunioni`, `/report`, `/agenzia` come redirect a `/ufficio` per evitare 404
 
----
-
-### 3. Pulsante campanella con starburst
-
-Il pulsante della campanella notifiche avra lo stesso sfondo a punte (starburst) bianco con ombra, come l'indicatore attivo della navigazione.
-
-**File: `src/components/layout/NotificationBell.tsx`**
-- Sostituzione del `rounded-full bg-white/80` con un contenitore `relative` che include lo stesso SVG starburst a 16 punte usato nella navigazione
-- L'SVG bianco con `drop-shadow` sostituisce il cerchio liscio attuale
-- L'icona Bell resta sopra (z-10)
-- Dimensione starburst: ~48px per coprire il bottone
-
-### Dettagli tecnici
-
-**Keyframe breath-pulse (tailwind.config.ts):**
-```
-"breath-pulse": {
-  "0%, 100%": { boxShadow: "0 0 0 0 rgba(239, 68, 68, 0.3)" },
-  "50%": { boxShadow: "0 0 12px 4px rgba(239, 68, 68, 0.15)" }
-}
-```
-Durata: 5s, iterazione infinita, ease-in-out.
-
-**Algoritmo fase lunare:**
-Calcolo basato sul ciclo sinodico di 29.53 giorni a partire da una luna nuova nota (es. 6 gennaio 2000). Il risultato mappa su 8 fasi con emoji corrispondente.
-
-**Starburst campanella:**
-Stesso SVG `<polygon>` a 16 punte con raggi alternati 50/35, fill bianco, `filter: drop-shadow(0 3px 6px rgba(0,0,0,0.18))`.
+### Nuovo file: `src/components/ufficio/UfficioPage.tsx`
+- Componente con selettore a pillola in alto (stile coerente con il design system liquid glass)
+- 3 sotto-tab: **Ufficio** (AgencyDashboard), **Riunioni** (MeetingsPage), **Analisi** (ReportAnalysisTab)
+- Lo stato della sotto-tab selezionata viene mantenuto internamente
+- Le pillole sono `rounded-full` con transizione fluida sull'indicatore attivo
