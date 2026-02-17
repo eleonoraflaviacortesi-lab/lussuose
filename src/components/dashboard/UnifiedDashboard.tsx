@@ -24,7 +24,7 @@ const UnifiedDashboard = () => {
   };
 
   return (
-    <div className="animate-fade-in">
+    <div className="animate-slide-up-spring">
       {/* Tab Selector - Pill style */}
       <div className="flex items-center justify-center gap-1 p-1 mx-4 mb-4 bg-muted/50 rounded-full backdrop-blur-sm">
         {tabs.map((tab) => {
