@@ -59,7 +59,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
         "fixed left-0 right-0 z-[55] flex justify-center transition-all duration-300",
         visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4 pointer-events-none'
       )}
-      style={{ top: 'calc(100px + env(safe-area-inset-top, 0px))' }}
+      style={{ top: 'calc(115px + env(safe-area-inset-top, 0px))' }}
     >
       <div className="glass-nav rounded-full px-3 py-2 flex items-center gap-1">
         {tabs.map((tab) => {
