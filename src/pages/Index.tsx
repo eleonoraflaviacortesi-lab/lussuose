@@ -135,7 +135,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       <FloatingSparkles />
       <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
-      <Header />
+      <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} />
       <div style={{ height: 'calc(175px + env(safe-area-inset-top, 0px))' }} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
