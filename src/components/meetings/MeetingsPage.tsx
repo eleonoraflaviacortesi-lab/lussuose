@@ -18,43 +18,43 @@ import { MeetingDetail } from './MeetingDetail';
 import { cn } from '@/lib/utils';
 
 const MONTHS = [
-  { value: '0', label: 'Gennaio' },
-  { value: '1', label: 'Febbraio' },
-  { value: '2', label: 'Marzo' },
-  { value: '3', label: 'Aprile' },
-  { value: '4', label: 'Maggio' },
-  { value: '5', label: 'Giugno' },
-  { value: '6', label: 'Luglio' },
-  { value: '7', label: 'Agosto' },
-  { value: '8', label: 'Settembre' },
-  { value: '9', label: 'Ottobre' },
-  { value: '10', label: 'Novembre' },
-  { value: '11', label: 'Dicembre' },
-];
+{ value: '0', label: 'Gennaio' },
+{ value: '1', label: 'Febbraio' },
+{ value: '2', label: 'Marzo' },
+{ value: '3', label: 'Aprile' },
+{ value: '4', label: 'Maggio' },
+{ value: '5', label: 'Giugno' },
+{ value: '6', label: 'Luglio' },
+{ value: '7', label: 'Agosto' },
+{ value: '8', label: 'Settembre' },
+{ value: '9', label: 'Ottobre' },
+{ value: '10', label: 'Novembre' },
+{ value: '11', label: 'Dicembre' }];
+
 
 export const MeetingsPage = () => {
   const { profile } = useAuth();
   const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
   const sede = profile?.sede || 'AREZZO';
-  
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedMeetingId, setSelectedMeetingId] = useState<string | null>(null);
   const [filterMonth, setFilterMonth] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>(String(getYear(new Date())));
-  const [editingMeeting, setEditingMeeting] = useState<{ id: string; title: string; weekStart: Date } | null>(null);
+  const [editingMeeting, setEditingMeeting] = useState<{id: string;title: string;weekStart: Date;} | null>(null);
   const [deletingMeetingId, setDeletingMeetingId] = useState<string | null>(null);
-  
+
   const { meetings, isLoading, createOrGetMeeting, updateMeeting, deleteMeeting, duplicateMeeting } = useMeetings(sede);
-  
+
   const currentWeek = getWeekInfo(selectedDate);
-  
+
   // Find meeting for current week
-  const currentMeeting = meetings?.find(m => m.week_start === currentWeek.weekStart);
+  const currentMeeting = meetings?.find((m) => m.week_start === currentWeek.weekStart);
 
   // Get available years from meetings
   const availableYears = useMemo(() => {
     if (!meetings) return [String(getYear(new Date()))];
-    const years = [...new Set(meetings.map(m => String(m.year)))];
+    const years = [...new Set(meetings.map((m) => String(m.year)))];
     if (!years.includes(String(getYear(new Date())))) {
       years.push(String(getYear(new Date())));
     }
@@ -64,15 +64,15 @@ export const MeetingsPage = () => {
   // Filter meetings by month and year
   const filteredMeetings = useMemo(() => {
     if (!meetings) return [];
-    
-    return meetings.filter(m => {
+
+    return meetings.filter((m) => {
       const meetingDate = parseISO(m.week_start);
       const meetingYear = getYear(meetingDate);
       const meetingMonth = getMonth(meetingDate);
-      
+
       if (String(meetingYear) !== filterYear) return false;
       if (filterMonth !== 'all' && meetingMonth !== Number(filterMonth)) return false;
-      
+
       return true;
     });
   }, [meetings, filterMonth, filterYear]);
@@ -91,7 +91,7 @@ export const MeetingsPage = () => {
         week_start: currentWeek.weekStart,
         week_number: currentWeek.weekNumber,
         year: currentWeek.year,
-        title: `Riunione ${currentWeek.label}`,
+        title: `Riunione ${currentWeek.label}`
       });
       setSelectedMeetingId(id);
     }
@@ -101,9 +101,9 @@ export const MeetingsPage = () => {
     return (
       <MeetingDetail
         meetingId={selectedMeetingId}
-        onBack={() => setSelectedMeetingId(null)}
-      />
-    );
+        onBack={() => setSelectedMeetingId(null)} />);
+
+
   }
 
   return (
@@ -111,7 +111,7 @@ export const MeetingsPage = () => {
       {/* Header with week navigation */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-wide uppercase">Riunioni Settimanali</h1>
+          <h1 className="tracking-wide uppercase text-xl font-medium">Riunioni Settimanali</h1>
           <p className="text-muted-foreground text-sm">
             Gestione operativa e task per settimana
           </p>
@@ -149,20 +149,20 @@ export const MeetingsPage = () => {
       </Card>
 
       {/* Current week meeting card */}
-      <Card 
+      <Card
         className={cn(
           "p-6 cursor-pointer transition-all hover:shadow-lg",
           currentMeeting ? "border-primary/50" : "border-dashed"
         )}
-        onClick={handleOpenMeeting}
-      >
-        {isLoading ? (
-          <div className="space-y-3">
+        onClick={handleOpenMeeting}>
+
+        {isLoading ?
+        <div className="space-y-3">
             <Skeleton className="h-6 w-48" />
             <Skeleton className="h-4 w-32" />
-          </div>
-        ) : currentMeeting ? (
-          <div className="space-y-3">
+          </div> :
+        currentMeeting ?
+        <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg">
                 {currentMeeting.title || `Riunione ${currentWeek.label}`}
@@ -172,30 +172,30 @@ export const MeetingsPage = () => {
             <p className="text-sm text-muted-foreground">
               Creata il {format(parseISO(currentMeeting.created_at), "d MMM yyyy", { locale: it })}
             </p>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-6 text-center">
+          </div> :
+
+        <div className="flex flex-col items-center justify-center py-6 text-center">
             <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
               <Plus className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="font-medium">Nessuna riunione per questa settimana</h3>
-            {isCoordinator ? (
-              <p className="text-sm text-muted-foreground mt-1">
+            {isCoordinator ?
+          <p className="text-sm text-muted-foreground mt-1">
                 Tocca per creare la riunione
-              </p>
-            ) : (
-              <p className="text-sm text-muted-foreground mt-1">
+              </p> :
+
+          <p className="text-sm text-muted-foreground mt-1">
                 Il coordinatore non ha ancora creato la riunione
               </p>
-            )}
+          }
           </div>
-        )}
+        }
       </Card>
 
       {/* Filters and meetings list */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold">Riunioni</h2>
+          <h2 className="font-medium text-base">Riunioni</h2>
           <div className="flex items-center gap-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <Select value={filterMonth} onValueChange={setFilterMonth}>
@@ -204,9 +204,9 @@ export const MeetingsPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tutti i mesi</SelectItem>
-                {MONTHS.map(m => (
-                  <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                ))}
+                {MONTHS.map((m) =>
+                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                )}
               </SelectContent>
             </Select>
             <Select value={filterYear} onValueChange={setFilterYear}>
@@ -214,27 +214,27 @@ export const MeetingsPage = () => {
                 <SelectValue placeholder="Anno" />
               </SelectTrigger>
               <SelectContent>
-                {availableYears.map(y => (
-                  <SelectItem key={y} value={y}>{y}</SelectItem>
-                ))}
+                {availableYears.map((y) =>
+                <SelectItem key={y} value={y}>{y}</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
         </div>
         <div className="space-y-2">
-          {isLoading ? (
-            Array.from({ length: 3 }).map((_, i) => (
-              <Card key={i} className="p-4">
+          {isLoading ?
+          Array.from({ length: 3 }).map((_, i) =>
+          <Card key={i} className="p-4">
                 <Skeleton className="h-5 w-40" />
               </Card>
-            ))
-          ) : filteredMeetings.length > 0 ? (
-            filteredMeetings.map(meeting => (
-              <Card
-                key={meeting.id}
-                className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => setSelectedMeetingId(meeting.id)}
-              >
+          ) :
+          filteredMeetings.length > 0 ?
+          filteredMeetings.map((meeting) =>
+          <Card
+            key={meeting.id}
+            className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setSelectedMeetingId(meeting.id)}>
+
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">
@@ -247,55 +247,55 @@ export const MeetingsPage = () => {
                   </div>
                   <div className="flex items-center gap-1">
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      title="Duplica per questa settimana"
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        const newId = await duplicateMeeting.mutateAsync(meeting.id);
-                        if (newId) setSelectedMeetingId(newId);
-                      }}
-                    >
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  title="Duplica per questa settimana"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const newId = await duplicateMeeting.mutateAsync(meeting.id);
+                    if (newId) setSelectedMeetingId(newId);
+                  }}>
+
                       <Copy className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingMeeting({ 
-                          id: meeting.id, 
-                          title: meeting.title || `Riunione Settimana ${meeting.week_number}`,
-                          weekStart: parseISO(meeting.week_start)
-                        });
-                      }}
-                    >
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingMeeting({
+                      id: meeting.id,
+                      title: meeting.title || `Riunione Settimana ${meeting.week_number}`,
+                      weekStart: parseISO(meeting.week_start)
+                    });
+                  }}>
+
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeletingMeetingId(meeting.id);
-                      }}
-                    >
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeletingMeetingId(meeting.id);
+                  }}>
+
                       <Trash2 className="h-4 w-4" />
                     </Button>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
               </Card>
-            ))
-          ) : (
-            <Card className="p-6 text-center text-muted-foreground">
+          ) :
+
+          <Card className="p-6 text-center text-muted-foreground">
               <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
               <p>Nessuna riunione per {filterMonth === 'all' ? 'questo periodo' : MONTHS[Number(filterMonth)]?.label + ' ' + filterYear}</p>
             </Card>
-          )}
+          }
         </div>
       </div>
 
@@ -310,9 +310,9 @@ export const MeetingsPage = () => {
               <Label>Titolo</Label>
               <Input
                 value={editingMeeting?.title || ''}
-                onChange={(e) => setEditingMeeting(prev => prev ? { ...prev, title: e.target.value } : null)}
-                placeholder="Titolo riunione"
-              />
+                onChange={(e) => setEditingMeeting((prev) => prev ? { ...prev, title: e.target.value } : null)}
+                placeholder="Titolo riunione" />
+
             </div>
             <div className="space-y-2">
               <Label>Settimana</Label>
@@ -320,14 +320,14 @@ export const MeetingsPage = () => {
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {editingMeeting?.weekStart ? (
-                      <>
+                    {editingMeeting?.weekStart ?
+                    <>
                         {format(startOfWeek(editingMeeting.weekStart, { weekStartsOn: 1 }), "d MMM", { locale: it })} - 
                         {format(addWeeks(startOfWeek(editingMeeting.weekStart, { weekStartsOn: 1 }), 1), " d MMM yyyy", { locale: it })}
-                      </>
-                    ) : (
-                      <span>Seleziona settimana</span>
-                    )}
+                      </> :
+
+                    <span>Seleziona settimana</span>
+                    }
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
@@ -336,12 +336,12 @@ export const MeetingsPage = () => {
                     selected={editingMeeting?.weekStart}
                     onSelect={(date) => {
                       if (date) {
-                        setEditingMeeting(prev => prev ? { ...prev, weekStart: date } : null);
+                        setEditingMeeting((prev) => prev ? { ...prev, weekStart: date } : null);
                       }
                     }}
                     locale={it}
-                    className={cn("p-3 pointer-events-auto")}
-                  />
+                    className={cn("p-3 pointer-events-auto")} />
+
                 </PopoverContent>
               </Popover>
               <p className="text-xs text-muted-foreground">
@@ -355,8 +355,8 @@ export const MeetingsPage = () => {
               onClick={() => {
                 if (editingMeeting) {
                   const weekInfo = getWeekInfo(editingMeeting.weekStart);
-                  updateMeeting.mutate({ 
-                    id: editingMeeting.id, 
+                  updateMeeting.mutate({
+                    id: editingMeeting.id,
                     title: editingMeeting.title,
                     week_start: weekInfo.weekStart,
                     week_number: weekInfo.weekNumber,
@@ -364,8 +364,8 @@ export const MeetingsPage = () => {
                   });
                   setEditingMeeting(null);
                 }
-              }}
-            >
+              }}>
+
               Salva
             </Button>
           </DialogFooter>
@@ -390,13 +390,13 @@ export const MeetingsPage = () => {
                   deleteMeeting.mutate(deletingMeetingId);
                   setDeletingMeetingId(null);
                 }
-              }}
-            >
+              }}>
+
               Elimina
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
-  );
+    </div>);
+
 };
