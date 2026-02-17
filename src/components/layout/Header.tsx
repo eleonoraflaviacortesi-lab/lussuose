@@ -85,26 +85,28 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
     <>
       <header className="fixed top-0 left-0 right-0 z-[60]">
         {/* iOS Safe Area Background */}
-        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black" />
+        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-background" />
         
-        {/* Ticker Banner - Black with smooth scroll */}
-        <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
-          <div className="flex ticker-smooth whitespace-nowrap pt-2">
-            {[...Array(3)].map((_, i) => (
-              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
-                <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
-                <span>★</span>
-                <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>
-                <span>★</span>
-                <span>FATTURATO A CREDITO €{formatCurrency(fatturatoCredito)}</span>
-                <span>★</span>
-              </span>
-            ))}
+        {/* Ticker Banner - inside a mega pill */}
+        <div className="pt-[env(safe-area-inset-top)] px-2">
+          <div className="bg-foreground text-background rounded-b-[1.5rem] overflow-hidden">
+            <div className="flex ticker-smooth whitespace-nowrap py-1.5">
+              {[...Array(3)].map((_, i) => (
+                <span key={i} className="flex items-center gap-6 mx-6 text-[11px] font-bold tracking-[0.15em] uppercase">
+                  <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
+                  <span>★</span>
+                  <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>
+                  <span>★</span>
+                  <span>FATTURATO A CREDITO €{formatCurrency(fatturatoCredito)}</span>
+                  <span>★</span>
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Main Header - Liquid Glass Effect */}
-        <div className="glass-header flex items-center justify-between px-4 py-2 rounded-b-[2rem]">
+        <div className="mx-2 mt-1 glass-header flex items-center justify-between px-4 py-2 rounded-[1.5rem]">
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
