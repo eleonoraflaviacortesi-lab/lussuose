@@ -346,31 +346,27 @@
     background: rgba(0, 0, 0, 0.06);
   }
 
-  /* Pill Navigation - Minimal with touch */
-  .pill-nav {
-    @apply px-2 flex items-center gap-1 justify-center;
-    padding-top: 1.5rem;
-    padding-bottom: 0.75rem;
+  /* Bottom Navigation Bar - Dark Floating Style */
+  .bottom-nav-bar {
+    background: rgba(15, 15, 15, 0.92);
+    backdrop-filter: blur(30px) saturate(180%);
+    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    box-shadow:
+      0 -4px 30px rgba(0, 0, 0, 0.2),
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
-  .pill-nav-item {
-    @apply flex items-center justify-center w-9 h-9 rounded-full transition-all duration-100;
+  .bottom-nav-item {
     -webkit-tap-highlight-color: transparent;
   }
 
-  .pill-nav-item:active:not(.active) {
-    @apply scale-90 bg-muted/30;
+  .bottom-nav-item:active:not(.active) {
+    @apply scale-90;
   }
 
-  .pill-nav-item.active {
-    @apply bg-transparent text-foreground;
-    background: none;
-    box-shadow: none;
-    overflow: visible;
-  }
-
-  .pill-nav-item:not(.active) {
-    @apply text-muted-foreground;
+  .bottom-nav-item.active {
+    background: rgba(255, 255, 255, 0.1);
   }
 
   /* Report Button - Dynamic States with touch */
