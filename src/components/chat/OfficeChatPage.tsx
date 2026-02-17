@@ -505,20 +505,27 @@ const OfficeChatPage = () => {
     return format(date, 'd MMMM yyyy', { locale: it });
   };
 
-  // Render message text with highlighted mentions
+  // Render message text with highlighted mentions (fuchsia) and #hashtags
   const renderMessageText = (text: string) => {
-    const parts = text.split(/(@[\w\s]+?)(?=\s|$)/g);
+    const parts = text.split(/(@[\w\s]+?|#[\w\s]+?)(?=\s|$)/g);
     return parts.map((part, i) => {
       if (part.startsWith('@')) {
         const name = part.slice(1).trim();
         const matched = profiles?.find(p => p.full_name.toLowerCase() === name.toLowerCase());
         if (matched) {
           return (
-            <span key={i} className="font-semibold text-primary cursor-pointer hover:underline">
+            <span key={i} className="font-bold cursor-pointer hover:underline" style={{ color: '#d946ef' }}>
               {part}
             </span>
           );
         }
+      }
+      if (part.startsWith('#')) {
+        return (
+          <span key={i} className="font-semibold text-primary cursor-pointer hover:underline">
+            {part}
+          </span>
+        );
       }
       return <span key={i}>{part}</span>;
     });
