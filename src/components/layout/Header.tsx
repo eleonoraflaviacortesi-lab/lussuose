@@ -121,7 +121,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: Heade
         <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
           <button 
             onClick={() => { triggerHaptic('selection'); setMenuOpen(true); }}
-            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform"
+            className="flex items-center justify-center hover:scale-105 transition-transform"
             aria-label="Apri menu"
           >
             <Menu className="w-5 h-5" />
