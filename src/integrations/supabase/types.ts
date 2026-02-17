@@ -752,13 +752,11 @@ export type Database = {
           name: string
           notes: string | null
           phone: string | null
-          prezzo_richiesto: number | null
           reminder_date: string | null
           status: string
           type: string | null
           updated_at: string
           user_id: string
-          valore: number | null
           zona: string | null
         }
         Insert: {
@@ -772,13 +770,11 @@ export type Database = {
           name: string
           notes?: string | null
           phone?: string | null
-          prezzo_richiesto?: number | null
           reminder_date?: string | null
           status?: string
           type?: string | null
           updated_at?: string
           user_id: string
-          valore?: number | null
           zona?: string | null
         }
         Update: {
@@ -792,13 +788,11 @@ export type Database = {
           name?: string
           notes?: string | null
           phone?: string | null
-          prezzo_richiesto?: number | null
           reminder_date?: string | null
           status?: string
           type?: string | null
           updated_at?: string
           user_id?: string
-          valore?: number | null
           zona?: string | null
         }
         Relationships: []

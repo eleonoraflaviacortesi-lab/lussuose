@@ -80,8 +80,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     reminder_date: null as Date | null,
     reminder_time: '09:00',
     comments: [] as NotiziaComment[],
-    prezzo_richiesto: null as number | null,
-    valore: null as number | null,
   });
 
   // Auto-save function
@@ -107,8 +105,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       emoji: editData.emoji || '📋',
       reminder_date: reminderDateTime,
       comments: editData.comments,
-      prezzo_richiesto: editData.prezzo_richiesto,
-      valore: editData.valore,
     });
 
     // Show saved indicator
@@ -165,8 +161,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         reminder_date: reminderDate,
         reminder_time: reminderDate ? format(reminderDate, 'HH:mm') : '09:00',
         comments: notizia.comments || [],
-        prezzo_richiesto: notizia.prezzo_richiesto ?? null,
-        valore: notizia.valore ?? null,
       });
       setNewComment('');
     }
@@ -350,33 +344,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 onChange={(e) => updateField('type', e.target.value)}
                 onBlur={handleBlur}
                 placeholder="Es: Casale"
-                className={pillInputClass}
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <Label htmlFor="edit-prezzo" className="text-xs font-medium mb-1.5 block">Prezzo richiesto</Label>
-              <input
-                id="edit-prezzo"
-                type="number"
-                value={editData.prezzo_richiesto ?? ''}
-                onChange={(e) => updateField('prezzo_richiesto', e.target.value ? Number(e.target.value) : null)}
-                onBlur={handleBlur}
-                placeholder="€ 0"
-                className={pillInputClass}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-valore" className="text-xs font-medium mb-1.5 block">Valore</Label>
-              <input
-                id="edit-valore"
-                type="number"
-                value={editData.valore ?? ''}
-                onChange={(e) => updateField('valore', e.target.value ? Number(e.target.value) : null)}
-                onBlur={handleBlur}
-                placeholder="€ 0"
                 className={pillInputClass}
               />
             </div>
