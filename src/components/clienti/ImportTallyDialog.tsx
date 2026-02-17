@@ -100,7 +100,7 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     });
   };
 
-  // Perform the import
+  // Perform the import – merge into existing clients when name matches
   const handleImport = async () => {
     if (!profile) return;
 
@@ -108,71 +108,140 @@ export function ImportTallyDialog({ open, onOpenChange, onSuccess }: ImportTally
     setResults(null);
 
     try {
-      const clienti: Record<string, any>[] = [];
+      const parsedClients: Record<string, any>[] = [];
       const errors: string[] = [];
 
-      // Process each row
       for (let rowIdx = 0; rowIdx < rows.length; rowIdx++) {
         try {
           const client = rowToClient(rows[rowIdx], columnInfos, profile.sede);
           if (client) {
-            clienti.push(client);
+            parsedClients.push(client);
           } else {
             errors.push(`Riga ${rowIdx + 2}: Nome mancante`);
           }
-        } catch (err) {
+        } catch {
           errors.push(`Riga ${rowIdx + 2}: Errore parsing`);
         }
       }
 
-      if (clienti.length === 0) {
-        toast({ 
-          title: 'Nessun cliente valido', 
-          description: `Trovati ${errors.length} errori. Verifica la mappatura delle colonne.`, 
-          variant: 'destructive' 
-        });
+      if (parsedClients.length === 0) {
+        toast({ title: 'Nessun cliente valido', description: `Trovati ${errors.length} errori.`, variant: 'destructive' });
         setResults({ success: 0, errors });
         setStep('result');
         setIsLoading(false);
         return;
       }
 
-      // Insert in batches
-      let successCount = 0;
-      const batchSize = 50;
-      
-      for (let i = 0; i < clienti.length; i += batchSize) {
-        const batch = clienti.slice(i, i + batchSize);
-        const { error } = await supabase
-          .from('clienti')
-          .upsert(batch as any, { 
-            onConflict: 'tally_submission_id',
-            ignoreDuplicates: false 
-          });
+      // Fetch all existing clients in the sede to match by name
+      const { data: existingClients } = await supabase
+        .from('clienti')
+        .select('*')
+        .eq('sede', profile.sede);
 
-        if (error) {
-          errors.push(`Batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
-        } else {
-          successCount += batch.length;
+      const existingMap = new Map<string, any>();
+      (existingClients || []).forEach(c => {
+        const key = `${(c.nome || '').trim().toLowerCase()}|${(c.cognome || '').trim().toLowerCase()}`;
+        existingMap.set(key, c);
+      });
+
+      let successCount = 0;
+      const SKIP_FIELDS = ['sede', 'status', 'emoji', 'display_order', 'id', 'created_at', 'updated_at'];
+      const ARRAY_FIELDS = ['regioni', 'tipologia', 'contesto', 'motivo_zona'];
+
+      for (const incoming of parsedClients) {
+        try {
+          const nome = (incoming.nome || '').trim();
+          // Split "Nome Cognome" if cognome not separately mapped
+          let cognome = (incoming.cognome || '').trim();
+          let nomeParts = nome;
+          if (!cognome && nome.includes(' ')) {
+            const parts = nome.split(/\s+/);
+            nomeParts = parts[0];
+            cognome = parts.slice(1).join(' ');
+          }
+
+          const lookupKey = `${nomeParts.toLowerCase()}|${cognome.toLowerCase()}`;
+          const existing = existingMap.get(lookupKey);
+
+          if (existing) {
+            // Merge: only fill missing fields, keep original portale
+            const updates: Record<string, any> = {};
+
+            for (const [field, value] of Object.entries(incoming)) {
+              if (SKIP_FIELDS.includes(field)) continue;
+              if (field === 'nome' || field === 'cognome') continue;
+              // Keep original portale
+              if (field === 'portale' && existing.portale) continue;
+
+              if (ARRAY_FIELDS.includes(field)) {
+                const existingArr: string[] = existing[field] || [];
+                const incomingArr: string[] = Array.isArray(value) ? value : [];
+                const merged = [...new Set([...existingArr, ...incomingArr])];
+                if (merged.length > existingArr.length) {
+                  updates[field] = merged;
+                }
+              } else {
+                // Only fill if existing value is null/empty
+                const existingVal = existing[field];
+                if ((existingVal === null || existingVal === undefined || existingVal === '') && value != null && value !== '') {
+                  updates[field] = value;
+                }
+              }
+            }
+
+            // Store tally_submission_id if present and missing
+            if (incoming.tally_submission_id && !existing.tally_submission_id) {
+              updates.tally_submission_id = incoming.tally_submission_id;
+            }
+
+            // Mark as qualified
+            if (existing.status === 'new' || existing.status === 'contacted') {
+              updates.status = 'qualified';
+            }
+
+            if (Object.keys(updates).length > 0) {
+              const { error } = await supabase
+                .from('clienti')
+                .update(updates)
+                .eq('id', existing.id);
+              if (error) {
+                errors.push(`${nome}: ${error.message}`);
+              } else {
+                successCount++;
+              }
+            } else {
+              successCount++; // Already up to date
+            }
+          } else {
+            // New client – insert with qualified status, portale = TALLY only if not set
+            incoming.status = 'qualified';
+            if (!incoming.portale) incoming.portale = 'TALLY';
+            if (nomeParts !== nome) {
+              incoming.nome = nomeParts;
+              incoming.cognome = cognome;
+            }
+
+            const { error } = await supabase.from('clienti').insert(incoming as any);
+            if (error) {
+              errors.push(`${nome}: ${error.message}`);
+            } else {
+              successCount++;
+            }
+          }
+        } catch (err: any) {
+          errors.push(`${incoming.nome}: ${err.message}`);
         }
       }
 
       setResults({ success: successCount, errors });
       setStep('result');
-      
+
       if (successCount > 0) {
-        toast({ 
-          title: 'Import completato', 
-          description: `${successCount} clienti importati` 
-        });
+        toast({ title: 'Import completato', description: `${successCount} clienti processati (integrati o creati)` });
         onSuccess();
       }
     } catch (err: any) {
-      toast({ 
-        title: 'Errore import', 
-        description: err.message, 
-        variant: 'destructive' 
-      });
+      toast({ title: 'Errore import', description: err.message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
     }
