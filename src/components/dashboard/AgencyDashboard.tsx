@@ -3,7 +3,7 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotizie, Notizia } from '@/hooks/useNotizie';
 import { Progress } from '@/components/ui/progress';
-import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, BarChart3, Settings, TrendingDown, CreditCard, Clock } from 'lucide-react';
+import { Phone, FileText, Calendar, Building, Briefcase, Home, Euro, Settings, TrendingDown, CreditCard, Clock, Star } from 'lucide-react';
 import SedeTargetsDialog from './SedeTargetsDialog';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,7 @@ const AgencyDashboard = () => {
   const [period, setPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [showTargetsDialog, setShowTargetsDialog] = useState(false);
   const userSede = currentProfile?.sede || 'CITTÀ DI CASTELLO';
-  
+
   const { kpis, isLoading } = useKPIs(period);
   const { notizieByStatus, isLoading: notizieLoading } = useNotizie();
 
@@ -22,7 +22,7 @@ const AgencyDashboard = () => {
     return new Intl.NumberFormat('it-IT', {
       style: 'currency',
       currency: 'EUR',
-      minimumFractionDigits: 0,
+      minimumFractionDigits: 0
     }).format(value);
   };
 
@@ -30,8 +30,8 @@ const AgencyDashboard = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-6 w-6 border-2 border-foreground border-t-transparent"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   const periodLabel = period === 'week' ? 'SETTIMANA PERFORMANCE' : period === 'year' ? 'ANNO PERFORMANCE' : 'MESE PERFORMANCE';
@@ -72,22 +72,22 @@ const AgencyDashboard = () => {
   const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
 
   // KPI Card component
-  const KPICard = ({ 
-    title, 
-    value, 
-    target, 
-    delta, 
-    icon: Icon, 
-    format = 'number' 
-  }: { 
-    title: string; 
-    value: number; 
-    target: number; 
-    delta: number; 
-    icon: React.ElementType; 
-    format?: 'number' | 'currency';
-  }) => {
-    const percent = target > 0 ? Math.min(100, Math.round((value / target) * 100)) : 0;
+  const KPICard = ({
+    title,
+    value,
+    target,
+    delta,
+    icon: Icon,
+    format = 'number'
+
+
+
+
+
+
+
+  }: {title: string;value: number;target: number;delta: number;icon: React.ElementType;format?: 'number' | 'currency';}) => {
+    const percent = target > 0 ? Math.min(100, Math.round(value / target * 100)) : 0;
     const formatValue = (val: number) => format === 'currency' ? formatCurrency(val) : val.toString();
     const formatDelta = (d: number) => {
       const prefix = d > 0 ? '+' : '';
@@ -102,9 +102,9 @@ const AgencyDashboard = () => {
           </p>
           <Icon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
         </div>
-        <p className={cn(
-          "font-bold text-foreground mb-2",
-          format === 'currency' ? "text-2xl" : "text-3xl"
+        <p className={cn("text-foreground mb-2 text-xl font-medium",
+
+        format === 'currency' ? "text-2xl" : "text-3xl"
         )}>
           {formatValue(value)}
         </p>
@@ -118,8 +118,8 @@ const AgencyDashboard = () => {
             {formatDelta(delta)}
           </span>
         </div>
-      </div>
-    );
+      </div>);
+
   };
 
   return (
@@ -128,36 +128,36 @@ const AgencyDashboard = () => {
       <div className="bg-card rounded-2xl shadow-lg p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center">
-            <BarChart3 className="w-6 h-6" />
+            <Star className="w-6 h-6" />
           </div>
           <div className="flex-1">
-            <h2 className="text-2xl font-extrabold tracking-wide uppercase">{userSede}</h2>
+            <h2 className="tracking-wide uppercase text-xl font-medium">{userSede}</h2>
             <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
               {periodLabel}
             </p>
           </div>
-          <button 
+          <button
             onClick={() => setShowTargetsDialog(true)}
-            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          >
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors">
+
             <Settings className="w-4 h-4" />
           </button>
         </div>
 
         <div className="flex items-center gap-1 bg-muted rounded-full p-1 justify-center">
-          {(['week', 'month', 'year'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={`flex-1 px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
-                period === p 
-                  ? 'bg-foreground text-background' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
+          {(['week', 'month', 'year'] as const).map((p) =>
+          <button
+            key={p}
+            onClick={() => setPeriod(p)}
+            className={`flex-1 px-3 py-1.5 text-[10px] font-medium tracking-[0.1em] uppercase rounded-full transition-colors ${
+            period === p ?
+            'bg-foreground text-background' :
+            'text-muted-foreground hover:text-foreground'}`
+            }>
+
               {p === 'week' ? 'S' : p === 'month' ? 'M' : 'A'}
             </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -189,8 +189,8 @@ const AgencyDashboard = () => {
       </div>
 
       {/* In attesa di rogito section */}
-      {creditNotizie.length > 0 && (
-        <div className="space-y-3">
+      {creditNotizie.length > 0 &&
+      <div className="space-y-3">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-blue-500" />
             <h3 className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
@@ -198,29 +198,29 @@ const AgencyDashboard = () => {
             </h3>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {creditNotizie.map((notizia: Notizia) => (
-              <div 
-                key={notizia.id}
-                className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800"
-              >
+            {creditNotizie.map((notizia: Notizia) =>
+          <div
+            key={notizia.id}
+            className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-xl border border-blue-200 dark:border-blue-800">
+
                 <div className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center text-sm">
                   {notizia.emoji || '🏠'}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-foreground truncate">{notizia.name}</p>
-                  {notizia.zona && (
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider truncate">{notizia.zona}</p>
-                  )}
+                  {notizia.zona &&
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider truncate">{notizia.zona}</p>
+              }
                 </div>
               </div>
-            ))}
+          )}
           </div>
         </div>
-      )}
+      }
 
       <SedeTargetsDialog open={showTargetsDialog} onOpenChange={setShowTargetsDialog} />
-    </div>
-  );
+    </div>);
+
 };
 
 export default AgencyDashboard;
