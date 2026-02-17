@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfiles } from '@/hooks/useProfiles';
-import { Send, Reply, X, ChevronDown, Mic, Square, Megaphone, Wallet, Play, Pause, Hash } from 'lucide-react';
+import { Send, Reply, X, ChevronDown, Mic, Square, Megaphone, Wallet, Play, Pause } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -51,8 +51,7 @@ const OfficeChatPage = () => {
   // # hashtag attachment state
   const [showHashDropdown, setShowHashDropdown] = useState(false);
   const [hashQuery, setHashQuery] = useState('');
-  const [hashMode, setHashMode] = useState<'choose' | 'notizia' | 'cliente'>('choose');
-  const [hashResults, setHashResults] = useState<any[]>([]);
+  const [hashResults, setHashResults] = useState<Array<{ id: string; type: 'notizia' | 'cliente'; label: string; sub: string; emoji: string; raw: any }>>([]);
   const [hashIndex, setHashIndex] = useState(0);
   const [hashLoading, setHashLoading] = useState(false);
 
@@ -345,42 +344,49 @@ const OfficeChatPage = () => {
     await supabase.from('chat_messages').update({ reactions }).eq('id', msg.id);
   };
 
-  // # hashtag search — global across all agents in sede
-  const searchHashtag = useCallback(async (query: string, mode: 'notizia' | 'cliente') => {
+  // # hashtag search — searches BOTH notizie and clienti globally
+  const searchHashtag = useCallback(async (query: string) => {
     setHashLoading(true);
-    if (mode === 'notizia') {
-      // Search all notizie in same sede (RLS allows via is_same_sede)
-      const { data } = await supabase
-        .from('notizie')
-        .select('*')
-        .ilike('name', `%${query}%`)
+    const q = query.trim();
+    
+    // Search both in parallel
+    const [notizieRes, clientiRes] = await Promise.all([
+      supabase.from('notizie').select('*')
+        .ilike('name', `%${q}%`)
         .order('created_at', { ascending: false })
-        .limit(8);
-      setHashResults(data || []);
-    } else {
-      // Search all clienti in sede
-      const { data } = await supabase
-        .from('clienti')
-        .select('*')
+        .limit(5),
+      supabase.from('clienti').select('*')
         .eq('sede', sede)
-        .or(`nome.ilike.%${query}%,cognome.ilike.%${query}%`)
+        .or(`nome.ilike.%${q}%,cognome.ilike.%${q}%`)
         .order('created_at', { ascending: false })
-        .limit(8);
-      setHashResults(data || []);
-    }
+        .limit(5),
+    ]);
+
+    const results: typeof hashResults = [];
+    (notizieRes.data || []).forEach(n => results.push({
+      id: n.id, type: 'notizia', label: n.name, sub: n.zona || n.status, emoji: n.emoji || '📋', raw: n,
+    }));
+    (clientiRes.data || []).forEach(c => results.push({
+      id: c.id, type: 'cliente', label: `${c.nome} ${c.cognome || ''}`.trim(), sub: c.paese || c.status, emoji: c.emoji || '🏠', raw: c,
+    }));
+    
+    setHashResults(results);
     setHashLoading(false);
   }, [sede]);
 
   // Debounced hash search
   const hashSearchTimerRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {
-    if (!showHashDropdown || hashMode === 'choose') return;
+    if (!showHashDropdown || !hashQuery) {
+      if (!hashQuery && showHashDropdown) setHashResults([]);
+      return;
+    }
     if (hashSearchTimerRef.current) clearTimeout(hashSearchTimerRef.current);
     hashSearchTimerRef.current = setTimeout(() => {
-      searchHashtag(hashQuery, hashMode);
+      searchHashtag(hashQuery);
     }, 200);
     return () => { if (hashSearchTimerRef.current) clearTimeout(hashSearchTimerRef.current); };
-  }, [hashQuery, hashMode, showHashDropdown, searchHashtag]);
+  }, [hashQuery, showHashDropdown, searchHashtag]);
 
   // Mention & hashtag detection in textarea
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -405,37 +411,13 @@ const OfficeChatPage = () => {
     }
     setShowMentionDropdown(false);
 
-    // Check for # hashtag
+    // Check for # hashtag — just search by whatever follows #
     const hashIdx = beforeCursor.lastIndexOf('#');
     if (hashIdx >= 0 && (hashIdx === 0 || beforeCursor[hashIdx - 1] === ' ' || beforeCursor[hashIdx - 1] === '\n')) {
       const q = beforeCursor.slice(hashIdx + 1);
       if (!q.includes('\n')) {
         setShowHashDropdown(true);
-        // Parse mode from query: #n or #b prefix or just #
-        if (q.length === 0) {
-          setHashMode('choose');
-          setHashQuery('');
-        } else if (q.startsWith('n ') || q.startsWith('n')) {
-          if (q.length > 1) {
-            setHashMode('notizia');
-            setHashQuery(q.slice(q.startsWith('n ') ? 2 : 1));
-          } else {
-            setHashMode('notizia');
-            setHashQuery('');
-          }
-        } else if (q.startsWith('b ') || q.startsWith('b')) {
-          if (q.length > 1) {
-            setHashMode('cliente');
-            setHashQuery(q.slice(q.startsWith('b ') ? 2 : 1));
-          } else {
-            setHashMode('cliente');
-            setHashQuery('');
-          }
-        } else {
-          // Default: search both — show choose
-          setHashMode('choose');
-          setHashQuery(q);
-        }
+        setHashQuery(q);
         setHashIndex(0);
         return;
       }
@@ -443,7 +425,7 @@ const OfficeChatPage = () => {
     setShowHashDropdown(false);
   };
 
-  const selectHashItem = (item: any, type: 'notizia' | 'cliente') => {
+  const selectHashItem = (item: typeof hashResults[number]) => {
     // Remove the # and everything after it from the message
     const beforeCursor = newMessage.slice(0, cursorPos);
     const hashIdx = beforeCursor.lastIndexOf('#');
@@ -452,7 +434,7 @@ const OfficeChatPage = () => {
     setNewMessage(cleaned + (cleaned ? ' ' : '') + after);
     setShowHashDropdown(false);
 
-    if (type === 'notizia') {
+    if (item.type === 'notizia') {
       sendMessage(item.id, undefined);
     } else {
       sendMessage(undefined, item.id);
@@ -471,17 +453,17 @@ const OfficeChatPage = () => {
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     // Hash dropdown navigation
-    if (showHashDropdown && hashMode !== 'choose' && hashResults.length > 0) {
+    if (showHashDropdown && hashResults.length > 0) {
       if (e.key === 'ArrowDown') { e.preventDefault(); setHashIndex(i => Math.min(i + 1, hashResults.length - 1)); return; }
       if (e.key === 'ArrowUp') { e.preventDefault(); setHashIndex(i => Math.max(i - 1, 0)); return; }
       if (e.key === 'Enter' || e.key === 'Tab') {
         e.preventDefault();
-        selectHashItem(hashResults[hashIndex], hashMode as 'notizia' | 'cliente');
+        selectHashItem(hashResults[hashIndex]);
         return;
       }
       if (e.key === 'Escape') { setShowHashDropdown(false); return; }
     }
-    if (showHashDropdown && hashMode === 'choose') {
+    if (showHashDropdown) {
       if (e.key === 'Escape') { setShowHashDropdown(false); return; }
     }
 
@@ -793,90 +775,35 @@ const OfficeChatPage = () => {
       {/* # Hashtag dropdown */}
       {showHashDropdown && (
         <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl shadow-xl border border-border z-50 overflow-hidden max-h-64 overflow-y-auto">
-          {hashMode === 'choose' ? (
-            <div className="p-1">
-              <p className="text-xs text-muted-foreground px-3 py-2">Cosa vuoi allegare?</p>
-              <button
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  // Insert 'n ' after #
-                  const beforeCursor = newMessage.slice(0, cursorPos);
-                  const hashIdx = beforeCursor.lastIndexOf('#');
-                  const after = newMessage.slice(cursorPos);
-                  const val = newMessage.slice(0, hashIdx) + '#n ' + after;
-                  setNewMessage(val);
-                  setCursorPos(hashIdx + 3);
-                  setHashMode('notizia');
-                  setHashQuery('');
-                  setTimeout(() => {
-                    textareaRef.current?.focus();
-                    textareaRef.current?.setSelectionRange(hashIdx + 3, hashIdx + 3);
-                  }, 0);
-                }}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted rounded-lg"
-              >
-                <Megaphone className="w-4 h-4" />
-                <span className="font-medium">Notizia</span>
-                <span className="text-xs text-muted-foreground ml-auto">#n</span>
-              </button>
-              <button
-                onMouseDown={(e) => {
-                  e.preventDefault();
-                  const beforeCursor = newMessage.slice(0, cursorPos);
-                  const hashIdx = beforeCursor.lastIndexOf('#');
-                  const after = newMessage.slice(cursorPos);
-                  const val = newMessage.slice(0, hashIdx) + '#b ' + after;
-                  setNewMessage(val);
-                  setCursorPos(hashIdx + 3);
-                  setHashMode('cliente');
-                  setHashQuery('');
-                  setTimeout(() => {
-                    textareaRef.current?.focus();
-                    textareaRef.current?.setSelectionRange(hashIdx + 3, hashIdx + 3);
-                  }, 0);
-                }}
-                className="w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm hover:bg-muted rounded-lg"
-              >
-                <Wallet className="w-4 h-4" />
-                <span className="font-medium">Buyer</span>
-                <span className="text-xs text-muted-foreground ml-auto">#b</span>
-              </button>
-            </div>
+          {hashQuery.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">Scrivi un nome dopo # per cercare notizie e buyer</p>
+          ) : hashResults.length === 0 && !hashLoading ? (
+            <p className="text-xs text-muted-foreground text-center py-4">Nessun risultato</p>
           ) : (
-            <div>
-              <div className="px-3 py-2 border-b border-border flex items-center gap-2 text-xs text-muted-foreground">
-                {hashMode === 'notizia' ? <Megaphone className="w-3.5 h-3.5" /> : <Wallet className="w-3.5 h-3.5" />}
-                <span>Cerca {hashMode === 'notizia' ? 'notizia' : 'buyer'}...</span>
-                {hashLoading && <span className="ml-auto animate-pulse">⏳</span>}
-              </div>
-              {hashResults.length === 0 && !hashLoading && (
-                <p className="text-xs text-muted-foreground text-center py-4">Nessun risultato</p>
-              )}
-              {hashResults.map((item, idx) => (
-                <button
-                  key={item.id}
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    selectHashItem(item, hashMode as 'notizia' | 'cliente');
-                  }}
-                  className={cn(
-                    'w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm',
-                    idx === hashIndex ? 'bg-muted' : 'hover:bg-muted/50'
-                  )}
-                >
-                  <span className="text-base">{hashMode === 'notizia' ? (item.emoji || '📋') : (item.emoji || '🏠')}</span>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium truncate">
-                      {hashMode === 'notizia' ? item.name : `${item.nome} ${item.cognome || ''}`}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {hashMode === 'notizia' ? (item.zona || item.status) : (item.paese || item.status)}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
+            hashResults.map((item, idx) => (
+              <button
+                key={`${item.type}-${item.id}`}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  selectHashItem(item);
+                }}
+                className={cn(
+                  'w-full text-left px-3 py-2.5 flex items-center gap-2.5 text-sm',
+                  idx === hashIndex ? 'bg-muted' : 'hover:bg-muted/50'
+                )}
+              >
+                <span className="text-base">{item.emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium truncate">{item.label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{item.sub}</p>
+                </div>
+                <span className="text-[10px] text-muted-foreground/60 flex-shrink-0">
+                  {item.type === 'notizia' ? '📋' : '👤'}
+                </span>
+              </button>
+            ))
           )}
+          {hashLoading && <p className="text-xs text-muted-foreground text-center py-2 animate-pulse">Cercando...</p>}
         </div>
       )}
 
