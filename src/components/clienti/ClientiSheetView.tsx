@@ -16,7 +16,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { triggerHaptic } from '@/lib/haptics';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
@@ -728,7 +728,7 @@ function LazyAgentCell({ value, onChange, agents }: { value: string; onChange: (
   if (!open) {
     return (
       <span
-        className="block truncate text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 min-h-[28px]"
+        className="block text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 min-h-[28px] break-words"
         onClick={(e) => { e.stopPropagation(); setOpen(true); }}
       >{display}</span>
     );
@@ -768,13 +768,13 @@ function InlineTextCell({ value, onChange }: { value: string; onChange?: (val: s
   }, [draft, value, onChange]);
 
   if (!onChange) {
-    return <span className="block truncate text-xs px-2 py-1 min-h-[28px]" title={value}>{value || '—'}</span>;
+    return <span className="block text-xs px-2 py-1 min-h-[28px] break-words" title={value}>{value || '—'}</span>;
   }
 
   if (!editing) {
     return (
       <span
-        className="block truncate text-xs px-2 py-1.5 cursor-text hover:bg-secondary/50 rounded min-h-[28px]"
+        className="block text-xs px-2 py-1.5 cursor-text hover:bg-secondary/50 rounded min-h-[28px] break-words"
         onClick={(e) => { e.stopPropagation(); setEditing(true); setDraft(value); }}
         title={value}
       >
@@ -860,7 +860,7 @@ function SheetToolbar({
 }
 
 // --- Memoized Row ---
-const ROW_HEIGHT = 32;
+const MIN_ROW_HEIGHT = 32;
 
 const SheetRow = memo(function SheetRow({
   cliente,
@@ -933,7 +933,7 @@ const SheetRow = memo(function SheetRow({
         rowFormat?.strikethrough && 'line-through',
       )}
       style={{
-        height: ROW_HEIGHT,
+        minHeight: MIN_ROW_HEIGHT,
         backgroundColor: cliente.row_bg_color || cliente.card_color || undefined,
         color: cliente.row_text_color || (cliente.card_color ? (isDarkColor(cliente.card_color) ? '#ffffff' : '#000000') : undefined),
       }}
@@ -965,7 +965,7 @@ const SheetRow = memo(function SheetRow({
           <div
             key={col.key}
             className={cn(
-              "flex-shrink-0 border-r border-border/20 overflow-hidden",
+              "flex-shrink-0 border-r border-border/20",
               selectedColKey === col.key && "bg-accent/30",
               (cf?.bold || col.key === 'nome' || col.key === 'cognome') && 'font-bold',
               cf?.italic && 'italic',
@@ -975,6 +975,7 @@ const SheetRow = memo(function SheetRow({
               width: colWidths[col.key],
               backgroundColor: cf?.bgColor || undefined,
               color: cf?.textColor || undefined,
+              wordBreak: 'break-word',
             }}
             onClick={(e) => { e.stopPropagation(); onSelect(cliente.id); onCellSelect?.(cliente.id, col.key); }}
           >
@@ -1239,13 +1240,29 @@ function getCustomFieldValue(cliente: Cliente, key: string): string {
   return String(cf[key] ?? '');
 }
 
+// --- Persistence helpers for column widths ---
+function getSavedColWidths(): Record<string, number> | null {
+  try {
+    const saved = localStorage.getItem('clienti-sheet-col-widths');
+    return saved ? JSON.parse(saved) : null;
+  } catch { return null; }
+}
+
+function saveColWidths(widths: Record<string, number>) {
+  localStorage.setItem('clienti-sheet-col-widths', JSON.stringify(widths));
+}
+
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, searchQuery, onAddNew }: ClientiSheetViewProps) {
   const [customCols, setCustomCols] = useState<ColumnDef[]>(getCustomColumns);
   const allColumns = useMemo(() => [...COLUMNS, ...customCols], [customCols]);
   const [colOrder, setColOrder] = useState<string[]>(() => [...COLUMNS.map(c => c.key), ...getCustomColumns().map(c => c.key)]);
   const [colWidths, setColWidths] = useState<Record<string, number>>(
-    () => Object.fromEntries([...COLUMNS, ...getCustomColumns()].map(c => [c.key, c.width]))
+    () => {
+      const saved = getSavedColWidths();
+      const defaults = Object.fromEntries([...COLUMNS, ...getCustomColumns()].map(c => [c.key, c.width]));
+      return saved ? { ...defaults, ...saved } : defaults;
+    }
   );
   const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
@@ -1295,9 +1312,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   const dragColRef = useRef<{ key: string; startX: number } | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ cliente: Cliente; x: number; y: number } | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [containerHeight, setContainerHeight] = useState(600);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Copy/Paste keyboard handler
@@ -1413,25 +1427,10 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     setColFilters(prev => ({ ...prev, [key]: values }));
   }, []);
 
-  // Virtualization
-  const overscan = 10;
-  const totalHeight = sorted.length * ROW_HEIGHT;
-  const startIdx = Math.max(0, Math.floor(scrollTop / ROW_HEIGHT) - overscan);
-  const endIdx = Math.min(sorted.length, Math.ceil((scrollTop + containerHeight) / ROW_HEIGHT) + overscan);
-  const visibleRows = sorted.slice(startIdx, endIdx);
-
-  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  }, []);
-
-  // Measure container
-  const measureRef = useCallback((el: HTMLDivElement | null) => {
-    if (el) {
-      scrollRef.current = el;
-      const rect = el.getBoundingClientRect();
-      setContainerHeight(rect.height);
-    }
-  }, []);
+  // Persist column widths
+  useEffect(() => {
+    saveColWidths(colWidths);
+  }, [colWidths]);
 
   const handleHeaderClick = useCallback((key: string) => {
     // Date columns no longer sortable from header (use top-level button instead)
@@ -1591,7 +1590,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   return (
     <div
-      className="border border-border/30 rounded-2xl bg-background overflow-hidden flex flex-col max-h-[calc(100vh-280px)] shadow-sm"
+      className="border border-border/30 rounded-2xl bg-background overflow-hidden shadow-sm"
       onClick={(e) => {
         // Deselect when clicking on the container background (not on rows/headers)
         if (e.target === e.currentTarget) {
@@ -1625,9 +1624,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
       {/* Table */}
       <div
-        ref={measureRef}
-        className="overflow-auto flex-1"
-        onScroll={handleScroll}
+        className="overflow-x-auto"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedRowId(null);
@@ -1709,30 +1706,28 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
             )}
           </div>
 
-          {/* Virtualized rows */}
-          <div style={{ height: totalHeight, position: 'relative' }}>
-            <div style={{ position: 'absolute', top: startIdx * ROW_HEIGHT, left: 0, right: 0 }}>
-              {visibleRows.map((cliente, i) => (
-                <SheetRow
-                  key={cliente.id}
-                  cliente={cliente}
-                  idx={startIdx + i}
-                  colWidths={colWidths}
-                  agents={agents}
-                  rowNumWidth={rowNumWidth}
-                  isSelected={selectedRowId === cliente.id}
-                  selectedColKey={selectedColKey}
-                  rowFormat={rowFormats[cliente.id]}
-                  colFormats={colFormats}
-                  orderedColumns={orderedColumns}
-                  onSelect={setSelectedRowId}
-                  onCardClick={onCardClick}
-                  onCellChange={handleCellChange}
-                  onContextMenu={handleRowContextMenu}
-                  onCellSelect={(clienteId, colKey) => { setSelectedRowId(clienteId); setSelectedCellCol(colKey); }}
-                />
-              ))}
-            </div>
+          {/* Rows */}
+          <div>
+            {sorted.map((cliente, i) => (
+              <SheetRow
+                key={cliente.id}
+                cliente={cliente}
+                idx={i}
+                colWidths={colWidths}
+                agents={agents}
+                rowNumWidth={rowNumWidth}
+                isSelected={selectedRowId === cliente.id}
+                selectedColKey={selectedColKey}
+                rowFormat={rowFormats[cliente.id]}
+                colFormats={colFormats}
+                orderedColumns={orderedColumns}
+                onSelect={setSelectedRowId}
+                onCardClick={onCardClick}
+                onCellChange={handleCellChange}
+                onContextMenu={handleRowContextMenu}
+                onCellSelect={(clienteId, colKey) => { setSelectedRowId(clienteId); setSelectedCellCol(colKey); }}
+              />
+            ))}
           </div>
 
           {sorted.length === 0 && (
