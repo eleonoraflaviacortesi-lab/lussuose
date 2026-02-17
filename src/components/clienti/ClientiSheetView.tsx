@@ -2135,7 +2135,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
       {/* Table */}
       <div
-        className="overflow-x-auto"
+        className="overflow-x-auto [transform:rotateX(180deg)]"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedRowId(null);
@@ -2143,7 +2143,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
           }
         }}
       >
-        <div style={{ minWidth: totalWidth }}>
+        <div style={{ minWidth: totalWidth }} className="[transform:rotateX(180deg)]">
           {/* Header */}
           <div className="flex sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/40">
             <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r border-border/20" style={{ width: rowNumWidth }}>
