@@ -364,6 +364,7 @@ const COLUMNS: ColumnDef[] = [
   { key: 'telefono', label: 'Contatto 1', width: 150, minWidth: 100, editable: true, type: 'text' },
   { key: 'email', label: 'Contatto 2', width: 200, minWidth: 120, editable: true, type: 'text' },
   { key: 'status', label: 'Status', width: 130, minWidth: 100, editable: true, type: 'status' },
+  { key: 'note_extra', label: 'Note', width: 200, minWidth: 120, editable: true, type: 'text' },
 ];
 
 // --- Helpers ---
