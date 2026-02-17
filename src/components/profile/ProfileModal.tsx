@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Check, User, MapPin } from 'lucide-react';
+import { X, Check, User, MapPin, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -9,6 +10,7 @@ import { triggerHaptic } from '@/lib/haptics';
 interface ProfileModalProps {
   open: boolean;
   onClose: () => void;
+  onOpenSettings?: () => void;
 }
 
 const EMOJI_OPTIONS = ['👑', '👩‍💼', '📈', '🏠', '✨', '🖤', '💼', '💎', '🌸', '💅', '👠', '💄'];
@@ -16,8 +18,9 @@ const SEDI = ['CITTÀ DI CASTELLO', 'AREZZO'] as const;
 
 const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
 
-const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
+const ProfileModal = ({ open, onClose, onOpenSettings }: ProfileModalProps) => {
   const { profile, user, refetchProfile } = useAuth();
+  const navigate = useNavigate();
   const [selectedEmoji, setSelectedEmoji] = useState('🖤');
   const [customEmoji, setCustomEmoji] = useState('');
   const [fullName, setFullName] = useState('');
@@ -271,6 +274,22 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           >
             {isLoading ? 'SALVATAGGIO...' : 'SALVA'}
             <Check className="w-4 h-4" />
+          </button>
+
+          {/* Settings Link */}
+          <button
+            onClick={() => {
+              onClose();
+              if (onOpenSettings) {
+                onOpenSettings();
+              } else {
+                navigate('/impostazioni');
+              }
+            }}
+            className="w-full bg-muted/50 text-muted-foreground rounded-full h-10 flex items-center justify-center gap-2 font-medium tracking-[0.1em] uppercase text-xs hover:text-foreground transition-colors active:scale-[0.98]"
+          >
+            <Settings className="w-4 h-4" />
+            Impostazioni
           </button>
         </div>
       </div>

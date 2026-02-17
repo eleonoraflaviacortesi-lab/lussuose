@@ -12,9 +12,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
+  onOpenSettings?: () => void;
 }
 
-const Header = ({ onOpenProfile }: HeaderProps) => {
+const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
@@ -133,7 +134,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
         </div>
       </header>
 
-      <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} />
+      <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} onOpenSettings={onOpenSettings} />
     </>
   );
 };

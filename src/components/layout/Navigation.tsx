@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Newspaper, Settings, Calendar, Wallet } from 'lucide-react';
+import { Home, Megaphone, Newspaper, Calendar, Wallet } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -15,7 +15,6 @@ const tabToPath: Record<string, string> = {
   notizie: '/notizie',
   clienti: '/clienti',
   ufficio: '/ufficio',
-  impostazioni: '/impostazioni',
 };
 
 const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
@@ -27,7 +26,6 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Wallet, label: 'Buyers' },
     { id: 'ufficio', icon: Newspaper, label: 'Ufficio' },
-    { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
   const handleTabChange = (tabId: string) => {
