@@ -149,7 +149,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         onRefresh={handleRefresh}
         className="overflow-x-hidden"
       >
-        <main className="max-w-3xl lg:max-w-7xl mx-auto px-3 lg:px-6 animate-in fade-in duration-150 overflow-x-hidden">
+        <main className={`mx-auto animate-in fade-in duration-150 overflow-x-hidden ${activeTab === 'clienti' ? 'max-w-full px-2 lg:px-4' : 'max-w-3xl lg:max-w-7xl px-3 lg:px-6'}`}>
           <Suspense
             fallback={
               <div className="py-10 flex items-center justify-center">

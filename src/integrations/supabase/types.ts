@@ -223,6 +223,7 @@ export type Database = {
           contattato_da: string | null
           contesto: string[] | null
           created_at: string
+          custom_fields: Json | null
           data_submission: string | null
           dependance: string | null
           descrizione: string | null
@@ -274,6 +275,7 @@ export type Database = {
           contattato_da?: string | null
           contesto?: string[] | null
           created_at?: string
+          custom_fields?: Json | null
           data_submission?: string | null
           dependance?: string | null
           descrizione?: string | null
@@ -325,6 +327,7 @@ export type Database = {
           contattato_da?: string | null
           contesto?: string[] | null
           created_at?: string
+          custom_fields?: Json | null
           data_submission?: string | null
           dependance?: string | null
           descrizione?: string | null

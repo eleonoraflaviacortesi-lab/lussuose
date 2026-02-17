@@ -310,7 +310,30 @@ const SheetContextMenu = memo(function SheetContextMenu({
 });
 SheetContextMenu.displayName = 'SheetContextMenu';
 
-const PORTALE_OPTIONS = [
+// Portal options stored in localStorage for customization
+function getCustomPortals(): string[] {
+  try {
+    const saved = localStorage.getItem('custom-portals');
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+function saveCustomPortals(portals: string[]) {
+  localStorage.setItem('custom-portals', JSON.stringify(portals));
+}
+
+function getCustomPortaleColors(): Record<string, string> {
+  try {
+    const saved = localStorage.getItem('custom-portale-colors');
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+
+function saveCustomPortaleColors(colors: Record<string, string>) {
+  localStorage.setItem('custom-portale-colors', JSON.stringify(colors));
+}
+
+const DEFAULT_PORTALE_OPTIONS = [
   'James Edition', 'Idealista', 'Gate-away', 'Sito Cortesi', 'Immobiliare.it', 'Rightmove', 'TALLY', 'Altro',
 ];
 const TIPO_CONTATTO_OPTIONS = ['Mail', 'WhatsApp', 'Call', 'Idealista', 'Sito Cortesi'];
@@ -419,8 +442,8 @@ function ColorPalettePopover({
   );
 }
 
-// --- Lazy Badge Cell: only mounts Select on click ---
-function LazyBadgeCell({
+// --- Simple Badge Cell (for lingua, tipo_contatto) ---
+function SimpleBadgeCell({
   value, onChange, options, colorMap,
 }: {
   value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>;
@@ -474,6 +497,162 @@ function LazyBadgeCell({
         ))}
       </SelectContent>
     </Select>
+  );
+}
+
+// --- Portal Badge Cell with right-click color change and custom portals ---
+function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [colorMenuPortal, setColorMenuPortal] = useState<string | null>(null);
+  const [colorMenuPos, setColorMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [addingNew, setAddingNew] = useState(false);
+  const [newPortal, setNewPortal] = useState('');
+  const newInputRef = useRef<HTMLInputElement>(null);
+  const [customPortals, setCustomPortals] = useState(getCustomPortals);
+  const [customColors, setCustomColors] = useState(getCustomPortaleColors);
+
+  const allOptions = useMemo(() => [...DEFAULT_PORTALE_OPTIONS, ...customPortals], [customPortals]);
+  const mergedColors = useMemo(() => ({ ...PORTALE_COLORS, ...customColors }), [customColors]);
+  const bgColor = mergedColors[value] || '#6b7280';
+
+  useEffect(() => {
+    if (addingNew && newInputRef.current) newInputRef.current.focus();
+  }, [addingNew]);
+
+  const handleAddPortal = () => {
+    if (newPortal.trim() && !allOptions.includes(newPortal.trim())) {
+      const updated = [...customPortals, newPortal.trim()];
+      setCustomPortals(updated);
+      saveCustomPortals(updated);
+      onChange(newPortal.trim());
+    }
+    setNewPortal('');
+    setAddingNew(false);
+    setOpen(false);
+  };
+
+  const handleColorSelect = (portal: string, color: string) => {
+    const updated = { ...customColors, [portal]: color };
+    setCustomColors(updated);
+    saveCustomPortaleColors(updated);
+    setColorMenuPortal(null);
+  };
+
+  if (!open && !value) {
+    return (
+      <span
+        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-secondary/50"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >—</span>
+    );
+  }
+
+  if (!open) {
+    return (
+      <span
+        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50"
+        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+      >
+        <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+      </span>
+    );
+  }
+
+  return (
+    <>
+      <Select
+        value={value || '__none'}
+        onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
+        open={true}
+        onOpenChange={(o) => { if (!o) { setOpen(false); setColorMenuPortal(null); } }}
+      >
+        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
+          {value ? (
+            <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+          ) : (
+            <span className="text-muted-foreground text-xs">—</span>
+          )}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none">—</SelectItem>
+          {allOptions.map(o => (
+            <div
+              key={o}
+              className="relative"
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setColorMenuPortal(o);
+                setColorMenuPos({ x: e.clientX, y: e.clientY });
+              }}
+            >
+              <SelectItem value={o}>
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: mergedColors[o] || '#6b7280' }} />
+                  {o}
+                </span>
+              </SelectItem>
+            </div>
+          ))}
+          {/* Add new portal */}
+          {addingNew ? (
+            <div className="px-2 py-1.5 flex items-center gap-1">
+              <input
+                ref={newInputRef}
+                value={newPortal}
+                onChange={(e) => setNewPortal(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleAddPortal();
+                  if (e.key === 'Escape') { setAddingNew(false); setNewPortal(''); }
+                }}
+                className="flex-1 h-6 text-xs bg-muted rounded px-2 outline-none focus:ring-1 focus:ring-foreground/20"
+                placeholder="Nuovo portale..."
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          ) : (
+            <button
+              className="w-full text-left px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 flex items-center gap-1.5 transition-colors"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setAddingNew(true); }}
+            >
+              <Plus className="w-3 h-3" /> Aggiungi portale
+            </button>
+          )}
+        </SelectContent>
+      </Select>
+
+      {/* Portal color picker overlay */}
+      {colorMenuPortal && (
+        <>
+          <div className="fixed inset-0 z-[200]" onClick={() => setColorMenuPortal(null)} />
+          <div
+            className="fixed z-[200] p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+            style={{
+              left: Math.min(colorMenuPos.x, window.innerWidth - 280),
+              top: Math.min(colorMenuPos.y, window.innerHeight - 200),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
+              Colore: {colorMenuPortal}
+            </p>
+            <div className="grid grid-cols-10 gap-1">
+              {PALETTE_COLORS.map(c => (
+                <button
+                  key={c}
+                  className={cn(
+                    "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
+                    mergedColors[colorMenuPortal] === c && "ring-2 ring-foreground ring-offset-1"
+                  )}
+                  style={{ backgroundColor: c }}
+                  onClick={() => handleColorSelect(colorMenuPortal, c)}
+                />
+              ))}
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 }
 
@@ -679,6 +858,7 @@ const SheetRow = memo(function SheetRow({
   onCardClick,
   onCellChange,
   onContextMenu,
+  onCellSelect,
 }: {
   cliente: Cliente;
   idx: number;
@@ -694,6 +874,7 @@ const SheetRow = memo(function SheetRow({
   onCardClick: (c: Cliente) => void;
   onCellChange: (id: string, key: string, val: string) => void;
   onContextMenu: (cliente: Cliente, x: number, y: number) => void;
+  onCellSelect?: (clienteId: string, colKey: string) => void;
 }) {
   const longPressRef = useRef<NodeJS.Timeout | null>(null);
   const longPressTriggered = useRef(false);
@@ -776,15 +957,16 @@ const SheetRow = memo(function SheetRow({
               backgroundColor: cf?.bgColor || undefined,
               color: cf?.textColor || undefined,
             }}
+            onClick={(e) => { e.stopPropagation(); onSelect(cliente.id); onCellSelect?.(cliente.id, col.key); }}
           >
             {col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'lingua' && col.editable ? (
-              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
             ) : col.type === 'portale' && col.editable ? (
-              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={PORTALE_OPTIONS} colorMap={PORTALE_COLORS} />
+              <PortalBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'tipo_contatto' && col.editable ? (
-              <LazyBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
             ) : col.type === 'agent' && col.editable ? (
               <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
             ) : col.key === 'telefono' ? (
@@ -805,6 +987,8 @@ const SheetRow = memo(function SheetRow({
                   </a>
                 )}
               </div>
+            ) : col.key.startsWith('custom_') ? (
+              <InlineTextCell value={getCustomFieldValue(cliente, col.key)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
             ) : (
               <InlineTextCell value={getCellValueStatic(cliente, col)} onChange={col.editable ? (v) => onCellChange(cliente.id, col.key, v) : undefined} />
             )}
@@ -1018,16 +1202,38 @@ function ColumnFilterPopover({
   );
 }
 
+// --- Custom columns management ---
+function getCustomColumns(): ColumnDef[] {
+  try {
+    const saved = localStorage.getItem('clienti-custom-columns');
+    return saved ? JSON.parse(saved) : [];
+  } catch { return []; }
+}
+
+function saveCustomColumns(cols: ColumnDef[]) {
+  localStorage.setItem('clienti-custom-columns', JSON.stringify(cols));
+}
+
+function getCustomFieldValue(cliente: Cliente, key: string): string {
+  const cf = (cliente as any).custom_fields;
+  if (!cf || typeof cf !== 'object') return '';
+  return String(cf[key] ?? '');
+}
+
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, searchQuery, onAddNew }: ClientiSheetViewProps) {
-  const [colOrder, setColOrder] = useState<string[]>(() => COLUMNS.map(c => c.key));
+  const [customCols, setCustomCols] = useState<ColumnDef[]>(getCustomColumns);
+  const allColumns = useMemo(() => [...COLUMNS, ...customCols], [customCols]);
+  const [colOrder, setColOrder] = useState<string[]>(() => [...COLUMNS.map(c => c.key), ...getCustomColumns().map(c => c.key)]);
   const [colWidths, setColWidths] = useState<Record<string, number>>(
-    () => Object.fromEntries(COLUMNS.map(c => [c.key, c.width]))
+    () => Object.fromEntries([...COLUMNS, ...getCustomColumns()].map(c => [c.key, c.width]))
   );
-  const [sortCol, setSortCol] = useState<string | null>('data_submission');
+  const [sortCol, setSortCol] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [selectedColKey, setSelectedColKey] = useState<string | null>(null);
+  const [selectedCellCol, setSelectedCellCol] = useState<string | null>(null);
+  const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [colFilters, setColFilters] = useState<Record<string, Set<string>>>({});
   const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
   const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => {
@@ -1036,6 +1242,9 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       return saved ? JSON.parse(saved) : {};
     } catch { return {}; }
   });
+  const [addingColumn, setAddingColumn] = useState(false);
+  const [newColName, setNewColName] = useState('');
+  const newColRef = useRef<HTMLInputElement>(null);
 
   // Persist colFormats to localStorage
   useEffect(() => {
@@ -1043,6 +1252,26 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       localStorage.setItem('clienti-sheet-col-formats', JSON.stringify(colFormats));
     } catch {}
   }, [colFormats]);
+
+  useEffect(() => {
+    if (addingColumn && newColRef.current) newColRef.current.focus();
+  }, [addingColumn]);
+
+  const handleAddColumn = useCallback(() => {
+    const name = newColName.trim();
+    if (!name) return;
+    const key = `custom_${name.toLowerCase().replace(/[^a-z0-9]/g, '_')}`;
+    if (allColumns.some(c => c.key === key)) return;
+    const newCol: ColumnDef = { key, label: name, width: 130, minWidth: 80, editable: true, type: 'text' };
+    const updated = [...customCols, newCol];
+    setCustomCols(updated);
+    saveCustomColumns(updated);
+    setColOrder(prev => [...prev, key]);
+    setColWidths(prev => ({ ...prev, [key]: 130 }));
+    setNewColName('');
+    setAddingColumn(false);
+  }, [newColName, allColumns, customCols]);
+
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
   const dragColRef = useRef<{ key: string; startX: number } | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
@@ -1050,10 +1279,55 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   const scrollRef = useRef<HTMLDivElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerHeight, setContainerHeight] = useState(600);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Copy/Paste keyboard handler
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedRowId || !selectedCellCol) return;
+      const isCtrl = e.ctrlKey || e.metaKey;
+      
+      if (isCtrl && e.key === 'c') {
+        e.preventDefault();
+        const cliente = clienti.find(c => c.id === selectedRowId);
+        if (cliente) {
+          const col = allColumns.find(c => c.key === selectedCellCol);
+          if (col) {
+            const val = col.key.startsWith('custom_') ? getCustomFieldValue(cliente, col.key) : getCellValueStatic(cliente, col);
+            setCopiedValue(val);
+            navigator.clipboard.writeText(val).catch(() => {});
+          }
+        }
+      }
+      
+      if (isCtrl && e.key === 'v') {
+        e.preventDefault();
+        navigator.clipboard.readText().then(text => {
+          if (text && selectedRowId && selectedCellCol) {
+            const col = allColumns.find(c => c.key === selectedCellCol);
+            if (col?.editable) {
+              handleCellChange(selectedRowId, selectedCellCol, text);
+            }
+          }
+        }).catch(() => {
+          // Fallback to internal copied value
+          if (copiedValue && selectedRowId && selectedCellCol) {
+            const col = allColumns.find(c => c.key === selectedCellCol);
+            if (col?.editable) {
+              handleCellChange(selectedRowId, selectedCellCol, copiedValue);
+            }
+          }
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedRowId, selectedCellCol, clienti, copiedValue]);
 
   const orderedColumns = useMemo(() => {
-    return colOrder.map(key => COLUMNS.find(c => c.key === key)!).filter(Boolean);
-  }, [colOrder]);
+    return colOrder.map(key => allColumns.find(c => c.key === key)!).filter(Boolean);
+  }, [colOrder, allColumns]);
 
   const filtered = useMemo(() => {
     if (!searchQuery) return clienti;
@@ -1078,8 +1352,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     if (activeFilters.length === 0) return filtered;
     return filtered.filter(c => {
       return activeFilters.every(([key, allowedVals]) => {
-        const col = COLUMNS.find(cl => cl.key === key)!;
-        const cellVal = getCellValueStatic(c, col);
+        const col = allColumns.find(cl => cl.key === key)!;
+        const cellVal = col.key.startsWith('custom_') ? getCustomFieldValue(c, col.key) : getCellValueStatic(c, col);
         return allowedVals.has(cellVal);
       });
     });
@@ -1088,7 +1362,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   const sorted = useMemo(() => {
     if (!sortCol) return colFiltered;
     return [...colFiltered].sort((a, b) => {
-      const col = COLUMNS.find(c => c.key === sortCol)!;
+      const col = allColumns.find(c => c.key === sortCol)!;
       const va = getCellValueStatic(a, col);
       const vb = getCellValueStatic(b, col);
       // Date-aware sorting for date columns
@@ -1105,16 +1379,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   // Compute unique values per column for filters
   const uniqueValuesMap = useMemo(() => {
     const map: Record<string, string[]> = {};
-    for (const col of COLUMNS) {
+    for (const col of allColumns) {
       const valSet = new Set<string>();
       for (const c of filtered) {
-        const v = getCellValueStatic(c, col);
+        const v = col.key.startsWith('custom_') ? getCustomFieldValue(c, col.key) : getCellValueStatic(c, col);
         valSet.add(v);
       }
       map[col.key] = Array.from(valSet).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     }
     return map;
-  }, [filtered]);
+  }, [filtered, allColumns]);
 
   const handleFilterChange = useCallback((key: string, values: Set<string>) => {
     setColFilters(prev => ({ ...prev, [key]: values }));
@@ -1141,15 +1415,10 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   }, []);
 
   const handleHeaderClick = useCallback((key: string) => {
-    // Only date columns are sortable
-    const isSortable = DATE_COLUMNS.includes(key);
-    if (isSortable) {
-      if (sortCol === key) setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
-      else { setSortCol(key); setSortDir('desc'); }
-    }
+    // Date columns no longer sortable from header (use top-level button instead)
     setSelectedColKey(key);
     setSelectedRowId(null);
-  }, [sortCol]);
+  }, []);
 
   const handleResizeStart = useCallback((key: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -1168,6 +1437,15 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   }, [colWidths]);
 
   const handleCellChange = useCallback(async (clienteId: string, key: string, rawValue: string) => {
+    // Custom fields go into the custom_fields JSONB
+    if (key.startsWith('custom_')) {
+      const cliente = clienti.find(c => c.id === clienteId);
+      const existingFields = (cliente as any)?.custom_fields || {};
+      const updatedFields = { ...existingFields, [key]: rawValue || null };
+      await onUpdate(clienteId, { custom_fields: updatedFields } as any);
+      return;
+    }
+    
     const updates: Partial<any> = {};
     if (key === 'budget_max') {
       const num = parseFloat(rawValue.replace(/[^0-9.]/g, ''));
@@ -1175,7 +1453,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     } else if (key === 'regioni' || key === 'tipologia') {
       updates[key] = rawValue ? rawValue.split(',').map(s => s.trim()).filter(Boolean) : [];
     } else if (key === 'data_submission' || key === 'last_contact_date') {
-      // Accept dd/mm/yyyy or yyyy-mm-dd
       const dmy = rawValue.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
       if (dmy) {
         updates[key] = `${dmy[3]}-${dmy[2]}-${dmy[1]}`;
@@ -1186,7 +1463,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       updates[key] = rawValue || null;
     }
     await onUpdate(clienteId, updates);
-  }, [onUpdate]);
+  }, [onUpdate, clienti]);
 
   const selectedCliente = useMemo(() => sorted.find(c => c.id === selectedRowId) || null, [sorted, selectedRowId]);
   const selectedIndex = useMemo(() => sorted.findIndex(c => c.id === selectedRowId), [sorted, selectedRowId]);
@@ -1355,7 +1632,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 onDragLeave={() => setDragOverCol(null)}
                 className={cn(
                   "relative flex items-center border-r border-border/20 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider px-2 py-2 select-none cursor-grab hover:bg-secondary/50 transition-colors",
-                  DATE_COLUMNS.includes(col.key) && sortCol === col.key && "text-foreground",
                   selectedColKey === col.key && "bg-accent/40 text-foreground",
                   dragOverCol === col.key && "bg-accent/60 border-l-2 border-l-foreground/30"
                 )}
@@ -1364,9 +1640,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
               >
                 <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
                 <span className="truncate flex-1">{col.label}</span>
-                {DATE_COLUMNS.includes(col.key) && sortCol === col.key && (
-                  <span className="ml-0.5 text-[9px]">{sortDir === 'asc' ? '▲' : '▼'}</span>
-                )}
                 {DATE_COLUMNS.includes(col.key) ? (
                   <DateColumnFilterPopover
                     colKey={col.key}
@@ -1389,6 +1662,32 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 />
               </div>
             ))}
+            {/* Add column button */}
+            {addingColumn ? (
+              <div className="flex-shrink-0 flex items-center px-2 py-2 border-r border-border/20" style={{ width: 140 }}>
+                <input
+                  ref={newColRef}
+                  value={newColName}
+                  onChange={(e) => setNewColName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddColumn();
+                    if (e.key === 'Escape') { setAddingColumn(false); setNewColName(''); }
+                  }}
+                  onBlur={() => { if (!newColName.trim()) { setAddingColumn(false); setNewColName(''); } }}
+                  className="w-full h-6 text-xs bg-muted rounded px-2 outline-none focus:ring-1 focus:ring-foreground/20"
+                  placeholder="Nome colonna..."
+                />
+              </div>
+            ) : (
+              <div
+                className="flex-shrink-0 flex items-center justify-center cursor-pointer hover:bg-secondary/50 transition-colors border-r border-border/20"
+                style={{ width: 40 }}
+                onClick={() => setAddingColumn(true)}
+                title="Aggiungi colonna"
+              >
+                <Plus className="w-4 h-4 text-muted-foreground" />
+              </div>
+            )}
           </div>
 
           {/* Virtualized rows */}
@@ -1411,6 +1710,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                   onCardClick={onCardClick}
                   onCellChange={handleCellChange}
                   onContextMenu={handleRowContextMenu}
+                  onCellSelect={(clienteId, colKey) => { setSelectedRowId(clienteId); setSelectedCellCol(colKey); }}
                 />
               ))}
             </div>
