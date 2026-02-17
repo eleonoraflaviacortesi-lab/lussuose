@@ -47,14 +47,23 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
+  const playTrillo = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/trillo_msn.mp3');
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
   useEffect(() => {
     const channel = supabase.channel('arcane-fog-broadcast')
       .on('broadcast', { event: 'arcane-fog' }, () => {
         triggerArcaneFog();
+        playTrillo();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [playTrillo]);
 
   const handleLogoTap = useCallback(() => {
     tapCountRef.current += 1;
@@ -65,6 +74,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
       tapCountRef.current = 0;
       triggerHaptic('success');
       triggerArcaneFog();
+      playTrillo();
       supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
     } else if (tapCountRef.current === 1) {
       // Single tap → go home
