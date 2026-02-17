@@ -158,26 +158,24 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* iOS Safe Area Background */}
-      <div className="fixed inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-background z-50" />
+      <div className="fixed inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black z-50" />
       
       {/* Ticker Banner */}
-      <div className="pt-[env(safe-area-inset-top)] px-2">
-        <div className="bg-foreground text-background rounded-b-[1.5rem] overflow-hidden">
-          <div className="flex animate-ticker whitespace-nowrap py-1.5">
-            {[...Array(8)].map((_, i) => (
-              <span key={i} className="flex items-center gap-6 mx-6 text-[11px] font-bold tracking-[0.15em] uppercase">
-                <span>CORTESI LUXURY REAL ESTATE</span>
-                <span>★</span>
-                <span>LE LUSSUOSE</span>
-                <span>★</span>
-              </span>
-            ))}
-          </div>
+      <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
+        <div className="flex animate-ticker whitespace-nowrap pt-2">
+          {[...Array(8)].map((_, i) => (
+            <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
+              <span>CORTESI LUXURY REAL ESTATE</span>
+              <span>★</span>
+              <span>LE LUSSUOSE</span>
+              <span>★</span>
+            </span>
+          ))}
         </div>
       </div>
 
-      {/* Header - Mega pill */}
-      <div className="mx-2 mt-1 glass-header flex items-center justify-center px-4 py-1 rounded-[1.5rem]">
+      {/* Header */}
+      <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem]">
         <img 
           src={logoLarge} 
           alt="Logo" 
