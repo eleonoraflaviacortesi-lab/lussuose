@@ -8,6 +8,7 @@ import PullToRefresh from '@/components/ui/pull-to-refresh';
 import { FloatingSparkles } from '@/components/ui/floating-sparkles';
 import { MagicCursor } from '@/components/ui/magic-cursor';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
+import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
 import type { Notizia } from '@/hooks/useNotizie';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
@@ -18,6 +19,7 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
+const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
 
 // Map URL paths to tab ids
@@ -26,6 +28,7 @@ const pathToTab: Record<string, string> = {
   '/calendario': 'calendario',
   '/notizie': 'notizie',
   '/clienti': 'clienti',
+  '/chat': 'chat',
   '/ufficio': 'ufficio',
   '/riunioni': 'ufficio',
   '/report': 'ufficio',
@@ -117,6 +120,8 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         return <ClientiPage initialClienteId={pendingClienteId} onClienteOpened={() => setPendingClienteId(null)} />;
       case 'calendario':
         return <CalendarPage />;
+      case 'chat':
+        return <OfficeChatPage />;
       case 'ufficio':
         return <UfficioPage />;
       case 'inserisci':
@@ -159,6 +164,12 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       </PullToRefresh>
       
       
+
+      {/* Global chat listener for previews & sounds */}
+      <ChatGlobalListener
+        activeTab={activeTab}
+        onGoToChat={() => { setActiveTab('chat'); navigate('/chat'); }}
+      />
 
       {/* Global Notizia Detail Modal (can be opened from any tab) */}
       <NotiziaDetail

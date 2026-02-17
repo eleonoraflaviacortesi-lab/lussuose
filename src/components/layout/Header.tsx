@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2 } from 'lucide-react';
+import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2, MessageCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
@@ -25,6 +25,7 @@ const tabToPath: Record<string, string> = {
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
+  chat: '/chat',
   ufficio: '/ufficio',
 };
 
@@ -33,6 +34,7 @@ const menuItems = [
   { id: 'calendario', icon: CalendarDays, label: 'Calendario' },
   { id: 'notizie', icon: Send, label: 'Notizie' },
   { id: 'clienti', icon: Briefcase, label: 'Buyers' },
+  { id: 'chat', icon: MessageCircle, label: 'Chat' },
   { id: 'ufficio', icon: Building2, label: 'Ufficio' },
 ];
 
