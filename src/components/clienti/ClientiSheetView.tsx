@@ -735,18 +735,17 @@ function ColorPalettePopover({
   );
 }
 
-// --- Simple Badge Cell (for lingua, tipo_contatto) with right-click color editing ---
+// --- Simple Badge Cell (for lingua, tipo_contatto) — click opens pill context menu ---
 function SimpleBadgeCell({
   value, onChange, options, colorMap, colType,
 }: {
   value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>; colType?: string;
 }) {
-  const [open, setOpen] = useState(false);
-  const [colorMenuItem, setColorMenuItem] = useState<string | null>(null);
-  const [colorMenuPos, setColorMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const [colorTarget, setColorTarget] = useState<string | null>(null);
   const [localColors, setLocalColors] = useState(colorMap || {});
 
-  // Sync global lingua colors
   useEffect(() => {
     if (colType === 'lingua') {
       const handler = (e: StorageEvent) => {
@@ -757,125 +756,103 @@ function SimpleBadgeCell({
     }
   }, [colType]);
 
-  useEffect(() => {
-    setLocalColors(colorMap || {});
-  }, [colorMap]);
+  useEffect(() => { setLocalColors(colorMap || {}); }, [colorMap]);
 
   const bgColor = localColors[value] || '#6b7280';
-  const triggerRef = useRef<HTMLButtonElement>(null);
 
-  const handleContextMenuItem = useCallback((o: string, e: React.MouseEvent) => {
-    e.preventDefault();
+  const openMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setColorMenuItem(o);
-    setColorMenuPos({ x: e.clientX, y: e.clientY });
-  }, []);
+    e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMenuPos({ x: rect.left, y: rect.bottom + 4 });
+    setMenuOpen(true);
+    setColorTarget(null);
+  };
 
-  const handleItemClick = useCallback((o: string, e: React.MouseEvent) => {
-    if (o === value) {
-      e.preventDefault();
-      e.stopPropagation();
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      setColorMenuItem(o);
-      setColorMenuPos({ x: rect.right + 8, y: rect.top });
-    }
-  }, [value]);
-
-  const handleColorSelect = (item: string, color: string) => {
+  const handleColorChange = (item: string, color: string) => {
     if (colType === 'lingua') {
       const updated = { ...getCustomLinguaColors(), [item]: color };
       saveCustomLinguaColors(updated);
       setLocalColors({ ...LINGUA_COLORS, ...updated });
     }
-    // For tipo_contatto: could add persistence if needed
-    setColorMenuItem(null);
+    setColorTarget(null);
   };
-
-  const selectOpen = !colorMenuItem;
-
-  if (!open && !value) {
-    return (
-      <span
-        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-secondary/50"
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-      >—</span>
-    );
-  }
-
-  if (!open) {
-    return (
-      <span
-        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50"
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-      >
-        <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
-      </span>
-    );
-  }
 
   return (
     <>
-      <Select
-        value={value || '__none'}
-        onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
-        open={selectOpen}
-        onOpenChange={(o) => { if (!o && !colorMenuItem) setOpen(false); }}
+      <span
+        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50 min-h-[28px]"
+        onClick={openMenu}
+        onContextMenu={openMenu}
       >
-        <SelectTrigger ref={triggerRef} className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-          {value ? (
-            <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
-          ) : (
-            <span className="text-muted-foreground text-xs">—</span>
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__none">—</SelectItem>
-          {options.map(o => (
-            <div
-              key={o}
-              className="relative"
-              onContextMenu={(e) => handleContextMenuItem(o, e)}
-              onClick={(e) => handleItemClick(o, e)}
-            >
-              <SelectItem value={o}>
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: localColors[o] || '#6b7280' }} />
-                  {o}
-                  {o === value && <span className="text-[9px] text-muted-foreground ml-1">🎨</span>}
-                </span>
-              </SelectItem>
-            </div>
-          ))}
-        </SelectContent>
-      </Select>
+        {value ? (
+          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+        ) : (
+          <span className="text-muted-foreground text-xs px-1">—</span>
+        )}
+      </span>
 
-      {/* Color picker overlay */}
-      {colorMenuItem && createPortal(
+      {menuOpen && createPortal(
         <>
-          <div className="fixed inset-0 z-[9998]" onClick={() => { setColorMenuItem(null); setOpen(false); }} />
+          <div className="fixed inset-0 z-[9998]" onClick={() => setMenuOpen(false)} onContextMenu={(e) => { e.preventDefault(); setMenuOpen(false); }} />
           <div
-            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px]"
             style={{
-              left: Math.min(colorMenuPos.x, window.innerWidth - 280),
-              top: Math.min(colorMenuPos.y, window.innerHeight - 200),
+              left: Math.min(menuPos.x, window.innerWidth - 300),
+              top: menuPos.y + 200 > window.innerHeight ? Math.max(8, menuPos.y - 250) : menuPos.y,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
-              Colore: {colorMenuItem}
-            </p>
-            <div className="grid grid-cols-8 gap-1">
-              {PALETTE_COLORS.map(c => (
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
+            <div className="flex flex-wrap gap-1 px-2 py-1.5 max-w-[260px]">
+              {options.map(opt => (
                 <button
-                  key={c}
+                  key={opt}
+                  onClick={() => {
+                    if (value === opt) {
+                      setColorTarget(prev => prev === opt ? null : opt);
+                    } else {
+                      onChange(opt);
+                      setMenuOpen(false);
+                    }
+                  }}
                   className={cn(
-                    "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
-                    localColors[colorMenuItem!] === c && "ring-2 ring-foreground ring-offset-1"
+                    "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
+                    value === opt && "ring-2 ring-foreground ring-offset-1",
+                    colorTarget === opt && "ring-2 ring-amber-400 ring-offset-1"
                   )}
-                  style={{ backgroundColor: c }}
-                  onClick={() => handleColorSelect(colorMenuItem!, c)}
-                />
+                  style={{ backgroundColor: localColors[opt] || '#6b7280' }}
+                >
+                  {opt}
+                </button>
               ))}
             </div>
+            {colorTarget && (
+              <>
+                <div className="h-px bg-muted/50" />
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Colore: {colorTarget}</span>
+                <div className="grid grid-cols-8 gap-1 px-2 py-1.5">
+                  {PALETTE_COLORS.map(c => (
+                    <button
+                      key={c}
+                      className={cn(
+                        "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
+                        localColors[colorTarget!] === c && "ring-2 ring-foreground ring-offset-1"
+                      )}
+                      style={{ backgroundColor: c }}
+                      onClick={() => handleColorChange(colorTarget!, c)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            <div className="h-px bg-muted/50" />
+            <button
+              onClick={() => { onChange(''); setMenuOpen(false); }}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors w-full"
+            >
+              <RotateCcw className="w-3 h-3" /> Reset
+            </button>
           </div>
         </>,
         document.body
@@ -884,22 +861,21 @@ function SimpleBadgeCell({
   );
 }
 
-// --- Portal Badge Cell with right-click color change and custom portals ---
+// --- Portal Badge Cell — click opens pill context menu ---
 function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: string) => void }) {
-  const [open, setOpen] = useState(false);
-  const [colorMenuPortal, setColorMenuPortal] = useState<string | null>(null);
-  const [colorMenuPos, setColorMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState({ x: 0, y: 0 });
+  const [colorTarget, setColorTarget] = useState<string | null>(null);
+  const [customPortals, setCustomPortals] = useState(getCustomPortals);
+  const [customColors, setCustomColors] = useState(getCustomPortaleColors);
   const [addingNew, setAddingNew] = useState(false);
   const [newPortal, setNewPortal] = useState('');
   const newInputRef = useRef<HTMLInputElement>(null);
-  const [customPortals, setCustomPortals] = useState(getCustomPortals);
-  const [customColors, setCustomColors] = useState(getCustomPortaleColors);
 
   const allOptions = useMemo(() => [...DEFAULT_PORTALE_OPTIONS, ...customPortals], [customPortals]);
   const mergedColors = useMemo(() => ({ ...PORTALE_COLORS, ...customColors }), [customColors]);
   const bgColor = mergedColors[value] || '#6b7280';
 
-  // Sync colors from other cells via storage event
   useEffect(() => {
     const handler = (e: StorageEvent) => {
       if (e.key === 'custom-portale-colors') setCustomColors(getCustomPortaleColors());
@@ -912,6 +888,22 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     if (addingNew && newInputRef.current) newInputRef.current.focus();
   }, [addingNew]);
 
+  const openMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    setMenuPos({ x: rect.left, y: rect.bottom + 4 });
+    setMenuOpen(true);
+    setColorTarget(null);
+  };
+
+  const handleColorChange = (portal: string, color: string) => {
+    const updated = { ...customColors, [portal]: color };
+    setCustomColors(updated);
+    saveCustomPortaleColors(updated);
+    setColorTarget(null);
+  };
+
   const handleAddPortal = () => {
     if (newPortal.trim() && !allOptions.includes(newPortal.trim())) {
       const updated = [...customPortals, newPortal.trim()];
@@ -921,143 +913,107 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     }
     setNewPortal('');
     setAddingNew(false);
-    setOpen(false);
+    setMenuOpen(false);
   };
-
-  const handleColorSelect = (portal: string, color: string) => {
-    const updated = { ...customColors, [portal]: color };
-    setCustomColors(updated);
-    saveCustomPortaleColors(updated);
-    setColorMenuPortal(null);
-  };
-
-  const handleContextMenuPortal = useCallback((o: string, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setColorMenuPortal(o);
-    setColorMenuPos({ x: e.clientX, y: e.clientY });
-  }, []);
-
-  const handleItemClick = useCallback((o: string, e: React.MouseEvent) => {
-    if (o === value) {
-      e.preventDefault();
-      e.stopPropagation();
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      setColorMenuPortal(o);
-      setColorMenuPos({ x: rect.right + 8, y: rect.top });
-    }
-  }, [value]);
-
-  if (!open && !value) {
-    return (
-      <span
-        className="block text-xs px-2 py-1.5 cursor-pointer min-h-[28px] text-muted-foreground hover:bg-secondary/50"
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-      >—</span>
-    );
-  }
-
-  if (!open) {
-    return (
-      <span
-        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50"
-        onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-      >
-        <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
-      </span>
-    );
-  }
-
-  // When color menu opens, close the Select to remove Radix's pointer-blocking overlay
-  const selectOpen = !colorMenuPortal;
 
   return (
     <>
-      <Select
-        value={value || '__none'}
-        onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
-        open={selectOpen}
-        onOpenChange={(o) => { if (!o && !colorMenuPortal) { setOpen(false); } }}
+      <span
+        className="block px-1 py-1 cursor-pointer hover:bg-secondary/50 min-h-[28px]"
+        onClick={openMenu}
+        onContextMenu={openMenu}
       >
-        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-          {value ? (
-            <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
-          ) : (
-            <span className="text-muted-foreground text-xs">—</span>
-          )}
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="__none">—</SelectItem>
-          {allOptions.map(o => (
-            <div
-              key={o}
-              className="relative"
-              onContextMenu={(e) => handleContextMenuPortal(o, e)}
-              onClick={(e) => handleItemClick(o, e)}
-            >
-              <SelectItem value={o}>
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: mergedColors[o] || '#6b7280' }} />
-                  {o}
-                  {o === value && <span className="text-[9px] text-muted-foreground ml-1">🎨</span>}
-                </span>
-              </SelectItem>
-            </div>
-          ))}
-          {/* Add new portal */}
-          {addingNew ? (
-            <div className="px-2 py-1.5 flex items-center gap-1">
-              <input
-                ref={newInputRef}
-                value={newPortal}
-                onChange={(e) => setNewPortal(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') handleAddPortal();
-                  if (e.key === 'Escape') { setAddingNew(false); setNewPortal(''); }
-                }}
-                className="flex-1 h-6 text-xs bg-muted rounded px-2 outline-none focus:ring-1 focus:ring-foreground/20"
-                placeholder="Nuovo portale..."
-                onClick={(e) => e.stopPropagation()}
-              />
-            </div>
-          ) : (
-            <button
-              className="w-full text-left px-2 py-1.5 text-xs text-muted-foreground hover:bg-muted/60 flex items-center gap-1.5 transition-colors"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setAddingNew(true); }}
-            >
-              <Plus className="w-3 h-3" /> Aggiungi portale
-            </button>
-          )}
-        </SelectContent>
-      </Select>
+        {value ? (
+          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+        ) : (
+          <span className="text-muted-foreground text-xs px-1">—</span>
+        )}
+      </span>
 
-      {/* Portal color picker overlay - Select is closed so no Radix overlay blocks */}
-      {colorMenuPortal && createPortal(
+      {menuOpen && createPortal(
         <>
-          <div className="fixed inset-0 z-[9998]" onClick={() => { setColorMenuPortal(null); setOpen(false); }} />
+          <div className="fixed inset-0 z-[9998]" onClick={() => setMenuOpen(false)} onContextMenu={(e) => { e.preventDefault(); setMenuOpen(false); }} />
           <div
-            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px]"
             style={{
-              left: Math.min(colorMenuPos.x, window.innerWidth - 280),
-              top: Math.min(colorMenuPos.y, window.innerHeight - 200),
+              left: Math.min(menuPos.x, window.innerWidth - 300),
+              top: menuPos.y + 200 > window.innerHeight ? Math.max(8, menuPos.y - 250) : menuPos.y,
             }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
-              Colore: {colorMenuPortal}
-            </p>
-            <div className="grid grid-cols-8 gap-1">
-              {PALETTE_COLORS.map(c => (
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
+            <div className="flex flex-wrap gap-1 px-2 py-1.5 max-w-[260px]">
+              {allOptions.map(opt => (
                 <button
-                  key={c}
+                  key={opt}
+                  onClick={() => {
+                    if (value === opt) {
+                      setColorTarget(prev => prev === opt ? null : opt);
+                    } else {
+                      onChange(opt);
+                      setMenuOpen(false);
+                    }
+                  }}
                   className={cn(
-                    "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
-                    mergedColors[colorMenuPortal!] === c && "ring-2 ring-foreground ring-offset-1"
+                    "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
+                    value === opt && "ring-2 ring-foreground ring-offset-1",
+                    colorTarget === opt && "ring-2 ring-amber-400 ring-offset-1"
                   )}
-                  style={{ backgroundColor: c }}
-                  onClick={() => handleColorSelect(colorMenuPortal!, c)}
-                />
+                  style={{ backgroundColor: mergedColors[opt] || '#6b7280' }}
+                >
+                  {opt}
+                </button>
               ))}
             </div>
+            {colorTarget && (
+              <>
+                <div className="h-px bg-muted/50" />
+                <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Colore: {colorTarget}</span>
+                <div className="grid grid-cols-8 gap-1 px-2 py-1.5">
+                  {PALETTE_COLORS.map(c => (
+                    <button
+                      key={c}
+                      className={cn(
+                        "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
+                        mergedColors[colorTarget!] === c && "ring-2 ring-foreground ring-offset-1"
+                      )}
+                      style={{ backgroundColor: c }}
+                      onClick={() => handleColorChange(colorTarget!, c)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+            <div className="h-px bg-muted/50" />
+            {addingNew ? (
+              <div className="px-2 py-1 flex items-center gap-1">
+                <input
+                  ref={newInputRef}
+                  value={newPortal}
+                  onChange={(e) => setNewPortal(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleAddPortal();
+                    if (e.key === 'Escape') { setAddingNew(false); setNewPortal(''); }
+                  }}
+                  className="flex-1 h-6 text-xs bg-muted rounded px-2 outline-none focus:ring-1 focus:ring-foreground/20"
+                  placeholder="Nuovo portale..."
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            ) : (
+              <button
+                className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors w-full"
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setAddingNew(true); }}
+              >
+                <Plus className="w-3 h-3" /> Aggiungi portale
+              </button>
+            )}
+            <button
+              onClick={() => { onChange(''); setMenuOpen(false); }}
+              className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors w-full"
+            >
+              <RotateCcw className="w-3 h-3" /> Reset
+            </button>
           </div>
         </>,
         document.body
@@ -1065,7 +1021,6 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     </>
   );
 }
-
 // --- Lazy Status Cell ---
 function LazyStatusCell({ value, onChange }: { value: string; onChange: (val: string) => void }) {
   const [open, setOpen] = useState(false);
