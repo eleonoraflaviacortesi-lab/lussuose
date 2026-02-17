@@ -625,7 +625,7 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
       {/* Portal color picker overlay - rendered via portal to escape Select */}
       {colorMenuPortal && createPortal(
         <>
-          <div className="fixed inset-0 z-[9999]" onClick={() => setColorMenuPortal(null)} onPointerDown={(e) => e.stopPropagation()} />
+          <div className="fixed inset-0 z-[9998]" onClick={() => setColorMenuPortal(null)} onPointerDown={(e) => e.stopPropagation()} />
           <div
             className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
             style={{
