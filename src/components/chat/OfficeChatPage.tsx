@@ -505,7 +505,7 @@ const OfficeChatPage = () => {
     return format(date, 'd MMMM yyyy', { locale: it });
   };
 
-  // Render message text with highlighted mentions
+  // Render message text with highlighted mentions in fuchsia
   const renderMessageText = (text: string) => {
     const parts = text.split(/(@[\w\s]+?)(?=\s|$)/g);
     return parts.map((part, i) => {
@@ -514,7 +514,7 @@ const OfficeChatPage = () => {
         const matched = profiles?.find(p => p.full_name.toLowerCase() === name.toLowerCase());
         if (matched) {
           return (
-            <span key={i} className="font-semibold text-primary cursor-pointer hover:underline">
+            <span key={i} className="font-bold cursor-pointer hover:underline" style={{ color: '#d946ef' }}>
               {part}
             </span>
           );
