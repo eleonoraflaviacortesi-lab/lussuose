@@ -118,7 +118,7 @@ const Header = ({ onOpenProfile }: HeaderProps) => {
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[8rem] w-auto max-w-[80vw] -my-8 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[7.5rem] w-auto max-w-[80vw] -my-8 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
 
