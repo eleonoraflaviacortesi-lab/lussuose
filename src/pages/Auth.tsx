@@ -179,7 +179,7 @@ const Auth = () => {
         <img 
           src={logoLarge} 
           alt="Logo" 
-          className="h-[3.5rem]" 
+          className="h-[5.5rem] -my-4" 
         />
       </div>
 
