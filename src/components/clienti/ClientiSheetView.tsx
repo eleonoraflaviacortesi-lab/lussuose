@@ -1317,8 +1317,8 @@ const SheetRow = memo(function SheetRow({
         <span className="text-[10px] font-medium flex-1 text-center select-none flex items-center justify-center gap-0.5">
           {idx + 1}
           {cliente.tally_submission_id && (
-            <svg viewBox="0 0 24 24" className="w-3 h-3 text-amber-500 flex-shrink-0" fill="currentColor">
-              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+            <svg viewBox="0 0 24 24" className="w-4 h-4 flex-shrink-0 drop-shadow-[0_0_3px_rgba(245,158,11,0.6)]" fill="#f59e0b">
+              <path d="M12 1l3 8.5L24 12l-9 2.5L12 23l-3-8.5L0 12l9-2.5z" />
             </svg>
           )}
         </span>
@@ -1654,6 +1654,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   });
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColName, setNewColName] = useState('');
+  const [qualifiedFilter, setQualifiedFilter] = useState(false);
   const newColRef = useRef<HTMLInputElement>(null);
 
   // Persist colFormats to localStorage
@@ -1755,16 +1756,21 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   // Apply column filters
   const colFiltered = useMemo(() => {
+    let result = filtered;
+    // Qualified filter
+    if (qualifiedFilter) {
+      result = result.filter(c => !!c.tally_submission_id);
+    }
     const activeFilters = Object.entries(colFilters).filter(([, vals]) => vals.size > 0);
-    if (activeFilters.length === 0) return filtered;
-    return filtered.filter(c => {
+    if (activeFilters.length === 0) return result;
+    return result.filter(c => {
       return activeFilters.every(([key, allowedVals]) => {
         const col = allColumns.find(cl => cl.key === key)!;
         const cellVal = col.key.startsWith('custom_') ? getCustomFieldValue(c, col.key) : getCellValueStatic(c, col);
         return allowedVals.has(cellVal);
       });
     });
-  }, [filtered, colFilters]);
+  }, [filtered, colFilters, qualifiedFilter]);
 
   const sorted = useMemo(() => {
     if (!sortCol) return colFiltered;
@@ -1989,11 +1995,22 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
         }
       }}
     >
-      {/* Add new row button */}
+      {/* Add new row button + quick filters */}
       {onAddNew && (
         <div className="px-3 py-2 border-b border-border/40 flex items-center gap-2">
           <Button variant="outline" size="sm" className="h-8 px-3 gap-1.5 text-xs font-semibold border-dashed border-2" onClick={onAddNew}>
             <Plus className="w-4 h-4" /> Nuova richiesta
+          </Button>
+          <Button
+            variant={qualifiedFilter ? 'default' : 'outline'}
+            size="sm"
+            className="h-8 px-3 gap-1.5 text-xs font-semibold"
+            onClick={() => setQualifiedFilter(prev => !prev)}
+          >
+            <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+              <path d="M12 1l3 8.5L24 12l-9 2.5L12 23l-3-8.5L0 12l9-2.5z" />
+            </svg>
+            Qualificati
           </Button>
           <UndoRedoButtons />
         </div>
