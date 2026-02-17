@@ -9,13 +9,16 @@ import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
+import Navigation from '@/components/layout/Navigation';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
   onOpenSettings?: () => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
-const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
+const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
@@ -104,29 +107,32 @@ const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
           </div>
         </div>
 
-        {/* Main Header - Liquid Glass Effect */}
+        {/* Main Header - Liquid Glass Effect with integrated nav */}
         <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
           {/* Profile Button */}
           <button 
             onClick={() => setShowProfile(true)}
-            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
+            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl flex-shrink-0"
             aria-label="Apri profilo"
           >
             {profile?.avatar_emoji || '🖤'}
           </button>
 
-          {/* Brand Logo - Easter egg: triple-tap! */}
+          {/* Center: Nav Pill */}
+          <Navigation activeTab={activeTab} onTabChange={onTabChange} />
+
+          {/* Brand Logo */}
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[5.5rem] w-auto max-w-[70vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[5.5rem] w-auto max-w-[25vw] -my-4 transition-transform cursor-pointer select-none flex-shrink-0 ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
 
           {/* Logout */}
           <button 
             onClick={handleSignOut}
-            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+            className="w-9 h-9 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
             aria-label="Esci"
           >
             <LogOut className="w-4 h-4" />
