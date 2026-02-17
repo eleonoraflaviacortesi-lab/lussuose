@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu, X, Home, Calendar, Megaphone, Wallet, Newspaper, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
@@ -9,18 +9,38 @@ import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 interface HeaderProps {
   onOpenProfile?: () => void;
   onOpenSettings?: () => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
-const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
+const tabToPath: Record<string, string> = {
+  numeri: '/',
+  calendario: '/calendario',
+  notizie: '/notizie',
+  clienti: '/clienti',
+  ufficio: '/ufficio',
+};
+
+const menuItems = [
+  { id: 'numeri', icon: Home, label: 'Home' },
+  { id: 'calendario', icon: Calendar, label: 'Calendario' },
+  { id: 'notizie', icon: Megaphone, label: 'Notizie' },
+  { id: 'clienti', icon: Wallet, label: 'Buyers' },
+  { id: 'ufficio', icon: Newspaper, label: 'Ufficio' },
+];
+
+const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange }: HeaderProps) => {
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [logoWiggle, setLogoWiggle] = useState(false);
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -44,14 +64,31 @@ const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
       triggerHaptic('success');
       triggerArcaneFog();
       supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
+    } else if (tapCountRef.current === 1) {
+      // Single tap → go home
+      tapTimerRef.current = setTimeout(() => {
+        if (tapCountRef.current === 1) {
+          triggerHaptic('selection');
+          onTabChange?.('numeri');
+          navigate('/');
+        }
+        tapCountRef.current = 0;
+      }, 400);
     } else {
       tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
     }
-  }, []);
+  }, [onTabChange, navigate]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/auth');
+  };
+
+  const handleNavigate = (tabId: string) => {
+    triggerHaptic('selection');
+    onTabChange?.(tabId);
+    navigate(tabToPath[tabId] || '/');
+    setMenuOpen(false);
   };
 
   const formatCurrency = (value: number) => {
@@ -83,11 +120,11 @@ const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
         </div>
         <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
           <button 
-            onClick={() => setShowProfile(true)}
-            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform text-xl"
-            aria-label="Apri profilo"
+            onClick={() => { triggerHaptic('selection'); setMenuOpen(true); }}
+            className="w-10 h-10 rounded-full glass-button flex items-center justify-center hover:scale-105 transition-transform"
+            aria-label="Apri menu"
           >
-            {profile?.avatar_emoji || '🖤'}
+            <Menu className="w-5 h-5" />
           </button>
           <img 
             src={logo} 
@@ -104,6 +141,76 @@ const Header = ({ onOpenProfile, onOpenSettings }: HeaderProps) => {
           </button>
         </div>
       </header>
+
+      {/* Slide-in menu drawer */}
+      {menuOpen && (
+        <div className="fixed inset-0 z-[70]" onClick={() => setMenuOpen(false)}>
+          <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+          <div
+            className="absolute left-0 top-0 bottom-0 w-72 bg-background shadow-2xl animate-in slide-in-from-left duration-200 flex flex-col"
+            style={{ paddingTop: 'env(safe-area-inset-top)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <div className="flex items-center justify-between px-4 py-3">
+              <span className="font-bold text-sm uppercase tracking-wide text-muted-foreground">Menu</span>
+              <button onClick={() => setMenuOpen(false)} className="p-1 rounded-full hover:bg-muted transition-colors">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Profile */}
+            <button
+              onClick={() => { setMenuOpen(false); setShowProfile(true); }}
+              className="mx-3 mb-2 flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-muted/60 transition-colors"
+            >
+              <span className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xl">
+                {profile?.avatar_emoji || '🖤'}
+              </span>
+              <div className="text-left">
+                <p className="font-semibold text-sm">{profile?.full_name || 'Profilo'}</p>
+                <p className="text-xs text-muted-foreground">Profilo ed Impostazioni</p>
+              </div>
+            </button>
+
+            <div className="border-t mx-4 my-1" />
+
+            {/* Nav items */}
+            <div className="flex-1 px-3 py-2 space-y-1">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleNavigate(item.id)}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium",
+                      isActive
+                        ? "bg-foreground text-background"
+                        : "text-foreground hover:bg-muted/60"
+                    )}
+                  >
+                    <Icon className="w-4.5 h-4.5" strokeWidth={isActive ? 2 : 1.5} />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Sign out at bottom */}
+            <div className="border-t mx-4" />
+            <button
+              onClick={() => { setMenuOpen(false); handleSignOut(); }}
+              className="mx-3 my-3 flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              Esci
+            </button>
+          </div>
+        </div>
+      )}
+
       <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} onOpenSettings={onOpenSettings} />
     </>
   );

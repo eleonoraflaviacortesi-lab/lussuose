@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/layout/Header';
-import Navigation from '@/components/layout/Navigation';
+
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { FloatingSparkles } from '@/components/ui/floating-sparkles';
@@ -135,9 +135,8 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       <FloatingSparkles />
       <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
-      <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} />
+      <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); navigate(tab === 'numeri' ? '/' : `/${tab}`); }} />
       <div style={{ height: 'calc(85px + env(safe-area-inset-top, 0px))' }} />
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
       
       
       {/* Main content with pull-to-refresh */}
