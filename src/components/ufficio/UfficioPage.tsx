@@ -4,14 +4,12 @@ import { cn } from '@/lib/utils';
 const AgencyDashboard = lazy(() => import('@/components/dashboard/AgencyDashboard'));
 const MeetingsPage = lazy(() => import('@/components/meetings/MeetingsPage').then((m) => ({ default: m.MeetingsPage })));
 const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalysisTab'));
-const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 
-type SubTab = 'ufficio' | 'riunioni' | 'chat' | 'analisi';
+type SubTab = 'ufficio' | 'riunioni' | 'analisi';
 
 const subTabs: {id: SubTab;label: string;}[] = [
 { id: 'ufficio', label: 'Ufficio' },
 { id: 'riunioni', label: 'Riunioni' },
-{ id: 'chat', label: 'Chat' },
 { id: 'analisi', label: 'Analisi' }];
 
 
@@ -51,7 +49,6 @@ const UfficioPage = () => {
         <div key={active} className="animate-fade-in">
           {active === 'ufficio' && <AgencyDashboard />}
           {active === 'riunioni' && <MeetingsPage />}
-          {active === 'chat' && <OfficeChatPage />}
           {active === 'analisi' && <ReportAnalysisTab />}
         </div>
       </Suspense>

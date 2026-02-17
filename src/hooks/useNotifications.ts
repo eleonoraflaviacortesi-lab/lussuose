@@ -37,6 +37,15 @@ function showBrowserNotification(title: string, body?: string) {
   }
 }
 
+// Play notification sound
+function playNotificationSound() {
+  try {
+    const audio = new Audio('/sounds/msn_messenger_noti.mp3');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch {}
+}
+
 export function useNotifications() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -80,6 +89,7 @@ export function useNotifications() {
     for (const n of currentUnread) {
       if (!prevUnreadIdsRef.current.has(n.id)) {
         showBrowserNotification(n.title, n.message || undefined);
+        playNotificationSound();
       }
     }
 
