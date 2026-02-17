@@ -231,9 +231,10 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   return (
     <div 
       className={cn(
-        "fixed inset-0 z-[100] flex flex-col bg-background",
+        "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background",
         "animate-in slide-in-from-bottom duration-300",
       )}
+      style={{ top: 'calc(env(safe-area-inset-top) + 85px)' }}
     >
       {/* Full-screen scrollable content */}
       <div 
