@@ -39,6 +39,11 @@ export const triggerArcaneFog = () => {
   const spawnDuration = 2000;
   const startTime = performance.now();
 
+  // Safety: always remove canvas after max duration
+  const safetyTimeout = setTimeout(() => {
+    if (canvas.parentNode) canvas.remove();
+  }, totalDuration + 2000);
+
   const spawnStar = (): Star => ({
     x: Math.random() * w,
     y: -30 - Math.random() * 60,
@@ -57,6 +62,7 @@ export const triggerArcaneFog = () => {
   const animate = (now: number) => {
     const elapsed = now - startTime;
     if (elapsed > totalDuration && stars.every(s => s.y > h + 40)) {
+      clearTimeout(safetyTimeout);
       canvas.remove();
       return;
     }
