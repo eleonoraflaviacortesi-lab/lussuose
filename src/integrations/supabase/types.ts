@@ -72,30 +72,59 @@ export type Database = {
       }
       chat_messages: {
         Row: {
+          audio_url: string | null
           created_at: string
           id: string
+          linked_cliente_id: string | null
+          linked_notizia_id: string | null
+          mentions: string[] | null
           message: string
+          reactions: Json | null
           reply_to_id: string | null
           sede: string
           user_id: string
         }
         Insert: {
+          audio_url?: string | null
           created_at?: string
           id?: string
+          linked_cliente_id?: string | null
+          linked_notizia_id?: string | null
+          mentions?: string[] | null
           message: string
+          reactions?: Json | null
           reply_to_id?: string | null
           sede?: string
           user_id: string
         }
         Update: {
+          audio_url?: string | null
           created_at?: string
           id?: string
+          linked_cliente_id?: string | null
+          linked_notizia_id?: string | null
+          mentions?: string[] | null
           message?: string
+          reactions?: Json | null
           reply_to_id?: string | null
           sede?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "chat_messages_linked_cliente_id_fkey"
+            columns: ["linked_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clienti"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_linked_notizia_id_fkey"
+            columns: ["linked_notizia_id"]
+            isOneToOne: false
+            referencedRelation: "notizie"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "chat_messages_reply_to_id_fkey"
             columns: ["reply_to_id"]
