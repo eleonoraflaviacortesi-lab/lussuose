@@ -2,12 +2,7 @@ import { useState, useMemo } from 'react';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { MergeClienteDialog } from './MergeClienteDialog';
 import { Cliente } from '@/types';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import MentionInput from '@/components/ui/mention-input';
 import { useMentionNotifications } from '@/hooks/useMentionNotifications';
@@ -155,11 +150,12 @@ export function ClienteDetail({
 
   const assignedAgent = agents.find(a => a.user_id === cliente.assigned_to);
 
+  if (!open) return null;
+
   return (
     <>
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg lg:max-w-5xl w-full h-[100dvh] max-h-[100dvh] flex flex-col p-0 rounded-none sm:rounded-none border-0 gap-0 [&>button]:hidden animate-in slide-in-from-bottom duration-300">
-        <DialogHeader className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
+    <div className={cn("fixed inset-0 z-[100] flex flex-col bg-background", "animate-in slide-in-from-bottom duration-300")}>
+      <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
             <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
               <X className="w-5 h-5" />
@@ -175,7 +171,7 @@ export function ClienteDetail({
               />
             </div>
           </div>
-        </DialogHeader>
+        </div>
 
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4 space-y-4">
 
@@ -654,8 +650,7 @@ export function ClienteDetail({
           </div>
 
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
 
     {cliente && (
       <MergeClienteDialog
