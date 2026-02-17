@@ -413,6 +413,11 @@ export const ClienteCard = memo(({
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
+      {/* Qualified sparkle badge */}
+      {cliente.status === 'qualified' && (
+        <div className="absolute -top-1.5 -right-1.5 text-base animate-pulse" title="Qualificato">✨</div>
+      )}
+
       {/* Header with emoji and name */}
       <div className="flex items-start gap-2 mb-2">
         <span className="text-xl flex-shrink-0">
