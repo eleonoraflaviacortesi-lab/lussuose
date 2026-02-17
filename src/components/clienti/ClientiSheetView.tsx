@@ -164,6 +164,23 @@ const SheetContextMenu = memo(function SheetContextMenu({
   const [customCardColor, setCustomCardColor] = useState(cliente.card_color || '#fef3c7');
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [adjustedPos, setAdjustedPos] = useState(position);
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      const el = menuRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const pad = 10;
+      let nx = position.x, ny = position.y;
+      if (nx + rect.width > window.innerWidth - pad) nx = window.innerWidth - rect.width - pad;
+      if (nx < pad) nx = pad;
+      if (ny + rect.height > window.innerHeight - pad) ny = window.innerHeight - rect.height - pad;
+      if (ny < pad) ny = pad;
+      setAdjustedPos({ x: nx, y: ny });
+    });
+  }, [position]);
 
   return (
     <>
@@ -173,11 +190,11 @@ const SheetContextMenu = memo(function SheetContextMenu({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
+        ref={menuRef}
         className="fixed z-[110] flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-h-[85vh] overflow-y-auto"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
-          top: Math.min(Math.max(10, position.y), window.innerHeight - 40),
-          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
+          left: adjustedPos.x,
+          top: adjustedPos.y,
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -443,15 +460,33 @@ const CellContextMenu = memo(function CellContextMenu({
     : colType === 'portale' ? portaleColors
     : TIPO_CONTATTO_COLORS;
 
+  const cellMenuRef = useRef<HTMLDivElement>(null);
+  const [adjPos, setAdjPos] = useState({ x, y });
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      const el = cellMenuRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const pad = 10;
+      let nx = x, ny = y;
+      if (nx + rect.width > window.innerWidth - pad) nx = window.innerWidth - rect.width - pad;
+      if (nx < pad) nx = pad;
+      if (ny + rect.height > window.innerHeight - pad) ny = window.innerHeight - rect.height - pad;
+      if (ny < pad) ny = pad;
+      setAdjPos({ x: nx, y: ny });
+    });
+  }, [x, y]);
+
   return (
     <>
       <div className="fixed inset-0 z-[110]" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
       <div
+        ref={cellMenuRef}
         className="fixed z-[110] flex flex-col gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-h-[85vh] overflow-y-auto min-w-[180px]"
         style={{
-          left: Math.min(Math.max(10, x), window.innerWidth - 260),
-          top: Math.min(Math.max(10, y), window.innerHeight - 40),
-          transform: y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
+          left: adjPos.x,
+          top: adjPos.y,
         }}
         onClick={(e) => e.stopPropagation()}
       >
