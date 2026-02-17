@@ -564,7 +564,7 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
         value={value || '__none'}
         onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
         open={true}
-        onOpenChange={(o) => { if (!o) { setOpen(false); setColorMenuPortal(null); } }}
+        onOpenChange={(o) => { if (!o && !colorMenuPortal) { setOpen(false); } }}
       >
         <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
           {value ? (
