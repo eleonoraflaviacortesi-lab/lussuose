@@ -40,12 +40,12 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   // Annual target from sede targets (sum of all months)
   const annualTarget = annualTargets?.vendite_target || 48;
   const currentSales = kpis?.vendite?.value || 0;
-  const completionPercent = Math.min(100, Math.round((currentSales / annualTarget) * 100));
+  const completionPercent = Math.min(100, Math.round(currentSales / annualTarget * 100));
   const fatturato = kpis?.fatturato?.value || 0;
-  
+
   // Track if goal was just reached to celebrate
   const previousSalesRef = useRef<number | null>(null);
-  
+
   useEffect(() => {
     if (previousSalesRef.current !== null && previousSalesRef.current < annualTarget && currentSales >= annualTarget) {
       // Goal just reached!
@@ -53,7 +53,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
     }
     previousSalesRef.current = currentSales;
   }, [currentSales, annualTarget]);
-  
+
   // Calculate fatturato a credito from myData
   const fatturatoCredito = useMemo(() => {
     if (!myData) return 0;
@@ -64,9 +64,9 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
     if (!allData) return 0;
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    return allData
-      .filter(d => new Date(d.date) >= startOfMonth)
-      .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0);
+    return allData.
+    filter((d) => new Date(d.date) >= startOfMonth).
+    reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0);
   }, [allData]);
 
   // NOTE: performance charts (Recharts) are lazy-loaded in PerformanceCharts to speed up first paint.
@@ -81,17 +81,17 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-6 w-6 border-2 border-foreground border-t-transparent"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   const contatti = kpis?.contatti?.value || 0;
   const notizie = kpis?.notizie?.value || 0;
   const chiusure = kpis?.vendite?.value || 0;
-  const conversioni = contatti > 0 ? Math.round((chiusure / contatti) * 100) : 0;
+  const conversioni = contatti > 0 ? Math.round(chiusure / contatti * 100) : 0;
 
   const incarichiTarget = sedeTargets.incarichi_target || 4;
-  const incarichiPercent = Math.min(100, Math.round((incarichiTeam / incarichiTarget) * 100));
+  const incarichiPercent = Math.min(100, Math.round(incarichiTeam / incarichiTarget * 100));
 
   const handleNotiziaClick = (notizia: Notizia) => {
     onOpenNotizia?.(notizia);
@@ -107,22 +107,22 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         <button
           onClick={() => navigate('/inserisci')}
           className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium tracking-widest transition-all active:scale-95 ${
-            hasReportedToday 
-              ? 'bg-muted text-muted-foreground' 
-              : 'bg-foreground text-background shadow-[0_0_25px_8px_rgba(0,0,0,0.25)]'
-          }`}
-        >
-          {hasReportedToday ? (
-            <>
+          hasReportedToday ?
+          'bg-muted text-muted-foreground' :
+          'bg-foreground text-background shadow-[0_0_25px_8px_rgba(0,0,0,0.25)]'}`
+          }>
+
+          {hasReportedToday ?
+          <>
               <Check className="w-4 h-4" />
               FATTO
-            </>
-          ) : (
-            <>
+            </> :
+
+          <>
               <Plus className="w-4 h-4" />
               CICLO PRODUTTIVO
             </>
-          )}
+          }
         </button>
       </div>
 
@@ -168,7 +168,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME GENERATO
           </p>
-          <p className="text-xl font-bold text-white whitespace-nowrap">
+          <p className="text-xl text-white whitespace-nowrap font-medium">
             {formatCompactCurrency(fatturato)}
           </p>
         </div>
@@ -176,7 +176,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
             VOLUME A CREDITO
           </p>
-          <p className="text-xl font-bold text-white whitespace-nowrap">
+          <p className="text-xl text-white whitespace-nowrap font-medium">
             {formatCompactCurrency(fatturatoCredito)}
           </p>
         </div>
@@ -187,51 +187,51 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
       <Suspense
         fallback={
-          <div className="bg-card rounded-2xl shadow-lg p-4">
+        <div className="bg-card rounded-2xl shadow-lg p-4">
             <div className="h-24 rounded-xl bg-muted animate-pulse" />
           </div>
-        }
-      >
+        }>
+
         <PerformanceCharts
           myData={myData}
           chartPeriod={chartPeriod}
           onChartPeriodChange={setChartPeriod}
-          formatCompactCurrency={formatCompactCurrency}
-        />
+          formatCompactCurrency={formatCompactCurrency} />
+
       </Suspense>
 
       {/* Stats Grid - Clickable Cards */}
       <div className="grid grid-cols-4 gap-2">
         <button
           onClick={() => setSelectedKPI('contatti')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
-        >
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
+
           <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-bold text-foreground">{contatti}</p>
+          <p className="text-xl text-foreground font-medium">{contatti}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONTATTI</p>
         </button>
         <button
           onClick={() => setSelectedKPI('notizie')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
-        >
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
+
           <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-bold text-foreground">{notizie}</p>
+          <p className="text-xl text-foreground font-medium">{notizie}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">NOTIZIE</p>
         </button>
         <button
           onClick={() => setSelectedKPI('chiusure')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
-        >
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
+
           <Award className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-bold text-foreground">{chiusure}</p>
+          <p className="text-xl text-foreground font-medium">{chiusure}</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CHIUSURE</p>
         </button>
         <button
           onClick={() => setSelectedKPI('conversioni')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]"
-        >
+          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
+
           <Zap className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl font-bold text-foreground">{conversioni}%</p>
+          <p className="text-xl text-foreground font-medium">{conversioni}%</p>
           <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONV.</p>
         </button>
       </div>
@@ -242,24 +242,24 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           onOpenChange={(open) => !open && setSelectedKPI(null)}
           kpiKey={selectedKPI}
           title={
-            selectedKPI === 'contatti' ? 'CONTATTI REALI' :
-            selectedKPI === 'notizie' ? 'NOTIZIE ACQUISITE' :
-            selectedKPI === 'chiusure' ? 'CHIUSURE TOTALI' :
-            'CONVERSIONI'
+          selectedKPI === 'contatti' ? 'CONTATTI REALI' :
+          selectedKPI === 'notizie' ? 'NOTIZIE ACQUISITE' :
+          selectedKPI === 'chiusure' ? 'CHIUSURE TOTALI' :
+          'CONVERSIONI'
           }
           value={
-            selectedKPI === 'contatti' ? contatti :
-            selectedKPI === 'notizie' ? notizie :
-            selectedKPI === 'chiusure' ? chiusure :
-            conversioni
+          selectedKPI === 'contatti' ? contatti :
+          selectedKPI === 'notizie' ? notizie :
+          selectedKPI === 'chiusure' ? chiusure :
+          conversioni
           }
           icon={
-            selectedKPI === 'contatti' ? Users :
-            selectedKPI === 'notizie' ? TrendingUp :
-            selectedKPI === 'chiusure' ? Award :
-            Zap
-          }
-        />
+          selectedKPI === 'contatti' ? Users :
+          selectedKPI === 'notizie' ? TrendingUp :
+          selectedKPI === 'chiusure' ? Award :
+          Zap
+          } />
+
       </Suspense>
 
       {/* Incarichi Team Card */}
@@ -276,7 +276,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           </div>
           
           <div className="flex items-baseline gap-1.5 mb-2">
-            <span className="text-4xl font-bold text-foreground">{incarichiTeam}</span>
+            <span className="text-4xl text-foreground font-medium">{incarichiTeam}</span>
             <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
           </div>
 
@@ -288,8 +288,8 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </div>
       </div>
 
-    </div>
-  );
+    </div>);
+
 };
 
 export default PersonalDashboard;
