@@ -540,6 +540,13 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     setColorMenuPortal(null);
   };
 
+  const handleContextMenuPortal = useCallback((o: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setColorMenuPortal(o);
+    setColorMenuPos({ x: e.clientX, y: e.clientY });
+  }, []);
+
   if (!open && !value) {
     return (
       <span
@@ -560,12 +567,16 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
     );
   }
 
+  // When color menu opens, close the Select to remove Radix's pointer-blocking overlay
+  const selectOpen = !colorMenuPortal;
+
+
   return (
     <>
       <Select
         value={value || '__none'}
         onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
-        open={true}
+        open={selectOpen}
         onOpenChange={(o) => { if (!o && !colorMenuPortal) { setOpen(false); } }}
       >
         <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
@@ -581,12 +592,7 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
             <div
               key={o}
               className="relative"
-              onContextMenu={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setColorMenuPortal(o);
-                setColorMenuPos({ x: e.clientX, y: e.clientY });
-              }}
+              onContextMenu={(e) => handleContextMenuPortal(o, e)}
             >
               <SelectItem value={o}>
                 <span className="flex items-center gap-2">
@@ -623,18 +629,16 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
         </SelectContent>
       </Select>
 
-      {/* Portal color picker overlay - rendered via portal to escape Select */}
+      {/* Portal color picker overlay - Select is closed so no Radix overlay blocks */}
       {colorMenuPortal && createPortal(
         <>
-          <div className="fixed inset-0 z-[9998]" onClick={() => setColorMenuPortal(null)} onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }} onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }} />
+          <div className="fixed inset-0 z-[9998]" onClick={() => { setColorMenuPortal(null); setOpen(false); }} />
           <div
             className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
             style={{
               left: Math.min(colorMenuPos.x, window.innerWidth - 280),
               top: Math.min(colorMenuPos.y, window.innerHeight - 200),
             }}
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => e.stopPropagation()}
           >
             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
               Colore: {colorMenuPortal}
@@ -648,13 +652,7 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
                     mergedColors[colorMenuPortal!] === c && "ring-2 ring-foreground ring-offset-1"
                   )}
                   style={{ backgroundColor: c }}
-                  onPointerDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-                  onMouseDown={(e) => { e.stopPropagation(); e.preventDefault(); }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleColorSelect(colorMenuPortal!, c);
-                  }}
+                  onClick={() => handleColorSelect(colorMenuPortal!, c)}
                 />
               ))}
             </div>
