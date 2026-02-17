@@ -715,14 +715,50 @@ function ColorPalettePopover({
   );
 }
 
-// --- Simple Badge Cell (for lingua, tipo_contatto) ---
+// --- Simple Badge Cell (for lingua, tipo_contatto) with right-click color editing ---
 function SimpleBadgeCell({
-  value, onChange, options, colorMap,
+  value, onChange, options, colorMap, colType,
 }: {
-  value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>;
+  value: string; onChange: (val: string) => void; options: string[]; colorMap?: Record<string, string>; colType?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const bgColor = colorMap?.[value] || '#6b7280';
+  const [colorMenuItem, setColorMenuItem] = useState<string | null>(null);
+  const [colorMenuPos, setColorMenuPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [localColors, setLocalColors] = useState(colorMap || {});
+
+  // Sync global lingua colors
+  useEffect(() => {
+    if (colType === 'lingua') {
+      const handler = (e: StorageEvent) => {
+        if (e.key === 'custom-lingua-colors') setLocalColors(getMergedLinguaColors());
+      };
+      window.addEventListener('storage', handler);
+      return () => window.removeEventListener('storage', handler);
+    }
+  }, [colType]);
+
+  useEffect(() => {
+    setLocalColors(colorMap || {});
+  }, [colorMap]);
+
+  const bgColor = localColors[value] || '#6b7280';
+
+  const handleContextMenuItem = useCallback((o: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setColorMenuItem(o);
+    setColorMenuPos({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleColorSelect = (item: string, color: string) => {
+    if (colType === 'lingua') {
+      const updated = { ...getCustomLinguaColors(), [item]: color };
+      saveCustomLinguaColors(updated);
+      setLocalColors({ ...LINGUA_COLORS, ...updated });
+    }
+    // For tipo_contatto: could add persistence if needed
+    setColorMenuItem(null);
+  };
 
   if (!open && !value) {
     return (
@@ -744,32 +780,74 @@ function SimpleBadgeCell({
     );
   }
 
+  const selectOpen = !colorMenuItem;
+
   return (
-    <Select
-      value={value || '__none'}
-      onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
-      open={true}
-      onOpenChange={(o) => { if (!o) setOpen(false); }}
-    >
-      <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
-        {value ? (
-          <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
-        ) : (
-          <span className="text-muted-foreground text-xs">—</span>
-        )}
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="__none">—</SelectItem>
-        {options.map(o => (
-          <SelectItem key={o} value={o}>
-            <span className="flex items-center gap-2">
-              {colorMap && <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colorMap[o] || '#6b7280' }} />}
-              {o}
-            </span>
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <>
+      <Select
+        value={value || '__none'}
+        onValueChange={v => { onChange(v === '__none' ? '' : v); setOpen(false); }}
+        open={selectOpen}
+        onOpenChange={(o) => { if (!o && !colorMenuItem) setOpen(false); }}
+      >
+        <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
+          {value ? (
+            <span className="px-2 py-0.5 rounded text-white text-[10px] font-semibold" style={{ backgroundColor: bgColor }}>{value}</span>
+          ) : (
+            <span className="text-muted-foreground text-xs">—</span>
+          )}
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__none">—</SelectItem>
+          {options.map(o => (
+            <div
+              key={o}
+              className="relative"
+              onContextMenu={(e) => handleContextMenuItem(o, e)}
+            >
+              <SelectItem value={o}>
+                <span className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: localColors[o] || '#6b7280' }} />
+                  {o}
+                </span>
+              </SelectItem>
+            </div>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Color picker overlay */}
+      {colorMenuItem && createPortal(
+        <>
+          <div className="fixed inset-0 z-[9998]" onClick={() => { setColorMenuItem(null); setOpen(false); }} />
+          <div
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150"
+            style={{
+              left: Math.min(colorMenuPos.x, window.innerWidth - 280),
+              top: Math.min(colorMenuPos.y, window.innerHeight - 200),
+            }}
+          >
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-2 px-1">
+              Colore: {colorMenuItem}
+            </p>
+            <div className="grid grid-cols-10 gap-1">
+              {PALETTE_COLORS.map(c => (
+                <button
+                  key={c}
+                  className={cn(
+                    "w-5 h-5 rounded-full border border-border/30 hover:scale-125 transition-transform",
+                    localColors[colorMenuItem!] === c && "ring-2 ring-foreground ring-offset-1"
+                  )}
+                  style={{ backgroundColor: c }}
+                  onClick={() => handleColorSelect(colorMenuItem!, c)}
+                />
+              ))}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
+    </>
   );
 }
 
@@ -1272,11 +1350,11 @@ const SheetRow = memo(function SheetRow({
             {col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'lingua' && col.editable ? (
-              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} colType="lingua" />
             ) : col.type === 'portale' && col.editable ? (
               <PortalBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'tipo_contatto' && col.editable ? (
-              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={TIPO_CONTATTO_OPTIONS} colorMap={TIPO_CONTATTO_COLORS} colType="tipo_contatto" />
             ) : col.type === 'agent' && col.editable ? (
               <LazyAgentCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} agents={agents} />
             ) : col.key === 'telefono' ? (
