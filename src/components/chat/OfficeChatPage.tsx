@@ -54,6 +54,8 @@ const OfficeChatPage = () => {
   const [hashResults, setHashResults] = useState<Array<{ id: string; type: 'notizia' | 'cliente'; label: string; sub: string; emoji: string; raw: any }>>([]);
   const [hashIndex, setHashIndex] = useState(0);
   const [hashLoading, setHashLoading] = useState(false);
+  const [pendingLinkedNotizia, setPendingLinkedNotizia] = useState<string | null>(null);
+  const [pendingLinkedCliente, setPendingLinkedCliente] = useState<string | null>(null);
 
   // Linked data cache
   const [linkedNotizie, setLinkedNotizie] = useState<Record<string, any>>({});
@@ -208,10 +210,14 @@ const OfficeChatPage = () => {
 
   // Send text message
   const sendMessage = async (linkedNotiziaId?: string, linkedClienteId?: string) => {
-    if ((!newMessage.trim() && !linkedNotiziaId && !linkedClienteId) || !user || isSending) return;
+    const notiziaId = linkedNotiziaId || pendingLinkedNotizia;
+    const clienteId = linkedClienteId || pendingLinkedCliente;
+    if ((!newMessage.trim() && !notiziaId && !clienteId) || !user || isSending) return;
     setIsSending(true);
     const text = newMessage.trim();
     setNewMessage('');
+    setPendingLinkedNotizia(null);
+    setPendingLinkedCliente(null);
     const replyId = replyTo?.id || null;
     setReplyTo(null);
 
@@ -220,12 +226,12 @@ const OfficeChatPage = () => {
     try {
       await supabase.from('chat_messages').insert({
         user_id: user.id,
-        message: text || (linkedNotiziaId ? '📋 Notizia allegata' : '👤 Buyer allegato'),
+        message: text || (notiziaId ? '📋 Notizia allegata' : '👤 Buyer allegato'),
         reply_to_id: replyId,
         sede,
         mentions: mentionIds,
-        linked_notizia_id: linkedNotiziaId || null,
-        linked_cliente_id: linkedClienteId || null,
+        linked_notizia_id: notiziaId || null,
+        linked_cliente_id: clienteId || null,
       });
     } catch {
       setNewMessage(text);
@@ -426,18 +432,21 @@ const OfficeChatPage = () => {
   };
 
   const selectHashItem = (item: typeof hashResults[number]) => {
-    // Remove the # and everything after it from the message
+    // Auto-complete: replace #query with #Label in the text
     const beforeCursor = newMessage.slice(0, cursorPos);
     const hashIdx = beforeCursor.lastIndexOf('#');
     const after = newMessage.slice(cursorPos);
-    const cleaned = newMessage.slice(0, hashIdx).trimEnd();
-    setNewMessage(cleaned + (cleaned ? ' ' : '') + after);
+    const val = newMessage.slice(0, hashIdx) + `#${item.label} ` + after;
+    setNewMessage(val);
     setShowHashDropdown(false);
 
+    // Store pending attachment to send with the message
     if (item.type === 'notizia') {
-      sendMessage(item.id, undefined);
+      setPendingLinkedNotizia(item.id);
+      setPendingLinkedCliente(null);
     } else {
-      sendMessage(undefined, item.id);
+      setPendingLinkedCliente(item.id);
+      setPendingLinkedNotizia(null);
     }
   };
 
