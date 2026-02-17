@@ -138,7 +138,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} />
       <div style={{ height: 'calc(85px + env(safe-area-inset-top, 0px))' }} />
       <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-      <div style={{ height: '100px' }} />
+      
       
       {/* Main content with pull-to-refresh */}
       <PullToRefresh 
