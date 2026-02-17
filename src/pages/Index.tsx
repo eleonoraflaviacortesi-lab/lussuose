@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import Header from '@/components/layout/Header';
 
 import PullToRefresh from '@/components/ui/pull-to-refresh';
-import { NotificationBell } from '@/components/layout/NotificationBell';
 import { FloatingSparkles } from '@/components/ui/floating-sparkles';
 import { MagicCursor } from '@/components/ui/magic-cursor';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
@@ -135,7 +134,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
       <FloatingSparkles />
       <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
-      <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); navigate(tab === 'numeri' ? '/' : `/${tab}`); }} />
+      <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); navigate(tab === 'numeri' ? '/' : `/${tab}`); }} onOpenCliente={handleOpenCliente} />
       <div style={{ height: 'calc(85px + env(safe-area-inset-top, 0px))' }} />
       
       
@@ -159,8 +158,7 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         </main>
       </PullToRefresh>
       
-      {/* Fixed Notification Bell */}
-      <NotificationBell onOpenCliente={handleOpenCliente} />
+      
 
       {/* Global Notizia Detail Modal (can be opened from any tab) */}
       <NotiziaDetail
