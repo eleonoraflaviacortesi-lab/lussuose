@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { Home, Megaphone, Settings, Calendar, UsersRound, Wallet } from 'lucide-react';
+import { Home, Megaphone, Settings, Calendar, Wallet, Newspaper } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -14,8 +14,7 @@ const tabToPath: Record<string, string> = {
   calendario: '/calendario',
   notizie: '/notizie',
   clienti: '/clienti',
-  // separator after clienti
-  riunioni: '/riunioni',
+  ufficio: '/ufficio',
   impostazioni: '/impostazioni',
 };
 
@@ -27,8 +26,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
     { id: 'calendario', icon: Calendar, label: 'Calendario' },
     { id: 'notizie', icon: Megaphone, label: 'Notizie' },
     { id: 'clienti', icon: Wallet, label: 'Buyers' },
-    // separator after index 3 (clienti)
-    { id: 'riunioni', icon: UsersRound, label: 'Riunioni' },
+    { id: 'ufficio', icon: Newspaper, label: 'Ufficio' },
     { id: 'impostazioni', icon: Settings, label: 'Impostazioni' },
   ];
 
