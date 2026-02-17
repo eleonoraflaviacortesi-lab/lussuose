@@ -1359,7 +1359,14 @@ const SheetRow = memo(function SheetRow({
         onTouchEnd={handleTouchEnd}
         onTouchMove={handleTouchMove}
       >
-        <span className="text-[10px] font-medium flex-1 text-center select-none">{idx + 1}</span>
+        <span className="text-[10px] font-medium flex-1 text-center select-none flex items-center justify-center gap-0.5">
+          {idx + 1}
+          {cliente.tally_submission_id && (
+            <svg viewBox="0 0 24 24" className="w-3 h-3 text-amber-500 flex-shrink-0" fill="currentColor">
+              <path d="M12 2l2.4 7.2L22 12l-7.6 2.8L12 22l-2.4-7.2L2 12l7.6-2.8z" />
+            </svg>
+          )}
+        </span>
         <button
           className="flex items-center justify-center w-5 h-full hover:text-foreground transition-colors"
           onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
