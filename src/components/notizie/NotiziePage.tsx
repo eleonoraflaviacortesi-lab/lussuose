@@ -33,7 +33,7 @@ const BoardSkeleton = () =>
 
 
 const NotiziePage = () => {
-  const { notizie, notizieByStatus, isLoading, updateNotizia } = useNotizie();
+  const { notizie, notizieByStatus, isLoading, updateNotizia, deleteNotizia, addNotizia } = useNotizie();
   const { pushAction } = useUndoRedo();
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [detailOpen, setDetailOpen] = useState(false);
@@ -163,6 +163,8 @@ const NotiziePage = () => {
             notizie={notizie || []}
             onNotiziaClick={handleNotiziaClick}
             onUpdate={handleSheetUpdate}
+            onDelete={(id) => deleteNotizia.mutate(id)}
+            onAddNew={() => addNotizia.mutate({ name: '' })}
             searchQuery={searchQuery}
           />
         )}
