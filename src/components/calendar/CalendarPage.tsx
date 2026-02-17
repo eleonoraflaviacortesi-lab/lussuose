@@ -49,8 +49,8 @@ const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', 
 
 
 // Context menu for events
-const EventContextMenu = memo(({ 
-  position, 
+const EventContextMenu = memo(({
+  position,
   event,
   columns,
   notizia,
@@ -60,31 +60,31 @@ const EventContextMenu = memo(({
   onUrgentToggle,
   onRemoveReminder,
   onAddComment,
-  onClose 
-}: { 
-  position: { x: number; y: number }; 
-  event: CalendarEvent;
-  columns: KanbanColumn[];
-  notizia?: Notizia | null;
-  cliente?: any | null;
-  onStatusChange: (status: NotiziaStatus) => void;
-  onEmojiChange: (emoji: string | null) => void;
-  onUrgentToggle: () => void;
-  onRemoveReminder: () => void;
-  onAddComment: (text: string) => void;
-  onClose: () => void;
-}) => {
+  onClose
+
+
+
+
+
+
+
+
+
+
+
+
+}: {position: {x: number;y: number;};event: CalendarEvent;columns: KanbanColumn[];notizia?: Notizia | null;cliente?: any | null;onStatusChange: (status: NotiziaStatus) => void;onEmojiChange: (emoji: string | null) => void;onUrgentToggle: () => void;onRemoveReminder: () => void;onAddComment: (text: string) => void;onClose: () => void;}) => {
   const [commentText, setCommentText] = useState('');
-  
+
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
   const isNotiziaReminder = event.type === 'notizia_reminder';
   const isClienteReminder = event.type === 'cliente_reminder';
-  
+
   // Get existing comments
   const comments = notizia?.comments || cliente?.comments || [];
   const lastComment = comments.length > 0 ? comments[comments.length - 1] : null;
-  
+
   const handleAddComment = () => {
     if (commentText.trim()) {
       onAddComment(commentText.trim());
@@ -93,71 +93,71 @@ const EventContextMenu = memo(({
       toast.success('Commento aggiunto');
     }
   };
-  
+
   return (
     <>
-      <div 
-        className="fixed inset-0 z-50" 
+      <div
+        className="fixed inset-0 z-50"
         onClick={onClose}
-        onContextMenu={(e) => { e.preventDefault(); onClose(); }}
-      />
+        onContextMenu={(e) => {e.preventDefault();onClose();}} />
+
       <div
         className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[300px] max-h-[85vh] overflow-y-auto"
         style={{
           left: Math.min(Math.max(10, position.x), window.innerWidth - 310),
           top: Math.min(Math.max(10, position.y), window.innerHeight - 40),
-          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
+          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none'
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
-        onTouchEnd={(e) => e.stopPropagation()}
-      >
+        onTouchEnd={(e) => e.stopPropagation()}>
+
         {/* Comments section - for notizie and clienti reminders */}
-        {(isNotiziaReminder || isClienteReminder) && (
-          <div>
+        {(isNotiziaReminder || isClienteReminder) &&
+        <div>
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
               <MessageCircle className="w-3 h-3" />
               Commenti ({comments.length})
             </span>
             
             {/* Show last comment if exists */}
-            {lastComment && (
-              <div className="bg-muted/50 rounded-xl px-3 py-2 text-sm text-foreground mb-2 max-h-[60px] overflow-y-auto">
+            {lastComment &&
+          <div className="bg-muted/50 rounded-xl px-3 py-2 text-sm text-foreground mb-2 max-h-[60px] overflow-y-auto">
                 <p className="text-[10px] text-muted-foreground mb-0.5">
                   {format(parseISO(lastComment.created_at), 'd MMM HH:mm', { locale: it })}
                 </p>
                 <p className="text-xs">{lastComment.text}</p>
               </div>
-            )}
+          }
             
             {/* Add new comment */}
             <div className="flex gap-2">
               <Textarea
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder="Aggiungi commento..."
-                className="flex-1 min-h-[40px] max-h-[80px] text-xs px-2.5 py-2 resize-none"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleAddComment();
-                  }
-                }}
-              />
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              placeholder="Aggiungi commento..."
+              className="flex-1 min-h-[40px] max-h-[80px] text-xs px-2.5 py-2 resize-none"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleAddComment();
+                }
+              }} />
+
               <button
-                onClick={handleAddComment}
-                disabled={!commentText.trim()}
-                className="w-9 h-9 shrink-0 rounded-xl bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40"
-              >
+              onClick={handleAddComment}
+              disabled={!commentText.trim()}
+              className="w-9 h-9 shrink-0 rounded-xl bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40">
+
                 <Send className="w-4 h-4" />
               </button>
             </div>
           </div>
-        )}
+        }
 
         {/* Emoji picker - for both notizie and clienti */}
-        {(isNotiziaReminder || isClienteReminder) && (
-          <>
+        {(isNotiziaReminder || isClienteReminder) &&
+        <>
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
@@ -165,35 +165,35 @@ const EventContextMenu = memo(({
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
               <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-                {event.emoji && (
-                  <button
-                    onClick={() => { onEmojiChange(null); onClose(); }}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-                    title="Rimuovi emoji"
-                  >
+                {event.emoji &&
+              <button
+                onClick={() => {onEmojiChange(null);onClose();}}
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                title="Rimuovi emoji">
+
                     <X className="w-3.5 h-3.5" />
                   </button>
-                )}
-                {QUICK_EMOJIS.map((emoji) => (
-                  <button
-                    key={emoji}
-                    onClick={() => { onEmojiChange(emoji); onClose(); }}
-                    className={cn(
-                      "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-                      event.emoji === emoji && "bg-muted ring-1 ring-foreground"
-                    )}
-                  >
+              }
+                {QUICK_EMOJIS.map((emoji) =>
+              <button
+                key={emoji}
+                onClick={() => {onEmojiChange(emoji);onClose();}}
+                className={cn(
+                  "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
+                  event.emoji === emoji && "bg-muted ring-1 ring-foreground"
+                )}>
+
                     {emoji}
                   </button>
-                ))}
+              )}
               </div>
             </div>
           </>
-        )}
+        }
 
         {/* Notizia-specific options */}
-        {isNotiziaReminder && (
-          <>
+        {isNotiziaReminder &&
+        <>
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
@@ -201,14 +201,14 @@ const EventContextMenu = memo(({
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Priorità</span>
               <button
-                onClick={() => { onUrgentToggle(); onClose(); }}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
-                  event.urgent 
-                    ? "bg-red-500 text-white" 
-                    : "bg-muted hover:bg-red-100 text-foreground"
-                )}
-              >
+              onClick={() => {onUrgentToggle();onClose();}}
+              className={cn(
+                "flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full",
+                event.urgent ?
+                "bg-red-500 text-white" :
+                "bg-muted hover:bg-red-100 text-foreground"
+              )}>
+
                 <AlertTriangle className="w-4 h-4" />
                 <span>{event.urgent ? 'Urgente ✓' : 'Segna come urgente'}</span>
               </button>
@@ -221,22 +221,22 @@ const EventContextMenu = memo(({
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Status</span>
               <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-                {columns.map((col) => (
-                  <button
-                    key={col.key}
-                    onClick={() => { onStatusChange(col.key as NotiziaStatus); onClose(); }}
-                    className={cn(
-                      "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
-                      currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
-                    )}
-                    style={{ 
-                      backgroundColor: col.color,
-                      color: isDarkColor(col.color) ? 'white' : 'black'
-                    }}
-                  >
+                {columns.map((col) =>
+              <button
+                key={col.key}
+                onClick={() => {onStatusChange(col.key as NotiziaStatus);onClose();}}
+                className={cn(
+                  "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                  currentStatus === col.key && "ring-2 ring-offset-1 ring-foreground"
+                )}
+                style={{
+                  backgroundColor: col.color,
+                  color: isDarkColor(col.color) ? 'white' : 'black'
+                }}>
+
                     {col.label}
                   </button>
-                ))}
+              )}
               </div>
             </div>
 
@@ -245,61 +245,61 @@ const EventContextMenu = memo(({
 
             {/* Remove reminder */}
             <button
-              onClick={() => { onRemoveReminder(); onClose(); }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
-            >
+            onClick={() => {onRemoveReminder();onClose();}}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground">
+
               <Trash2 className="w-4 h-4" />
               <span>Rimuovi promemoria</span>
             </button>
           </>
-        )}
+        }
 
         {/* Cliente-specific options */}
-        {isClienteReminder && (
-          <>
+        {isClienteReminder &&
+        <>
             {/* Separator */}
             <div className="h-px bg-muted/50" />
 
             {/* Remove reminder */}
             <button
-              onClick={() => { onRemoveReminder(); onClose(); }}
-              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground"
-            >
+            onClick={() => {onRemoveReminder();onClose();}}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all w-full bg-muted hover:bg-destructive hover:text-white text-foreground">
+
               <Trash2 className="w-4 h-4" />
               <span>Rimuovi promemoria</span>
             </button>
           </>
-        )}
+        }
       </div>
-    </>
-  );
+    </>);
+
 });
 EventContextMenu.displayName = 'EventContextMenu';
 
 const CalendarPage = () => {
   const isMobile = useIsMobile();
-  const [currentWeekStart, setCurrentWeekStart] = useState(() => 
-    startOfWeek(new Date(), { weekStartsOn: 1 })
+  const [currentWeekStart, setCurrentWeekStart] = useState(() =>
+  startOfWeek(new Date(), { weekStartsOn: 1 })
   );
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
-  
+
   // For opening detail modals
   const [selectedNotizia, setSelectedNotizia] = useState<Notizia | null>(null);
   const [selectedCliente, setSelectedCliente] = useState<any | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  
+
   // Task context menu state (separate from other events)
-  const [taskContextMenu, setTaskContextMenu] = useState<{ task: Task; position: { x: number; y: number } } | null>(null);
-  
+  const [taskContextMenu, setTaskContextMenu] = useState<{task: Task;position: {x: number;y: number;};} | null>(null);
+
   // Context menu state
-  const [contextMenu, setContextMenu] = useState<{ event: CalendarEvent; position: { x: number; y: number } } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{event: CalendarEvent;position: {x: number;y: number;};} | null>(null);
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const weekScrollRef = useRef<HTMLDivElement>(null);
-  
+
   // Track dragging state to prevent click on day during drag
   const [isDragging, setIsDragging] = useState(false);
 
@@ -313,7 +313,7 @@ const CalendarPage = () => {
 
   // Helper to get status color from columns
   const getStatusColor = (status: string): string => {
-    const col = columns.find(c => c.key === status);
+    const col = columns.find((c) => c.key === status);
     return col?.color || '#6b7280';
   };
 
@@ -339,19 +339,19 @@ const CalendarPage = () => {
         todayEl.scrollIntoView({ behavior: 'auto', inline: 'center', block: 'nearest' });
       }
     }, 50);
-    
+
     return () => clearTimeout(timeoutId);
   }, [currentWeekStart, isMobile]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
-    
-    weekDays.forEach(day => {
+
+    weekDays.forEach((day) => {
       const dayKey = format(day, 'yyyy-MM-dd');
       const events: CalendarEvent[] = [];
 
       // Add appointments
-      appointments?.forEach(apt => {
+      appointments?.forEach((apt) => {
         if (isSameDay(parseISO(apt.start_time), day)) {
           events.push({
             id: apt.id,
@@ -359,20 +359,20 @@ const CalendarPage = () => {
             type: 'appointment',
             clienteId: apt.cliente_id || undefined,
             clienteName: apt.cliente?.nome,
-            completed: apt.completed,
+            completed: apt.completed
           });
         }
       });
 
       // Add cliente reminders
-      clienti?.forEach(cliente => {
+      clienti?.forEach((cliente) => {
         if (cliente.reminder_date && isSameDay(parseISO(cliente.reminder_date), day)) {
-          const clienteComments = (cliente.comments || []) as Array<{id: string; text: string; createdAt?: string; created_at?: string}>;
+          const clienteComments = (cliente.comments || []) as Array<{id: string;text: string;createdAt?: string;created_at?: string;}>;
           // Normalize to NotiziaComment format
-          const normalizedComments: NotiziaComment[] = clienteComments.map(c => ({
+          const normalizedComments: NotiziaComment[] = clienteComments.map((c) => ({
             id: c.id,
             text: c.text,
-            created_at: c.created_at || c.createdAt || new Date().toISOString(),
+            created_at: c.created_at || c.createdAt || new Date().toISOString()
           }));
           events.push({
             id: `cliente-${cliente.id}`,
@@ -384,17 +384,17 @@ const CalendarPage = () => {
             statusColor: getStatusColor(cliente.status),
             displayOrder: cliente.display_order,
             lastComment: getLastComment(normalizedComments),
-            commentsCount: normalizedComments.length,
+            commentsCount: normalizedComments.length
           });
         }
       });
 
       // Add notizia reminders
-      notizie?.forEach(notizia => {
+      notizie?.forEach((notizia) => {
         if (notizia.reminder_date && isSameDay(parseISO(notizia.reminder_date), day)) {
           // Check if note_extra contains "URGENT" flag (stored in notes field)
           const isUrgent = notizia.notes?.includes('[URGENT]') || false;
-          
+
           events.push({
             id: `notizia-${notizia.id}`,
             title: notizia.name,
@@ -405,13 +405,13 @@ const CalendarPage = () => {
             urgent: isUrgent,
             displayOrder: notizia.display_order,
             lastComment: getLastComment(notizia.comments),
-            commentsCount: notizia.comments?.length || 0,
+            commentsCount: notizia.comments?.length || 0
           });
         }
       });
 
       // Add tasks
-      tasks?.forEach(task => {
+      tasks?.forEach((task) => {
         if (isSameDay(parseISO(task.due_date), day)) {
           events.push({
             id: `task-${task.id}`,
@@ -424,7 +424,7 @@ const CalendarPage = () => {
             notes: task.notes || undefined,
             cardColor: task.card_color || undefined,
             isUrgent: task.is_urgent || false,
-            urgent: task.is_urgent || false, // Map to the general urgent field for sorting
+            urgent: task.is_urgent || false // Map to the general urgent field for sorting
           });
         }
       });
@@ -442,8 +442,8 @@ const CalendarPage = () => {
   }, [weekDays, appointments, clienti, notizie, tasks, columns]);
 
   const navigateWeek = (direction: 'prev' | 'next') => {
-    setCurrentWeekStart(prev => 
-      direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1)
+    setCurrentWeekStart((prev) =>
+    direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1)
     );
   };
 
@@ -454,7 +454,7 @@ const CalendarPage = () => {
   const handleDayClick = (day: Date) => {
     // Don't open dialog if we just finished dragging
     if (isDragging) return;
-    
+
     setSelectedDate(day);
     if (isMobile) {
       setShowDayView(true);
@@ -462,7 +462,7 @@ const CalendarPage = () => {
       setShowAddDialog(true);
     }
   };
-  
+
   // Drag start handler to track dragging state
   const handleDragStart = useCallback(() => {
     setIsDragging(true);
@@ -470,28 +470,28 @@ const CalendarPage = () => {
 
   const handleEventClick = (event: CalendarEvent) => {
     triggerHaptic('light');
-    
+
     // Tasks - open edit dialog
     if (event.type === 'task' && event.taskId) {
-      const task = tasks?.find(t => t.id === event.taskId);
+      const task = tasks?.find((t) => t.id === event.taskId);
       if (task) {
         setSelectedTask(task);
       }
       return;
     }
-    
+
     if (event.type === 'notizia_reminder' && event.notiziaId) {
-      const notizia = notizie?.find(n => n.id === event.notiziaId);
+      const notizia = notizie?.find((n) => n.id === event.notiziaId);
       if (notizia) {
         setSelectedNotizia(notizia);
       }
     } else if (event.type === 'cliente_reminder' && event.clienteId) {
-      const cliente = clienti?.find(c => c.id === event.clienteId);
+      const cliente = clienti?.find((c) => c.id === event.clienteId);
       if (cliente) {
         setSelectedCliente(cliente);
       }
     } else if (event.type === 'appointment' && event.clienteId) {
-      const cliente = clienti?.find(c => c.id === event.clienteId);
+      const cliente = clienti?.find((c) => c.id === event.clienteId);
       if (cliente) {
         setSelectedCliente(cliente);
       }
@@ -501,16 +501,16 @@ const CalendarPage = () => {
   const handleContextMenu = (event: CalendarEvent, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Tasks have their own context menu
     if (event.type === 'task' && event.taskId) {
-      const task = tasks?.find(t => t.id === event.taskId);
+      const task = tasks?.find((t) => t.id === event.taskId);
       if (task) {
         setTaskContextMenu({ task, position: { x: e.clientX - 100, y: e.clientY - 50 } });
       }
       return;
     }
-    
+
     // Allow context menu for all event types now (for notes)
     setContextMenu({ event, position: { x: e.clientX - 100, y: e.clientY - 50 } });
   };
@@ -519,16 +519,16 @@ const CalendarPage = () => {
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
-      
+
       // Tasks have their own context menu
       if (event.type === 'task' && event.taskId) {
-        const task = tasks?.find(t => t.id === event.taskId);
+        const task = tasks?.find((t) => t.id === event.taskId);
         if (task) {
           setTaskContextMenu({ task, position: { x: touch.clientX - 100, y: touch.clientY - 60 } });
         }
         return;
       }
-      
+
       setContextMenu({ event, position: { x: touch.clientX - 100, y: touch.clientY - 60 } });
     }, 500);
   };
@@ -592,21 +592,21 @@ const CalendarPage = () => {
   }, [selectedDate, eventsByDay]);
 
   // Agent data for ClienteDetail
-  const agents = profiles?.map(p => ({
+  const agents = profiles?.map((p) => ({
     user_id: p.user_id,
     full_name: p.full_name,
-    avatar_emoji: p.avatar_emoji || '👤',
+    avatar_emoji: p.avatar_emoji || '👤'
   })) || [];
 
   // Get notizia for context menu
-  const contextMenuNotizia = contextMenu?.event.notiziaId 
-    ? notizie?.find(n => n.id === contextMenu.event.notiziaId) 
-    : null;
+  const contextMenuNotizia = contextMenu?.event.notiziaId ?
+  notizie?.find((n) => n.id === contextMenu.event.notiziaId) :
+  null;
 
   // Get cliente for context menu
-  const contextMenuCliente = contextMenu?.event.clienteId 
-    ? clienti?.find(c => c.id === contextMenu.event.clienteId) 
-    : null;
+  const contextMenuCliente = contextMenu?.event.clienteId ?
+  clienti?.find((c) => c.id === contextMenu.event.clienteId) :
+  null;
 
   // Handler to remove reminder from notizia
   const handleRemoveReminder = (notiziaId: string) => {
@@ -625,19 +625,19 @@ const CalendarPage = () => {
 
   // Handler to add comment to notizia
   const handleAddNotiziaComment = (notiziaId: string, text: string) => {
-    const notizia = notizie?.find(n => n.id === notiziaId);
+    const notizia = notizie?.find((n) => n.id === notiziaId);
     if (!notizia) return;
-    
+
     const newComment: NotiziaComment = {
       id: crypto.randomUUID(),
       text,
-      created_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
     };
-    
-    updateNotizia.mutate({ 
-      id: notiziaId, 
+
+    updateNotizia.mutate({
+      id: notiziaId,
       comments: [...(notizia.comments || []), newComment],
-      silent: true 
+      silent: true
     });
   };
 
@@ -652,13 +652,13 @@ const CalendarPage = () => {
     // Format: 'notizia-{id}' or 'cliente-{id}' or 'task-{id}'
     if (draggableId.startsWith('notizia-')) {
       const notiziaId = draggableId.replace('notizia-', '');
-      const notizia = notizie?.find(n => n.id === notiziaId);
-      
+      const notizia = notizie?.find((n) => n.id === notiziaId);
+
       if (notizia) {
         // Use default time of 09:00 if no reminder_date exists
         let hours = 9;
         let minutes = 0;
-        
+
         if (notizia.reminder_date) {
           try {
             const oldDate = parseISO(notizia.reminder_date);
@@ -667,29 +667,29 @@ const CalendarPage = () => {
               minutes = oldDate.getMinutes();
             }
           } catch {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             // Use default values
-          }
-        }
-        
-        const newDate = setMinutes(setHours(targetDate, hours), minutes);
-        
-        triggerHaptic('light');
-        updateNotizia.mutate({ 
-          id: notiziaId, 
-          reminder_date: newDate.toISOString(), 
-          silent: true 
-        });
-        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
-      }
-    } else if (draggableId.startsWith('cliente-')) {
-      const clienteId = draggableId.replace('cliente-', '');
-      const cliente = clienti?.find(c => c.id === clienteId);
-      
+          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);
       if (cliente) {
         // Use default time of 09:00 if no reminder_date exists
         let hours = 9;
         let minutes = 0;
-        
+
         if (cliente.reminder_date) {
           try {
             const oldDate = parseISO(cliente.reminder_date);
@@ -698,30 +698,30 @@ const CalendarPage = () => {
               minutes = oldDate.getMinutes();
             }
           } catch {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             // Use default values
-          }
-        }
-        
-        const newDate = setMinutes(setHours(targetDate, hours), minutes);
-        
-        triggerHaptic('light');
-        updateCliente({ 
-          id: clienteId, 
-          reminder_date: newDate.toISOString() 
-        });
-        toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);
-      }
-    } else if (draggableId.startsWith('task-')) {
-      const taskId = draggableId.replace('task-', '');
-      const task = tasks?.find(t => t.id === taskId);
-      
-      if (task) {
+          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {
         const newDateStr = format(targetDate, 'yyyy-MM-dd');
-        
+
         triggerHaptic('light');
-        updateTask.mutate({ 
-          id: taskId, 
-          due_date: newDateStr 
+        updateTask.mutate({
+          id: taskId,
+          due_date: newDateStr
         });
         toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);
       }
@@ -732,7 +732,7 @@ const CalendarPage = () => {
   const handleDragEnd = useCallback((result: DropResult) => {
     // Reset dragging state after a short delay to prevent click from firing
     setTimeout(() => setIsDragging(false), 100);
-    
+
     try {
       const { destination, source, draggableId } = result;
 
@@ -749,7 +749,7 @@ const CalendarPage = () => {
         setCurrentWeekStart(subWeeks(currentWeekStart, 1));
         return;
       }
-      
+
       if (destination.droppableId === 'next-week') {
         // Navigate to next week and set the event to Monday (first day of next week)
         const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
@@ -767,24 +767,24 @@ const CalendarPage = () => {
       if (destination.droppableId === source.droppableId) {
         const dayKey = source.droppableId.replace('day-', '');
         const events = eventsByDay.get(dayKey) || [];
-        
+
         // Get only draggable events (same filter as in the render)
-        const draggableEvents = events.filter(e => 
-          e.type === 'notizia_reminder' || 
-          e.type === 'cliente_reminder' || 
-          e.type === 'task'
+        const draggableEvents = events.filter((e) =>
+        e.type === 'notizia_reminder' ||
+        e.type === 'cliente_reminder' ||
+        e.type === 'task'
         );
-        
+
         // Create a copy and reorder
         const reordered = [...draggableEvents];
         const [removed] = reordered.splice(source.index, 1);
         reordered.splice(destination.index, 0, removed);
-        
+
         // Calculate new display_order for all events in this day and group by type
-        const taskUpdates: { id: string; display_order: number }[] = [];
-        const notiziaUpdates: { id: string; display_order: number }[] = [];
-        const clienteUpdates: { id: string; display_order: number }[] = [];
-        
+        const taskUpdates: {id: string;display_order: number;}[] = [];
+        const notiziaUpdates: {id: string;display_order: number;}[] = [];
+        const clienteUpdates: {id: string;display_order: number;}[] = [];
+
         reordered.forEach((event, index) => {
           const newOrder = index * 10;
           if (event.type === 'task' && event.taskId) {
@@ -795,33 +795,33 @@ const CalendarPage = () => {
             clienteUpdates.push({ id: event.clienteId, display_order: newOrder });
           }
         });
-        
+
         // Batch updates for each type
         if (taskUpdates.length > 0) reorderTasks.mutate(taskUpdates);
         if (notiziaUpdates.length > 0) reorderNotizie.mutate(notiziaUpdates);
         if (clienteUpdates.length > 0) reorderClienti.mutate(clienteUpdates);
-        
+
         triggerHaptic('light');
         return;
       }
 
       // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
       const targetDayKey = destination.droppableId.replace('day-', '');
-      
+
       // Validate the date string before parsing
       if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
         console.error('Invalid target date key:', targetDayKey);
         return;
       }
-      
+
       const targetDate = parseISO(targetDayKey);
-      
+
       // Check if targetDate is valid
       if (isNaN(targetDate.getTime())) {
         console.error('Invalid target date:', targetDayKey);
         return;
       }
-      
+
       moveEvent(draggableId, targetDate);
     } catch (error) {
       console.error('Error during drag and drop:', error);
@@ -833,15 +833,15 @@ const CalendarPage = () => {
   const moveEventToDate = moveEvent;
 
   return (
-    <div className="pt-4 pb-8 animate-fade-in">
+    <div className="pb-8 animate-fade-in pt-[55px]">
 
       {/* Week Navigation - Mobile optimized */}
-      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6 mx-6">
+      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6 mx-6 pt-[16px]">
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateWeek('prev')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0"
-          >
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
+
             <ChevronLeft className="w-5 h-5" />
           </button>
           
@@ -854,153 +854,153 @@ const CalendarPage = () => {
             </span>
             <button
               onClick={goToToday}
-              className="px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium tracking-wider uppercase bg-muted rounded-full hover:bg-muted/80 transition-colors shrink-0"
-            >
+              className="px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium tracking-wider uppercase bg-muted rounded-full hover:bg-muted/80 transition-colors shrink-0">
+
               Oggi
             </button>
           </div>
 
           <button
             onClick={() => navigateWeek('next')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0"
-          >
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
+
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       {/* Week Grid */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
+      {isLoading ?
+      <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
-        </div>
-      ) : isMobile ? (
-        <div 
-          ref={weekScrollRef}
-          className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
-          style={{ 
-            scrollbarWidth: 'none', 
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            scrollSnapType: 'x proximity',
-          }}
-        >
-          {weekDays.map((day) => {
-            const dayKey = format(day, 'yyyy-MM-dd');
-            const events = eventsByDay.get(dayKey) || [];
-            const isToday = isSameDay(day, new Date());
+        </div> :
+      isMobile ?
+      <div
+        ref={weekScrollRef}
+        className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          scrollSnapType: 'x proximity'
+        }}>
 
-            return (
-              <div
-                key={dayKey}
-                data-today={isToday ? 'true' : undefined}
-                className={cn(
-                  "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
-                  isToday && "ring-2 ring-foreground"
-                )}
-                style={{ scrollSnapAlign: 'center' }}
-                onClick={() => handleDayClick(day)}
-              >
+          {weekDays.map((day) => {
+          const dayKey = format(day, 'yyyy-MM-dd');
+          const events = eventsByDay.get(dayKey) || [];
+          const isToday = isSameDay(day, new Date());
+
+          return (
+            <div
+              key={dayKey}
+              data-today={isToday ? 'true' : undefined}
+              className={cn(
+                "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
+                isToday && "ring-2 ring-foreground"
+              )}
+              style={{ scrollSnapAlign: 'center' }}
+              onClick={() => handleDayClick(day)}>
+
                 <div className="text-center mb-3 pb-2 border-b border-muted">
                   <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                     {format(day, 'EEEE', { locale: it })}
                   </p>
                   <p className={cn(
-                    "text-2xl font-semibold",
-                    isToday ? "text-foreground" : "text-foreground"
-                  )}>
+                  "text-2xl font-semibold",
+                  isToday ? "text-foreground" : "text-foreground"
+                )}>
                     {format(day, 'd')}
                   </p>
                 </div>
 
                 <div className="space-y-2 min-h-[120px]">
-                  {events.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                  {events.length === 0 ?
+                <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                       Nessun evento
-                    </p>
-                  ) : (
-                    events.slice(0, 4).map((event) => (
-                      <EventCard 
-                        key={event.id} 
-                        event={event}
-                        onClick={() => handleEventClick(event)}
-                        onContextMenu={(e) => handleContextMenu(event, e)}
-                        onTouchStart={(e) => handleTouchStart(event, e)}
-                        onTouchEnd={handleTouchEnd}
-                        onToggle={handleToggleCompleted}
-                        hasComment={!!event.lastComment}
-                        compact
-                      />
-                    ))
-                  )}
-                  {events.length > 4 && (
-                    <p className="text-xs text-muted-foreground text-center">
+                    </p> :
+
+                events.slice(0, 4).map((event) =>
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => handleEventClick(event)}
+                  onContextMenu={(e) => handleContextMenu(event, e)}
+                  onTouchStart={(e) => handleTouchStart(event, e)}
+                  onTouchEnd={handleTouchEnd}
+                  onToggle={handleToggleCompleted}
+                  hasComment={!!event.lastComment}
+                  compact />
+
+                )
+                }
+                  {events.length > 4 &&
+                <p className="text-xs text-muted-foreground text-center">
                       +{events.length - 4} altri
                     </p>
-                  )}
+                }
                 </div>
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDayClick(day);
-                  }}
-                  className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors"
-                >
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDayClick(day);
+                }}
+                className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors">
+
                   Vedi giorno
                 </button>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              </div>);
+
+        })}
+        </div> :
+
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex items-stretch gap-2 px-6">
             {/* Previous week drop zone */}
             <Droppable droppableId="prev-week">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={cn(
-                    "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                    snapshot.isDraggingOver 
-                      ? "border-primary bg-primary/10 text-primary" 
-                      : "border-muted-foreground/20 text-muted-foreground/50"
-                  )}
-                >
+              {(provided, snapshot) =>
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={cn(
+                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                snapshot.isDraggingOver ?
+                "border-primary bg-primary/10 text-primary" :
+                "border-muted-foreground/20 text-muted-foreground/50"
+              )}>
+
                   <ChevronLeft className="w-5 h-5" />
                   <span className="text-[9px] font-medium tracking-wider uppercase writing-mode-vertical" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                     Sett. prec.
                   </span>
                   {provided.placeholder}
                 </div>
-              )}
+            }
             </Droppable>
 
             {/* Week days grid */}
             <div className="grid grid-cols-7 gap-2 flex-1">
               {weekDays.map((day) => {
-                const dayKey = format(day, 'yyyy-MM-dd');
-                const events = eventsByDay.get(dayKey) || [];
-                const isToday = isSameDay(day, new Date());
-                // Notizie, clienti reminders and tasks are draggable
-                const draggableEvents = events.filter(e => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
-                const appointmentEvents = events.filter(e => e.type === 'appointment');
+              const dayKey = format(day, 'yyyy-MM-dd');
+              const events = eventsByDay.get(dayKey) || [];
+              const isToday = isSameDay(day, new Date());
+              // Notizie, clienti reminders and tasks are draggable
+              const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
+              const appointmentEvents = events.filter((e) => e.type === 'appointment');
 
-                return (
-                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={cn(
-                          "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
-                          isToday && "ring-2 ring-foreground",
-                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
-                        )}
-                        onClick={() => handleDayClick(day)}
-                      >
+              return (
+                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) =>
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                      isToday && "ring-2 ring-foreground",
+                      snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                    )}
+                    onClick={() => handleDayClick(day)}>
+
                         <div className="text-center mb-3 pb-2 border-b border-muted">
                           <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                             {format(day, 'EEE', { locale: it })}
@@ -1012,131 +1012,131 @@ const CalendarPage = () => {
 
                         <div className="space-y-2 min-h-[80px]">
                           {/* Non-draggable appointments */}
-                          {appointmentEvents.map((event) => (
-                            <EventCard 
-                              key={event.id} 
-                              event={event}
-                              onClick={() => handleEventClick(event)}
-                              onContextMenu={(e) => handleContextMenu(event, e)}
-                              onTouchStart={(e) => handleTouchStart(event, e)}
-                              onTouchEnd={handleTouchEnd}
-                              onToggle={handleToggleCompleted}
-                              hasComment={false}
-                            />
-                          ))}
+                          {appointmentEvents.map((event) =>
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        onClick={() => handleEventClick(event)}
+                        onContextMenu={(e) => handleContextMenu(event, e)}
+                        onTouchStart={(e) => handleTouchStart(event, e)}
+                        onTouchEnd={handleTouchEnd}
+                        onToggle={handleToggleCompleted}
+                        hasComment={false} />
+
+                      )}
                           
                           {/* Draggable reminders */}
-                          {draggableEvents.map((event, index) => (
-                            <Draggable key={event.id} draggableId={event.id} index={index}>
-                              {(provided, snapshot) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  style={provided.draggableProps.style}
-                                >
+                          {draggableEvents.map((event, index) =>
+                      <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(provided, snapshot) =>
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          style={provided.draggableProps.style}>
+
                                   <DraggableEventCard
-                                    event={event}
-                                    onClick={() => handleEventClick(event)}
-                                    onContextMenu={(e) => handleContextMenu(event, e)}
-                                    onTouchStart={(e) => handleTouchStart(event, e)}
-                                    onTouchEnd={handleTouchEnd}
-                                    onToggle={handleToggleCompleted}
-                                    isDragging={snapshot.isDragging}
-                                    hasComment={!!event.lastComment}
-                                    dragHandleProps={provided.dragHandleProps}
-                                  />
+                            event={event}
+                            onClick={() => handleEventClick(event)}
+                            onContextMenu={(e) => handleContextMenu(event, e)}
+                            onTouchStart={(e) => handleTouchStart(event, e)}
+                            onTouchEnd={handleTouchEnd}
+                            onToggle={handleToggleCompleted}
+                            isDragging={snapshot.isDragging}
+                            hasComment={!!event.lastComment}
+                            dragHandleProps={provided.dragHandleProps} />
+
                                 </div>
-                              )}
+                        }
                             </Draggable>
-                          ))}
+                      )}
                           
-                          {events.length === 0 && (
-                            <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                          {events.length === 0 &&
+                      <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                               Nessun evento
                             </p>
-                          )}
+                      }
                           {provided.placeholder}
                         </div>
 
                         <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDate(day);
-                            setShowAddMenu(true);
-                          }}
-                          className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                        >
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDate(day);
+                        setShowAddMenu(true);
+                      }}
+                      className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1">
+
                           <Plus className="w-3 h-3" />
                           <span className="text-[10px] font-medium">Aggiungi</span>
                         </button>
                       </div>
-                    )}
-                  </Droppable>
-                );
-              })}
+                  }
+                  </Droppable>);
+
+            })}
             </div>
 
             {/* Next week drop zone */}
             <Droppable droppableId="next-week">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={cn(
-                    "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                    snapshot.isDraggingOver 
-                      ? "border-primary bg-primary/10 text-primary" 
-                      : "border-muted-foreground/20 text-muted-foreground/50"
-                  )}
-                >
+              {(provided, snapshot) =>
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={cn(
+                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                snapshot.isDraggingOver ?
+                "border-primary bg-primary/10 text-primary" :
+                "border-muted-foreground/20 text-muted-foreground/50"
+              )}>
+
                   <ChevronRight className="w-5 h-5" />
                   <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                     Sett. succ.
                   </span>
                   {provided.placeholder}
                 </div>
-              )}
+            }
             </Droppable>
           </div>
         </DragDropContext>
-      )}
+      }
 
       {/* Add Appointment Dialog */}
       <AddAppointmentDialog
         open={showAddDialog}
         onOpenChange={setShowAddDialog}
-        defaultDate={selectedDate}
-      />
+        defaultDate={selectedDate} />
+
 
       {/* Add to Calendar Menu */}
-      {selectedDate && (
-        <AddToCalendarMenu
-          open={showAddMenu}
-          onOpenChange={setShowAddMenu}
-          date={selectedDate}
-          clienti={clienti || []}
-          notizie={notizie || []}
-          onAddAppointment={() => {
-            setShowAddMenu(false);
-            setShowAddDialog(true);
-          }}
-          onAddClienteReminder={handleAddClienteReminder}
-          onAddNotiziaReminder={handleAddNotiziaReminder}
-          onAddTask={() => {
-            setShowAddMenu(false);
-            setShowAddTaskDialog(true);
-          }}
-        />
-      )}
+      {selectedDate &&
+      <AddToCalendarMenu
+        open={showAddMenu}
+        onOpenChange={setShowAddMenu}
+        date={selectedDate}
+        clienti={clienti || []}
+        notizie={notizie || []}
+        onAddAppointment={() => {
+          setShowAddMenu(false);
+          setShowAddDialog(true);
+        }}
+        onAddClienteReminder={handleAddClienteReminder}
+        onAddNotiziaReminder={handleAddNotiziaReminder}
+        onAddTask={() => {
+          setShowAddMenu(false);
+          setShowAddTaskDialog(true);
+        }} />
+
+      }
 
       {/* Add Task Dialog */}
-      {selectedDate && (
-        <AddTaskDialog
-          open={showAddTaskDialog}
-          onOpenChange={setShowAddTaskDialog}
-          date={selectedDate}
-        />
-      )}
+      {selectedDate &&
+      <AddTaskDialog
+        open={showAddTaskDialog}
+        onOpenChange={setShowAddTaskDialog}
+        date={selectedDate} />
+
+      }
 
       {/* Day View Sheet (Mobile) */}
       <CalendarDayView
@@ -1152,15 +1152,15 @@ const CalendarPage = () => {
         }}
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      />
+        onTouchEnd={handleTouchEnd} />
+
 
       {/* Notizia Detail Modal */}
       <NotiziaDetail
         notizia={selectedNotizia}
         open={!!selectedNotizia}
-        onOpenChange={(open) => !open && setSelectedNotizia(null)}
-      />
+        onOpenChange={(open) => !open && setSelectedNotizia(null)} />
+
 
       {/* Cliente Detail Modal */}
       <ClienteDetail
@@ -1188,109 +1188,109 @@ const CalendarPage = () => {
           if (selectedCliente) {
             updateCliente({ id: selectedCliente.id, ...updates });
           }
-        }}
-      />
+        }} />
+
 
       {/* Edit Task Dialog */}
       <EditTaskDialog
         open={!!selectedTask}
         onOpenChange={(open) => !open && setSelectedTask(null)}
-        task={selectedTask}
-      />
+        task={selectedTask} />
+
 
       {/* Context Menu */}
-      {contextMenu && (
-        <EventContextMenu
-          position={contextMenu.position}
-          event={contextMenu.event}
-          columns={columns}
-          notizia={contextMenuNotizia}
-          cliente={contextMenuCliente}
-          onStatusChange={(status) => {
-            const notiziaId = contextMenu.event.notiziaId;
-            if (notiziaId) handleNotiziaStatusChange(notiziaId, status);
-          }}
-          onEmojiChange={(emoji) => {
-            const notiziaId = contextMenu.event.notiziaId;
-            const clienteId = contextMenu.event.clienteId;
-            if (notiziaId) {
-              handleNotiziaEmojiChange(notiziaId, emoji);
-            } else if (clienteId) {
-              updateCliente({ id: clienteId, emoji: emoji || undefined });
-            }
-          }}
-          onUrgentToggle={() => {
-            const notiziaId = contextMenu.event.notiziaId;
-            if (notiziaId && contextMenuNotizia) {
-              handleNotiziaUrgentToggle(notiziaId, contextMenuNotizia.notes, contextMenu.event.urgent || false);
-            }
-          }}
-          onRemoveReminder={() => {
-            const notiziaId = contextMenu.event.notiziaId;
-            const clienteId = contextMenu.event.clienteId;
-            if (notiziaId) {
-              handleRemoveReminder(notiziaId);
-            } else if (clienteId) {
-              updateCliente({ id: clienteId, reminder_date: undefined });
-            }
-          }}
-          onAddComment={(text) => {
-            if (contextMenu.event.notiziaId) {
-              handleAddNotiziaComment(contextMenu.event.notiziaId, text);
-            } else if (contextMenu.event.clienteId) {
-              handleAddClienteCommentFromCalendar(contextMenu.event.clienteId, text);
-            }
-          }}
-          onClose={() => setContextMenu(null)}
-        />
-      )}
+      {contextMenu &&
+      <EventContextMenu
+        position={contextMenu.position}
+        event={contextMenu.event}
+        columns={columns}
+        notizia={contextMenuNotizia}
+        cliente={contextMenuCliente}
+        onStatusChange={(status) => {
+          const notiziaId = contextMenu.event.notiziaId;
+          if (notiziaId) handleNotiziaStatusChange(notiziaId, status);
+        }}
+        onEmojiChange={(emoji) => {
+          const notiziaId = contextMenu.event.notiziaId;
+          const clienteId = contextMenu.event.clienteId;
+          if (notiziaId) {
+            handleNotiziaEmojiChange(notiziaId, emoji);
+          } else if (clienteId) {
+            updateCliente({ id: clienteId, emoji: emoji || undefined });
+          }
+        }}
+        onUrgentToggle={() => {
+          const notiziaId = contextMenu.event.notiziaId;
+          if (notiziaId && contextMenuNotizia) {
+            handleNotiziaUrgentToggle(notiziaId, contextMenuNotizia.notes, contextMenu.event.urgent || false);
+          }
+        }}
+        onRemoveReminder={() => {
+          const notiziaId = contextMenu.event.notiziaId;
+          const clienteId = contextMenu.event.clienteId;
+          if (notiziaId) {
+            handleRemoveReminder(notiziaId);
+          } else if (clienteId) {
+            updateCliente({ id: clienteId, reminder_date: undefined });
+          }
+        }}
+        onAddComment={(text) => {
+          if (contextMenu.event.notiziaId) {
+            handleAddNotiziaComment(contextMenu.event.notiziaId, text);
+          } else if (contextMenu.event.clienteId) {
+            handleAddClienteCommentFromCalendar(contextMenu.event.clienteId, text);
+          }
+        }}
+        onClose={() => setContextMenu(null)} />
+
+      }
 
       {/* Task Context Menu */}
-      {taskContextMenu && (
-        <TaskContextMenu
-          position={taskContextMenu.position}
-          task={taskContextMenu.task}
-          onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
-          onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
-          onDelete={async () => {
-            await deleteTask.mutateAsync(taskContextMenu.task.id);
-            toast.success('Task eliminata');
-            setTaskContextMenu(null);
-          }}
-          onClose={() => setTaskContextMenu(null)}
-        />
-      )}
-    </div>
-  );
+      {taskContextMenu &&
+      <TaskContextMenu
+        position={taskContextMenu.position}
+        task={taskContextMenu.task}
+        onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
+        onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
+        onDelete={async () => {
+          await deleteTask.mutateAsync(taskContextMenu.task.id);
+          toast.success('Task eliminata');
+          setTaskContextMenu(null);
+        }}
+        onClose={() => setTaskContextMenu(null)} />
+
+      }
+    </div>);
+
 };
 
 // Event Card component
-const EventCard = memo(({ 
-  event, 
+const EventCard = memo(({
+  event,
   onClick,
   onContextMenu,
   onTouchStart,
   onTouchEnd,
   onToggle,
   hasComment,
-  compact 
-}: {
-  event: CalendarEvent;
-  onClick: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
-  onToggle: (id: string, completed: boolean) => void;
-  hasComment?: boolean;
-  compact?: boolean;
-}) => {
+  compact
+
+
+
+
+
+
+
+
+
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
-      
+
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
@@ -1300,10 +1300,10 @@ const EventCard = memo(({
         isBuyer: false,
         showBuyerBadge: false,
         showTaskBadge: true,
-        canToggle: true,
+        canToggle: true
       };
     }
-    
+
     // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
@@ -1315,10 +1315,10 @@ const EventCard = memo(({
         isBuyer: true,
         showBuyerBadge: true,
         showTaskBadge: false,
-        canToggle: false,
+        canToggle: false
       };
     }
-    
+
     // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
       const baseColor = event.statusColor || '#8B9A7D';
@@ -1332,10 +1332,10 @@ const EventCard = memo(({
         isBuyer: false,
         showBuyerBadge: false,
         showTaskBadge: false,
-        canToggle: false,
+        canToggle: false
       };
     }
-    
+
     // Appointments - sage green
     if (event.type === 'appointment') {
       return {
@@ -1347,7 +1347,7 @@ const EventCard = memo(({
         isBuyer: false,
         showBuyerBadge: false,
         showTaskBadge: false,
-        canToggle: true,
+        canToggle: true
       };
     }
 
@@ -1360,7 +1360,7 @@ const EventCard = memo(({
       isBuyer: false,
       showBuyerBadge: false,
       showTaskBadge: false,
-      canToggle: false,
+      canToggle: false
     };
   };
 
@@ -1391,49 +1391,49 @@ const EventCard = memo(({
       onContextMenu={onContextMenu}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      onTouchMove={onTouchEnd}
-    >
-      {event.urgent && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+      onTouchMove={onTouchEnd}>
+
+      {event.urgent &&
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
-      )}
-      {hasComment && !event.urgent && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
+      }
+      {hasComment && !event.urgent &&
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
-      )}
-      {styles.showBuyerBadge && !event.urgent && !hasComment && (
-        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+      }
+      {styles.showBuyerBadge && !event.urgent && !hasComment &&
+      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Buyer
         </div>
-      )}
-      {styles.showTaskBadge && !event.urgent && !hasComment && (
-        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+      }
+      {styles.showTaskBadge && !event.urgent && !hasComment &&
+      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Task
         </div>
-      )}
+      }
       <div className="flex items-start gap-2">
-        {canToggle ? (
-          <button
-            onClick={handleToggle}
-            className={cn(
-              "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors",
-              event.completed 
-                ? 'bg-foreground border-foreground' 
-                : 'border-muted-foreground/50 hover:border-foreground'
-            )}
-          >
+        {canToggle ?
+        <button
+          onClick={handleToggle}
+          className={cn(
+            "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 mt-0.5 transition-colors",
+            event.completed ?
+            'bg-foreground border-foreground' :
+            'border-muted-foreground/50 hover:border-foreground'
+          )}>
+
             {event.completed && <Check className="w-3 h-3 text-background" />}
-          </button>
-        ) : event.emoji ? (
-          <span className="text-sm shrink-0">{event.emoji}</span>
-        ) : (
-          <div 
-            className="w-2 h-2 rounded-full mt-1.5 shrink-0"
-            style={{ backgroundColor: event.statusColor || '#6b7280' }}
-          />
-        )}
+          </button> :
+        event.emoji ?
+        <span className="text-sm shrink-0">{event.emoji}</span> :
+
+        <div
+          className="w-2 h-2 rounded-full mt-1.5 shrink-0"
+          style={{ backgroundColor: event.statusColor || '#6b7280' }} />
+
+        }
         
         <div className="flex-1 min-w-0">
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
@@ -1441,14 +1441,14 @@ const EventCard = memo(({
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 });
 EventCard.displayName = 'EventCard';
 
 // Draggable Event Card - entire card is draggable
-const DraggableEventCard = memo(({ 
-  event, 
+const DraggableEventCard = memo(({
+  event,
   onClick,
   onContextMenu,
   onTouchStart,
@@ -1456,25 +1456,25 @@ const DraggableEventCard = memo(({
   onToggle,
   isDragging,
   hasComment,
-  dragHandleProps,
-}: {
-  event: CalendarEvent;
-  onClick: () => void;
-  onContextMenu: (e: React.MouseEvent) => void;
-  onTouchStart: (e: React.TouchEvent) => void;
-  onTouchEnd: () => void;
-  onToggle: (id: string, completed: boolean) => void;
-  isDragging: boolean;
-  hasComment?: boolean;
-  dragHandleProps?: any;
-}) => {
+  dragHandleProps
+
+
+
+
+
+
+
+
+
+
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border, or custom color
     if (event.type === 'task') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
-      
+
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
@@ -1482,10 +1482,10 @@ const DraggableEventCard = memo(({
         textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         showBuyerBadge: false,
         showTaskBadge: true,
-        canToggle: true,
+        canToggle: true
       };
     }
-    
+
     // Buyers (cliente_reminder) - Minimal elegant: white card with black border
     if (event.type === 'cliente_reminder') {
       return {
@@ -1495,10 +1495,10 @@ const DraggableEventCard = memo(({
         textClass: 'text-foreground',
         showBuyerBadge: true,
         showTaskBadge: false,
-        canToggle: false,
+        canToggle: false
       };
     }
-    
+
     // Sellers (notizie) - use kanban status color
     if (event.type === 'notizia_reminder') {
       const baseColor = event.statusColor || '#8B9A7D';
@@ -1510,10 +1510,10 @@ const DraggableEventCard = memo(({
         textClass: textColor,
         showBuyerBadge: false,
         showTaskBadge: false,
-        canToggle: false,
+        canToggle: false
       };
     }
-    
+
     return {
       bg: 'bg-[#8B9A7D]/30',
       customBg: null,
@@ -1521,7 +1521,7 @@ const DraggableEventCard = memo(({
       textClass: 'text-foreground',
       showBuyerBadge: false,
       showTaskBadge: false,
-      canToggle: false,
+      canToggle: false
     };
   };
 
@@ -1545,54 +1545,54 @@ const DraggableEventCard = memo(({
       onContextMenu={onContextMenu}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      onTouchMove={onTouchEnd}
-    >
-      {styles.showBuyerBadge && !event.urgent && (
-        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+      onTouchMove={onTouchEnd}>
+
+      {styles.showBuyerBadge && !event.urgent &&
+      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Buyer
         </div>
-      )}
-      {styles.showTaskBadge && !event.urgent && !hasComment && (
-        <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+      }
+      {styles.showTaskBadge && !event.urgent && !hasComment &&
+      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Task
         </div>
-      )}
-      {event.urgent && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+      }
+      {event.urgent &&
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
-      )}
-      {hasComment && !event.urgent && !styles.showBuyerBadge && !styles.showTaskBadge && (
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
+      }
+      {hasComment && !event.urgent && !styles.showBuyerBadge && !styles.showTaskBadge &&
+      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
           <MessageCircle className="w-2.5 h-2.5 text-white" />
         </div>
-      )}
+      }
       <div className="flex items-center gap-2">
         {/* Checkbox for tasks, emoji/dot for others */}
-        {styles.canToggle ? (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              triggerHaptic('light');
-              onToggle(event.id, !event.completed);
-            }}
-            className={cn(
-              "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
-              event.completed 
-                ? 'bg-foreground border-foreground' 
-                : 'border-muted-foreground/50 hover:border-foreground'
-            )}
-          >
+        {styles.canToggle ?
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            triggerHaptic('light');
+            onToggle(event.id, !event.completed);
+          }}
+          className={cn(
+            "w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors",
+            event.completed ?
+            'bg-foreground border-foreground' :
+            'border-muted-foreground/50 hover:border-foreground'
+          )}>
+
             {event.completed && <Check className="w-3 h-3 text-background" />}
-          </button>
-        ) : event.emoji ? (
-          <span className="text-sm shrink-0">{event.emoji}</span>
-        ) : (
-          <div 
-            className="w-2 h-2 rounded-full shrink-0"
-            style={{ backgroundColor: event.statusColor || '#6b7280' }}
-          />
-        )}
+          </button> :
+        event.emoji ?
+        <span className="text-sm shrink-0">{event.emoji}</span> :
+
+        <div
+          className="w-2 h-2 rounded-full shrink-0"
+          style={{ backgroundColor: event.statusColor || '#6b7280' }} />
+
+        }
         
         <div className="flex-1 min-w-0">
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
@@ -1600,8 +1600,8 @@ const DraggableEventCard = memo(({
           </p>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 });
 DraggableEventCard.displayName = 'DraggableEventCard';
 
