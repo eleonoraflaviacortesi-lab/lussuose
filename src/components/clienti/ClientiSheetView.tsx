@@ -11,7 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus, Trash2 } from 'lucide-react';
+import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, MessageCircle, Eye, GripHorizontal, Filter, Check, Star, Plus, Trash2, Copy, ClipboardPaste, Calendar as CalendarIcon, RotateCcw, StickyNote, Palette } from 'lucide-react';
+import { DayPicker } from 'react-day-picker';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
@@ -33,6 +34,7 @@ interface ClientiSheetViewProps {
   onCardClick: (cliente: Cliente) => void;
   onUpdate: (id: string, updates: Partial<Cliente>) => Promise<void>;
   onDelete?: (id: string) => Promise<void>;
+  onDuplicate?: (cliente: Cliente) => Promise<void>;
   searchQuery: string;
   onAddNew?: () => void | Promise<void>;
 }
@@ -124,13 +126,29 @@ const EmojiGridWithCustom = memo(function EmojiGridWithCustom({ currentEmoji, on
   );
 });
 
-// Sheet context menu (status + emoji + color)
+// --- Lingua colors persistence (global) ---
+function getCustomLinguaColors(): Record<string, string> {
+  try {
+    const saved = localStorage.getItem('custom-lingua-colors');
+    return saved ? JSON.parse(saved) : {};
+  } catch { return {}; }
+}
+function saveCustomLinguaColors(colors: Record<string, string>) {
+  localStorage.setItem('custom-lingua-colors', JSON.stringify(colors));
+  window.dispatchEvent(new StorageEvent('storage', { key: 'custom-lingua-colors' }));
+}
+function getMergedLinguaColors(): Record<string, string> {
+  return { ...LINGUA_COLORS, ...getCustomLinguaColors() };
+}
+
+// Sheet context menu (status + emoji + color + duplicate)
 const SheetContextMenu = memo(function SheetContextMenu({
   position,
   cliente,
   onStatusChange,
   onEmojiChange,
   onColorChange,
+  onDuplicate,
   onDelete,
   onClose,
 }: {
@@ -139,6 +157,7 @@ const SheetContextMenu = memo(function SheetContextMenu({
   onStatusChange: (status: ClienteStatus) => void;
   onEmojiChange: (emoji: string | null) => void;
   onColorChange: (color: string | null) => void;
+  onDuplicate?: () => void;
   onDelete?: () => void;
   onClose: () => void;
 }) {
@@ -280,23 +299,37 @@ const SheetContextMenu = memo(function SheetContextMenu({
           </>
         )}
 
+        {/* Separator before destructive actions */}
+        <div className="h-px bg-muted/50" />
+
+        {/* Duplicate */}
+        {onDuplicate && (
+          <button
+            onClick={() => { onDuplicate(); onClose(); }}
+            className="flex items-center gap-2 text-xs text-foreground hover:text-foreground/80 transition-colors py-1"
+          >
+            <Copy className="w-3.5 h-3.5" />
+            Duplica riga
+          </button>
+        )}
+
+        {/* Separator before delete */}
+        {onDelete && <div className="h-px bg-destructive/20" />}
+
         {/* Delete */}
         {onDelete && (
-          <>
-            <div className="h-px bg-muted/50" />
-            <button
-              onClick={() => {
-                if (window.confirm('Eliminare questo cliente?')) {
-                  onDelete();
-                  onClose();
-                }
-              }}
-              className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 transition-colors py-1"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Elimina cliente
-            </button>
-          </>
+          <button
+            onClick={() => {
+              if (window.confirm('Eliminare questo cliente?')) {
+                onDelete();
+                onClose();
+              }
+            }}
+            className="flex items-center gap-2 text-xs text-destructive hover:text-destructive/80 transition-colors py-1"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Elimina cliente
+          </button>
         )}
 
         <ColorPickerOverlay
@@ -310,6 +343,207 @@ const SheetContextMenu = memo(function SheetContextMenu({
   );
 });
 SheetContextMenu.displayName = 'SheetContextMenu';
+
+// --- Cell Context Menu ---
+type CellMenuInfo = {
+  cliente: Cliente;
+  colKey: string;
+  colType: string;
+  value: string;
+  x: number;
+  y: number;
+};
+
+const CellContextMenu = memo(function CellContextMenu({
+  info,
+  onCellChange,
+  onClose,
+}: {
+  info: CellMenuInfo;
+  onCellChange: (id: string, key: string, val: string) => void;
+  onClose: () => void;
+}) {
+  const { cliente, colKey, colType, value, x, y } = info;
+  const [linguaColors, setLinguaColors] = useState(getMergedLinguaColors);
+  const [portaleColors, setPortaleColors] = useState<Record<string, string>>(() => ({ ...PORTALE_COLORS, ...getCustomPortaleColors() }));
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    if (!value) return undefined;
+    const parts = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (parts) return new Date(+parts[3], +parts[2] - 1, +parts[1]);
+    return undefined;
+  });
+
+  const isPill = colType === 'lingua' || colType === 'portale' || colType === 'tipo_contatto';
+  const isDate = colKey === 'data_submission' || colKey === 'last_contact_date';
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value).catch(() => {});
+    onClose();
+  };
+
+  const handlePaste = async () => {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (text) onCellChange(cliente.id, colKey, text);
+    } catch {}
+    onClose();
+  };
+
+  const handleReset = () => {
+    onCellChange(cliente.id, colKey, '');
+    onClose();
+  };
+
+  // Pill color change (global for lingua, per-portal for portale)
+  const handlePillColorChange = (color: string) => {
+    if (colType === 'lingua' && value) {
+      const updated = { ...getCustomLinguaColors(), [value]: color };
+      saveCustomLinguaColors(updated);
+      setLinguaColors({ ...LINGUA_COLORS, ...updated });
+    } else if (colType === 'portale' && value) {
+      const updated = { ...getCustomPortaleColors(), [value]: color };
+      saveCustomPortaleColors(updated);
+      setPortaleColors({ ...PORTALE_COLORS, ...updated });
+    } else if (colType === 'tipo_contatto' && value) {
+      // tipo_contatto uses same mechanism as portale for simplicity
+      const updated = { ...getCustomPortaleColors(), [`tc_${value}`]: color };
+      saveCustomPortaleColors(updated);
+    }
+    onClose();
+  };
+
+  const handleResetPillColor = () => {
+    if (colType === 'lingua' && value) {
+      const updated = { ...getCustomLinguaColors() };
+      delete updated[value];
+      saveCustomLinguaColors(updated);
+    } else if (colType === 'portale' && value) {
+      const updated = { ...getCustomPortaleColors() };
+      delete updated[value];
+      saveCustomPortaleColors(updated);
+    }
+    onClose();
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      const formatted = format(date, 'dd/MM/yyyy');
+      onCellChange(cliente.id, colKey, formatted);
+    }
+    onClose();
+  };
+
+  // Pill value options
+  const pillOptions = colType === 'lingua' ? LINGUA_OPTIONS_VALUES
+    : colType === 'portale' ? [...DEFAULT_PORTALE_OPTIONS, ...getCustomPortals()]
+    : colType === 'tipo_contatto' ? TIPO_CONTATTO_OPTIONS
+    : [];
+
+  const pillColorMap = colType === 'lingua' ? linguaColors
+    : colType === 'portale' ? portaleColors
+    : TIPO_CONTATTO_COLORS;
+
+  return (
+    <>
+      <div className="fixed inset-0 z-[110]" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose(); }} />
+      <div
+        className="fixed z-[110] flex flex-col gap-1 p-2 bg-white/95 backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-h-[85vh] overflow-y-auto min-w-[180px]"
+        style={{
+          left: Math.min(Math.max(10, x), window.innerWidth - 260),
+          top: Math.min(Math.max(10, y), window.innerHeight - 40),
+          transform: y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* --- PILL MENU --- */}
+        {isPill && (
+          <>
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
+            <div className="flex flex-wrap gap-1 px-2 py-1 max-w-[220px]">
+              {pillOptions.map(opt => (
+                <button
+                  key={opt}
+                  onClick={() => { onCellChange(cliente.id, colKey, opt); onClose(); }}
+                  className={cn(
+                    "px-2 py-0.5 rounded text-[10px] font-semibold text-white transition-all hover:scale-105",
+                    value === opt && "ring-2 ring-foreground ring-offset-1"
+                  )}
+                  style={{ backgroundColor: pillColorMap[opt] || '#6b7280' }}
+                >
+                  {opt}
+                </button>
+              ))}
+            </div>
+            <div className="h-px bg-muted/50" />
+            <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Cambia colore</span>
+            <div className="grid grid-cols-10 gap-1 px-2 py-1">
+              {CONTEXT_PALETTE_COLORS.filter(Boolean).slice(0, 30).map(c => (
+                <button
+                  key={c}
+                  className="w-4 h-4 rounded-full border border-border/30 hover:scale-125 transition-transform"
+                  style={{ backgroundColor: c! }}
+                  onClick={() => handlePillColorChange(c!)}
+                />
+              ))}
+            </div>
+            <button onClick={handleResetPillColor} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors">
+              <RotateCcw className="w-3 h-3" /> Reset colore
+            </button>
+            <div className="h-px bg-muted/50" />
+          </>
+        )}
+
+        {/* --- DATE MENU --- */}
+        {isDate && (
+          <>
+            <div className="px-1">
+              <DayPicker
+                mode="single"
+                selected={selectedDate}
+                onSelect={handleDateSelect}
+                className="text-xs"
+                classNames={{
+                  months: "flex flex-col",
+                  month: "space-y-2",
+                  caption: "flex justify-center pt-1 relative items-center text-xs font-medium",
+                  nav: "space-x-1 flex items-center",
+                  nav_button: "h-6 w-6 bg-transparent p-0 opacity-50 hover:opacity-100 inline-flex items-center justify-center",
+                  table: "w-full border-collapse",
+                  head_row: "flex",
+                  head_cell: "text-muted-foreground rounded-md w-7 font-normal text-[10px]",
+                  row: "flex w-full mt-1",
+                  cell: "text-center text-[11px] p-0 relative focus-within:relative focus-within:z-20",
+                  day: "h-7 w-7 p-0 font-normal hover:bg-accent rounded-md inline-flex items-center justify-center",
+                  day_selected: "bg-primary text-primary-foreground hover:bg-primary",
+                  day_today: "bg-accent text-accent-foreground",
+                }}
+              />
+            </div>
+            <div className="h-px bg-muted/50" />
+            <button onClick={handleReset} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1 transition-colors">
+              <RotateCcw className="w-3 h-3" /> Reset data
+            </button>
+            <div className="h-px bg-muted/50" />
+          </>
+        )}
+
+        {/* --- COMMON ACTIONS --- */}
+        <button onClick={handleCopy} className="flex items-center gap-2 text-xs text-foreground hover:bg-muted/60 px-2 py-1.5 rounded transition-colors">
+          <Copy className="w-3 h-3" /> Copia valore
+        </button>
+        <button onClick={handlePaste} className="flex items-center gap-2 text-xs text-foreground hover:bg-muted/60 px-2 py-1.5 rounded transition-colors">
+          <ClipboardPaste className="w-3 h-3" /> Incolla
+        </button>
+        {!isPill && !isDate && (
+          <button onClick={handleReset} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded transition-colors">
+            <RotateCcw className="w-3 h-3" /> Reset formato
+          </button>
+        )}
+      </div>
+    </>
+  );
+});
+CellContextMenu.displayName = 'CellContextMenu';
 
 // Portal options stored in localStorage for customization
 function getCustomPortals(): string[] {
@@ -877,6 +1111,7 @@ const SheetRow = memo(function SheetRow({
   onCardClick,
   onCellChange,
   onContextMenu,
+  onCellContextMenu,
   onCellSelect,
 }: {
   cliente: Cliente;
@@ -893,12 +1128,14 @@ const SheetRow = memo(function SheetRow({
   onCardClick: (c: Cliente) => void;
   onCellChange: (id: string, key: string, val: string) => void;
   onContextMenu: (cliente: Cliente, x: number, y: number) => void;
+  onCellContextMenu: (cliente: Cliente, col: ColumnDef, value: string, x: number, y: number) => void;
   onCellSelect?: (clienteId: string, colKey: string) => void;
 }) {
   const longPressRef = useRef<NodeJS.Timeout | null>(null);
   const longPressTriggered = useRef(false);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+  // Long press on # cell for mobile → row context menu
+  const handleRowNumTouchStart = useCallback((e: React.TouchEvent) => {
     longPressTriggered.current = false;
     const touch = e.touches[0];
     const x = touch.clientX;
@@ -918,10 +1155,26 @@ const SheetRow = memo(function SheetRow({
     if (longPressRef.current) clearTimeout(longPressRef.current);
   }, []);
 
-  const handleRightClick = useCallback((e: React.MouseEvent) => {
+  // Right-click on # cell → row context menu
+  const handleRowNumRightClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     onContextMenu(cliente, e.clientX, e.clientY);
   }, [cliente, onContextMenu]);
+
+  // Right-click on data cell → cell context menu
+  const handleCellRightClick = useCallback((e: React.MouseEvent, col: ColumnDef) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const value = col.key.startsWith('custom_') ? getCustomFieldValue(cliente, col.key) : getCellValueStatic(cliente, col);
+    onCellContextMenu(cliente, col, value, e.clientX, e.clientY);
+  }, [cliente, onCellContextMenu]);
+
+  // Prevent browser default context menu on the row itself
+  const handleRowContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+  }, []);
+
   return (
     <div
       className={cn(
@@ -938,17 +1191,18 @@ const SheetRow = memo(function SheetRow({
         color: cliente.row_text_color || (cliente.card_color ? (isDarkColor(cliente.card_color) ? '#ffffff' : '#000000') : undefined),
       }}
       onClick={() => onSelect(cliente.id)}
-      onContextMenu={handleRightClick}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onTouchMove={handleTouchMove}
+      onContextMenu={handleRowContextMenu}
     >
-      {/* Row number + open detail */}
+      {/* Row number + open detail — RIGHT CLICK HERE = ROW MENU */}
       <div
-        className="flex-shrink-0 flex items-center gap-0.5 border-r border-border/20 text-muted-foreground"
+        className="flex-shrink-0 flex items-center gap-0.5 border-r border-border/20 text-muted-foreground cursor-pointer hover:bg-muted/40 transition-colors"
         style={{ width: rowNumWidth, color: cliente.row_text_color || undefined }}
+        onContextMenu={handleRowNumRightClick}
+        onTouchStart={handleRowNumTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchMove}
       >
-        <span className="text-[10px] font-medium flex-1 text-center">{idx + 1}</span>
+        <span className="text-[10px] font-medium flex-1 text-center select-none">{idx + 1}</span>
         <button
           className="flex items-center justify-center w-5 h-full hover:text-foreground transition-colors"
           onClick={(e) => { e.stopPropagation(); onCardClick(cliente); }}
@@ -958,7 +1212,7 @@ const SheetRow = memo(function SheetRow({
         </button>
       </div>
 
-      {/* Data cells */}
+      {/* Data cells — RIGHT CLICK HERE = CELL MENU */}
       {orderedColumns.map(col => {
         const cf = colFormats[col.key];
         return (
@@ -978,11 +1232,12 @@ const SheetRow = memo(function SheetRow({
               wordBreak: 'break-word',
             }}
             onClick={(e) => { e.stopPropagation(); onSelect(cliente.id); onCellSelect?.(cliente.id, col.key); }}
+            onContextMenu={(e) => handleCellRightClick(e, col)}
           >
             {col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'lingua' && col.editable ? (
-              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={LINGUA_COLORS} />
+              <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} options={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} />
             ) : col.type === 'portale' && col.editable ? (
               <PortalBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'tipo_contatto' && col.editable ? (
@@ -1253,7 +1508,7 @@ function saveColWidths(widths: Record<string, number>) {
 }
 
 // --- Main Component ---
-export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, searchQuery, onAddNew }: ClientiSheetViewProps) {
+export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, onDuplicate, searchQuery, onAddNew }: ClientiSheetViewProps) {
   const [customCols, setCustomCols] = useState<ColumnDef[]>(getCustomColumns);
   const allColumns = useMemo(() => [...COLUMNS, ...customCols], [customCols]);
   const [colOrder, setColOrder] = useState<string[]>(() => [...COLUMNS.map(c => c.key), ...getCustomColumns().map(c => c.key)]);
@@ -1517,8 +1772,25 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   }, [selectedRowId, selectedColKey]);
 
   const handleRowContextMenu = useCallback((cliente: Cliente, x: number, y: number) => {
+    setCellMenu(null); // close cell menu if open
     setContextMenu({ cliente, x, y });
   }, []);
+
+  // Cell context menu
+  const [cellMenu, setCellMenu] = useState<CellMenuInfo | null>(null);
+
+  const handleCellContextMenu = useCallback((cliente: Cliente, col: ColumnDef, value: string, x: number, y: number) => {
+    setContextMenu(null); // close row menu if open
+    setCellMenu({ cliente, colKey: col.key, colType: col.type || 'text', value, x, y });
+  }, []);
+
+  // Duplicate handler
+  const handleDuplicate = useCallback(async () => {
+    if (contextMenu && onDuplicate) {
+      await onDuplicate(contextMenu.cliente);
+      setContextMenu(null);
+    }
+  }, [contextMenu, onDuplicate]);
 
   const handleContextStatusChange = useCallback(async (status: ClienteStatus) => {
     if (contextMenu) await onUpdate(contextMenu.cliente.id, { status } as any);
@@ -1530,7 +1802,6 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   const handleContextColorChange = useCallback(async (color: string | null) => {
     if (contextMenu) {
-      // Sync card_color + row_bg_color + auto text color
       const autoTextColor = color ? (isDarkColor(color) ? '#ffffff' : '#000000') : null;
       await onUpdate(contextMenu.cliente.id, { 
         card_color: color, 
@@ -1725,6 +1996,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 onCardClick={onCardClick}
                 onCellChange={handleCellChange}
                 onContextMenu={handleRowContextMenu}
+                onCellContextMenu={handleCellContextMenu}
                 onCellSelect={(clienteId, colKey) => { setSelectedRowId(clienteId); setSelectedCellCol(colKey); }}
               />
             ))}
@@ -1746,7 +2018,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
         )}
       </div>
 
-      {/* Context menu */}
+      {/* Row Context menu */}
       {contextMenu && (
         <SheetContextMenu
           position={{ x: contextMenu.x, y: contextMenu.y }}
@@ -1754,8 +2026,18 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
           onStatusChange={handleContextStatusChange}
           onEmojiChange={handleContextEmojiChange}
           onColorChange={handleContextColorChange}
+          onDuplicate={onDuplicate ? handleDuplicate : undefined}
           onDelete={onDelete ? async () => { await onDelete(contextMenu.cliente.id); setContextMenu(null); } : undefined}
           onClose={() => setContextMenu(null)}
+        />
+      )}
+
+      {/* Cell Context menu */}
+      {cellMenu && (
+        <CellContextMenu
+          info={cellMenu}
+          onCellChange={handleCellChange}
+          onClose={() => setCellMenu(null)}
         />
       )}
     </div>

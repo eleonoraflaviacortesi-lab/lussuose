@@ -370,6 +370,10 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           }
         }}
         searchQuery={isCoordinator ? filters.search || '' : searchQuery}
+        onDuplicate={async (cliente) => {
+          const { id, created_at, updated_at, ...rest } = cliente;
+          await createCliente({ ...rest, nome: rest.nome || 'Copia' });
+        }}
         onAddNew={async () => {
           const today = new Date().toISOString().split('T')[0];
           await createCliente({ nome: '', data_submission: today });
