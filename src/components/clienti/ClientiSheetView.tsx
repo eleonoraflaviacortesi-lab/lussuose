@@ -851,11 +851,19 @@ function SimpleBadgeCell({
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setMenuOpen(false)} onContextMenu={(e) => { e.preventDefault(); setMenuOpen(false); }} />
           <div
-            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px]"
-            style={{
-              left: Math.min(menuPos.x, window.innerWidth - 300),
-              top: menuPos.y + 200 > window.innerHeight ? Math.max(8, menuPos.y - 250) : menuPos.y,
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px] max-h-[80vh] overflow-y-auto"
+            ref={(el) => {
+              if (el) {
+                const rect = el.getBoundingClientRect();
+                const safeLeft = Math.min(menuPos.x, window.innerWidth - rect.width - 8);
+                const safeTop = menuPos.y + rect.height > window.innerHeight - 8
+                  ? Math.max(8, window.innerHeight - rect.height - 8)
+                  : menuPos.y;
+                el.style.left = `${Math.max(8, safeLeft)}px`;
+                el.style.top = `${safeTop}px`;
+              }
             }}
+            style={{ left: -9999, top: -9999 }}
             onClick={(e) => e.stopPropagation()}
           >
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
@@ -1022,11 +1030,19 @@ function PortalBadgeCell({ value, onChange }: { value: string; onChange: (val: s
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setMenuOpen(false)} onContextMenu={(e) => { e.preventDefault(); setMenuOpen(false); }} />
           <div
-            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px]"
-            style={{
-              left: Math.min(menuPos.x, window.innerWidth - 300),
-              top: menuPos.y + 200 > window.innerHeight ? Math.max(8, menuPos.y - 250) : menuPos.y,
+            className="fixed z-[9999] p-2 bg-popover backdrop-blur-xl rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 min-w-[180px] max-h-[80vh] overflow-y-auto"
+            ref={(el) => {
+              if (el) {
+                const rect = el.getBoundingClientRect();
+                const safeLeft = Math.min(menuPos.x, window.innerWidth - rect.width - 8);
+                const safeTop = menuPos.y + rect.height > window.innerHeight - 8
+                  ? Math.max(8, window.innerHeight - rect.height - 8)
+                  : menuPos.y;
+                el.style.left = `${Math.max(8, safeLeft)}px`;
+                el.style.top = `${safeTop}px`;
+              }
             }}
+            style={{ left: -9999, top: -9999 }}
             onClick={(e) => e.stopPropagation()}
           >
             <span className="text-[9px] uppercase tracking-wider text-muted-foreground px-2 pt-1">Modifica valore</span>
