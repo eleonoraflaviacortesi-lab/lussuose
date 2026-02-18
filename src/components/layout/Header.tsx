@@ -143,7 +143,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[5.5rem] w-auto max-w-[70vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[7rem] w-auto max-w-[70vw] -my-6 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
           <NotificationBell onOpenCliente={onOpenCliente} inline />
