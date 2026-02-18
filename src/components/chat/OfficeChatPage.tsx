@@ -34,7 +34,7 @@ const REACTION_EMOJIS = ['❤️', '👍', '😂', '😮', '😢', '🔥'];
 
 const OfficeChatPage = () => {
   const { user, profile } = useAuth();
-  const { profiles } = useProfiles();
+  const { profiles } = useProfiles(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
