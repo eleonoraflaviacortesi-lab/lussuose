@@ -145,7 +145,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[7rem] w-auto max-w-[60vw] -my-6 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[5.5rem] w-auto max-w-[60vw] -my-4 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
           <div className="flex-1 flex justify-end">
