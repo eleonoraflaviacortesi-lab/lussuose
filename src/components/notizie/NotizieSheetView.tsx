@@ -13,6 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { GripVertical, Paintbrush, Type, X, Bold, Italic, Strikethrough, Eye, GripHorizontal, Filter, Check, Star, Plus, Trash2, Copy, ClipboardPaste, RotateCcw, MessageCircle } from 'lucide-react';
+import { useColumnTypeOverrides } from '@/hooks/useColumnTypeOverrides';
+import { ColumnTypeMenu } from '@/components/ui/column-type-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
@@ -470,12 +472,33 @@ function ColumnFilterPopover({
   );
 }
 
+// --- Override Dropdown Cell ---
+function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: string; colKey: string; sheetId: string; onChange?: (v: string) => void }) {
+  const storageKey = `col-dropdown-opts-${sheetId}-${colKey}`;
+  const [open, setOpen] = useState(false);
+  const [opts, setOpts] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; } });
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState('');
+  const saveOpts = (next: string[]) => { setOpts(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
+  if (!open) return <span className="block text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 rounded min-h-[28px] truncate" onClick={e => { e.stopPropagation(); setOpen(true); }}>{value || '—'}</span>;
+  return (
+    <div className="relative">
+      <div className="fixed inset-0 z-[150]" onClick={() => setOpen(false)} />
+      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl shadow-lg p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
+        <button onClick={() => { onChange?.(''); setOpen(false); }} className="w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground">— Vuoto</button>
+        {opts.map(o => <button key={o} onClick={() => { onChange?.(o); setOpen(false); }} className={cn("w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60", value === o && "font-semibold")}>{o}</button>)}
+        {adding ? <input autoFocus className="w-full text-xs px-2 py-1 border border-border rounded mt-1" value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { saveOpts([...opts, draft.trim()]); setDraft(''); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} onBlur={() => setAdding(false)} placeholder="Nuova opzione…" /> : <button onClick={() => setAdding(true)} className="w-full text-left px-2 py-1 text-xs text-muted-foreground hover:text-foreground">+ Aggiungi</button>}
+      </div>
+    </div>
+  );
+}
+
 // --- Memoized Row ---
 const MIN_ROW_HEIGHT = 32;
 
 const SheetRow = memo(function SheetRow({
   notizia, idx, colWidths, rowNumWidth, isSelected, selectedColKey, rowFormat, colFormats, orderedColumns,
-  onSelect, onCardClick, onCellChange, onContextMenu, onCellContextMenu, onCellSelect,
+  onSelect, onCardClick, onCellChange, onContextMenu, onCellContextMenu, onCellSelect, colTypeOverrides,
   isDragOver, onRowDragStart, onRowDragOver, onRowDrop, onRowDragEnd,
   statusOptions,
 }: {
@@ -494,6 +517,7 @@ const SheetRow = memo(function SheetRow({
   onRowDragStart?: (e: React.DragEvent) => void; onRowDragOver?: (e: React.DragEvent) => void;
   onRowDrop?: (e: React.DragEvent) => void; onRowDragEnd?: () => void;
   statusOptions: { value: string; label: string; color: string }[];
+  colTypeOverrides: Record<string, string>;
 }) {
   const longPressRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -550,7 +574,34 @@ const SheetRow = memo(function SheetRow({
             onClick={e => { e.stopPropagation(); onSelect(notizia.id); onCellSelect?.(notizia.id, col.key); }}
             onContextMenu={e => handleCellRightClick(e, col)}>
 
-            {col.type === 'status' && col.editable ? (
+            {/* Column type override rendering */}
+            {colTypeOverrides[col.key] === 'checkbox' ? (
+              <div className="flex items-center justify-center min-h-[28px] px-2">
+                <input type="checkbox" className="w-4 h-4 cursor-pointer accent-foreground"
+                  checked={!!getCellValueStatic(notizia, col) && getCellValueStatic(notizia, col) !== 'false' && getCellValueStatic(notizia, col) !== '0'}
+                  onChange={e => col.editable && onCellChange(notizia.id, col.key, e.target.checked ? 'true' : '')} />
+              </div>
+            ) : colTypeOverrides[col.key] === 'url' ? (
+              <div className="flex items-center gap-1 px-2 min-h-[28px]">
+                {getCellValueStatic(notizia, col) ? (
+                  <a href={getCellValueStatic(notizia, col).startsWith('http') ? getCellValueStatic(notizia, col) : `https://${getCellValueStatic(notizia, col)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:underline truncate max-w-full"
+                    onClick={e => e.stopPropagation()}>{getCellValueStatic(notizia, col)}</a>
+                ) : (
+                  <InlineTextCell value={getCellValueStatic(notizia, col)} onChange={col.editable ? v => onCellChange(notizia.id, col.key, v) : undefined} />
+                )}
+              </div>
+            ) : colTypeOverrides[col.key] === 'dropdown' ? (
+              <OverrideDropdownCell
+                value={getCellValueStatic(notizia, col)}
+                colKey={col.key}
+                sheetId="notizie"
+                onChange={col.editable ? v => onCellChange(notizia.id, col.key, v) : undefined}
+              />
+            ) : colTypeOverrides[col.key] === 'text' ? (
+              <InlineTextCell value={getCellValueStatic(notizia, col)} onChange={col.editable ? v => onCellChange(notizia.id, col.key, v) : undefined} />
+            ) : col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(notizia, col)} onChange={v => onCellChange(notizia.id, col.key, v)} statusOptions={statusOptions} />
             ) : col.type === 'number' && col.editable ? (
               <InlineNumberCell value={(notizia as any)[col.key] ?? null} onChange={v => onCellChange(notizia.id, col.key, String(v ?? ''))} />
@@ -560,6 +611,7 @@ const SheetRow = memo(function SheetRow({
                   <InlineTextCell value={getCellValueStatic(notizia, col)} onChange={col.editable ? v => onCellChange(notizia.id, col.key, v) : undefined} />
                 </div>
                 {notizia.phone && (
+
                   <a href={`https://wa.me/${notizia.phone.replace(/[\s\-\(\)\+]/g, '')}`} target="_blank" rel="noopener noreferrer"
                     className="flex-shrink-0 p-1 rounded hover:bg-accent transition-colors" onClick={e => e.stopPropagation()} title="WhatsApp">
                     <MessageCircle className="w-3.5 h-3.5 text-green-600" />
@@ -583,6 +635,8 @@ const SheetRow = memo(function SheetRow({
 // ============ MAIN COMPONENT ============
 const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQuery, onAddNew }: NotizieSheetViewProps) => {
   const { columns: kanbanColumns } = useKanbanColumns();
+  const { overrides: colTypeOverrides, setColumnType } = useColumnTypeOverrides('notizie-sheet');
+  const [colTypeMenu, setColTypeMenu] = useState<{ colKey: string; colLabel: string; x: number; y: number } | null>(null);
   const statusOptions = useMemo(() =>
     kanbanColumns.length > 0
       ? kanbanColumns.map(c => ({ value: c.key, label: c.label, color: c.color }))
@@ -829,9 +883,11 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
                   dragOverCol === col.key && "bg-accent/60 border-l-2 border-l-foreground/30"
                 )}
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
-                onClick={() => handleHeaderClick(col.key)}>
+                onClick={() => handleHeaderClick(col.key)}
+                onContextMenu={e => { e.preventDefault(); setColTypeMenu({ colKey: col.key, colLabel: col.label, x: e.clientX, y: e.clientY }); }}>
                 <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
                 <span className="truncate flex-1">{col.label}</span>
+                {colTypeOverrides[col.key] && <span className="text-[8px] text-muted-foreground ml-0.5 opacity-60" title={`Tipo: ${colTypeOverrides[col.key]}`}>⌗</span>}
                 {sortCol === col.key && <span className="text-[8px] ml-0.5">{sortDir === 'asc' ? '▲' : '▼'}</span>}
                 <ColumnFilterPopover colKey={col.key} uniqueValues={uniqueValuesMap[col.key] || []} activeFilter={colFilters[col.key] || new Set()} onFilterChange={handleFilterChange} />
                 <div className="absolute right-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-foreground/10 active:bg-foreground/20"
@@ -843,7 +899,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
           {/* Rows */}
           <div>
             {sorted.map((notizia, i) => (
-              <SheetRow key={notizia.id} notizia={notizia} idx={i} colWidths={colWidths} rowNumWidth={rowNumWidth}
+              <SheetRow key={notizia.id} notizia={notizia} idx={i} colWidths={colWidths} rowNumWidth={rowNumWidth} colTypeOverrides={colTypeOverrides}
                 isSelected={selectedRowId === notizia.id} selectedColKey={selectedColKey}
                 rowFormat={rowFormats[notizia.id]} colFormats={colFormats} orderedColumns={orderedColumns}
                 onSelect={setSelectedRowId} onCardClick={onNotiziaClick}
@@ -887,6 +943,16 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
 
       {/* Cell context menu */}
       {cellMenu && <CellContextMenu info={cellMenu} onCellChange={handleCellChange} onClose={() => setCellMenu(null)} />}
+      {colTypeMenu && (
+        <ColumnTypeMenu
+          colKey={colTypeMenu.colKey}
+          colLabel={colTypeMenu.colLabel}
+          currentType={colTypeOverrides[colTypeMenu.colKey] ?? null}
+          position={{ x: colTypeMenu.x, y: colTypeMenu.y }}
+          onSelect={setColumnType}
+          onClose={() => setColTypeMenu(null)}
+        />
+      )}
     </div>
   );
 };

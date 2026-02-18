@@ -1,4 +1,6 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
+import { useColumnTypeOverrides } from '@/hooks/useColumnTypeOverrides';
+import { ColumnTypeMenu } from '@/components/ui/column-type-menu';
 import { createPortal } from 'react-dom';
 import { Cliente, ClienteStatus } from '@/types';
 import { format } from 'date-fns';
@@ -1753,6 +1755,8 @@ function saveColWidths(widths: Record<string, number>) {
 
 // --- Main Component ---
 export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDelete, onDuplicate, searchQuery, onAddNew }: ClientiSheetViewProps) {
+  const { overrides: colTypeOverrides, setColumnType } = useColumnTypeOverrides('clienti-sheet');
+  const [colTypeMenu, setColTypeMenu] = useState<{ colKey: string; colLabel: string; x: number; y: number } | null>(null);
   const [customCols, setCustomCols] = useState<ColumnDef[]>(getCustomColumns);
   const allColumns = useMemo(() => [...COLUMNS, ...customCols], [customCols]);
   const [colOrder, setColOrder] = useState<string[]>(() => [...COLUMNS.map(c => c.key), ...getCustomColumns().map(c => c.key)]);
@@ -2189,9 +2193,11 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 )}
                 style={{ width: colWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
+                onContextMenu={e => { e.preventDefault(); setColTypeMenu({ colKey: col.key, colLabel: col.label, x: e.clientX, y: e.clientY }); }}
               >
                 <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
                 <span className="truncate flex-1">{col.label}</span>
+                {colTypeOverrides[col.key] && <span className="text-[8px] text-muted-foreground ml-0.5 opacity-60" title={`Tipo: ${colTypeOverrides[col.key]}`}>⌗</span>}
                 {DATE_COLUMNS.includes(col.key) ? (
                   <DateColumnFilterPopover
                     colKey={col.key}
@@ -2343,6 +2349,18 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
           info={cellMenu}
           onCellChange={handleCellChange}
           onClose={() => setCellMenu(null)}
+        />
+      )}
+    </div>
+  );
+      {colTypeMenu && (
+        <ColumnTypeMenu
+          colKey={colTypeMenu.colKey}
+          colLabel={colTypeMenu.colLabel}
+          currentType={colTypeOverrides[colTypeMenu.colKey] ?? null}
+          position={{ x: colTypeMenu.x, y: colTypeMenu.y }}
+          onSelect={setColumnType}
+          onClose={() => setColTypeMenu(null)}
         />
       )}
     </div>
