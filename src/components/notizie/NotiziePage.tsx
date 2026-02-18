@@ -1,16 +1,17 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
-import { Search, X, LayoutGrid, Table2 } from 'lucide-react';
+import { Search, X, LayoutGrid, Table2, FileSpreadsheet } from 'lucide-react';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
 import AddNotiziaDialog from './AddNotiziaDialog';
 import ImportCSVDialog from './ImportCSVDialog';
-import ImportDalilaDialog from './ImportDalilaDialog';
 import NotizieStatsChart from './NotizieStatsChart';
 import NotizieSheetView from './NotizieSheetView';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
+import { exportToExcel } from '@/lib/exportExcel';
+import { format } from 'date-fns';
 
 // Lazy load drag-drop board for faster initial render
 const KanbanBoard = lazy(() => import('./KanbanBoard'));
@@ -91,6 +92,23 @@ const NotiziePage = () => {
     updateNotizia.mutate({ id, ...updates, silent: true } as any);
   }, [updateNotizia]);
 
+  const handleExportExcel = useCallback(async () => {
+    const data = notizie || [];
+    const today = format(new Date(), 'yyyy-MM-dd');
+    await exportToExcel(`notizie_${today}`, [
+      { header: 'Nome', key: 'name', width: 30 },
+      { header: 'Zona', key: 'zona', width: 20 },
+      { header: 'Telefono', key: 'phone', width: 18 },
+      { header: 'Tipo', key: 'type', width: 15 },
+      { header: 'Stato', key: 'status', width: 15 },
+      { header: 'Prezzo Richiesto', key: 'prezzo_richiesto', width: 18 },
+      { header: 'Valore', key: 'valore', width: 15 },
+      { header: 'Note', key: 'notes', width: 40 },
+      { header: 'Online', key: 'is_online', width: 10 },
+      { header: 'Creato', key: 'created_at', width: 20 },
+    ], data.map(n => ({ ...n, is_online: n.is_online ? 'Sì' : 'No' })));
+  }, [notizie]);
+
   return (
     <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col">
       <div className="flex items-center justify-between gap-4 pt-[25px] shadow-none">
@@ -118,7 +136,10 @@ const NotiziePage = () => {
         
         <div className="flex items-center gap-2">
           <UndoRedoButtons />
-          <ImportDalilaDialog />
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportExcel}>
+            <FileSpreadsheet className="w-4 h-4" />
+            <span className="hidden sm:inline">Excel</span>
+          </Button>
           <ImportCSVDialog />
           <AddNotiziaDialog />
         </div>

@@ -13,10 +13,11 @@ import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3, Sparkles } from 'lucide-react';
-import ImportDalilaCSVDialog from './ImportDalilaCSVDialog';
 import { ClientiAnalysisModal } from './ClientiAnalysisModal';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
+import { exportToExcel } from '@/lib/exportExcel';
+import { format } from 'date-fns';
 
 // Extract date from note_extra for imported buyers
 function getDataRichiestaFromNotes(noteExtra: string | null): string | null {
@@ -45,7 +46,6 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [dalilaImportOpen, setDalilaImportOpen] = useState(false);
   const [dateSortDir, setDateSortDir] = useState<'desc' | 'asc' | null>(null);
   const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
   const [analysisOpen, setAnalysisOpen] = useState(false);
@@ -158,8 +158,6 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       setSelectedCliente(null);
     }
   }, [selectedCliente, deleteCliente, createCliente, pushAction]);
-
-  // Agents see only assigned clients, coordinators see all
   const displayClients = isCoordinator ?
   clienti :
   clienti.filter((c) => c.assigned_to === profile?.user_id);
@@ -177,6 +175,31 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     });
     return groups;
   }, [isCoordinator, clientiGrouped, displayClients]);
+
+  const handleExportExcel = useCallback(async () => {
+    const today = format(new Date(), 'yyyy-MM-dd');
+    await exportToExcel(`buyers_${today}`, [
+      { header: 'Nome', key: 'nome', width: 20 },
+      { header: 'Cognome', key: 'cognome', width: 20 },
+      { header: 'Telefono', key: 'telefono', width: 18 },
+      { header: 'Email', key: 'email', width: 25 },
+      { header: 'Paese', key: 'paese', width: 15 },
+      { header: 'Lingua', key: 'lingua', width: 12 },
+      { header: 'Stato', key: 'status', width: 15 },
+      { header: 'Budget Max', key: 'budget_max', width: 15 },
+      { header: 'Regioni', key: 'regioni', width: 25 },
+      { header: 'Tipologia', key: 'tipologia', width: 25 },
+      { header: 'Portale', key: 'portale', width: 20 },
+      { header: 'Sede', key: 'sede', width: 12 },
+      { header: 'Note Extra', key: 'note_extra', width: 40 },
+      { header: 'Data Submission', key: 'data_submission', width: 20 },
+      { header: 'Creato', key: 'created_at', width: 20 },
+    ], displayClients.map(c => ({
+      ...c,
+      regioni: Array.isArray(c.regioni) ? c.regioni.join(', ') : '',
+      tipologia: Array.isArray(c.tipologia) ? c.tipologia.join(', ') : '',
+    })));
+  }, [displayClients]);
 
   // Apply date sorting within groups if active
   const sortedGrouped = useMemo(() => {
@@ -269,6 +292,10 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             <span className="hidden sm:inline">CSV</span>
           </Button>
         }
+        <Button variant="outline" size="icon" onClick={handleExportExcel} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+          <FileSpreadsheet className="w-4 h-4" />
+          <span className="hidden sm:inline">Excel</span>
+        </Button>
         <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-9 h-9 p-0">
           <Plus className="w-4 h-4" />
         </Button>
@@ -437,11 +464,6 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           setImportDialogOpen(false);
         }} />
 
-
-      {/* Dalila CSV Import Dialog */}
-      <ImportDalilaCSVDialog
-        open={dalilaImportOpen}
-        onOpenChange={setDalilaImportOpen} />
 
 
       {/* Analysis Modal */}
