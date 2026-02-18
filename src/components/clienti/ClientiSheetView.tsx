@@ -1311,6 +1311,27 @@ function SheetToolbar({
   );
 }
 
+// --- Override Dropdown Cell ---
+function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: string; colKey: string; sheetId: string; onChange?: (v: string) => void }) {
+  const storageKey = `col-dropdown-opts-${sheetId}-${colKey}`;
+  const [open, setOpen] = useState(false);
+  const [opts, setOpts] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; } });
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState('');
+  const saveOpts = (next: string[]) => { setOpts(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
+  if (!open) return <span className="block text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 rounded min-h-[28px] truncate" onClick={e => { e.stopPropagation(); setOpen(true); }}>{value || '—'}</span>;
+  return (
+    <div className="relative">
+      <div className="fixed inset-0 z-[150]" onClick={() => setOpen(false)} />
+      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl shadow-lg p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
+        <button onClick={() => { onChange?.(''); setOpen(false); }} className="w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground">— Vuoto</button>
+        {opts.map(o => <button key={o} onClick={() => { onChange?.(o); setOpen(false); }} className={cn("w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60", value === o && "font-semibold")}>{o}</button>)}
+        {adding ? <input autoFocus className="w-full text-xs px-2 py-1 border border-border rounded mt-1" value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { saveOpts([...opts, draft.trim()]); setDraft(''); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} onBlur={() => setAdding(false)} placeholder="Nuova opzione…" /> : <button onClick={() => setAdding(true)} className="w-full text-left px-2 py-1 text-xs text-muted-foreground hover:text-foreground">+ Aggiungi</button>}
+      </div>
+    </div>
+  );
+}
+
 // --- Memoized Row ---
 const MIN_ROW_HEIGHT = 32;
 
@@ -1325,6 +1346,7 @@ const SheetRow = memo(function SheetRow({
   rowFormat,
   colFormats,
   orderedColumns,
+  colTypeOverrides,
   onSelect,
   onCardClick,
   onCellChange,
@@ -1347,6 +1369,7 @@ const SheetRow = memo(function SheetRow({
   rowFormat?: FormatState;
   colFormats: Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>;
   orderedColumns: ColumnDef[];
+  colTypeOverrides: Record<string, string>;
   onSelect: (id: string) => void;
   onCardClick: (c: Cliente) => void;
   onCellChange: (id: string, key: string, val: string) => void;
@@ -1480,7 +1503,28 @@ const SheetRow = memo(function SheetRow({
             onClick={(e) => { e.stopPropagation(); onSelect(cliente.id); onCellSelect?.(cliente.id, col.key); }}
             onContextMenu={(e) => handleCellRightClick(e, col)}
           >
-            {col.type === 'status' && col.editable ? (
+            {colTypeOverrides[col.key] === 'checkbox' ? (
+              <div className="flex items-center justify-center min-h-[28px] px-2">
+                <input type="checkbox" className="w-4 h-4 cursor-pointer accent-foreground"
+                  checked={!!getCellValueStatic(cliente, col) && getCellValueStatic(cliente, col) !== 'false' && getCellValueStatic(cliente, col) !== '0'}
+                  onChange={e => col.editable && onCellChange(cliente.id, col.key, e.target.checked ? 'true' : '')} />
+              </div>
+            ) : colTypeOverrides[col.key] === 'url' ? (
+              <div className="flex items-center gap-1 px-2 min-h-[28px]">
+                {getCellValueStatic(cliente, col) ? (
+                  <a href={getCellValueStatic(cliente, col).startsWith('http') ? getCellValueStatic(cliente, col) : `https://${getCellValueStatic(cliente, col)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="text-xs text-primary hover:underline truncate max-w-full"
+                    onClick={e => e.stopPropagation()}>{getCellValueStatic(cliente, col)}</a>
+                ) : (
+                  <InlineTextCell value="" onChange={col.editable ? v => onCellChange(cliente.id, col.key, v) : undefined} />
+                )}
+              </div>
+            ) : colTypeOverrides[col.key] === 'dropdown' ? (
+              <OverrideDropdownCell value={col.key.startsWith('custom_') ? getCustomFieldValue(cliente, col.key) : getCellValueStatic(cliente, col)} colKey={col.key} sheetId="clienti" onChange={col.editable ? v => onCellChange(cliente.id, col.key, v) : undefined} />
+            ) : colTypeOverrides[col.key] === 'text' ? (
+              <InlineTextCell value={col.key.startsWith('custom_') ? getCustomFieldValue(cliente, col.key) : getCellValueStatic(cliente, col)} onChange={col.editable ? v => onCellChange(cliente.id, col.key, v) : undefined} />
+            ) : col.type === 'status' && col.editable ? (
               <LazyStatusCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} />
             ) : col.type === 'lingua' && col.editable ? (
               <SimpleBadgeCell value={getCellValueStatic(cliente, col)} onChange={(v) => onCellChange(cliente.id, col.key, v)} defaultOptions={LINGUA_OPTIONS_VALUES} colorMap={getMergedLinguaColors()} colType="lingua" />
@@ -2263,6 +2307,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                 rowFormat={rowFormats[cliente.id]}
                 colFormats={colFormats}
                 orderedColumns={orderedColumns}
+                colTypeOverrides={colTypeOverrides}
                 onSelect={setSelectedRowId}
                 onCardClick={onCardClick}
                 onCellChange={handleCellChange}
@@ -2351,8 +2396,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
           onClose={() => setCellMenu(null)}
         />
       )}
-    </div>
-  );
+
+      {/* Column Type menu */}
       {colTypeMenu && (
         <ColumnTypeMenu
           colKey={colTypeMenu.colKey}
