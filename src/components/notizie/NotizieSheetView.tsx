@@ -582,6 +582,13 @@ const SheetRow = memo(function SheetRow({
 
 // ============ MAIN COMPONENT ============
 const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQuery, onAddNew }: NotizieSheetViewProps) => {
+  const { columns: kanbanColumns } = useKanbanColumns();
+  const statusOptions = useMemo(() =>
+    kanbanColumns.length > 0
+      ? kanbanColumns.map(c => ({ value: c.key, label: c.label, color: c.color }))
+      : STATUS_OPTIONS.map(o => ({ value: o.value, label: o.label, color: o.color })),
+    [kanbanColumns]
+  );
   const { columns: kanbanCols } = useKanbanColumns();
   const dynamicStatusOptions = kanbanCols.length > 0
     ? kanbanCols.map(c => ({ value: c.key, label: c.label, color: c.color }))
@@ -851,6 +858,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
                   onUpdate(srcId, { display_order: notizia.display_order } as any);
                 }}
                 onRowDragEnd={() => { setDragRowId(null); setDragOverRowId(null); }}
+                statusOptions={statusOptions}
               />
             ))}
           </div>
@@ -873,7 +881,8 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
           onStatusChange={handleContextStatusChange} onEmojiChange={handleContextEmojiChange}
           onColorChange={handleContextColorChange}
           onDelete={onDelete ? () => { onDelete(contextMenu.notizia.id); setContextMenu(null); } : undefined}
-          onClose={() => setContextMenu(null)} />
+          onClose={() => setContextMenu(null)}
+          statusOptions={statusOptions} />
       )}
 
       {/* Cell context menu */}
