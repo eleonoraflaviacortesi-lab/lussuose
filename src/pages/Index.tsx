@@ -137,7 +137,6 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Ambient magic effects */}
       <FloatingSparkles />
-      <MagicCursor />
       {/* Fixed elements - not affected by pull-to-refresh */}
       <Header onOpenSettings={() => { setActiveTab('impostazioni'); navigate('/impostazioni'); }} activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); navigate(tab === 'numeri' ? '/' : `/${tab}`); }} onOpenCliente={handleOpenCliente} />
       <div style={{ height: 'calc(85px + env(safe-area-inset-top, 0px))' }} />
