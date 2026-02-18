@@ -88,11 +88,12 @@ const EmojiGridWithCustom = memo(function EmojiGridWithCustom({ currentEmoji, on
 
 // --- Row context menu ---
 const SheetContextMenu = memo(function SheetContextMenu({
-  position, notizia, onStatusChange, onEmojiChange, onColorChange, onDelete, onClose,
+  position, notizia, onStatusChange, onEmojiChange, onColorChange, onDelete, onClose, statusOptions,
 }: {
   position: { x: number; y: number }; notizia: Notizia;
   onStatusChange: (s: NotiziaStatus) => void; onEmojiChange: (e: string | null) => void;
   onColorChange: (c: string | null) => void; onDelete?: () => void; onClose: () => void;
+  statusOptions: { value: string; label: string; color: string }[];
 }) {
   const [showCustomPicker, setShowCustomPicker] = useState(false);
   const [customCardColor, setCustomCardColor] = useState(notizia.card_color || '#fef3c7');
@@ -122,8 +123,8 @@ const SheetContextMenu = memo(function SheetContextMenu({
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Stato</span>
           <div className="flex flex-wrap gap-1.5 max-w-[220px]">
-            {STATUS_OPTIONS.map(col => (
-              <button key={col.value} onClick={() => { onStatusChange(col.value); onClose(); }}
+            {statusOptions.map(col => (
+              <button key={col.value} onClick={() => { onStatusChange(col.value as NotiziaStatus); onClose(); }}
                 className={cn("px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
                   notizia.status === col.value && "ring-2 ring-foreground ring-offset-1"
                 )} style={{ backgroundColor: col.color, color: isDarkColor(col.color) ? 'white' : 'black' }}>{col.label}</button>
@@ -240,9 +241,9 @@ const CellContextMenu = memo(function CellContextMenu({
 });
 
 // --- Status Cell ---
-function LazyStatusCell({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function LazyStatusCell({ value, onChange, statusOptions }: { value: string; onChange: (v: string) => void; statusOptions: { value: string; label: string; color: string }[] }) {
   const [open, setOpen] = useState(false);
-  const status = STATUS_OPTIONS.find(s => s.value === value);
+  const status = statusOptions.find(s => s.value === value) || STATUS_OPTIONS.find(s => s.value === value);
   if (!open) {
     return (
       <span className="block px-1 py-1 cursor-pointer hover:bg-secondary/50" onClick={e => { e.stopPropagation(); setOpen(true); }}>
@@ -255,8 +256,8 @@ function LazyStatusCell({ value, onChange }: { value: string; onChange: (v: stri
       <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
         <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>{status?.label || value}</span>
       </SelectTrigger>
-      <SelectContent>
-        {STATUS_OPTIONS.map(s => (
+      <SelectContent className="z-[200] bg-background border border-border shadow-lg">
+        {statusOptions.map(s => (
           <SelectItem key={s.value} value={s.value}>
             <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />{s.label}</span>
           </SelectItem>
@@ -476,12 +477,15 @@ const SheetRow = memo(function SheetRow({
   notizia, idx, colWidths, rowNumWidth, isSelected, selectedColKey, rowFormat, colFormats, orderedColumns,
   onSelect, onCardClick, onCellChange, onContextMenu, onCellContextMenu, onCellSelect,
   isDragOver, onRowDragStart, onRowDragOver, onRowDrop, onRowDragEnd,
+  statusOptions,
 }: {
   notizia: Notizia; idx: number; colWidths: Record<string, number>; rowNumWidth: number;
-  isSelected: boolean; selectedColKey: string | null; rowFormat?: FormatState;
+  isSelected: boolean; selectedColKey: string | null;
+  rowFormat?: { bold?: boolean; italic?: boolean; strikethrough?: boolean };
   colFormats: Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>;
   orderedColumns: ColumnDef[];
-  onSelect: (id: string) => void; onCardClick: (n: Notizia) => void;
+  onSelect: (id: string) => void;
+  onCardClick: (n: Notizia) => void;
   onCellChange: (id: string, key: string, val: string) => void;
   onContextMenu: (n: Notizia, x: number, y: number) => void;
   onCellContextMenu: (n: Notizia, col: ColumnDef, val: string, x: number, y: number) => void;
@@ -489,6 +493,7 @@ const SheetRow = memo(function SheetRow({
   isDragOver?: boolean;
   onRowDragStart?: (e: React.DragEvent) => void; onRowDragOver?: (e: React.DragEvent) => void;
   onRowDrop?: (e: React.DragEvent) => void; onRowDragEnd?: () => void;
+  statusOptions: { value: string; label: string; color: string }[];
 }) {
   const longPressRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -546,7 +551,7 @@ const SheetRow = memo(function SheetRow({
             onContextMenu={e => handleCellRightClick(e, col)}>
 
             {col.type === 'status' && col.editable ? (
-              <LazyStatusCell value={getCellValueStatic(notizia, col)} onChange={v => onCellChange(notizia.id, col.key, v)} />
+              <LazyStatusCell value={getCellValueStatic(notizia, col)} onChange={v => onCellChange(notizia.id, col.key, v)} statusOptions={statusOptions} />
             ) : col.type === 'number' && col.editable ? (
               <InlineNumberCell value={(notizia as any)[col.key] ?? null} onChange={v => onCellChange(notizia.id, col.key, String(v ?? ''))} />
             ) : col.key === 'phone' ? (
@@ -577,6 +582,11 @@ const SheetRow = memo(function SheetRow({
 
 // ============ MAIN COMPONENT ============
 const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQuery, onAddNew }: NotizieSheetViewProps) => {
+  const { columns: kanbanCols } = useKanbanColumns();
+  const dynamicStatusOptions = kanbanCols.length > 0
+    ? kanbanCols.map(c => ({ value: c.key, label: c.label, color: c.color }))
+    : STATUS_OPTIONS;
+
   const [colWidths, setColWidths] = useState<Record<string, number>>(() => {
     const saved = getSavedColWidths();
     const defaults = Object.fromEntries(COLUMNS.map(c => [c.key, c.width]));
