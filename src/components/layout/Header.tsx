@@ -132,22 +132,27 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
             ))}
           </div>
         </div>
-        <div className="glass-header flex items-center justify-between px-4 py-1 rounded-b-[2rem]">
-          <button 
-            onClick={() => { triggerHaptic('selection'); setMenuOpen(true); }}
-            className="flex items-center justify-center hover:scale-105 transition-transform"
-            aria-label="Apri menu"
-          >
-            <Menu className="w-5 h-5" />
-          </button>
+        <div className="glass-header flex items-center px-4 py-1 rounded-b-[2rem]">
+          <div className="flex-1 flex justify-start">
+            <button 
+              onClick={() => { triggerHaptic('selection'); setMenuOpen(true); }}
+              className="flex items-center justify-center hover:scale-105 transition-transform"
+              aria-label="Apri menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
           <img 
             src={logo} 
             alt="Logo" 
-            className={`h-[7rem] w-auto max-w-[70vw] -my-6 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
+            className={`h-[7rem] w-auto max-w-[60vw] -my-6 transition-transform cursor-pointer select-none ${logoWiggle ? 'animate-[wiggle_0.4s_ease-in-out]' : ''}`}
             onClick={handleLogoTap}
           />
-          <NotificationBell onOpenCliente={onOpenCliente} inline />
+          <div className="flex-1 flex justify-end">
+            <NotificationBell onOpenCliente={onOpenCliente} inline />
+          </div>
         </div>
+        
       </header>
 
       {/* Slide-in menu drawer */}
