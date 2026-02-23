@@ -328,7 +328,7 @@ export function useClienti(options?: {
 
       const { data, error } = await supabase
         .from('clienti')
-        .update({ comments: JSON.stringify(updatedComments) })
+        .update({ comments: updatedComments as any })
         .eq('id', id)
         .select()
         .single();
