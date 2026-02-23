@@ -124,7 +124,7 @@ export function MergeClienteDialog({ open, onOpenChange, cliente, allClienti, on
 
       // Merge comments
       const mergedComments = [...(cliente.comments || []), ...(selectedCliente.comments || [])];
-      mergedData.comments = JSON.stringify(mergedComments);
+      mergedData.comments = mergedComments;
 
       // Append note about merge
       const mergeNote = `\n\n🔗 Unito con richiesta "${selectedCliente.nome}" (${selectedCliente.portale || 'N/A'}) del ${selectedCliente.data_submission ? format(new Date(selectedCliente.data_submission), 'dd/MM/yyyy', { locale: it }) : 'N/A'}`;
