@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { EmojiPickerPopover } from '@/components/ui/emoji-picker-popover';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { MergeClienteDialog } from './MergeClienteDialog';
 import { Cliente } from '@/types';
@@ -161,7 +162,11 @@ export function ClienteDetail({
             <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
               <X className="w-5 h-5" />
             </button>
-            <span className="text-2xl">{cliente.emoji}</span>
+            <EmojiPickerPopover
+              emoji={cliente.emoji}
+              onEmojiChange={(emoji) => onUpdate({ emoji: emoji || '🏠' })}
+              size="lg"
+            />
             <div className="flex-1 min-w-0">
               <InlineEditText
                 value={cliente.nome}
