@@ -152,7 +152,7 @@ export function useClienti(options?: {
         descrizione: clienteData.descrizione,
         status: clienteData.status || 'new',
         sede: profile?.sede || 'AREZZO',
-        comments: JSON.stringify(clienteData.comments || []),
+        comments: (clienteData.comments || []) as any,
       };
       if (clienteData.data_submission) insertData.data_submission = clienteData.data_submission;
       if (clienteData.cognome) insertData.cognome = clienteData.cognome;
@@ -183,7 +183,7 @@ export function useClienti(options?: {
     mutationFn: async ({ id, comments, ...updates }: Partial<Cliente> & { id: string }) => {
       const updateData: Record<string, unknown> = { ...updates };
       if (comments !== undefined) {
-        updateData.comments = JSON.stringify(comments);
+        updateData.comments = comments as any;
       }
       
       const { data, error } = await supabase
@@ -388,7 +388,7 @@ export function useClienti(options?: {
       const { created_at, updated_at, ...rest } = cliente;
       const insertData: Record<string, unknown> = {
         ...rest,
-        comments: JSON.stringify(rest.comments || []),
+        comments: (rest.comments || []) as any,
       };
       
       const { data, error } = await supabase
