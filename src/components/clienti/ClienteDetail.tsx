@@ -53,6 +53,7 @@ import { ActivityQuickActions } from './ActivityQuickActions';
 import { ClienteReminder } from './ClienteReminder';
 import { ClientePDFExport } from './ClientePDFExport';
 import { useClienteActivities } from '@/hooks/useClienteActivities';
+import { AttachmentsSection } from '@/components/shared/AttachmentsSection';
 
 interface ClienteDetailProps {
   cliente: Cliente | null;
@@ -545,6 +546,9 @@ export function ClienteDetail({
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+
+              {/* Allegati */}
+              <AttachmentsSection entityType="cliente" entityId={cliente.id} />
 
               {/* Property Matches */}
               <PropertyMatchesSection clienteId={cliente.id} clientePhone={cliente.telefono} noteExtra={cliente.note_extra} />

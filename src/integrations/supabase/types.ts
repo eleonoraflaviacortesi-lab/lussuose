@@ -70,6 +70,42 @@ export type Database = {
           },
         ]
       }
+      attachments: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_path: string
+          file_size: number
+          id: string
+          uploaded_by: string
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          file_name: string
+          file_path: string
+          file_size?: number
+          id?: string
+          uploaded_by: string
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          id?: string
+          uploaded_by?: string
+        }
+        Relationships: []
+      }
       chat_messages: {
         Row: {
           audio_url: string | null
