@@ -55,8 +55,10 @@ export interface NotiziaInput {
 
 // Helper to parse comments from JSON
 const parseComments = (comments: Json | null): NotiziaComment[] => {
-  if (!comments || !Array.isArray(comments)) return [];
-  return comments.map(c => ({
+  let parsed: any = comments;
+  if (typeof parsed === 'string') { try { parsed = JSON.parse(parsed); } catch { return []; } }
+  if (!parsed || !Array.isArray(parsed)) return [];
+  return parsed.map((c: any) => ({
     id: String((c as Record<string, unknown>).id || ''),
     text: String((c as Record<string, unknown>).text || ''),
     created_at: String((c as Record<string, unknown>).created_at || ''),
