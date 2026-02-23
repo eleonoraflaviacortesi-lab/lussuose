@@ -1588,22 +1588,35 @@ const EventCard = memo(({
       onTouchEnd={onTouchEnd}
       onTouchMove={onTouchEnd}>
 
-      {event.urgent &&
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-          <AlertTriangle className="w-2.5 h-2.5 text-white" />
-        </div>
-      }
-      {/* Comment badge removed - now using inline icon */}
-      {styles.showBuyerBadge && !event.urgent && !hasComment &&
-      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
-          Buyer
-        </div>
-      }
-      {styles.showTaskBadge && !event.urgent && !hasComment &&
-      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
-          Task
-        </div>
-      }
+      {/* Top-right badge row */}
+      <div className="absolute -top-1.5 -right-1 flex items-center gap-0.5">
+        {event.urgent && (
+          <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+            <AlertTriangle className="w-2.5 h-2.5 text-white" />
+          </div>
+        )}
+        {hasComment && comments && onAddComment && (
+          <CommentPopover
+            comments={comments}
+            onAddComment={onAddComment}
+            trigger={
+              <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+                <MessageCircle className="w-2.5 h-2.5 text-background" />
+              </div>
+            }
+          />
+        )}
+        {styles.showBuyerBadge && !event.urgent && !hasComment && (
+          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+            Buyer
+          </div>
+        )}
+        {styles.showTaskBadge && !event.urgent && !hasComment && (
+          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+            Task
+          </div>
+        )}
+      </div>
       <div className="flex items-start gap-2">
         {canToggle ?
         <button
@@ -1641,17 +1654,6 @@ const EventCard = memo(({
             </p>
           )}
         </div>
-        {hasComment && comments && onAddComment && (
-          <CommentPopover
-            comments={comments}
-            onAddComment={onAddComment}
-            trigger={
-              <div className="w-5 h-5 rounded-full bg-white border border-foreground flex items-center justify-center shrink-0 cursor-pointer hover:bg-muted transition-colors">
-                <MessageCircle className="w-3 h-3 text-foreground" />
-              </div>
-            }
-          />
-        )}
       </div>
     </div>);
 
@@ -1752,22 +1754,35 @@ const DraggableEventCard = memo(({
       onTouchEnd={onTouchEnd}
       onTouchMove={onTouchEnd}>
 
-      {styles.showBuyerBadge && !event.urgent &&
-      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
-          Buyer
-        </div>
-      }
-      {styles.showTaskBadge && !event.urgent && !hasComment &&
-      <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
-          Task
-        </div>
-      }
-      {event.urgent &&
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-          <AlertTriangle className="w-2.5 h-2.5 text-white" />
-        </div>
-      }
-      {/* Comment badge removed - now using inline icon */}
+      {/* Top-right badge row */}
+      <div className="absolute -top-1.5 -right-1 flex items-center gap-0.5">
+        {event.urgent && (
+          <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+            <AlertTriangle className="w-2.5 h-2.5 text-white" />
+          </div>
+        )}
+        {hasComment && comments && onAddComment && (
+          <CommentPopover
+            comments={comments}
+            onAddComment={onAddComment}
+            trigger={
+              <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+                <MessageCircle className="w-2.5 h-2.5 text-background" />
+              </div>
+            }
+          />
+        )}
+        {styles.showBuyerBadge && !event.urgent && !hasComment && (
+          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+            Buyer
+          </div>
+        )}
+        {styles.showTaskBadge && !event.urgent && !hasComment && (
+          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+            Task
+          </div>
+        )}
+      </div>
       <div className="flex items-center gap-2">
         {/* Checkbox for tasks, emoji/dot for others */}
         {styles.canToggle ?
@@ -1810,17 +1825,6 @@ const DraggableEventCard = memo(({
             </p>
           )}
         </div>
-        {hasComment && comments && onAddComment && (
-          <CommentPopover
-            comments={comments}
-            onAddComment={onAddComment}
-            trigger={
-              <div className="w-5 h-5 rounded-full bg-white border border-foreground flex items-center justify-center shrink-0 cursor-pointer hover:bg-muted transition-colors">
-                <MessageCircle className="w-3 h-3 text-foreground" />
-              </div>
-            }
-          />
-        )}
       </div>
     </div>);
 
