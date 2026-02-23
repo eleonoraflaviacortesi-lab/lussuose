@@ -1172,7 +1172,7 @@ const CalendarPage = () => {
                                       const bg = event.cardColor
                                         || (event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : null)
                                         || (event.type === 'cliente_reminder' && event.statusColor ? event.statusColor : null);
-                                      return (!bg || bg === '#FFFFFF' || bg === '#ffffff' || bg === '#F3F4F6') ? '1px solid #d1d5db' : 'none';
+                                      return (bg && isDarkColor(bg)) ? 'none' : '1px solid #d1d5db';
                                     })(),
                                     ...dragProv.draggableProps.style,
                                   }}
