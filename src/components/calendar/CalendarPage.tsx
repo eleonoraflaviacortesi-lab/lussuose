@@ -75,7 +75,7 @@ const EventContextMenu = memo(({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
   const currentDate = notizia?.reminder_date || cliente?.reminder_date || null;
-  const currentCardColor = notizia?.card_color || cliente?.card_color || null;
+  const currentCardColor = event.cardColor || null;
 
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
@@ -429,6 +429,24 @@ const CalendarPage = () => {
   // Track dragging state to prevent click on day during drag
   const [isDragging, setIsDragging] = useState(false);
 
+  // Calendar-only event colors (stored in localStorage, not on notizia/cliente)
+  const [calendarEventColors, setCalendarEventColors] = useState<Record<string, string>>(() => {
+    try {
+      const stored = localStorage.getItem('calendar_event_colors');
+      return stored ? JSON.parse(stored) : {};
+    } catch { return {}; }
+  });
+
+  const setCalendarEventColor = useCallback((eventId: string, color: string | null) => {
+    setCalendarEventColors(prev => {
+      const next = { ...prev };
+      if (color) next[eventId] = color;
+      else delete next[eventId];
+      localStorage.setItem('calendar_event_colors', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment, reorderClienti } = useClienti();
   const { notizie, isLoading: loadingNotizie, updateNotizia, reorderNotizie } = useNotizie();
@@ -520,14 +538,16 @@ const CalendarPage = () => {
             text: c.text,
             created_at: c.created_at || c.createdAt || new Date().toISOString()
           }));
+          const clienteEventId = `cliente-${cliente.id}`;
           events.push({
-            id: `cliente-${cliente.id}`,
+            id: clienteEventId,
             title: cliente.nome,
             type: 'cliente_reminder',
             clienteId: cliente.id,
             clienteName: cliente.nome,
             emoji: cliente.emoji,
             statusColor: getStatusColor(cliente.status),
+            cardColor: calendarEventColors[clienteEventId] || undefined,
             displayOrder: cliente.display_order,
             lastComment: getLastComment(normalizedComments),
             commentsCount: normalizedComments.length,
@@ -542,13 +562,15 @@ const CalendarPage = () => {
           // Check if note_extra contains "URGENT" flag (stored in notes field)
           const isUrgent = notizia.notes?.includes('[URGENT]') || false;
 
+          const notiziaEventId = `notizia-${notizia.id}`;
           events.push({
-            id: `notizia-${notizia.id}`,
+            id: notiziaEventId,
             title: notizia.name,
             type: 'notizia_reminder',
             notiziaId: notizia.id,
             emoji: notizia.emoji,
             statusColor: getStatusColor(notizia.status),
+            cardColor: calendarEventColors[notiziaEventId] || undefined,
             urgent: isUrgent,
             displayOrder: notizia.display_order,
             lastComment: getLastComment(notizia.comments),
@@ -587,7 +609,7 @@ const CalendarPage = () => {
     });
 
     return map;
-  }, [viewDays, appointments, clienti, notizie, tasks, columns]);
+  }, [viewDays, appointments, clienti, notizie, tasks, columns, calendarEventColors]);
 
   const navigateCalendar = (direction: 'prev' | 'next') => {
     const delta = direction === 'next' ? 1 : -1;
@@ -1135,8 +1157,17 @@ const CalendarPage = () => {
                                     event.type === 'task' && event.completed && "line-through opacity-60"
                                   )}
                                   style={{
-                                    backgroundColor: event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : 'hsl(var(--muted))',
-                                    color: event.type === 'notizia_reminder' && event.statusColor && isDarkColor(event.statusColor) ? 'white' : undefined,
+                                    backgroundColor: event.cardColor
+                                      ? event.cardColor
+                                      : event.type === 'notizia_reminder' && event.statusColor
+                                        ? event.statusColor
+                                        : event.type === 'cliente_reminder' && event.statusColor
+                                          ? event.statusColor
+                                          : 'hsl(var(--muted))',
+                                    color: (() => {
+                                      const bg = event.cardColor || (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder') ? event.statusColor : null);
+                                      return bg && isDarkColor(bg) ? 'white' : undefined;
+                                    })(),
                                     ...dragProv.draggableProps.style,
                                   }}
                                   onClick={(e) => { e.stopPropagation(); handleEventClick(event); }}
@@ -1534,15 +1565,9 @@ const CalendarPage = () => {
           }
         }}
         onColorChange={(color) => {
-          const notiziaId = contextMenu.event.notiziaId;
-          const clienteId = contextMenu.event.clienteId;
-          if (notiziaId) {
-            updateNotizia.mutate({ id: notiziaId, card_color: color, silent: true });
-            toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
-          } else if (clienteId) {
-            updateCliente({ id: clienteId, card_color: color || undefined });
-            toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
-          }
+          setCalendarEventColor(contextMenu.event.id, color);
+          triggerHaptic('light');
+          toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
           setContextMenu(null);
         }}
         onDateChange={(newDate) => {
@@ -1609,14 +1634,17 @@ const EventCard = memo(({
       };
     }
 
-    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
+    // Buyers (cliente_reminder)
     if (event.type === 'cliente_reminder') {
+      const hasCustomColor = !!event.cardColor;
+      const baseColor = event.cardColor || null;
+      const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
-        bg: 'bg-white',
-        customBg: null,
-        border: 'border border-foreground',
-        textClass: 'text-foreground',
-        timeClass: 'text-muted-foreground',
+        bg: hasCustomColor ? '' : 'bg-white',
+        customBg: baseColor,
+        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        textClass: textColor,
+        timeClass: hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: true,
         showBuyerBadge: true,
         showTaskBadge: false,
@@ -1624,9 +1652,9 @@ const EventCard = memo(({
       };
     }
 
-    // Sellers (notizie) - use kanban status color
+    // Sellers (notizie) - use cardColor override or kanban status color
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D';
+      const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
@@ -1798,22 +1826,25 @@ const DraggableEventCard = memo(({
       };
     }
 
-    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
+    // Buyers (cliente_reminder)
     if (event.type === 'cliente_reminder') {
+      const hasCustomColor = !!event.cardColor;
+      const baseColor = event.cardColor || null;
+      const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
-        bg: 'bg-white',
-        customBg: null,
-        border: 'border border-foreground',
-        textClass: 'text-foreground',
+        bg: hasCustomColor ? '' : 'bg-white',
+        customBg: baseColor,
+        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        textClass: textColor,
         showBuyerBadge: true,
         showTaskBadge: false,
         canToggle: false
       };
     }
 
-    // Sellers (notizie) - use kanban status color
+    // Sellers (notizie) - use cardColor override or kanban status color
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D';
+      const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
