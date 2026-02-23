@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays } from 'lucide-react';
+import CommentPopover from './CommentPopover';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -675,6 +676,29 @@ const CalendarPage = () => {
     addClienteComment({ id: clienteId, comment: text });
   };
 
+  // Helper to get comments array for an event
+  const getEventComments = useCallback((event: CalendarEvent): NotiziaComment[] => {
+    if (event.notiziaId) {
+      const n = notizie?.find((x) => x.id === event.notiziaId);
+      return n?.comments || [];
+    }
+    if (event.clienteId && event.type === 'cliente_reminder') {
+      const c = clienti?.find((x) => x.id === event.clienteId);
+      const raw = (c?.comments || []) as Array<{id: string; text: string; createdAt?: string; created_at?: string;}>;
+      return raw.map((r) => ({ id: r.id, text: r.text, created_at: r.created_at || r.createdAt || new Date().toISOString() }));
+    }
+    return [];
+  }, [notizie, clienti]);
+
+  // Helper to add comment for an event
+  const handleEventAddComment = useCallback((event: CalendarEvent, text: string) => {
+    if (event.notiziaId) {
+      handleAddNotiziaComment(event.notiziaId, text);
+    } else if (event.clienteId && event.type === 'cliente_reminder') {
+      handleAddClienteCommentFromCalendar(event.clienteId, text);
+    }
+  }, [notizie, clienti]);
+
   // Helper function to move an event to a specific date - defined first so it can be used in handleDragEnd
   const moveEvent = useCallback((draggableId: string, targetDate: Date) => {
     // Parse draggableId to get event type and id
@@ -954,6 +978,8 @@ const CalendarPage = () => {
                   onTouchEnd={handleTouchEnd}
                   onToggle={handleToggleCompleted}
                   hasComment={!!event.lastComment}
+                  comments={getEventComments(event)}
+                  onAddComment={(text) => handleEventAddComment(event, text)}
                   compact />
 
                 )
@@ -1068,6 +1094,8 @@ const CalendarPage = () => {
                             onToggle={handleToggleCompleted}
                             isDragging={snapshot.isDragging}
                             hasComment={!!event.lastComment}
+                            comments={getEventComments(event)}
+                            onAddComment={(text) => handleEventAddComment(event, text)}
                             dragHandleProps={provided.dragHandleProps} />
 
                                 </div>
@@ -1308,8 +1336,8 @@ const CalendarPage = () => {
 
 // Event Card component for rendering individual events
 const EventCard = memo(({
-  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact
-}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;}) => {
+  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
@@ -1424,11 +1452,7 @@ const EventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       }
-      {hasComment && !event.urgent &&
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
-          <MessageCircle className="w-2.5 h-2.5 text-white" />
-        </div>
-      }
+      {/* Comment badge removed - now using inline icon */}
       {styles.showBuyerBadge && !event.urgent && !hasComment &&
       <div className="absolute -top-1.5 -right-1 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
           Buyer
@@ -1466,6 +1490,17 @@ const EventCard = memo(({
             {event.title}
           </p>
         </div>
+        {hasComment && comments && onAddComment && (
+          <CommentPopover
+            comments={comments}
+            onAddComment={onAddComment}
+            trigger={
+              <div className="w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center shrink-0 cursor-pointer hover:bg-blue-500 transition-colors">
+                <MessageCircle className="w-3 h-3 text-white" />
+              </div>
+            }
+          />
+        )}
       </div>
     </div>);
 
@@ -1482,8 +1517,10 @@ const DraggableEventCard = memo(({
   onToggle,
   isDragging,
   hasComment,
-  dragHandleProps
-}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;}) => {
+  dragHandleProps,
+  comments,
+  onAddComment
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;comments?: NotiziaComment[];onAddComment?: (text: string) => void;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border, or custom color
     if (event.type === 'task') {
@@ -1578,11 +1615,7 @@ const DraggableEventCard = memo(({
           <AlertTriangle className="w-2.5 h-2.5 text-white" />
         </div>
       }
-      {hasComment && !event.urgent && !styles.showBuyerBadge && !styles.showTaskBadge &&
-      <div className="absolute -top-1 -right-1 w-4 h-4 bg-blue-400 rounded-full flex items-center justify-center">
-          <MessageCircle className="w-2.5 h-2.5 text-white" />
-        </div>
-      }
+      {/* Comment badge removed - now using inline icon */}
       <div className="flex items-center gap-2">
         {/* Checkbox for tasks, emoji/dot for others */}
         {styles.canToggle ?
@@ -1615,6 +1648,17 @@ const DraggableEventCard = memo(({
             {event.title}
           </p>
         </div>
+        {hasComment && comments && onAddComment && (
+          <CommentPopover
+            comments={comments}
+            onAddComment={onAddComment}
+            trigger={
+              <div className="w-5 h-5 rounded-full bg-blue-400 flex items-center justify-center shrink-0 cursor-pointer hover:bg-blue-500 transition-colors">
+                <MessageCircle className="w-3 h-3 text-white" />
+              </div>
+            }
+          />
+        )}
       </div>
     </div>);
 
