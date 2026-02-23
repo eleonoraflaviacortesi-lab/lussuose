@@ -1,8 +1,10 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star } from 'lucide-react';
 import CommentPopover from './CommentPopover';
+import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
+import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -64,12 +66,16 @@ const EventContextMenu = memo(({
   onUrgentToggle,
   onRemoveReminder,
   onAddComment,
+  onColorChange,
   onDateChange,
   onClose
-}: {position: {x: number;y: number;};event: CalendarEvent;columns: KanbanColumn[];notizia?: Notizia | null;cliente?: any | null;onStatusChange: (status: NotiziaStatus) => void;onEmojiChange: (emoji: string | null) => void;onUrgentToggle: () => void;onRemoveReminder: () => void;onAddComment: (text: string) => void;onDateChange?: (newDate: string) => void;onClose: () => void;}) => {
+}: {position: {x: number;y: number;};event: CalendarEvent;columns: KanbanColumn[];notizia?: Notizia | null;cliente?: any | null;onStatusChange: (status: NotiziaStatus) => void;onEmojiChange: (emoji: string | null) => void;onUrgentToggle: () => void;onRemoveReminder: () => void;onAddComment: (text: string) => void;onColorChange?: (color: string | null) => void;onDateChange?: (newDate: string) => void;onClose: () => void;}) => {
   const [commentText, setCommentText] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
   const currentDate = notizia?.reminder_date || cliente?.reminder_date || null;
+  const currentCardColor = notizia?.card_color || cliente?.card_color || null;
 
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
@@ -185,7 +191,84 @@ const EventContextMenu = memo(({
           </>
         }
 
-        {/* Notizia-specific options */}
+        {/* Color picker - for both notizie and clienti */}
+        {(isNotiziaReminder || isClienteReminder) && onColorChange && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <div>
+              <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
+                <Palette className="w-3 h-3" />
+                Colore
+              </span>
+              <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+                {currentCardColor && (
+                  <button
+                    onClick={() => { onColorChange(null); onClose(); }}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                    title="Rimuovi colore"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+                {['#FEF3C7','#DCFCE7','#DBEAFE','#FCE7F3','#E9D5FF','#FED7AA','#F3F4F6','#FFFFFF'].map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => { onColorChange(color); onClose(); }}
+                    className={cn(
+                      "w-7 h-7 rounded-lg transition-all hover:scale-110",
+                      currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
+                    )}
+                    style={{ backgroundColor: color, border: color === '#FFFFFF' ? '1px solid #e5e7eb' : 'none' }}
+                  />
+                ))}
+                <button
+                  onClick={() => setShowColorPicker(true)}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-red-400 via-purple-400 to-blue-400 hover:scale-110 transition-transform"
+                  title="Colore personalizzato"
+                >
+                  <span className="text-white text-xs font-bold">+</span>
+                </button>
+              </div>
+              {/* Favorite colors */}
+              {favorites.length > 0 && (
+                <div className="mt-2">
+                  <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1 block flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    Preferiti
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+                    {favorites.map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => { onColorChange(color); onClose(); }}
+                        onContextMenu={(e) => { e.preventDefault(); removeFavorite(color); triggerHaptic('light'); }}
+                        className={cn(
+                          "w-7 h-7 rounded-lg transition-all hover:scale-110 relative group",
+                          currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
+                        )}
+                        style={{ backgroundColor: color }}
+                        title="Click: applica · Tasto destro: rimuovi"
+                      >
+                        <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-destructive text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Save as favorite */}
+              {currentCardColor && !['#FEF3C7','#DCFCE7','#DBEAFE','#FCE7F3','#E9D5FF','#FED7AA','#F3F4F6','#FFFFFF'].includes(currentCardColor) && !favorites.includes(currentCardColor) && (
+                <button
+                  onClick={() => { addFavorite(currentCardColor); triggerHaptic('light'); }}
+                  className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Star className="w-3 h-3" />
+                  Salva come preferito
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
         {isNotiziaReminder &&
         <>
             {/* Separator */}
@@ -303,6 +386,16 @@ const EventContextMenu = memo(({
           </>
         )}
       </div>
+      {/* Color picker overlay */}
+      <ColorPickerOverlay
+        open={showColorPicker}
+        color={currentCardColor || '#FEF3C7'}
+        onChange={(newColor) => {
+          if (onColorChange) { onColorChange(newColor); onClose(); }
+          setShowColorPicker(false);
+        }}
+        onClose={() => setShowColorPicker(false)}
+      />
     </>);
 
 });
@@ -1439,6 +1532,18 @@ const CalendarPage = () => {
           } else if (contextMenu.event.clienteId) {
             handleAddClienteCommentFromCalendar(contextMenu.event.clienteId, text);
           }
+        }}
+        onColorChange={(color) => {
+          const notiziaId = contextMenu.event.notiziaId;
+          const clienteId = contextMenu.event.clienteId;
+          if (notiziaId) {
+            updateNotizia.mutate({ id: notiziaId, card_color: color, silent: true });
+            toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
+          } else if (clienteId) {
+            updateCliente({ id: clienteId, card_color: color || undefined });
+            toast.success(color ? 'Colore aggiornato' : 'Colore rimosso');
+          }
+          setContextMenu(null);
         }}
         onDateChange={(newDate) => {
           const notiziaId = contextMenu.event.notiziaId;
