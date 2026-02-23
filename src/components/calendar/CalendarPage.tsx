@@ -1252,6 +1252,11 @@ const CalendarPage = () => {
         task={taskContextMenu.task}
         onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
         onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
+        onDateChange={async (newDate) => {
+          await updateTask.mutateAsync({ id: taskContextMenu.task.id, due_date: newDate });
+          toast.success('Data aggiornata');
+          setTaskContextMenu(null);
+        }}
         onDelete={async () => {
           await deleteTask.mutateAsync(taskContextMenu.task.id);
           toast.success('Task eliminata');
@@ -1260,29 +1265,13 @@ const CalendarPage = () => {
         onClose={() => setTaskContextMenu(null)} />
 
       }
-    </div>);
-
+    </div>
+  );
 };
 
-// Event Card component
+// Event Card component for rendering individual events
 const EventCard = memo(({
-  event,
-  onClick,
-  onContextMenu,
-  onTouchStart,
-  onTouchEnd,
-  onToggle,
-  hasComment,
-  compact
-
-
-
-
-
-
-
-
-
+  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact
 }: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border by default, or custom color
@@ -1457,16 +1446,6 @@ const DraggableEventCard = memo(({
   isDragging,
   hasComment,
   dragHandleProps
-
-
-
-
-
-
-
-
-
-
 }: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border, or custom color

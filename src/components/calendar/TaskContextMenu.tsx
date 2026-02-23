@@ -1,10 +1,13 @@
 import { memo, useState } from 'react';
-import { AlertTriangle, X, Palette, Trash2, Star } from 'lucide-react';
+import { AlertTriangle, X, Palette, Trash2, Star, CalendarDays } from 'lucide-react';
 import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { Task } from '@/hooks/useTasks';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
+import { Calendar } from '@/components/ui/calendar';
+import { format, parseISO } from 'date-fns';
+import { it } from 'date-fns/locale';
 
 // Preset colors for quick selection
 const PRESET_COLORS = [
@@ -24,6 +27,7 @@ type Props = {
   task: Task;
   onColorChange: (color: string | null) => void;
   onUrgentToggle: () => void;
+  onDateChange?: (newDate: string) => void;
   onDelete: () => void;
   onClose: () => void;
 };
@@ -33,10 +37,12 @@ const TaskContextMenu = memo(({
   task,
   onColorChange,
   onUrgentToggle,
+  onDateChange,
   onDelete,
   onClose,
 }: Props) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const { favorites, addFavorite, removeFavorite } = useFavoriteColors();
 
   const handleColorSelect = (color: string | null) => {
@@ -174,6 +180,37 @@ const TaskContextMenu = memo(({
             </div>
           </>
         )}
+
+        {/* Change date */}
+        <div>
+          <button
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-accent text-foreground transition-all w-full"
+          >
+            <CalendarDays className="w-4 h-4" />
+            <span>Cambia data</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {format(parseISO(task.due_date), 'd MMM', { locale: it })}
+            </span>
+          </button>
+          {showDatePicker && (
+            <div className="mt-1.5">
+              <Calendar
+                mode="single"
+                selected={parseISO(task.due_date)}
+                onSelect={(date) => {
+                  if (date && onDateChange) {
+                    onDateChange(format(date, 'yyyy-MM-dd'));
+                    triggerHaptic('light');
+                    onClose();
+                  }
+                }}
+                locale={it}
+                className="rounded-xl border p-2"
+              />
+            </div>
+          )}
+        </div>
 
         {/* Separator */}
         <div className="h-px bg-muted/50" />
