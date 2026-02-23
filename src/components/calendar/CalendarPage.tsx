@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { useAppointments } from '@/hooks/useAppointments';
 import { useClienti } from '@/hooks/useClienti';
@@ -23,6 +23,7 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
 
 export type CalendarEvent = {
   id: string;
@@ -60,21 +61,12 @@ const EventContextMenu = memo(({
   onUrgentToggle,
   onRemoveReminder,
   onAddComment,
+  onDateChange,
   onClose
-
-
-
-
-
-
-
-
-
-
-
-
-}: {position: {x: number;y: number;};event: CalendarEvent;columns: KanbanColumn[];notizia?: Notizia | null;cliente?: any | null;onStatusChange: (status: NotiziaStatus) => void;onEmojiChange: (emoji: string | null) => void;onUrgentToggle: () => void;onRemoveReminder: () => void;onAddComment: (text: string) => void;onClose: () => void;}) => {
+}: {position: {x: number;y: number;};event: CalendarEvent;columns: KanbanColumn[];notizia?: Notizia | null;cliente?: any | null;onStatusChange: (status: NotiziaStatus) => void;onEmojiChange: (emoji: string | null) => void;onUrgentToggle: () => void;onRemoveReminder: () => void;onAddComment: (text: string) => void;onDateChange?: (newDate: string) => void;onClose: () => void;}) => {
   const [commentText, setCommentText] = useState('');
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const currentDate = notizia?.reminder_date || cliente?.reminder_date || null;
 
   // Get current notizia status to highlight it
   const currentStatus = notizia?.status || 'new';
@@ -270,6 +262,42 @@ const EventContextMenu = memo(({
             </button>
           </>
         }
+
+        {/* Change date */}
+        {onDateChange && (
+          <>
+            <div className="h-px bg-muted/50" />
+            <div>
+              <button
+                onClick={() => setShowDatePicker(!showDatePicker)}
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-accent text-foreground transition-all w-full"
+              >
+                <CalendarDays className="w-4 h-4" />
+                <span>Cambia data</span>
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {currentDate ? format(parseISO(currentDate), 'd MMM', { locale: it }) : ''}
+                </span>
+              </button>
+              {showDatePicker && (
+                <div className="mt-1.5">
+                  <Calendar
+                    mode="single"
+                    selected={currentDate ? parseISO(currentDate) : undefined}
+                    onSelect={(date) => {
+                      if (date) {
+                        onDateChange(format(date, 'yyyy-MM-dd'));
+                        triggerHaptic('light');
+                        onClose();
+                      }
+                    }}
+                    locale={it}
+                    className="rounded-xl border p-2 pointer-events-auto"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </>);
 
@@ -1236,6 +1264,18 @@ const CalendarPage = () => {
           } else if (contextMenu.event.clienteId) {
             handleAddClienteCommentFromCalendar(contextMenu.event.clienteId, text);
           }
+        }}
+        onDateChange={(newDate) => {
+          const notiziaId = contextMenu.event.notiziaId;
+          const clienteId = contextMenu.event.clienteId;
+          if (notiziaId) {
+            updateNotizia.mutate({ id: notiziaId, reminder_date: new Date(newDate).toISOString(), silent: true });
+            toast.success('Data aggiornata');
+          } else if (clienteId) {
+            updateCliente({ id: clienteId, reminder_date: new Date(newDate).toISOString() });
+            toast.success('Data aggiornata');
+          }
+          setContextMenu(null);
         }}
         onClose={() => setContextMenu(null)} />
 
