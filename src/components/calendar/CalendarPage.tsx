@@ -1069,7 +1069,7 @@ const CalendarPage = () => {
                   : "bg-muted text-muted-foreground hover:bg-muted/80"
               )}
             >
-              {mode === 'day' ? 'Giorno' : mode === '3days' ? '3 Giorni' : mode === 'week' ? 'Settimana' : 'Mese'}
+              {mode === 'day' ? 'Giorno' : mode === '3days' ? '3gg' : mode === 'week' ? 'Settimana' : 'Mese'}
             </button>
           ))}
         </div>
