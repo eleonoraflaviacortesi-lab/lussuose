@@ -1645,14 +1645,9 @@ const EventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
-          {showDetails && event.notes && (
+          {showDetails && event.lastComment?.text?.trim() && (
             <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
-              📝 {event.notes}
-            </p>
-          )}
-          {showDetails && event.lastComment && (
-            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
-              💬 {event.lastComment.text}
+              💬 {event.lastComment.text.replace(/<[^>]*>/g, '').trim()} · {format(parseISO(event.lastComment.created_at), 'd MMM', { locale: it })}
             </p>
           )}
         </div>
@@ -1816,14 +1811,9 @@ const DraggableEventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
-          {showDetails && event.notes && (
+          {showDetails && event.lastComment?.text?.trim() && (
             <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
-              📝 {event.notes}
-            </p>
-          )}
-          {showDetails && event.lastComment && (
-            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
-              💬 {event.lastComment.text}
+              💬 {event.lastComment.text.replace(/<[^>]*>/g, '').trim()} · {format(parseISO(event.lastComment.created_at), 'd MMM', { locale: it })}
             </p>
           )}
         </div>
