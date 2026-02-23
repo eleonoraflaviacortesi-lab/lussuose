@@ -85,7 +85,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     valore: null as number | null,
   });
 
-  // Auto-save function
+  // Auto-save function - exclude comments to prevent overwriting external changes
   const performSave = useCallback(() => {
     if (!notizia || !editData.name.trim()) return;
     
@@ -107,7 +107,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       status: editData.status,
       emoji: editData.emoji || '📋',
       reminder_date: reminderDateTime,
-      comments: editData.comments,
       prezzo_richiesto: editData.prezzo_richiesto,
       valore: editData.valore,
     });
@@ -203,8 +202,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     });
     
     setNewComment('');
-    // Auto-save after adding comment
-    triggerAutoSave();
+    // Save comments directly
+    updateNotizia.mutate({ id: notizia.id, comments: newComments, silent: true });
   };
 
   const handleDeleteComment = (commentId: string) => {
@@ -213,8 +212,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       ...editData, 
       comments: newComments 
     });
-    // Auto-save after deleting comment
-    triggerAutoSave();
+    // Save comments directly
+    updateNotizia.mutate({ id: notizia.id, comments: newComments, silent: true });
   };
 
   const handleDelete = () => {
