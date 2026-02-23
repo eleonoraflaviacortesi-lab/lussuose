@@ -70,7 +70,7 @@ const CalendarDayView = ({
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
-        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
         label: 'Task',
         textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         showBuyerBadge: false,
@@ -95,12 +95,12 @@ const CalendarDayView = ({
     
     // Notizie (seller leads) - use status color or sage green default
     if (event.type === 'notizia_reminder') {
-      const baseColor = event.statusColor || '#8B9A7D';
+      const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
         customBg: baseColor,
-        border: 'border-transparent',
+        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
         label: 'Notizia',
         textClass: textColor,
         showBuyerBadge: false,

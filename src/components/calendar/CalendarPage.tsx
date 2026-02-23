@@ -1648,7 +1648,7 @@ const EventCard = memo(({
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
-        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
         textClass: textColor,
         timeClass: hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: true,
@@ -1665,7 +1665,7 @@ const EventCard = memo(({
       return {
         bg: '',
         customBg: baseColor,
-        border: 'border-transparent',
+        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
         textClass: textColor,
         timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: false,
@@ -1840,7 +1840,7 @@ const DraggableEventCard = memo(({
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
-        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
         textClass: textColor,
         showBuyerBadge: true,
         showTaskBadge: false,
@@ -1855,7 +1855,7 @@ const DraggableEventCard = memo(({
       return {
         bg: '',
         customBg: baseColor,
-        border: 'border-transparent',
+        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
         textClass: textColor,
         showBuyerBadge: false,
         showTaskBadge: false,
