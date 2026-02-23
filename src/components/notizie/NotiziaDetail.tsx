@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { AttachmentsSection } from '@/components/shared/AttachmentsSection';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send, Check } from 'lucide-react';
@@ -485,8 +486,11 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               >
                 <Send className="w-4 h-4" />
               </button>
-            </div>
+           </div>
           </div>
+
+          {/* Allegati */}
+          <AttachmentsSection entityType="notizia" entityId={notizia.id} />
 
           <div className="grid grid-cols-2 gap-2">
             <div>
