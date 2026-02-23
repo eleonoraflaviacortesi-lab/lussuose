@@ -639,7 +639,7 @@ const CalendarPage = () => {
 
   // Handler to remove reminder from notizia
   const handleRemoveReminder = (notiziaId: string) => {
-    updateNotizia.mutate({ id: notiziaId, reminder_date: undefined, silent: true });
+    updateNotizia.mutate({ id: notiziaId, reminder_date: null as any, silent: true });
   };
 
   // Handler to add reminder to existing cliente
@@ -1256,7 +1256,7 @@ const CalendarPage = () => {
           if (notiziaId) {
             handleRemoveReminder(notiziaId);
           } else if (clienteId) {
-            updateCliente({ id: clienteId, reminder_date: undefined });
+            updateCliente({ id: clienteId, reminder_date: null as any });
           }
         }}
         onAddComment={(text) => {
