@@ -1203,7 +1203,7 @@ const CalendarPage = () => {
 
                         <div className="space-y-2 min-h-[80px]">
                           {appointmentEvents.map((event) => (
-                            <EventCard
+                          <EventCard
                               key={event.id}
                               event={event}
                               onClick={() => handleEventClick(event)}
@@ -1212,6 +1212,7 @@ const CalendarPage = () => {
                               onTouchEnd={handleTouchEnd}
                               onToggle={handleToggleCompleted}
                               hasComment={false}
+                              showDetails={viewMode === 'day'}
                             />
                           ))}
                           
@@ -1235,6 +1236,7 @@ const CalendarPage = () => {
                                     comments={getEventComments(event)}
                                     onAddComment={(text) => handleEventAddComment(event, text)}
                                     dragHandleProps={dragProv.dragHandleProps}
+                                    showDetails={viewMode === 'day'}
                                   />
                                 </div>
                               )}
@@ -1475,8 +1477,8 @@ const CalendarPage = () => {
 
 // Event Card component for rendering individual events
 const EventCard = memo(({
-  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment
-}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;}) => {
+  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment, showDetails
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
@@ -1628,6 +1630,16 @@ const EventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
+          {showDetails && event.notes && (
+            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+              📝 {event.notes}
+            </p>
+          )}
+          {showDetails && event.lastComment && (
+            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+              💬 {event.lastComment.text}
+            </p>
+          )}
         </div>
         {hasComment && comments && onAddComment && (
           <CommentPopover
@@ -1658,8 +1670,9 @@ const DraggableEventCard = memo(({
   hasComment,
   dragHandleProps,
   comments,
-  onAddComment
-}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;comments?: NotiziaComment[];onAddComment?: (text: string) => void;}) => {
+  onAddComment,
+  showDetails
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border, or custom color
     if (event.type === 'task') {
@@ -1786,6 +1799,16 @@ const DraggableEventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass)}>
             {event.title}
           </p>
+          {showDetails && event.notes && (
+            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+              📝 {event.notes}
+            </p>
+          )}
+          {showDetails && event.lastComment && (
+            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+              💬 {event.lastComment.text}
+            </p>
+          )}
         </div>
         {hasComment && comments && onAddComment && (
           <CommentPopover
