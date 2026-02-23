@@ -30,6 +30,15 @@ export function InlineEditText({
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value || '');
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+  const editValueRef = useRef(editValue);
+  const isEditingRef = useRef(isEditing);
+  const onSaveRef = useRef(onSave);
+  const valueRef = useRef(value);
+
+  editValueRef.current = editValue;
+  isEditingRef.current = isEditing;
+  onSaveRef.current = onSave;
+  valueRef.current = value;
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -41,6 +50,15 @@ export function InlineEditText({
   useEffect(() => {
     setEditValue(value || '');
   }, [value]);
+
+  // Save on unmount if still editing
+  useEffect(() => {
+    return () => {
+      if (isEditingRef.current && editValueRef.current !== (valueRef.current || '')) {
+        onSaveRef.current(editValueRef.current);
+      }
+    };
+  }, []);
 
   const handleSave = () => {
     onSave(editValue);
