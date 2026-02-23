@@ -1168,6 +1168,12 @@ const CalendarPage = () => {
                                       const bg = event.cardColor || (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder') ? event.statusColor : null);
                                       return bg && isDarkColor(bg) ? 'white' : undefined;
                                     })(),
+                                    border: (() => {
+                                      const bg = event.cardColor
+                                        || (event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : null)
+                                        || (event.type === 'cliente_reminder' && event.statusColor ? event.statusColor : null);
+                                      return (!bg || bg === '#FFFFFF' || bg === '#ffffff' || bg === '#F3F4F6') ? '1px solid #d1d5db' : 'none';
+                                    })(),
                                     ...dragProv.draggableProps.style,
                                   }}
                                   onClick={(e) => { e.stopPropagation(); handleEventClick(event); }}
