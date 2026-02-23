@@ -437,7 +437,8 @@ const CalendarPage = () => {
             statusColor: getStatusColor(cliente.status),
             displayOrder: cliente.display_order,
             lastComment: getLastComment(normalizedComments),
-            commentsCount: normalizedComments.length
+            commentsCount: normalizedComments.length,
+            notes: cliente.note_extra || cliente.descrizione || undefined
           });
         }
       });
@@ -458,7 +459,8 @@ const CalendarPage = () => {
             urgent: isUrgent,
             displayOrder: notizia.display_order,
             lastComment: getLastComment(notizia.comments),
-            commentsCount: notizia.comments?.length || 0
+            commentsCount: notizia.comments?.length || 0,
+            notes: notizia.notes?.replace('[URGENT]', '').trim() || undefined
           });
         }
       });
