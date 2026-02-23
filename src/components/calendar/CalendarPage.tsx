@@ -94,11 +94,10 @@ const EventContextMenu = memo(({
         onContextMenu={(e) => {e.preventDefault();onClose();}} />
 
       <div
-        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[300px] max-h-[85vh] overflow-y-auto"
+        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[300px] max-h-[80vh] overflow-y-auto"
         style={{
           left: Math.min(Math.max(10, position.x), window.innerWidth - 310),
-          top: Math.min(Math.max(10, position.y), window.innerHeight - 40),
-          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none'
+          top: Math.min(Math.max(10, position.y), window.innerHeight * 0.15),
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
