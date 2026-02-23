@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Check } from 'lucide-react';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import {
   Sheet,
@@ -13,6 +13,7 @@ import { useTasks, Task } from '@/hooks/useTasks';
 import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/haptics';
+import { cn } from '@/lib/utils';
 
 type Props = {
   open: boolean;
@@ -23,6 +24,7 @@ type Props = {
 const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
+  const [completed, setCompleted] = useState(false);
   const { updateTask, deleteTask } = useTasks();
   const { sendMentionNotifications } = useMentionNotifications();
 
@@ -31,6 +33,7 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
     if (task) {
       setTitle(task.title);
       setNotes(task.notes || '');
+      setCompleted(task.completed || false);
     }
   }, [task]);
 
@@ -49,6 +52,7 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
         id: task.id,
         title: title.trim(),
         notes: notes.trim() || undefined,
+        completed,
       });
 
       // Send notifications to mentioned users
@@ -108,6 +112,29 @@ const EditTaskDialog = ({ open, onOpenChange, task }: Props) => {
         </SheetHeader>
 
         <form onSubmit={handleSubmit} className="py-6 space-y-4">
+          {/* Completed toggle */}
+          <button
+            type="button"
+            onClick={() => { setCompleted(!completed); triggerHaptic('light'); }}
+            className={cn(
+              "w-full flex items-center gap-3 p-3 rounded-xl border transition-colors",
+              completed ? "bg-green-50 border-green-300 dark:bg-green-950/30 dark:border-green-800" : "bg-muted/30 border-border"
+            )}
+          >
+            <div className={cn(
+              "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors",
+              completed ? "bg-green-500 border-green-500" : "border-muted-foreground/40"
+            )}>
+              {completed && <Check className="w-3.5 h-3.5 text-white" />}
+            </div>
+            <span className={cn(
+              "text-sm font-medium",
+              completed && "line-through text-muted-foreground"
+            )}>
+              {completed ? 'Completata' : 'Segna come completata'}
+            </span>
+          </button>
+
           <div>
             <label className="text-sm font-medium text-muted-foreground mb-2 block">
               Titolo *
