@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { it } from 'date-fns/locale';
+import { NotiziaComment } from '@/hooks/useNotizie';
 import { Calendar, ChevronRight, User, FileText } from 'lucide-react';
 import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia } from '@/hooks/useNotizie';
@@ -31,12 +32,19 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       time: string;
       emoji?: string | null;
       statusColor: string;
+      lastComment?: NotiziaComment;
       data: any;
     }> = [];
 
     // Add cliente reminders for today
     clienti?.forEach(cliente => {
       if (cliente.reminder_date && isSameDay(parseISO(cliente.reminder_date), today)) {
+        const comments = (cliente.comments || []) as Array<{id: string; text: string; created_at?: string; createdAt?: string}>;
+        const lastComment = comments.length > 0 ? {
+          id: comments[comments.length - 1].id,
+          text: comments[comments.length - 1].text,
+          created_at: comments[comments.length - 1].created_at || comments[comments.length - 1].createdAt || '',
+        } : undefined;
         reminders.push({
           id: `cliente-${cliente.id}`,
           type: 'cliente',
@@ -44,6 +52,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
           time: format(parseISO(cliente.reminder_date), 'HH:mm'),
           emoji: cliente.emoji,
           statusColor: getStatusColor(cliente.status),
+          lastComment,
           data: cliente,
         });
       }
@@ -52,6 +61,8 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
     // Add notizia reminders for today
     notizie?.forEach(notizia => {
       if (notizia.reminder_date && isSameDay(parseISO(notizia.reminder_date), today)) {
+        const comments = notizia.comments || [];
+        const lastComment = comments.length > 0 ? comments[comments.length - 1] : undefined;
         reminders.push({
           id: `notizia-${notizia.id}`,
           type: 'notizia',
@@ -59,6 +70,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
           time: format(parseISO(notizia.reminder_date), 'HH:mm'),
           emoji: notizia.emoji,
           statusColor: getStatusColor(notizia.status),
+          lastComment,
           data: notizia,
         });
       }
@@ -155,6 +167,15 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
                 )}>
                   {reminder.name}
                 </p>
+                {reminder.lastComment?.text && (
+                  <p className={cn(
+                    "text-[9px] truncate mt-0.5 opacity-80",
+                    isBuyer ? "text-muted-foreground" : (isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60")
+                  )}>
+                    💬 {reminder.lastComment.text.replace(/<[^>]*>/g, '').trim()}
+                    {reminder.lastComment.created_at && ` · ${format(parseISO(reminder.lastComment.created_at), 'd MMM', { locale: it })}`}
+                  </p>
+                )}
               </div>
               <span className={cn(
                 "text-xs font-medium",
