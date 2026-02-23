@@ -5,13 +5,23 @@ import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters, ClienteComment 
 import { useToast } from '@/hooks/use-toast';
 
 // Transform DB row to Cliente type
+const parseComments = (raw: any): any[] => {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw;
+  if (typeof raw === 'string') {
+    try { const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; }
+    catch { return []; }
+  }
+  return [];
+};
+
 const transformCliente = (row: any): Cliente => ({
   ...row,
   regioni: row.regioni || [],
   motivo_zona: row.motivo_zona || [],
   tipologia: row.tipologia || [],
   contesto: row.contesto || [],
-  comments: row.comments || [],
+  comments: parseComments(row.comments),
 });
 
 // Budget ranges for grouping
