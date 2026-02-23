@@ -1037,7 +1037,10 @@ const CalendarPage = () => {
                                   ref={dragProv.innerRef}
                                   {...dragProv.draggableProps}
                                   {...dragProv.dragHandleProps}
-                                  className="text-[8px] sm:text-[9px] font-medium truncate rounded px-1 py-0.5 cursor-grab"
+                                  className={cn(
+                                    "text-[8px] sm:text-[9px] font-medium truncate rounded px-1 py-0.5 cursor-grab",
+                                    event.type === 'task' && event.completed && "line-through opacity-60"
+                                  )}
                                   style={{
                                     backgroundColor: event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : 'hsl(var(--muted))',
                                     color: event.type === 'notizia_reminder' && event.statusColor && isDarkColor(event.statusColor) ? 'white' : undefined,
