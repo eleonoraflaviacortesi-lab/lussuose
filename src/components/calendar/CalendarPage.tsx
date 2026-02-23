@@ -279,20 +279,22 @@ const EventContextMenu = memo(({
                 </span>
               </button>
               {showDatePicker && (
-                <div className="mt-1.5">
-                  <Calendar
-                    mode="single"
-                    selected={currentDate ? parseISO(currentDate) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        onDateChange(format(date, 'yyyy-MM-dd'));
-                        triggerHaptic('light');
-                        onClose();
-                      }
-                    }}
-                    locale={it}
-                    className="rounded-xl border p-2 pointer-events-auto"
-                  />
+                <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
+                  <div className="bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] p-1" onClick={(e) => e.stopPropagation()}>
+                    <Calendar
+                      mode="single"
+                      selected={currentDate ? parseISO(currentDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          onDateChange(format(date, 'yyyy-MM-dd'));
+                          triggerHaptic('light');
+                          onClose();
+                        }
+                      }}
+                      locale={it}
+                      className="rounded-xl p-2 pointer-events-auto"
+                    />
+                  </div>
                 </div>
               )}
             </div>
