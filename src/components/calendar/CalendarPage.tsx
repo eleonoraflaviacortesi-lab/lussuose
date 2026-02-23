@@ -743,18 +743,14 @@ const CalendarPage = () => {
 
       // Handle week navigation drops
       if (destination.droppableId === 'prev-week') {
-        // Navigate to previous week and set the event to Sunday (last day of prev week)
         const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
         moveEvent(draggableId, targetDate);
-        setCurrentWeekStart(subWeeks(currentWeekStart, 1));
         return;
       }
 
       if (destination.droppableId === 'next-week') {
-        // Navigate to next week and set the event to Monday (first day of next week)
         const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
         moveEvent(draggableId, targetDate);
-        setCurrentWeekStart(addWeeks(currentWeekStart, 1));
         return;
       }
 
