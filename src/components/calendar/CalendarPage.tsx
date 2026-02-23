@@ -1646,12 +1646,12 @@ const EventCard = memo(({
             {event.title}
           </p>
           {showDetails && event.notes && (
-            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               📝 {event.notes}
             </p>
           )}
           {showDetails && event.lastComment && (
-            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               💬 {event.lastComment.text}
             </p>
           )}
@@ -1817,12 +1817,12 @@ const DraggableEventCard = memo(({
             {event.title}
           </p>
           {showDetails && event.notes && (
-            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               📝 {event.notes}
             </p>
           )}
           {showDetails && event.lastComment && (
-            <p className="text-[9px] text-muted-foreground mt-0.5 whitespace-normal break-words leading-tight">
+            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               💬 {event.lastComment.text}
             </p>
           )}
