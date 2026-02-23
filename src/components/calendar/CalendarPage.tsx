@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
-import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes } from 'date-fns';
+import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays } from 'lucide-react';
 import CommentPopover from './CommentPopover';
@@ -45,6 +45,8 @@ export type CalendarEvent = {
   cardColor?: string; // Custom color for task card
   isUrgent?: boolean; // Urgent flag for tasks
 };
+
+export type CalendarViewMode = 'day' | '3days' | 'week' | 'month';
 
 // Quick emojis
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -308,6 +310,7 @@ EventContextMenu.displayName = 'EventContextMenu';
 
 const CalendarPage = () => {
   const isMobile = useIsMobile();
+  const [viewMode, setViewMode] = useState<CalendarViewMode>('week');
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
   startOfWeek(new Date(), { weekStartsOn: 1 })
   );
@@ -353,13 +356,33 @@ const CalendarPage = () => {
     return comments[comments.length - 1];
   };
 
-  const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
-  }, [currentWeekStart]);
+  const viewDays = useMemo(() => {
+    switch (viewMode) {
+      case 'day':
+        return [currentWeekStart];
+      case '3days':
+        return Array.from({ length: 3 }, (_, i) => addDays(currentWeekStart, i));
+      case 'week':
+        return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
+      case 'month': {
+        const monthStart = startOfMonth(currentWeekStart);
+        const monthEnd = endOfMonth(currentWeekStart);
+        const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+        const days: Date[] = [];
+        let d = gridStart;
+        while (d <= monthEnd || days.length % 7 !== 0) {
+          days.push(d);
+          d = addDays(d, 1);
+          if (days.length > 42) break;
+        }
+        return days;
+      }
+    }
+  }, [viewMode, currentWeekStart]);
 
   // Scroll to today's card on mount and when week changes (mobile)
   useEffect(() => {
-    if (!isMobile || !weekScrollRef.current) return;
+    if (!isMobile || !weekScrollRef.current || viewMode === 'month') return;
 
     const container = weekScrollRef.current;
     // Wait for DOM to paint the cards, then center "today"
@@ -371,12 +394,12 @@ const CalendarPage = () => {
     }, 50);
 
     return () => clearTimeout(timeoutId);
-  }, [currentWeekStart, isMobile]);
+  }, [currentWeekStart, isMobile, viewMode]);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
 
-    weekDays.forEach((day) => {
+    viewDays.forEach((day) => {
       const dayKey = format(day, 'yyyy-MM-dd');
       const events: CalendarEvent[] = [];
 
@@ -469,17 +492,38 @@ const CalendarPage = () => {
     });
 
     return map;
-  }, [weekDays, appointments, clienti, notizie, tasks, columns]);
+  }, [viewDays, appointments, clienti, notizie, tasks, columns]);
 
-  const navigateWeek = (direction: 'prev' | 'next') => {
-    setCurrentWeekStart((prev) =>
-    direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1)
-    );
+  const navigateCalendar = (direction: 'prev' | 'next') => {
+    const delta = direction === 'next' ? 1 : -1;
+    setCurrentWeekStart((prev) => {
+      switch (viewMode) {
+        case 'day': return addDays(prev, delta);
+        case '3days': return addDays(prev, delta * 3);
+        case 'week': return direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1);
+        case 'month': return addMonths(prev, delta);
+      }
+    });
   };
 
   const goToToday = () => {
-    setCurrentWeekStart(startOfWeek(new Date(), { weekStartsOn: 1 }));
+    const today = new Date();
+    switch (viewMode) {
+      case 'day': setCurrentWeekStart(today); break;
+      case '3days': setCurrentWeekStart(today); break;
+      case 'week': setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 })); break;
+      case 'month': setCurrentWeekStart(startOfMonth(today)); break;
+    }
   };
+
+  const headerLabel = useMemo(() => {
+    switch (viewMode) {
+      case 'day': return format(currentWeekStart, 'd MMMM yyyy', { locale: it });
+      case '3days': return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 2), 'd MMM', { locale: it })}`;
+      case 'week': return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 6), 'd MMM', { locale: it })}`;
+      case 'month': return format(currentWeekStart, 'MMMM yyyy', { locale: it });
+    }
+  }, [viewMode, currentWeekStart]);
 
   const handleDayClick = (day: Date) => {
     // Don't open dialog if we just finished dragging
@@ -886,184 +930,183 @@ const CalendarPage = () => {
 
       {/* Week Navigation - Mobile optimized */}
       <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6 mx-6 pt-[16px]">
+        {/* View mode toggle */}
+        <div className="flex items-center justify-center gap-1 mb-3">
+          {(['day', '3days', 'week', 'month'] as CalendarViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              onClick={() => {
+                setViewMode(mode);
+                const today = new Date();
+                switch (mode) {
+                  case 'day': setCurrentWeekStart(today); break;
+                  case '3days': setCurrentWeekStart(today); break;
+                  case 'week': setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 })); break;
+                  case 'month': setCurrentWeekStart(startOfMonth(today)); break;
+                }
+              }}
+              className={cn(
+                "px-3 py-1 text-[10px] sm:text-xs font-medium tracking-wider uppercase rounded-full transition-colors",
+                viewMode === mode
+                  ? "bg-foreground text-background"
+                  : "bg-muted text-muted-foreground hover:bg-muted/80"
+              )}
+            >
+              {mode === 'day' ? 'Giorno' : mode === '3days' ? '3 Giorni' : mode === 'week' ? 'Settimana' : 'Mese'}
+            </button>
+          ))}
+        </div>
+
         <div className="flex items-center justify-between gap-2">
           <button
-            onClick={() => navigateWeek('prev')}
+            onClick={() => navigateCalendar('prev')}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
-
             <ChevronLeft className="w-5 h-5" />
           </button>
           
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-4 flex-1 justify-center min-w-0">
-            <span className="text-sm sm:text-lg font-semibold text-center truncate">
-              {format(currentWeekStart, 'd MMM', { locale: it })} - {format(addDays(currentWeekStart, 6), 'd MMM', { locale: it })}
-            </span>
-            <span className="text-xs text-muted-foreground sm:hidden">
-              {format(currentWeekStart, 'yyyy')}
+            <span className="text-sm sm:text-lg font-semibold text-center truncate capitalize">
+              {headerLabel}
             </span>
             <button
               onClick={goToToday}
               className="px-3 py-1 sm:py-1.5 text-[10px] sm:text-xs font-medium tracking-wider uppercase bg-muted rounded-full hover:bg-muted/80 transition-colors shrink-0">
-
               Oggi
             </button>
           </div>
 
           <button
-            onClick={() => navigateWeek('next')}
+            onClick={() => navigateCalendar('next')}
             className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
-
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
       </div>
 
-      {/* Week Grid */}
-      {isLoading ?
-      <div className="flex items-center justify-center py-12">
+      {/* Calendar Grid */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
-        </div> :
-      isMobile ?
-      <div
-        ref={weekScrollRef}
-        className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
-        style={{
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-          WebkitOverflowScrolling: 'touch',
-          scrollSnapType: 'x proximity'
-        }}>
+        </div>
+      ) : viewMode === 'month' ? (
+        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="px-6">
+            <div className="grid grid-cols-7 gap-1 mb-1">
+              {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d) => (
+                <div key={d} className="text-center text-[10px] font-medium tracking-wider uppercase text-muted-foreground py-1">
+                  {d}
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {viewDays.map((day) => {
+                const dayKey = format(day, 'yyyy-MM-dd');
+                const events = eventsByDay.get(dayKey) || [];
+                const isToday = isSameDay(day, new Date());
+                const isCurrentMonth = isSameMonth(day, currentWeekStart);
+                const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
 
-          {weekDays.map((day) => {
-          const dayKey = format(day, 'yyyy-MM-dd');
-          const events = eventsByDay.get(dayKey) || [];
-          const isToday = isSameDay(day, new Date());
+                return (
+                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={cn(
+                          "bg-card rounded-xl p-1.5 sm:p-2 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-all",
+                          isToday && "ring-2 ring-foreground",
+                          !isCurrentMonth && "opacity-40",
+                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                        )}
+                        onClick={() => {
+                          setSelectedDate(day);
+                          if (isMobile) setShowDayView(true);
+                          else setShowAddMenu(true);
+                        }}
+                      >
+                        <p className={cn("text-[10px] sm:text-xs font-semibold mb-1", isToday ? "text-foreground" : "text-muted-foreground")}>
+                          {format(day, 'd')}
+                        </p>
+                        <div className="space-y-0.5">
+                          {draggableEvents.slice(0, isMobile ? 2 : 3).map((event, index) => (
+                            <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(dragProv) => (
+                                <div
+                                  ref={dragProv.innerRef}
+                                  {...dragProv.draggableProps}
+                                  {...dragProv.dragHandleProps}
+                                  className="text-[8px] sm:text-[9px] font-medium truncate rounded px-1 py-0.5 cursor-grab"
+                                  style={{
+                                    backgroundColor: event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : 'hsl(var(--muted))',
+                                    color: event.type === 'notizia_reminder' && event.statusColor && isDarkColor(event.statusColor) ? 'white' : undefined,
+                                    ...dragProv.draggableProps.style,
+                                  }}
+                                  onClick={(e) => { e.stopPropagation(); handleEventClick(event); }}
+                                >
+                                  {event.emoji && <span className="mr-0.5">{event.emoji}</span>}
+                                  {event.title}
+                                </div>
+                              )}
+                            </Draggable>
+                          ))}
+                          {events.length > (isMobile ? 2 : 3) && (
+                            <p className="text-[8px] text-muted-foreground">+{events.length - (isMobile ? 2 : 3)}</p>
+                          )}
+                        </div>
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                );
+              })}
+            </div>
+          </div>
+        </DragDropContext>
+      ) : isMobile ? (
+        <div
+          ref={weekScrollRef}
+          className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
+          style={{
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch',
+            scrollSnapType: 'x proximity'
+          }}
+        >
+          {viewDays.map((day) => {
+            const dayKey = format(day, 'yyyy-MM-dd');
+            const events = eventsByDay.get(dayKey) || [];
+            const isToday = isSameDay(day, new Date());
+            const maxVisible = viewMode === 'day' ? 10 : 4;
 
-          return (
-            <div
-              key={dayKey}
-              data-today={isToday ? 'true' : undefined}
-              className={cn(
-                "bg-card rounded-2xl shadow-lg p-3 min-w-[280px] flex-shrink-0 transition-all",
-                isToday && "ring-2 ring-foreground"
-              )}
-              style={{ scrollSnapAlign: 'center' }}
-              onClick={() => handleDayClick(day)}>
-
+            return (
+              <div
+                key={dayKey}
+                data-today={isToday ? 'true' : undefined}
+                className={cn(
+                  "bg-card rounded-2xl shadow-lg p-3 flex-shrink-0 transition-all",
+                  viewMode === 'day' ? 'min-w-[calc(100vw-48px)]' : 'min-w-[280px]',
+                  isToday && "ring-2 ring-foreground"
+                )}
+                style={{ scrollSnapAlign: 'center' }}
+                onClick={() => handleDayClick(day)}
+              >
                 <div className="text-center mb-3 pb-2 border-b border-muted">
                   <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                     {format(day, 'EEEE', { locale: it })}
                   </p>
-                  <p className={cn(
-                  "text-2xl font-semibold",
-                  isToday ? "text-foreground" : "text-foreground"
-                )}>
+                  <p className="text-2xl font-semibold text-foreground">
                     {format(day, 'd')}
                   </p>
                 </div>
 
                 <div className="space-y-2 min-h-[120px]">
-                  {events.length === 0 ?
-                <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                  {events.length === 0 ? (
+                    <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                       Nessun evento
-                    </p> :
-
-                events.slice(0, 4).map((event) =>
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  onClick={() => handleEventClick(event)}
-                  onContextMenu={(e) => handleContextMenu(event, e)}
-                  onTouchStart={(e) => handleTouchStart(event, e)}
-                  onTouchEnd={handleTouchEnd}
-                  onToggle={handleToggleCompleted}
-                  hasComment={!!event.lastComment}
-                  comments={getEventComments(event)}
-                  onAddComment={(text) => handleEventAddComment(event, text)}
-                  compact />
-
-                )
-                }
-                  {events.length > 4 &&
-                <p className="text-xs text-muted-foreground text-center">
-                      +{events.length - 4} altri
                     </p>
-                }
-                </div>
-
-                <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDayClick(day);
-                }}
-                className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors">
-
-                  Vedi giorno
-                </button>
-              </div>);
-
-        })}
-        </div> :
-
-      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="flex items-stretch gap-2 px-6">
-            {/* Previous week drop zone */}
-            <Droppable droppableId="prev-week">
-              {(provided, snapshot) =>
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={cn(
-                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                snapshot.isDraggingOver ?
-                "border-primary bg-primary/10 text-primary" :
-                "border-muted-foreground/20 text-muted-foreground/50"
-              )}>
-
-                  <ChevronLeft className="w-5 h-5" />
-                  <span className="text-[9px] font-medium tracking-wider uppercase writing-mode-vertical" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                    Sett. prec.
-                  </span>
-                  {provided.placeholder}
-                </div>
-            }
-            </Droppable>
-
-            {/* Week days grid */}
-            <div className="grid grid-cols-7 gap-2 flex-1">
-              {weekDays.map((day) => {
-              const dayKey = format(day, 'yyyy-MM-dd');
-              const events = eventsByDay.get(dayKey) || [];
-              const isToday = isSameDay(day, new Date());
-              // Notizie, clienti reminders and tasks are draggable
-              const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
-              const appointmentEvents = events.filter((e) => e.type === 'appointment');
-
-              return (
-                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
-                    {(provided, snapshot) =>
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
-                      isToday && "ring-2 ring-foreground",
-                      snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
-                    )}
-                    onClick={() => handleDayClick(day)}>
-
-                        <div className="text-center mb-3 pb-2 border-b border-muted">
-                          <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
-                            {format(day, 'EEE', { locale: it })}
-                          </p>
-                          <p className="text-xl font-semibold text-foreground">
-                            {format(day, 'd')}
-                          </p>
-                        </div>
-
-                        <div className="space-y-2 min-h-[80px]">
-                          {/* Non-draggable appointments */}
-                          {appointmentEvents.map((event) =>
+                  ) : (
+                    events.slice(0, maxVisible).map((event) => (
                       <EventCard
                         key={event.id}
                         event={event}
@@ -1072,87 +1115,183 @@ const CalendarPage = () => {
                         onTouchStart={(e) => handleTouchStart(event, e)}
                         onTouchEnd={handleTouchEnd}
                         onToggle={handleToggleCompleted}
-                        hasComment={false} />
+                        hasComment={!!event.lastComment}
+                        comments={getEventComments(event)}
+                        onAddComment={(text) => handleEventAddComment(event, text)}
+                        compact
+                      />
+                    ))
+                  )}
+                  {events.length > maxVisible && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      +{events.length - maxVisible} altri
+                    </p>
+                  )}
+                </div>
 
-                      )}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDayClick(day);
+                  }}
+                  className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors"
+                >
+                  Vedi giorno
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+          <div className="flex items-stretch gap-2 px-6">
+            {viewMode === 'week' && (
+              <Droppable droppableId="prev-week">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                      snapshot.isDraggingOver
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-muted-foreground/20 text-muted-foreground/50"
+                    )}
+                  >
+                    <ChevronLeft className="w-5 h-5" />
+                    <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                      Sett. prec.
+                    </span>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
+
+            <div className={cn(
+              "grid gap-2 flex-1",
+              viewMode === 'day' ? 'grid-cols-1' : viewMode === '3days' ? 'grid-cols-3' : 'grid-cols-7'
+            )}>
+              {viewDays.map((day) => {
+                const dayKey = format(day, 'yyyy-MM-dd');
+                const events = eventsByDay.get(dayKey) || [];
+                const isToday = isSameDay(day, new Date());
+                const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
+                const appointmentEvents = events.filter((e) => e.type === 'appointment');
+
+                return (
+                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.droppableProps}
+                        className={cn(
+                          "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                          isToday && "ring-2 ring-foreground",
+                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                        )}
+                        onClick={() => handleDayClick(day)}
+                      >
+                        <div className="text-center mb-3 pb-2 border-b border-muted">
+                          <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
+                            {format(day, viewMode === 'day' ? 'EEEE' : 'EEE', { locale: it })}
+                          </p>
+                          <p className="text-xl font-semibold text-foreground">
+                            {format(day, 'd')}
+                          </p>
+                        </div>
+
+                        <div className="space-y-2 min-h-[80px]">
+                          {appointmentEvents.map((event) => (
+                            <EventCard
+                              key={event.id}
+                              event={event}
+                              onClick={() => handleEventClick(event)}
+                              onContextMenu={(e) => handleContextMenu(event, e)}
+                              onTouchStart={(e) => handleTouchStart(event, e)}
+                              onTouchEnd={handleTouchEnd}
+                              onToggle={handleToggleCompleted}
+                              hasComment={false}
+                            />
+                          ))}
                           
-                          {/* Draggable reminders */}
-                          {draggableEvents.map((event, index) =>
-                      <Draggable key={event.id} draggableId={event.id} index={index}>
-                              {(provided, snapshot) =>
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          style={provided.draggableProps.style}>
-
+                          {draggableEvents.map((event, index) => (
+                            <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(dragProv, dragSnap) => (
+                                <div
+                                  ref={dragProv.innerRef}
+                                  {...dragProv.draggableProps}
+                                  style={dragProv.draggableProps.style}
+                                >
                                   <DraggableEventCard
-                            event={event}
-                            onClick={() => handleEventClick(event)}
-                            onContextMenu={(e) => handleContextMenu(event, e)}
-                            onTouchStart={(e) => handleTouchStart(event, e)}
-                            onTouchEnd={handleTouchEnd}
-                            onToggle={handleToggleCompleted}
-                            isDragging={snapshot.isDragging}
-                            hasComment={!!event.lastComment}
-                            comments={getEventComments(event)}
-                            onAddComment={(text) => handleEventAddComment(event, text)}
-                            dragHandleProps={provided.dragHandleProps} />
-
+                                    event={event}
+                                    onClick={() => handleEventClick(event)}
+                                    onContextMenu={(e) => handleContextMenu(event, e)}
+                                    onTouchStart={(e) => handleTouchStart(event, e)}
+                                    onTouchEnd={handleTouchEnd}
+                                    onToggle={handleToggleCompleted}
+                                    isDragging={dragSnap.isDragging}
+                                    hasComment={!!event.lastComment}
+                                    comments={getEventComments(event)}
+                                    onAddComment={(text) => handleEventAddComment(event, text)}
+                                    dragHandleProps={dragProv.dragHandleProps}
+                                  />
                                 </div>
-                        }
+                              )}
                             </Draggable>
-                      )}
+                          ))}
                           
-                          {events.length === 0 &&
-                      <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                          {events.length === 0 && (
+                            <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                               Nessun evento
                             </p>
-                      }
+                          )}
                           {provided.placeholder}
                         </div>
 
                         <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedDate(day);
-                        setShowAddMenu(true);
-                      }}
-                      className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1">
-
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDate(day);
+                            setShowAddMenu(true);
+                          }}
+                          className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                        >
                           <Plus className="w-3 h-3" />
                           <span className="text-[10px] font-medium">Aggiungi</span>
                         </button>
                       </div>
-                  }
-                  </Droppable>);
-
-            })}
+                    )}
+                  </Droppable>
+                );
+              })}
             </div>
 
-            {/* Next week drop zone */}
-            <Droppable droppableId="next-week">
-              {(provided, snapshot) =>
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={cn(
-                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                snapshot.isDraggingOver ?
-                "border-primary bg-primary/10 text-primary" :
-                "border-muted-foreground/20 text-muted-foreground/50"
-              )}>
-
-                  <ChevronRight className="w-5 h-5" />
-                  <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
-                    Sett. succ.
-                  </span>
-                  {provided.placeholder}
-                </div>
-            }
-            </Droppable>
+            {viewMode === 'week' && (
+              <Droppable droppableId="next-week">
+                {(provided, snapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                      snapshot.isDraggingOver
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-muted-foreground/20 text-muted-foreground/50"
+                    )}
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                    <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
+                      Sett. succ.
+                    </span>
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
+            )}
           </div>
         </DragDropContext>
-      }
+      )}
 
       {/* Add Appointment Dialog */}
       <AddAppointmentDialog
