@@ -1,6 +1,6 @@
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { Plus, Check, MessageCircle } from 'lucide-react';
+import { Plus, Check, MessageCircle, MoreHorizontal } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -23,6 +23,7 @@ type Props = {
   onTouchStart: (event: CalendarEvent, e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onCloseAndOpenDetail?: () => void;
+  onMobileMenu?: (event: CalendarEvent) => void;
 };
 
 // Helper to determine if color is dark
@@ -48,6 +49,7 @@ const CalendarDayView = ({
   onContextMenu,
   onTouchStart,
   onTouchEnd,
+  onMobileMenu,
 }: Props) => {
   if (!date) return null;
 
@@ -193,9 +195,6 @@ const CalendarDayView = ({
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
                   onClick={() => handleEventClick(event)}
                   onContextMenu={(e) => onContextMenu(event, e)}
-                  onTouchStart={(e) => onTouchStart(event, e)}
-                  onTouchEnd={onTouchEnd}
-                  onTouchMove={onTouchEnd}
                 >
                   {event.urgent && (
                     <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
@@ -207,7 +206,7 @@ const CalendarDayView = ({
                       <MessageCircle className="w-3 h-3 text-white" />
                     </div>
                   )}
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 relative">
                     {canToggle ? (
                       <button
                         onClick={(e) => {
@@ -275,6 +274,15 @@ const CalendarDayView = ({
                         </div>
                       )}
                     </div>
+                    {/* Mobile menu button */}
+                    {onMobileMenu && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onMobileMenu(event); }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-muted/60 hover:bg-muted transition-colors self-center"
+                      >
+                        <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                    )}
                   </div>
                 </div>
               );
