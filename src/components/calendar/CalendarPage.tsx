@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star, MoreHorizontal } from 'lucide-react';
 import CommentPopover from './CommentPopover';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
@@ -403,10 +403,8 @@ EventContextMenu.displayName = 'EventContextMenu';
 
 const CalendarPage = () => {
   const isMobile = useIsMobile();
-  const [viewMode, setViewMode] = useState<CalendarViewMode>('week');
-  const [currentWeekStart, setCurrentWeekStart] = useState(() =>
-  startOfWeek(new Date(), { weekStartsOn: 1 })
-  );
+  const [viewMode, setViewMode] = useState<CalendarViewMode>('day');
+  const [currentWeekStart, setCurrentWeekStart] = useState(() => new Date());
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
@@ -707,6 +705,8 @@ const CalendarPage = () => {
   };
 
   const handleTouchStart = (event: CalendarEvent, e: React.TouchEvent) => {
+    // On mobile, don't use long-press for context menu - use explicit button instead
+    if (isMobile) return;
     const touch = e.touches[0];
     longPressTimer.current = setTimeout(() => {
       if (navigator.vibrate) navigator.vibrate(15);
@@ -730,6 +730,19 @@ const CalendarPage = () => {
       longPressTimer.current = null;
     }
   };
+
+  // Mobile-specific: open context menu via explicit button tap
+  const handleMobileContextMenu = useCallback((event: CalendarEvent) => {
+    triggerHaptic('light');
+    if (event.type === 'task' && event.taskId) {
+      const task = tasks?.find((t) => t.id === event.taskId);
+      if (task) {
+        setTaskContextMenu({ task, position: { x: window.innerWidth / 2 - 150, y: window.innerHeight * 0.15 } });
+      }
+      return;
+    }
+    setContextMenu({ event, position: { x: window.innerWidth / 2 - 150, y: window.innerHeight * 0.15 } });
+  }, [tasks]);
 
   // Task-specific handlers
   const handleTaskColorChange = (taskId: string, color: string | null) => {
@@ -1254,6 +1267,8 @@ const CalendarPage = () => {
                         comments={getEventComments(event)}
                         onAddComment={(text) => handleEventAddComment(event, text)}
                         compact
+                        isMobile={isMobile}
+                        onMobileMenu={() => handleMobileContextMenu(event)}
                       />
                     ))
                   )}
@@ -1481,7 +1496,8 @@ const CalendarPage = () => {
         }}
         onContextMenu={handleContextMenu}
         onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd} />
+        onTouchEnd={handleTouchEnd}
+        onMobileMenu={handleMobileContextMenu} />
 
 
       {/* Notizia Detail Modal */}
@@ -1618,8 +1634,8 @@ const CalendarPage = () => {
 
 // Event Card component for rendering individual events
 const EventCard = memo(({
-  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment, showDetails
-}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;}) => {
+  event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment, showDetails, onMobileMenu, isMobile
+}: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;onMobileMenu?: () => void;isMobile?: boolean;}) => {
   const getEventStyles = () => {
     // Tasks - white card with black border by default, or custom color
     if (event.type === 'task') {
@@ -1728,9 +1744,9 @@ const EventCard = memo(({
         onClick();
       }}
       onContextMenu={onContextMenu}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      onTouchMove={onTouchEnd}>
+      onTouchStart={isMobile ? undefined : onTouchStart}
+      onTouchEnd={isMobile ? undefined : onTouchEnd}
+      onTouchMove={isMobile ? undefined : onTouchEnd}>
 
       {/* Top-right badge row */}
       <div className="absolute -top-1.5 -right-1 flex items-center gap-0.5">
@@ -1793,6 +1809,15 @@ const EventCard = memo(({
             </p>
           )}
         </div>
+        {/* Mobile: explicit menu button instead of long-press */}
+        {isMobile && onMobileMenu && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onMobileMenu(); }}
+            className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-muted/60 hover:bg-muted transition-colors"
+          >
+            <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
+          </button>
+        )}
       </div>
     </div>);
 
