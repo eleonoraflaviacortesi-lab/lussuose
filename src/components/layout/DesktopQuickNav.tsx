@@ -1,4 +1,4 @@
-import { CalendarDays, Send, Briefcase } from 'lucide-react';
+import { CalendarDays, Newspaper, Briefcase } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { triggerHaptic } from '@/lib/haptics';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ interface DesktopQuickNavProps {
 
 const shortcuts = [
   { id: 'calendario', icon: CalendarDays, label: 'Calendario', path: '/calendario' },
-  { id: 'notizie', icon: Send, label: 'Seller', path: '/notizie' },
+  { id: 'notizie', icon: Newspaper, label: 'Notizie', path: '/notizie' },
   { id: 'clienti', icon: Briefcase, label: 'Buyers', path: '/clienti' },
 ];
 
