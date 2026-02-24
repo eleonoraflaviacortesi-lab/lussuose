@@ -1990,10 +1990,16 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   }, [colWidths]);
 
   const handleHeaderClick = useCallback((key: string) => {
-    // Date columns no longer sortable from header (use top-level button instead)
+    // Toggle sort on click
+    if (sortCol === key) {
+      setSortDir(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortCol(key);
+      setSortDir('asc');
+    }
     setSelectedColKey(key);
     setSelectedRowId(null);
-  }, []);
+  }, [sortCol]);
 
   const handleResizeStart = useCallback((key: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -2002,8 +2008,8 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
     const onMove = (ev: MouseEvent) => {
       if (!resizingRef.current) return;
       const diff = ev.clientX - resizingRef.current.startX;
-      const col = COLUMNS.find(c => c.key === resizingRef.current!.key)!;
-      const newW = Math.max(col.minWidth, resizingRef.current.startWidth + diff);
+      const col = allColumns.find(c => c.key === resizingRef.current!.key);
+      const newW = Math.max(col?.minWidth ?? 60, resizingRef.current.startWidth + diff);
       setColWidths(prev => ({ ...prev, [resizingRef.current!.key]: newW }));
     };
     const onUp = () => { resizingRef.current = null; document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
@@ -2337,18 +2343,20 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
                   const fromIdx = sorted.findIndex(c => c.id === sourceId);
                   const toIdx = sorted.findIndex(c => c.id === cliente.id);
                   if (fromIdx === -1 || toIdx === -1) return;
-                  // Update display_order for moved row
+                  // Batch all updates concurrently to avoid race conditions
                   const targetOrder = sorted[toIdx].display_order;
-                  await onUpdate(sourceId, { display_order: targetOrder } as any);
-                  // Shift other rows
                   const direction = fromIdx < toIdx ? -1 : 1;
                   const start = Math.min(fromIdx, toIdx);
                   const end = Math.max(fromIdx, toIdx);
+                  const updates: Promise<void>[] = [
+                    onUpdate(sourceId, { display_order: targetOrder } as any)
+                  ];
                   for (let j = start; j <= end; j++) {
                     if (sorted[j].id !== sourceId) {
-                      await onUpdate(sorted[j].id, { display_order: sorted[j].display_order + direction * 10 } as any);
+                      updates.push(onUpdate(sorted[j].id, { display_order: sorted[j].display_order + direction * 10 } as any));
                     }
                   }
+                  await Promise.all(updates);
                 }}
                 onRowDragEnd={() => {
                   setDragRowId(null);
