@@ -9,6 +9,7 @@ import { FloatingSparkles } from '@/components/ui/floating-sparkles';
 import { MagicCursor } from '@/components/ui/magic-cursor';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
+import DesktopQuickNav from '@/components/layout/DesktopQuickNav';
 import type { Notizia } from '@/hooks/useNotizie';
 
 // Lazy-load tabs to make first paint instant and avoid loading heavy widgets until needed
@@ -162,6 +163,8 @@ const IndexContent = ({ initialTab }: IndexContentProps) => {
         </main>
       </PullToRefresh>
       
+      {/* Desktop quick nav sidebar */}
+      <DesktopQuickNav activeTab={activeTab} onTabChange={(tab) => { setActiveTab(tab); navigate(tab === 'numeri' ? '/' : `/${tab}`); }} />
       
 
       {/* Global chat listener for previews & sounds */}
