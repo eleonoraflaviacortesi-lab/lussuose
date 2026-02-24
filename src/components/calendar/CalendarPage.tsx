@@ -24,6 +24,7 @@ import NotiziaDetail from '@/components/notizie/NotiziaDetail';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
+import { useSwipeGesture } from '@/hooks/useSwipeGesture';
 import { toast } from 'sonner';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
@@ -621,6 +622,17 @@ const CalendarPage = () => {
     });
   };
 
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    triggerHaptic('light');
+    navigateCalendar(direction === 'left' ? 'next' : 'prev');
+  }, [viewMode]);
+
+  const swipeHandlers = useSwipeGesture({
+    onSwipe: handleSwipe,
+    enabled: isMobile && (viewMode === 'day' || viewMode === '3days'),
+    threshold: 60,
+  });
+
   const goToToday = () => {
     const today = new Date();
     switch (viewMode) {
@@ -1214,6 +1226,7 @@ const CalendarPage = () => {
         <div
           ref={weekScrollRef}
           className="flex gap-3 overflow-x-auto pb-4 px-6 scrollbar-hide"
+          {...swipeHandlers}
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
