@@ -12,7 +12,9 @@ import { ImportTallyDialog } from './ImportTallyDialog';
 import ClientiStatsChart from './ClientiStatsChart';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3, Sparkles } from 'lucide-react';
+import { Plus, Loader2, Upload, Search, X, FileSpreadsheet, ArrowUpDown, LayoutGrid, Table, BarChart3, Sparkles, Users } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { ClientiAnalysisModal } from './ClientiAnalysisModal';
 import { UndoRedoButtons } from '@/components/ui/undo-redo-buttons';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
@@ -50,6 +52,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [filterQualified, setFilterQualified] = useState(false);
+  const [showAllBuyers, setShowAllBuyers] = useState(false);
 
   const {
     clienti,
@@ -158,9 +161,11 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       setSelectedCliente(null);
     }
   }, [selectedCliente, deleteCliente, createCliente, pushAction]);
-  const displayClients = isCoordinator ?
-  clienti :
-  clienti.filter((c) => c.assigned_to === profile?.user_id);
+  const displayClients = isCoordinator
+    ? clienti
+    : showAllBuyers
+      ? clienti
+      : clienti.filter((c) => c.assigned_to === profile?.user_id);
 
   // Create grouped data for display (for agents, use only their clients)
   const displayGrouped = useMemo(() => {
@@ -325,7 +330,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
       {/* Date Sort - only when not coordinator (coordinators have it in filters) */}
       {!isCoordinator &&
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -343,6 +348,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
           }
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Users className="w-4 h-4 text-muted-foreground" />
+            <Switch
+              id="show-all-buyers"
+              checked={showAllBuyers}
+              onCheckedChange={setShowAllBuyers}
+            />
+            <Label htmlFor="show-all-buyers" className="text-xs cursor-pointer whitespace-nowrap">
+              {showAllBuyers ? 'Tutti' : 'Miei'}
+            </Label>
           </div>
           <Button
           variant={dateSortDir ? 'default' : 'outline'}
