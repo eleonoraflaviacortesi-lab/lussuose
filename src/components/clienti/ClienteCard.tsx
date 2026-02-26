@@ -154,11 +154,10 @@ const ColorStatusPickerPill = memo(({
         onContextMenu={(e) => { e.preventDefault(); onClose(); }}
       />
       <div
-        className="fixed z-[110] flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-h-[85vh] overflow-y-auto"
+        className="fixed z-[110] flex flex-col gap-2.5 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 w-[340px] max-w-[90vw] max-h-[80vh] overflow-y-auto"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 260),
-          top: Math.min(Math.max(10, position.y), window.innerHeight - 40),
-          transform: position.y > window.innerHeight * 0.6 ? 'translateY(-100%)' : 'none',
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 360),
+          top: Math.min(Math.max(10, position.y), window.innerHeight * 0.15),
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -167,7 +166,7 @@ const ColorStatusPickerPill = memo(({
         {/* Status selector */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Stato</span>
-          <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+          <div className="flex flex-wrap gap-1.5">
             {statusColumns.map((col) => (
               <button
                 key={col.id}
@@ -204,7 +203,7 @@ const ColorStatusPickerPill = memo(({
         {/* Card color picker */}
         <div>
           <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Colore card</span>
-          <div className="grid grid-cols-10 gap-1 max-w-[240px]">
+          <div className="grid grid-cols-10 gap-1">
             {PALETTE_COLORS.map((c, i) => (
               <button
                 key={c || 'default'}
