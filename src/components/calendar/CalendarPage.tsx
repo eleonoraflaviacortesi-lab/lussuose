@@ -365,31 +365,35 @@ const EventContextMenu = memo(({
                 </span>
               </button>
               {showDatePicker && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 backdrop-blur-[2px]" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
-                  <div 
-                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] p-4 animate-in zoom-in-95 fade-in duration-200 border border-white/60"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Calendar
-                      mode="single"
-                      selected={currentDate ? parseISO(currentDate) : undefined}
-                      onSelect={(date) => {
-                        if (date) {
-                          onDateChange(format(date, 'yyyy-MM-dd'));
-                          triggerHaptic('light');
-                          onClose();
-                        }
-                      }}
-                      locale={it}
-                      className="rounded-2xl p-2 pointer-events-auto"
-                    />
-                  </div>
-                </div>
+                <span className="text-xs text-muted-foreground">Seleziona data…</span>
               )}
             </div>
           </>
         )}
       </div>
+      {/* Date picker as separate floating window */}
+      {showDatePicker && onDateChange && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/25 backdrop-blur-[3px]" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
+          <div 
+            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-5 animate-in zoom-in-95 fade-in duration-200 border border-white/60"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Calendar
+              mode="single"
+              selected={currentDate ? parseISO(currentDate) : undefined}
+              onSelect={(date) => {
+                if (date) {
+                  onDateChange(format(date, 'yyyy-MM-dd'));
+                  triggerHaptic('light');
+                  onClose();
+                }
+              }}
+              locale={it}
+              className="rounded-2xl p-2 pointer-events-auto"
+            />
+          </div>
+        </div>
+      )}
       {/* Color picker overlay */}
       <ColorPickerOverlay
         open={showColorPicker}
