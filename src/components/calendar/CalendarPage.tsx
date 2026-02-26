@@ -104,9 +104,9 @@ const EventContextMenu = memo(({
         onContextMenu={(e) => {e.preventDefault();onClose();}} />
 
       <div
-        className="fixed z-50 flex flex-col gap-2.5 p-3 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 max-w-[300px] max-h-[80vh] overflow-y-auto"
+        className="fixed z-50 flex flex-col gap-2.5 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 w-[340px] max-w-[90vw] max-h-[80vh] overflow-y-auto"
         style={{
-          left: Math.min(Math.max(10, position.x), window.innerWidth - 310),
+          left: Math.min(Math.max(10, position.x), window.innerWidth - 360),
           top: Math.min(Math.max(10, position.y), window.innerHeight * 0.15),
         }}
         onClick={(e) => e.stopPropagation()}
@@ -165,7 +165,7 @@ const EventContextMenu = memo(({
             {/* Emoji picker */}
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Emoji</span>
-              <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
+              <div className="flex flex-wrap items-center gap-1.5">
                 {event.emoji &&
               <button
                 onClick={() => {onEmojiChange(null);onClose();}}
@@ -201,7 +201,7 @@ const EventContextMenu = memo(({
                 <Palette className="w-3 h-3" />
                 Colore
               </span>
-              <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+               <div className="flex flex-wrap items-center gap-1.5">
                 {currentCardColor && (
                   <button
                     onClick={() => { onColorChange(null); onClose(); }}
@@ -237,7 +237,7 @@ const EventContextMenu = memo(({
                     <Star className="w-3 h-3" />
                     Preferiti
                   </span>
-                  <div className="flex flex-wrap items-center gap-1.5 max-w-[220px]">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {favorites.map((color) => (
                       <button
                         key={color}
@@ -298,7 +298,7 @@ const EventContextMenu = memo(({
             {/* Status selector - horizontal colored pills */}
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block">Status</span>
-              <div className="flex flex-wrap gap-1.5 max-w-[220px]">
+              <div className="flex flex-wrap gap-1.5">
                 {columns.map((col) =>
               <button
                 key={col.key}
@@ -365,8 +365,11 @@ const EventContextMenu = memo(({
                 </span>
               </button>
               {showDatePicker && (
-                <div className="fixed inset-0 z-[60] flex items-center justify-center" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
-                  <div className="bg-white rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] p-1" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/20 backdrop-blur-[2px]" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
+                  <div 
+                    className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.25)] p-4 animate-in zoom-in-95 fade-in duration-200 border border-white/60"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Calendar
                       mode="single"
                       selected={currentDate ? parseISO(currentDate) : undefined}
@@ -378,7 +381,7 @@ const EventContextMenu = memo(({
                         }
                       }}
                       locale={it}
-                      className="rounded-xl p-2 pointer-events-auto"
+                      className="rounded-2xl p-2 pointer-events-auto"
                     />
                   </div>
                 </div>
