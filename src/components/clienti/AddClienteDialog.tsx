@@ -66,6 +66,7 @@ interface FormData {
   interesse_affitto: string;
   descrizione: string;
   assigned_to: string;
+  data_submission: string;
 }
 
 const initialFormData: FormData = {
@@ -91,6 +92,7 @@ const initialFormData: FormData = {
   interesse_affitto: '',
   descrizione: '',
   assigned_to: '',
+  data_submission: new Date().toISOString().split('T')[0],
 };
 
 export function AddClienteDialog({
@@ -128,6 +130,7 @@ export function AddClienteDialog({
       interesse_affitto: formData.interesse_affitto || null,
       descrizione: formData.descrizione || null,
       assigned_to: formData.assigned_to || null,
+      data_submission: formData.data_submission ? new Date(formData.data_submission).toISOString() : new Date().toISOString(),
       status: 'new',
     });
 
@@ -451,6 +454,16 @@ export function AddClienteDialog({
               <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">
                 Assegnazione & Note
               </h3>
+
+              <div>
+                <Label htmlFor="data_submission">Data inserimento</Label>
+                <Input
+                  id="data_submission"
+                  type="date"
+                  value={formData.data_submission}
+                  onChange={e => updateField('data_submission', e.target.value)}
+                />
+              </div>
 
               <div>
                 <Label>Assegna a</Label>
