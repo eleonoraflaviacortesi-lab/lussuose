@@ -95,19 +95,30 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
   };
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="p-4">
-        <div className="flex items-center justify-center overflow-hidden">
-          <img
-            src={logo}
-            alt="Logo"
-            className={`h-10 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}
-            onClick={handleLogoTap}
-          />
-        </div>
+    <Sidebar collapsible="icon" className="border-none">
+      <SidebarHeader className="p-3">
+        {/* Profile avatar in sidebar header */}
+        {!collapsed && profile && (
+          <div className="flex items-center gap-2 px-1">
+            <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
+              {profile.avatar_emoji || '👤'}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{profile.full_name}</p>
+              <p className="text-xs text-muted-foreground truncate">{profile.sede}</p>
+            </div>
+          </div>
+        )}
+        {collapsed && profile && (
+          <div className="flex justify-center">
+            <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm">
+              {profile.avatar_emoji || '👤'}
+            </span>
+          </div>
+        )}
       </SidebarHeader>
 
-      <SidebarSeparator />
+      <SidebarSeparator className="bg-white/30" />
 
       {/* + New button */}
       <div className="px-2 pt-3 pb-1">
@@ -181,11 +192,6 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
-        {!collapsed && profile && (
-          <div className="px-2 pb-1">
-            <p className="text-xs text-muted-foreground truncate">{profile.full_name}</p>
-          </div>
-        )}
       </SidebarFooter>
     </Sidebar>
   );
