@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import ProfileModal from '@/components/profile/ProfileModal';
-import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -41,9 +41,10 @@ interface AppSidebarProps {
   onNewProperty?: () => void;
   onNewContact?: () => void;
   onNewActivity?: () => void;
+  onNewDailyReport?: () => void;
 }
 
-export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSidebarProps) {
+export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDailyReport }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
   const { signOut, profile } = useAuth();
@@ -153,6 +154,10 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
             <DropdownMenuItem onClick={onNewActivity} className="gap-2">
               <CalendarDays className="h-4 w-4" />
               New Activity
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onNewDailyReport} className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              New Daily Report
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
