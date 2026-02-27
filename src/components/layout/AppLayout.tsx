@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import logo from '@/assets/app_logo.svg';
 import { AppSidebar } from './AppSidebar';
 import { AppBreadcrumbs } from './AppBreadcrumbs';
 import { NotificationBell } from './NotificationBell';
@@ -117,10 +118,24 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          {/* Top bar with trigger + breadcrumbs + notifications */}
-          <header className="flex h-12 shrink-0 items-center gap-2 border-b px-4">
+          {/* Liquid glass header with logo */}
+          <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 px-4"
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
+              backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+              WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+              boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,1)',
+              borderBottom: '1px solid rgba(255,255,255,0.4)',
+            }}
+          >
             <SidebarTrigger className="-ml-1" />
-            <div className="h-4 w-px bg-border mx-1" />
+            <img
+              src={logo}
+              alt="Logo"
+              className="h-9 w-auto cursor-pointer select-none"
+              onClick={() => navigate('/')}
+            />
+            <div className="h-4 w-px bg-border/40 mx-1" />
             <AppBreadcrumbs />
             <div className="ml-auto">
               <NotificationBell onOpenCliente={handleOpenCliente} inline />
