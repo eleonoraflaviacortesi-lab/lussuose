@@ -183,11 +183,9 @@ export default function AppLayout() {
             <img
               src={logo}
               alt="Logo"
-              className={`h-14 -my-3 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+              className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
               onClick={handleLogoTap}
             />
-            <div className="h-4 w-px bg-border/40 mx-1" />
-            <AppBreadcrumbs />
             <div className="ml-auto">
               <NotificationBell onOpenCliente={handleOpenCliente} inline />
             </div>
