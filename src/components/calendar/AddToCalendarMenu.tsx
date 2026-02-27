@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Plus, User, FileText, Search, X, Pencil } from 'lucide-react';
 import {
   Sheet,
@@ -40,6 +40,7 @@ type Props = {
   date: Date;
   clienti: Cliente[];
   notizie: Notizia[];
+  initialType?: 'cliente' | 'notizia' | null;
   onAddAppointment: () => void;
   onAddClienteReminder: (clienteId: string, date: Date) => void;
   onAddNotiziaReminder: (notiziaId: string, date: Date) => void;
@@ -52,13 +53,22 @@ const AddToCalendarMenu = ({
   date,
   clienti,
   notizie,
+  initialType,
   onAddAppointment,
   onAddClienteReminder,
   onAddNotiziaReminder,
   onAddTask,
 }: Props) => {
-  const [selectedType, setSelectedType] = useState<AddType | null>(null);
+  const [selectedType, setSelectedType] = useState<AddType | null>(initialType || null);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync initialType when menu opens
+  useEffect(() => {
+    if (open) {
+      setSelectedType(initialType || null);
+      setSearchQuery('');
+    }
+  }, [open, initialType]);
 
   // Filter clienti without reminder on this date
   const availableClienti = useMemo(() => {
