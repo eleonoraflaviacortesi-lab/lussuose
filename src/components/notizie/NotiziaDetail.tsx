@@ -201,7 +201,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       });
       setNewComment('');
     }
-  }, [notizia]);
+  }, [notizia?.id]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -367,6 +367,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <StarRating
               value={editData.rating}
               onChange={(val) => {
+                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
                 setEditData(prev => ({ ...prev, rating: val }));
                 if (notizia) {
                   updateNotizia.mutate({ id: notizia.id, rating: val, silent: true });
