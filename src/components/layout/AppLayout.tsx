@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
@@ -11,6 +11,9 @@ import { AppBreadcrumbs } from './AppBreadcrumbs';
 import { NotificationBell } from './NotificationBell';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
+import { triggerHaptic } from '@/lib/haptics';
+import { supabase } from '@/integrations/supabase/client';
 
 // Lazy-load page components
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
@@ -48,6 +51,9 @@ export default function AppLayout() {
   const [showNewProperty, setShowNewProperty] = useState(false);
   const [showNewContact, setShowNewContact] = useState(false);
   const [showNewActivity, setShowNewActivity] = useState(false);
+  const [logoWiggle, setLogoWiggle] = useState(false);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
   const { createCliente } = useClienti();
   const { profiles } = useProfiles();
@@ -60,6 +66,49 @@ export default function AppLayout() {
     await Promise.all(keysToRefresh.map(key => queryClient.invalidateQueries({ queryKey: [key] })));
     await new Promise(resolve => setTimeout(resolve, 300));
   }, [queryClient]);
+
+  const playTrillo = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/trillo_msn.mp3');
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
+  const handleLogoTap = useCallback(() => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    setLogoWiggle(true);
+    setTimeout(() => setLogoWiggle(false), 400);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      triggerHaptic('success');
+      triggerArcaneFog();
+      playTrillo();
+      supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
+    } else if (tapCountRef.current === 1) {
+      tapTimerRef.current = setTimeout(() => {
+        if (tapCountRef.current === 1) {
+          triggerHaptic('selection');
+          navigate('/');
+        }
+        tapCountRef.current = 0;
+      }, 400);
+    } else {
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+    }
+  }, [navigate, playTrillo]);
+
+  // Listen for arcane-fog broadcast from other clients
+  useEffect(() => {
+    const channel = supabase.channel('arcane-fog-broadcast')
+      .on('broadcast', { event: 'arcane-fog' }, () => {
+        triggerArcaneFog();
+        playTrillo();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [playTrillo]);
 
   const handleOpenCliente = useCallback((clienteId: string) => {
     setPendingClienteId(clienteId);
@@ -132,8 +181,8 @@ export default function AppLayout() {
             <img
               src={logo}
               alt="Logo"
-              className="h-14 -my-3 w-auto cursor-pointer select-none"
-              onClick={() => navigate('/')}
+              className={`h-14 -my-3 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+              onClick={handleLogoTap}
             />
             <div className="h-4 w-px bg-border/40 mx-1" />
             <AppBreadcrumbs />
