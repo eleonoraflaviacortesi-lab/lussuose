@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import ProfileModal from '@/components/profile/ProfileModal';
 import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
@@ -48,6 +49,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showProfile, setShowProfile] = useState(false);
   const [logoWiggle, setLogoWiggle] = useState(false);
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
@@ -95,11 +97,15 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
   };
 
   return (
+    <>
     <Sidebar collapsible="icon" className="border-none">
       <SidebarHeader className="p-3">
-        {/* Profile avatar in sidebar header */}
+        {/* Profile avatar - clickable to open profile modal */}
         {!collapsed && profile && (
-          <div className="flex items-center gap-2 px-1">
+          <button
+            onClick={() => setShowProfile(true)}
+            className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
+          >
             <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
               {profile.avatar_emoji || '👤'}
             </span>
@@ -107,14 +113,17 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
               <p className="text-sm font-medium truncate">{profile.full_name}</p>
               <p className="text-xs text-muted-foreground truncate">{profile.sede}</p>
             </div>
-          </div>
+          </button>
         )}
         {collapsed && profile && (
-          <div className="flex justify-center">
+          <button
+            onClick={() => setShowProfile(true)}
+            className="flex justify-center w-full rounded-lg hover:bg-sidebar-accent/60 transition-colors py-1"
+          >
             <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm">
               {profile.avatar_emoji || '👤'}
             </span>
-          </div>
+          </button>
         )}
       </SidebarHeader>
 
@@ -194,5 +203,8 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
+
+      <ProfileModal open={showProfile} onClose={() => setShowProfile(false)} onOpenSettings={() => { setShowProfile(false); navigate('/settings'); }} />
+    </>
   );
 }
