@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { EmojiPickerPopover } from '@/components/ui/emoji-picker-popover';
+import { StarRating } from '@/components/ui/star-rating';
 import { LINGUA_COLORS, PORTALE_COLORS, TIPO_CONTATTO_COLORS } from '@/lib/colorMaps';
 import { MergeClienteDialog } from './MergeClienteDialog';
 import { Cliente } from '@/types';
@@ -176,6 +177,11 @@ export function ClienteDetail({
                 noHighlight
               />
             </div>
+            <StarRating
+              value={(cliente as any).rating ?? null}
+              onChange={(val) => onUpdate({ rating: val } as any)}
+              size="sm"
+            />
           </div>
         </div>
 

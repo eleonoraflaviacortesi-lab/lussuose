@@ -1,0 +1,3 @@
+
+ALTER TABLE public.clienti ADD COLUMN IF NOT EXISTS rating integer DEFAULT NULL;
+ALTER TABLE public.notizie ADD COLUMN IF NOT EXISTS rating integer DEFAULT NULL;

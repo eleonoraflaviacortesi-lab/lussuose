@@ -120,6 +120,7 @@ export interface Cliente {
   row_text_color: string | null;
   created_at: string;
   updated_at: string;
+  rating: number | null;
 }
 
 export type ClienteGroupBy = 'status' | 'regione' | 'tipologia' | 'budget' | 'agente';

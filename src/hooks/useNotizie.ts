@@ -33,6 +33,7 @@ export interface Notizia {
   is_online: boolean;
   prezzo_richiesto: number | null;
   valore: number | null;
+  rating: number | null;
 }
 
 export interface NotiziaInput {
@@ -51,6 +52,7 @@ export interface NotiziaInput {
   is_online?: boolean;
   prezzo_richiesto?: number | null;
   valore?: number | null;
+  rating?: number | null;
 }
 
 // Helper to parse comments from JSON

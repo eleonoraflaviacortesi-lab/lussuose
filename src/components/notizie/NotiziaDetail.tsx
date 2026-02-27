@@ -3,6 +3,7 @@ import { AttachmentsSection } from '@/components/shared/AttachmentsSection';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Phone, X, Trash2, CalendarIcon, Bell, ExternalLink, Send, Check } from 'lucide-react';
+import { StarRating } from '@/components/ui/star-rating';
 import MentionInput from '@/components/ui/mention-input';
 import { RichTextEditor } from '@/components/ui/rich-text-editor';
 import { useMentionNotifications } from '@/hooks/useMentionNotifications';
@@ -83,6 +84,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     comments: [] as NotiziaComment[],
     prezzo_richiesto: null as number | null,
     valore: null as number | null,
+    rating: null as number | null,
   });
 
   // Auto-save function - exclude comments to prevent overwriting external changes
@@ -109,6 +111,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       reminder_date: reminderDateTime,
       prezzo_richiesto: editData.prezzo_richiesto,
       valore: editData.valore,
+      rating: editData.rating,
     });
 
     // Show saved indicator
@@ -167,6 +170,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         comments: notizia.comments || [],
         prezzo_richiesto: notizia.prezzo_richiesto ?? null,
         valore: notizia.valore ?? null,
+        rating: (notizia as any).rating ?? null,
       });
       setNewComment('');
     }
@@ -328,6 +332,16 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 className={pillInputClass}
               />
             </div>
+          </div>
+
+          {/* Rating */}
+          <div className="flex items-center gap-2">
+            <Label className="text-xs font-medium">Rating</Label>
+            <StarRating
+              value={editData.rating}
+              onChange={(val) => updateAndSave('rating', val)}
+              size="sm"
+            />
           </div>
           
           <div className="grid grid-cols-2 gap-2">
