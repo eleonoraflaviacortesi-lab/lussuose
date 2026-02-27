@@ -1,12 +1,12 @@
-import { useState, useCallback, useMemo, useRef, useEffect, memo } from 'react';
+import { useState, useCallback, useMemo, useRef, memo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Cliente, ClienteStatus, ClienteGroupBy } from '@/types';
 import { ClienteCard } from './ClienteCard';
 import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { useClientKanbanColumns, ClientKanbanColumn } from '@/hooks/useClientKanbanColumns';
-import { GripVertical, Trash2, Plus } from 'lucide-react';
-import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
+import { Plus } from 'lucide-react';
+import { KanbanColumnHeader } from '@/components/shared/KanbanColumnHeader';
 
 interface ClientiKanbanProps {
   clientiGrouped: Map<string, Cliente[]>;
@@ -50,146 +50,7 @@ const regionOrder = [
 ];
 
 
-// Editable column header
-const ColumnHeader = memo(({ 
-  column, 
-  count, 
-  onUpdate, 
-  onDelete, 
-  isDragging 
-}: { 
-  column: ClientKanbanColumn;
-  count: number;
-  onUpdate: (updates: Partial<ClientKanbanColumn>) => void;
-  onDelete: () => void;
-  isDragging?: boolean;
-}) => {
-  const [editing, setEditing] = useState(false);
-  const [label, setLabel] = useState(column.label);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (editing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [editing]);
-
-  const handleSave = () => {
-    if (label.trim() && label !== column.label) {
-      onUpdate({ label: label.trim() });
-    }
-    setEditing(false);
-  };
-
-  const handleColorSelect = (color: string) => {
-    onUpdate({ color });
-    setShowColorPicker(false);
-  };
-
-  const [customColor, setCustomColor] = useState(column.color);
-  const [showCustomPicker, setShowCustomPicker] = useState(false);
-
-  return (
-    <div className={cn(
-      "flex items-center gap-2 mb-2 lg:mb-3 group relative",
-      isDragging && "opacity-50"
-    )}>
-      <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
-      
-      {editing ? (
-        <input
-          ref={inputRef}
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSave();
-            if (e.key === 'Escape') { setLabel(column.label); setEditing(false); }
-          }}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white shadow-lg outline-none w-24"
-        />
-      ) : (
-        <button
-          onClick={() => setEditing(true)}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform hover:scale-105 cursor-text"
-          style={{ 
-            backgroundColor: column.color,
-            color: isDarkColor(column.color) ? 'white' : 'black'
-          }}
-          title="Clicca per modificare nome"
-        >
-          {column.label}
-        </button>
-      )}
-      
-      {/* Color button */}
-      <button
-        onClick={() => setShowColorPicker(!showColorPicker)}
-        className="w-4 h-4 rounded-full shrink-0 transition-transform hover:scale-110 ring-1 ring-black/10"
-        style={{ backgroundColor: column.color }}
-        title="Cambia colore"
-      />
-      
-      <span className="text-xs text-muted-foreground">{count}</span>
-      
-      <button
-        onClick={onDelete}
-        className="ml-auto text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-        title="Elimina colonna"
-      >
-        <Trash2 className="w-3.5 h-3.5" />
-      </button>
-
-      {/* Color picker dropdown */}
-      {showColorPicker && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => { setShowColorPicker(false); setShowCustomPicker(false); }} />
-          <div className="absolute top-8 left-0 z-50 p-3 bg-white/90 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] rounded-2xl min-w-[220px] animate-in zoom-in-95 fade-in duration-150">
-            <div className="flex flex-wrap items-center gap-2">
-              {COLUMN_COLORS.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  className={cn(
-                    "w-8 h-8 rounded-full transition-all active:scale-90 shadow-sm",
-                    column.color === color && "ring-2 ring-foreground ring-offset-2"
-                  )}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-              {/* Custom color toggle */}
-              <button
-                onClick={() => setShowCustomPicker(!showCustomPicker)}
-                className={cn(
-                  "w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
-                  showCustomPicker && "ring-2 ring-foreground ring-offset-2"
-                )}
-              >
-                +
-              </button>
-            </div>
-            
-            {/* Custom color picker overlay */}
-            <ColorPickerOverlay
-              open={showCustomPicker}
-              color={customColor}
-              onChange={(newColor) => {
-                setCustomColor(newColor);
-                onUpdate({ color: newColor });
-                setShowColorPicker(false);
-                setShowCustomPicker(false);
-              }}
-              onClose={() => setShowCustomPicker(false)}
-            />
-          </div>
-        </>
-      )}
-    </div>
-  );
-});
-ColumnHeader.displayName = 'ColumnHeader';
 
 export function ClientiKanban({
   clientiGrouped,
@@ -385,10 +246,10 @@ export function ClientiKanban({
               >
                 {/* Column header */}
                 {groupBy === 'status' && 'columnId' in column ? (
-                  <ColumnHeader
+                  <KanbanColumnHeader
                     column={kanbanColumns.find(c => c.id === column.columnId)!}
                     count={column.items.length}
-                    onUpdate={(updates) => updateColumn({ id: column.columnId as string, ...updates })}
+                    onUpdate={(updates) => updateColumn({ id: column.columnId as string, ...updates } as any)}
                     onDelete={() => deleteColumn(column.columnId as string)}
                   />
                 ) : (
