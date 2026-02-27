@@ -164,6 +164,7 @@ export default function AppLayout() {
           onNewProperty={() => setShowNewProperty(true)}
           onNewContact={() => setShowNewContact(true)}
           onNewActivity={() => setShowNewActivity(true)}
+          onNewDailyReport={() => navigate('/inserisci')}
         />
 
         <SidebarInset>
