@@ -366,7 +366,12 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <Label className="text-xs font-medium">Rating</Label>
             <StarRating
               value={editData.rating}
-              onChange={(val) => updateAndSave('rating', val)}
+              onChange={(val) => {
+                setEditData(prev => ({ ...prev, rating: val }));
+                if (notizia) {
+                  updateNotizia.mutate({ id: notizia.id, rating: val, silent: true });
+                }
+              }}
               size="sm"
             />
           </div>

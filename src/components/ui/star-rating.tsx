@@ -23,7 +23,7 @@ export const StarRating = ({ value, onChange, max = 5, size = 'md', className }:
         <button
           key={star}
           type="button"
-          onClick={() => handleClick(star)}
+          onClick={(e) => { e.stopPropagation(); e.preventDefault(); handleClick(star); }}
           className="p-0.5 transition-transform active:scale-90 hover:scale-110"
         >
           <Star
