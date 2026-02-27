@@ -462,22 +462,6 @@ const CalendarPage = () => {
   const { profiles } = useProfiles();
   const { user } = useAuth();
 
-  // Keep selected detail entities in sync with optimistic cache updates
-  useEffect(() => {
-    if (!selectedCliente?.id || !clienti) return;
-    const latest = clienti.find((c) => c.id === selectedCliente.id);
-    if (latest && latest !== selectedCliente) {
-      setSelectedCliente(latest);
-    }
-  }, [clienti, selectedCliente]);
-
-  useEffect(() => {
-    if (!selectedNotizia?.id || !notizie) return;
-    const latest = notizie.find((n) => n.id === selectedNotizia.id);
-    if (latest && latest !== selectedNotizia) {
-      setSelectedNotizia(latest);
-    }
-  }, [notizie, selectedNotizia]);
 
   // Helper to get status color from columns
   const getStatusColor = (status: string): string => {
