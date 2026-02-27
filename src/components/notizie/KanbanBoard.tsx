@@ -4,10 +4,13 @@ import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
 import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
-import { MessageCircle, X, Plus, GripVertical, Trash2, Wifi, WifiOff, Star } from 'lucide-react';
+import { MessageCircle, X, Plus, Star, Wifi, WifiOff, Trash2 } from 'lucide-react';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
+import { EmojiGridWithCustom } from '@/components/shared/EmojiGridWithCustom';
+import { KanbanColumnHeader } from '@/components/shared/KanbanColumnHeader';
+import { EntityCardWrapper } from '@/components/shared/EntityCardWrapper';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -35,239 +38,7 @@ const cardColors = [
 ];
 
 
-// Editable column header
-const ColumnHeader = memo(({ 
-  column, 
-  count, 
-  onUpdate, 
-  onDelete, 
-  onQuickAdd,
-  isDragging 
-}: { 
-  column: KanbanColumn;
-  count: number;
-  onUpdate: (updates: Partial<KanbanColumn>) => void;
-  onDelete: () => void;
-  onQuickAdd?: () => void;
-  isDragging?: boolean;
-}) => {
-  const isProtected = column.key === PROTECTED_COLUMN_KEY;
-  const [editing, setEditing] = useState(false);
-  const [label, setLabel] = useState(column.label);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (editing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [editing]);
-
-  const handleSave = () => {
-    if (label.trim() && label !== column.label) {
-      onUpdate({ label: label.trim() });
-    }
-    setEditing(false);
-  };
-
-  const handleColorSelect = (color: string) => {
-    onUpdate({ color });
-    setShowColorPicker(false);
-  };
-
-  const [customColor, setCustomColor] = useState(column.color);
-  const [showCustomPicker, setShowCustomPicker] = useState(false);
-  const colorInputRef = useRef<HTMLInputElement>(null);
-
-  const handleSaveCustomColor = () => {
-    onUpdate({ color: customColor });
-    setShowCustomPicker(false);
-    setShowColorPicker(false);
-  };
-
-  return (
-    <div className={cn(
-      "flex items-center gap-2 mb-1.5 lg:mb-2 group relative",
-      isDragging && "opacity-50"
-    )}>
-      <GripVertical className="w-4 h-4 text-muted-foreground lg:opacity-0 lg:group-hover:opacity-100 transition-opacity cursor-grab shrink-0 touch-none" />
-      
-      {editing && !isProtected ? (
-        <input
-          ref={inputRef}
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') handleSave();
-            if (e.key === 'Escape') { setLabel(column.label); setEditing(false); }
-          }}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white shadow-lg outline-none w-24"
-        />
-      ) : (
-        <button
-          onClick={() => !isProtected && setEditing(true)}
-          className={cn(
-            "text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform",
-            !isProtected && "hover:scale-105 cursor-text",
-            isProtected && "cursor-default"
-          )}
-          style={{ 
-            backgroundColor: column.color,
-            color: isDarkColor(column.color) ? 'white' : 'black'
-          }}
-          title={isProtected ? "Colonna protetta" : "Clicca per modificare nome"}
-        >
-          {column.label}
-        </button>
-      )}
-      
-      {/* Color button */}
-      <button
-        onClick={() => setShowColorPicker(!showColorPicker)}
-        className="w-4 h-4 rounded-full shrink-0 transition-transform hover:scale-110 ring-1 ring-black/10"
-        style={{ backgroundColor: column.color }}
-        title="Cambia colore"
-      />
-      
-      <span className="text-xs text-muted-foreground">{count}</span>
-      
-      {onQuickAdd && (
-        <button
-          onClick={onQuickAdd}
-          className="ml-auto text-foreground hover:opacity-60 transition-opacity"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      )}
-      
-      {/* Delete button - hidden for protected columns */}
-      {!isProtected && (
-        <button
-          onClick={onDelete}
-          className="text-muted-foreground hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-          title="Elimina colonna"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
-      )}
-
-      {/* Color picker dropdown - Liquid Glass style */}
-      {showColorPicker && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => { setShowColorPicker(false); setShowCustomPicker(false); }} />
-          <div className="absolute top-8 left-0 z-50 p-3 bg-white/90 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.25)] rounded-2xl min-w-[220px] animate-in zoom-in-95 fade-in duration-150">
-            <div className="flex flex-wrap items-center gap-2">
-              {COLUMN_COLORS.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => handleColorSelect(color)}
-                  className={cn(
-                    "w-8 h-8 rounded-full transition-all active:scale-90 shadow-sm",
-                    column.color === color && "ring-2 ring-foreground ring-offset-2"
-                  )}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-              {/* Custom color toggle */}
-              <button
-                onClick={() => setShowCustomPicker(!showCustomPicker)}
-                className={cn(
-                  "w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
-                  showCustomPicker && "ring-2 ring-foreground ring-offset-2"
-                )}
-              >
-                +
-              </button>
-            </div>
-            
-            {/* Custom color picker overlay */}
-            <ColorPickerOverlay
-              open={showCustomPicker}
-              color={customColor}
-              onChange={(newColor) => {
-                setCustomColor(newColor);
-                onUpdate({ color: newColor });
-                setShowColorPicker(false);
-                setShowCustomPicker(false);
-              }}
-              onClose={() => setShowCustomPicker(false)}
-            />
-          </div>
-        </>
-      )}
-    </div>
-  );
-});
-ColumnHeader.displayName = 'ColumnHeader';
-
-// Shared emoji grid with custom "+" input
-const EmojiGridWithCustom = memo(({ currentEmoji, onSelect, onRemove }: {
-  currentEmoji: string | null;
-  onSelect: (emoji: string) => void;
-  onRemove: () => void;
-}) => {
-  const [showInput, setShowInput] = useState(false);
-  const [customEmoji, setCustomEmoji] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (showInput && inputRef.current) inputRef.current.focus();
-  }, [showInput]);
-
-  return (
-    <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-      {currentEmoji && (
-        <button
-          onClick={onRemove}
-          className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-          title="Rimuovi emoji"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      )}
-      {QUICK_EMOJIS.map((emoji) => (
-        <button
-          key={emoji}
-          onClick={() => onSelect(emoji)}
-          className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-            currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
-          )}
-        >
-          {emoji}
-        </button>
-      ))}
-      {showInput ? (
-        <input
-          ref={inputRef}
-          value={customEmoji}
-          onChange={(e) => setCustomEmoji(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && customEmoji.trim()) {
-              onSelect(customEmoji.trim());
-              setCustomEmoji('');
-              setShowInput(false);
-            }
-          }}
-          onBlur={() => { setShowInput(false); setCustomEmoji(''); }}
-          className="w-10 h-7 text-center text-base bg-muted rounded-lg border-0 outline-none focus:ring-1 focus:ring-foreground"
-          placeholder="😀"
-          maxLength={2}
-        />
-      ) : (
-        <button
-          onClick={() => setShowInput(true)}
-          className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted"
-        >
-          +
-        </button>
-      )}
-    </div>
-  );
-});
-EmojiGridWithCustom.displayName = 'EmojiGridWithCustom';
 
 // Color, Status, and Emoji picker pill component - uses dynamic columns
 const ColorStatusPickerPill = memo(({ 
@@ -507,35 +278,14 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
   const [pickerOpen, setPickerOpen] = useState(false);
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
   const isDark = isDarkColor(notizia.card_color);
   const commentsCount = notizia.comments?.length || 0;
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setPickerPos({ x: e.clientX - 100, y: e.clientY - 50 });
-    setPickerOpen(true);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    // Don't start long press if a picker is already open
+  const handleContextAction = useCallback((pos: { x: number; y: number }) => {
     if (pickerOpen || emojiPickerOpen) return;
-    
-    const touch = e.touches[0];
-    longPressTimer.current = setTimeout(() => {
-      if (navigator.vibrate) navigator.vibrate(15);
-      setPickerPos({ x: touch.clientX - 100, y: touch.clientY - 60 });
-      setPickerOpen(true);
-    }, 500);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  };
+    setPickerPos({ x: pos.x - 100, y: pos.y - 50 });
+    setPickerOpen(true);
+  }, [pickerOpen, emojiPickerOpen]);
 
   const handleEmojiClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -544,29 +294,17 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
     setEmojiPickerOpen(true);
   };
 
-  const handleCardClick = () => {
-    // Don't open detail if a picker is open or was just closed
+  const handleCardClick = useCallback(() => {
     if (pickerOpen || emojiPickerOpen) return;
-    triggerHaptic('light');
     onClick();
-  };
+  }, [pickerOpen, emojiPickerOpen, onClick]);
   
   return (
     <>
-      <div
-        className={cn(
-          "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 shadow-sm select-none active:scale-[0.97] active:shadow-md",
-          notizia.card_color ? "backdrop-blur-sm" : "bg-card"
-        )}
-        style={notizia.card_color ? { 
-          backgroundColor: notizia.card_color,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4)'
-        } : undefined}
+      <EntityCardWrapper
+        cardColor={notizia.card_color}
         onClick={handleCardClick}
-        onContextMenu={handleContextMenu}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleTouchEnd}
+        onContextAction={handleContextAction}
       >
         <div className="flex items-start gap-2">
           <button
@@ -619,7 +357,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
             </div>
           )}
         </div>
-      </div>
+      </EntityCardWrapper>
 
       {pickerOpen && (
         <ColorStatusPickerPill
@@ -692,12 +430,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   const handleDragEnd = useCallback((result: DropResult) => {
     if (!result.destination) return;
     
-    // Haptic feedback on drop
     triggerHaptic('medium');
     
     const { type } = result;
     
-    // Handle column reordering
     if (type === 'COLUMN') {
       const newOrder = [...columns];
       const [removed] = newOrder.splice(result.source.index, 1);
@@ -706,7 +442,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
       return;
     }
     
-    // Handle card reordering
     const sourceStatus = result.source.droppableId as NotiziaStatus;
     const destStatus = result.destination.droppableId as NotiziaStatus;
     const sourceIndex = result.source.index;
@@ -748,7 +483,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   }, [addColumn]);
 
   const handleDeleteColumn = useCallback(async (columnId: string, columnKey: string) => {
-    // Move all notizie in this column to 'new' status first
     const notizieToMove = notizieByStatus[columnKey] || [];
     for (const notizia of notizieToMove) {
       await updateNotizia.mutateAsync({ id: notizia.id, status: 'new' as NotiziaStatus, silent: true });
@@ -784,7 +518,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
           <div style={{ width: scrollWidth, height: '1px' }} />
         </div>
         
-        {/* Columns container with horizontal drag */}
         <Droppable droppableId="columns" type="COLUMN" direction="horizontal">
           {(provided) => (
             <div 
@@ -809,13 +542,14 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                       )}
                     >
                       <div {...columnProvided.dragHandleProps}>
-                        <ColumnHeader
+                        <KanbanColumnHeader
                           column={column}
                           count={(notizieByStatus[column.key] || []).length}
                           onUpdate={(updates) => updateColumn({ id: column.id, ...updates })}
                           onDelete={() => handleDeleteColumn(column.id, column.key)}
                           onQuickAdd={onQuickAdd ? () => onQuickAdd(column.key as NotiziaStatus) : undefined}
                           isDragging={columnSnapshot.isDragging}
+                          isProtected={column.key === PROTECTED_COLUMN_KEY}
                         />
                       </div>
                       
@@ -870,7 +604,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               ))}
               {provided.placeholder}
               
-              {/* Add column button */}
               <AddColumnButton onAdd={handleAddColumn} />
             </div>
           )}

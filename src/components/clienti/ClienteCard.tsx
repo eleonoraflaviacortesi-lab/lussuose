@@ -6,6 +6,8 @@ import { isPast, isToday, isTomorrow, differenceInDays } from 'date-fns';
 import { triggerHaptic } from '@/lib/haptics';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
+import { EmojiGridWithCustom } from '@/components/shared/EmojiGridWithCustom';
+import { EntityCardWrapper } from '@/components/shared/EntityCardWrapper';
 
 interface ClienteCardProps {
   cliente: Cliente & { reminder_date?: string | null };
@@ -31,8 +33,7 @@ const PALETTE_COLORS = [
   '#fee2e2', '#fecaca', '#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d', '#450a0a',
 ];
 
-// Quick emojis
-const QUICK_EMOJIS = ['🏠', '🏡', '🏰', '🏛️', '🌳', '🌊', '⭐', '🔥', '💎', '🎯', '📞', '📸'];
+const BUYER_EMOJIS = ['🏠', '🏡', '🏰', '🏛️', '🌳', '🌊', '⭐', '🔥', '💎', '🎯', '📞', '📸'];
 
 // Status columns (default)
 const defaultStatusColumns: Array<{ id: ClienteStatus; label: string; color: string }> = [
@@ -51,72 +52,7 @@ const isUrgent = (tempoRicerca: string | null): boolean => {
   return lower.includes('less than 3') || lower.includes('< 3') || lower.includes('1 month');
 };
 
-// Emoji grid with custom "+" input
-const EmojiGridWithCustom = memo(({ currentEmoji, onSelect, onRemove }: {
-  currentEmoji: string | null;
-  onSelect: (emoji: string) => void;
-  onRemove: () => void;
-}) => {
-  const [showInput, setShowInput] = useState(false);
-  const [customEmoji, setCustomEmoji] = useState('');
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (showInput && inputRef.current) inputRef.current.focus();
-  }, [showInput]);
-
-  return (
-    <div className="flex flex-wrap items-center gap-1 max-w-[220px]">
-      {currentEmoji && (
-        <button
-          onClick={onRemove}
-          className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-          title="Rimuovi emoji"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
-      )}
-      {QUICK_EMOJIS.map((emoji) => (
-        <button
-          key={emoji}
-          onClick={() => onSelect(emoji)}
-          className={cn(
-            "w-7 h-7 rounded-lg flex items-center justify-center text-base hover:bg-muted transition-colors",
-            currentEmoji === emoji && "bg-muted ring-1 ring-foreground"
-          )}
-        >
-          {emoji}
-        </button>
-      ))}
-      {showInput ? (
-        <input
-          ref={inputRef}
-          value={customEmoji}
-          onChange={(e) => setCustomEmoji(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && customEmoji.trim()) {
-              onSelect(customEmoji.trim());
-              setCustomEmoji('');
-              setShowInput(false);
-            }
-          }}
-          onBlur={() => { setShowInput(false); setCustomEmoji(''); }}
-          className="w-10 h-7 text-center text-base bg-muted rounded-lg border-0 outline-none focus:ring-1 focus:ring-foreground"
-          placeholder="😀"
-          maxLength={2}
-        />
-      ) : (
-        <button
-          onClick={() => setShowInput(true)}
-          className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted"
-        >
-          +
-        </button>
-      )}
-    </div>
-  );
-});
-EmojiGridWithCustom.displayName = 'EmojiGridWithCustom';
 
 // Unified picker pill component
 const ColorStatusPickerPill = memo(({ 
@@ -195,6 +131,7 @@ const ColorStatusPickerPill = memo(({
             currentEmoji={currentEmoji}
             onSelect={(emoji) => { onEmojiSelect(emoji); onClose(); }}
             onRemove={() => { onEmojiSelect(null); onClose(); }}
+            emojis={BUYER_EMOJIS}
           />
         </div>
 
@@ -328,52 +265,20 @@ export const ClienteCard = memo(({
 }: ClienteCardProps) => {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [pickerPos, setPickerPos] = useState({ x: 0, y: 0 });
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    triggerHaptic('medium');
-    setPickerPos({ x: e.clientX, y: e.clientY });
+  const handleContextAction = useCallback((pos: { x: number; y: number }) => {
+    setPickerPos(pos);
     setPickerOpen(true);
   }, []);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStartPos.current = { x: touch.clientX, y: touch.clientY };
-    
-    longPressTimer.current = setTimeout(() => {
-      triggerHaptic('medium');
-      setPickerPos({ x: touch.clientX, y: touch.clientY });
-      setPickerOpen(true);
-    }, 500);
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (!touchStartPos.current || !longPressTimer.current) return;
-    
-    const touch = e.touches[0];
-    const dx = Math.abs(touch.clientX - touchStartPos.current.x);
-    const dy = Math.abs(touch.clientY - touchStartPos.current.y);
-    
-    if (dx > 10 || dy > 10) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
-    if (longPressTimer.current) {
-      clearTimeout(longPressTimer.current);
-      longPressTimer.current = null;
-    }
-  }, []);
+  const handleCardClick = useCallback(() => {
+    if (pickerOpen) return;
+    onClick();
+  }, [pickerOpen, onClick]);
 
   const urgent = isUrgent(cliente.tempo_ricerca);
   const textColor = isDarkColor(cliente.card_color) ? 'text-white' : 'text-foreground';
 
-  // Reminder status
   const reminderStatus = useMemo(() => {
     if (!cliente.reminder_date) return null;
     const date = new Date(cliente.reminder_date);
@@ -383,7 +288,6 @@ export const ClienteCard = memo(({
     return null;
   }, [cliente.reminder_date]);
 
-  // Days since last contact
   const daysSinceContact = useMemo(() => {
     const refDate = cliente.last_contact_date || cliente.updated_at;
     if (!refDate) return null;
@@ -397,26 +301,13 @@ export const ClienteCard = memo(({
   };
 
   return (
-    <div
-      className={cn(
-        "relative rounded-xl p-3 cursor-pointer transition-all shadow-lg",
-        "hover:shadow-xl",
-        isDragging && "opacity-70 rotate-2 shadow-xl",
-        !cliente.card_color && "bg-white",
-        textColor
-      )}
-      style={{ backgroundColor: cliente.card_color || undefined }}
-      onClick={onClick}
-      onContextMenu={handleContextMenu}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
+    <EntityCardWrapper
+      cardColor={cliente.card_color}
+      isDragging={isDragging}
+      onClick={handleCardClick}
+      onContextAction={handleContextAction}
+      className={cn("relative p-3 shadow-lg hover:shadow-xl", !cliente.card_color && "bg-white", textColor)}
     >
-      {/* Qualified sparkle badge */}
-      {cliente.status === 'qualified' && (
-        <div className="absolute -top-1.5 -right-1.5 text-base animate-pulse" title="Qualificato">✨</div>
-      )}
-
       {/* Header with emoji and name */}
       <div className="flex items-start gap-2 mb-2">
         <span className="text-xl flex-shrink-0">
@@ -522,7 +413,7 @@ export const ClienteCard = memo(({
           onClose={() => setPickerOpen(false)}
         />
       )}
-    </div>
+    </EntityCardWrapper>
   );
 });
 
