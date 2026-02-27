@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
+import { triggerArcaneFog } from '@/lib/arcaneFog';
+import { triggerHaptic } from '@/lib/haptics';
+import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/app_logo.svg';
 import {
   Sidebar,
@@ -45,6 +48,41 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [logoWiggle, setLogoWiggle] = useState(false);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const playTrillo = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/trillo_msn.mp3');
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
+  const handleLogoTap = useCallback(() => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    setLogoWiggle(true);
+    setTimeout(() => setLogoWiggle(false), 400);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      triggerHaptic('success');
+      triggerArcaneFog();
+      playTrillo();
+      supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
+    } else if (tapCountRef.current === 1) {
+      tapTimerRef.current = setTimeout(() => {
+        if (tapCountRef.current === 1) {
+          triggerHaptic('selection');
+          navigate('/');
+        }
+        tapCountRef.current = 0;
+      }, 400);
+    } else {
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+    }
+  }, [navigate, playTrillo]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -59,11 +97,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity }: AppSi
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="p-4">
-        <div className="flex items-center gap-2 overflow-hidden">
+        <div className="flex items-center justify-center overflow-hidden">
           <img
             src={logo}
             alt="Logo"
-            className="h-8 w-auto shrink-0"
+            className={`h-10 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}
+            onClick={handleLogoTap}
           />
         </div>
       </SidebarHeader>
