@@ -179,14 +179,24 @@ export default function AppLayout() {
               borderBottomRightRadius: '1.5rem',
             }}
           >
-            <SidebarTrigger className="-ml-1" />
+            <SidebarTrigger className="-ml-1 md:flex hidden" />
+            {/* Mobile: centered logo only */}
+            <div className="md:hidden flex-1 flex justify-center">
+              <img
+                src={logo}
+                alt="Logo"
+                className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+                onClick={handleLogoTap}
+              />
+            </div>
+            {/* Desktop: logo + notification */}
             <img
               src={logo}
               alt="Logo"
-              className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+              className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 hidden md:block ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
               onClick={handleLogoTap}
             />
-            <div className="ml-auto">
+            <div className="ml-auto hidden md:block">
               <NotificationBell onOpenCliente={handleOpenCliente} inline />
             </div>
           </header>
