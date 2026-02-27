@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star, MoreHorizontal } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star, MoreHorizontal, User, FileText, Pencil } from 'lucide-react';
 import CommentPopover from './CommentPopover';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
@@ -415,6 +415,7 @@ const CalendarPage = () => {
   const [currentWeekStart, setCurrentWeekStart] = useState(() => new Date());
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const [addMenuInitialType, setAddMenuInitialType] = useState<'cliente' | 'notizia' | null>(null);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
@@ -1343,7 +1344,7 @@ const CalendarPage = () => {
 
             <div className={cn(
               "grid gap-2 flex-1",
-              viewMode === 'day' ? 'grid-cols-1' : viewMode === '3days' ? 'grid-cols-3' : 'grid-cols-7'
+              viewMode === 'day' ? 'grid-cols-1 max-w-2xl mx-auto' : viewMode === '3days' ? 'grid-cols-3' : 'grid-cols-7'
             )}>
               {viewDays.map((day) => {
                 const dayKey = format(day, 'yyyy-MM-dd');
@@ -1424,17 +1425,57 @@ const CalendarPage = () => {
                           {provided.placeholder}
                         </div>
 
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDate(day);
-                            setShowAddMenu(true);
-                          }}
-                          className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span className="text-[10px] font-medium">Aggiungi</span>
-                        </button>
+                        {viewMode === 'day' ? (
+                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDate(day);
+                                setShowAddMenu(true);
+                                setAddMenuInitialType('cliente');
+                              }}
+                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
+                            >
+                              <User className="w-3.5 h-3.5" />
+                              Buyer
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDate(day);
+                                setShowAddMenu(true);
+                                setAddMenuInitialType('notizia');
+                              }}
+                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                              Seller
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedDate(day);
+                                setShowAddTaskDialog(true);
+                              }}
+                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                              Task
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDate(day);
+                              setShowAddMenu(true);
+                            }}
+                            className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span className="text-[10px] font-medium">Aggiungi</span>
+                          </button>
+                        )}
                       </div>
                     )}
                   </Droppable>
@@ -1479,18 +1520,21 @@ const CalendarPage = () => {
       {selectedDate &&
       <AddToCalendarMenu
         open={showAddMenu}
-        onOpenChange={setShowAddMenu}
+        onOpenChange={(open) => { setShowAddMenu(open); if (!open) setAddMenuInitialType(null); }}
         date={selectedDate}
         clienti={clienti || []}
         notizie={notizie || []}
+        initialType={addMenuInitialType}
         onAddAppointment={() => {
           setShowAddMenu(false);
+          setAddMenuInitialType(null);
           setShowAddDialog(true);
         }}
         onAddClienteReminder={handleAddClienteReminder}
         onAddNotiziaReminder={handleAddNotiziaReminder}
         onAddTask={() => {
           setShowAddMenu(false);
+          setAddMenuInitialType(null);
           setShowAddTaskDialog(true);
         }} />
 
