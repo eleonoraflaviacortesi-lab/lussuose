@@ -178,8 +178,8 @@ export function ClienteDetail({
               />
             </div>
             <StarRating
-              value={(cliente as any).rating ?? null}
-              onChange={(val) => onUpdate({ rating: val } as any)}
+              value={cliente.rating ?? null}
+              onChange={(val) => onUpdate({ rating: val })}
               size="sm"
             />
           </div>

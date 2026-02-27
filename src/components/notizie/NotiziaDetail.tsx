@@ -143,15 +143,42 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   const updateAndSave = useCallback((field: string, value: any) => {
     setEditData(prev => {
       const newData = { ...prev, [field]: value };
+      // Save directly with new data to avoid stale closure
       setTimeout(() => {
         if (saveTimeoutRef.current) {
           clearTimeout(saveTimeoutRef.current);
         }
-        performSave();
+        if (!notizia || !newData.name.trim()) return;
+        
+        let reminderDateTime: string | null = null;
+        if (newData.reminder_date) {
+          const [hours, minutes] = newData.reminder_time.split(':');
+          const reminderDate = new Date(newData.reminder_date);
+          reminderDate.setHours(parseInt(hours), parseInt(minutes));
+          reminderDateTime = reminderDate.toISOString();
+        }
+        
+        updateNotizia.mutate({
+          id: notizia.id,
+          name: newData.name,
+          zona: newData.zona || undefined,
+          phone: newData.phone || undefined,
+          type: newData.type || undefined,
+          notes: newData.notes || undefined,
+          status: newData.status,
+          emoji: newData.emoji || '📋',
+          reminder_date: reminderDateTime,
+          prezzo_richiesto: newData.prezzo_richiesto,
+          valore: newData.valore,
+          rating: newData.rating,
+        });
+        
+        setShowSaved(true);
+        setTimeout(() => setShowSaved(false), 1500);
       }, 100);
       return newData;
     });
-  }, [performSave]);
+  }, [notizia, updateNotizia]);
 
   // Inizializza editData quando cambia la notizia
   useEffect(() => {
@@ -170,7 +197,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         comments: notizia.comments || [],
         prezzo_richiesto: notizia.prezzo_richiesto ?? null,
         valore: notizia.valore ?? null,
-        rating: (notizia as any).rating ?? null,
+        rating: notizia.rating ?? null,
       });
       setNewComment('');
     }
