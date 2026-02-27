@@ -346,6 +346,7 @@ export type Database = {
           piscina: string | null
           portale: string | null
           property_name: string | null
+          rating: number | null
           ref_number: string | null
           regioni: string[] | null
           reminder_date: string | null
@@ -398,6 +399,7 @@ export type Database = {
           piscina?: string | null
           portale?: string | null
           property_name?: string | null
+          rating?: number | null
           ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
@@ -450,6 +452,7 @@ export type Database = {
           piscina?: string | null
           portale?: string | null
           property_name?: string | null
+          rating?: number | null
           ref_number?: string | null
           regioni?: string[] | null
           reminder_date?: string | null
@@ -789,6 +792,7 @@ export type Database = {
           notes: string | null
           phone: string | null
           prezzo_richiesto: number | null
+          rating: number | null
           reminder_date: string | null
           status: string
           type: string | null
@@ -809,6 +813,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           prezzo_richiesto?: number | null
+          rating?: number | null
           reminder_date?: string | null
           status?: string
           type?: string | null
@@ -829,6 +834,7 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           prezzo_richiesto?: number | null
+          rating?: number | null
           reminder_date?: string | null
           status?: string
           type?: string | null
