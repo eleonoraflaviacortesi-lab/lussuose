@@ -1,44 +1,71 @@
 
 
-## Analisi: problemi identificati nell'app
+## Plan: Restructure Navigation with Left Sidebar
 
-### 1. Rating Seller: loop di stato che annulla l'aggiornamento istantaneo
-**File**: `src/components/notizie/NotiziaDetail.tsx` (linea 184)  
-**Problema**: Il `useEffect([notizia])` re-inizializza TUTTO `editData` ogni volta che l'oggetto `notizia` cambia referenza (cosa che succede ad ogni optimistic update). Quindi: click stella → `setEditData` → `mutate` con optimistic update → `notizia` cambia referenza → `useEffect` sovrascrive `editData` col valore vecchio → flash visivo.  
-**Fix**: Cambiare la dependency da `[notizia]` a `[notizia?.id]` per re-inizializzare solo quando si apre un'altra notizia.
+### Current State
+- Navigation uses a hamburger menu in the header (slide-in drawer) + a floating right-side quick-nav on desktop
+- All pages are tab-based, rendered via `activeTab` state in `Index.tsx`
+- The shadcn `Sidebar` component already exists in `src/components/ui/sidebar.tsx`
+- Breadcrumb component already exists in `src/components/ui/breadcrumb.tsx`
 
-### 2. CalendarPage: useEffect di sync creano loop infinito
-**File**: `src/components/calendar/CalendarPage.tsx` (linee 466-480)  
-**Problema**: I due `useEffect` aggiunti per sincronizzare `selectedCliente` e `selectedNotizia` con la cache creano un loop: optimistic update → cache cambia → `useEffect` aggiorna lo stato locale → re-render → e il confronto `latest !== selectedCliente` è sempre true perché sono oggetti diversi.  
-**Fix**: Rimuovere entrambi i `useEffect`. L'optimistic update locale (`setSelectedCliente(prev => ({...prev, ...updates}))`) è già sufficiente.
+### Implementation Steps
 
-### 3. Rating Seller: debounce pendente sovrascrive il rating
-**File**: `src/components/notizie/NotiziaDetail.tsx` (linea 369-373)  
-**Problema**: Se l'utente modifica un campo di testo e poi subito clicca una stella, il `setTimeout` di 100ms in `updateAndSave` o il debounce pendente in `triggerAutoSave` potrebbe sovrascrivere il rating con dati stale.  
-**Fix**: Nella onChange del rating, aggiungere `clearTimeout(saveTimeoutRef.current)` prima della mutazione diretta.
+#### 1. Create AppSidebar component
+**New file**: `src/components/layout/AppSidebar.tsx`
+- 5 nav items: Dashboard, Properties, Contacts, Activities, Settings
+- Icons: LayoutDashboard, Building2, Users, CalendarDays, Settings
+- Use shadcn `Sidebar` with `collapsible="icon"` (mini mode on collapse)
+- Logo at top in `SidebarHeader`
+- Profile avatar + sign-out in `SidebarFooter`
+- Persistent "+ New" dropdown button using `DropdownMenu` with 3 options: New Property, New Contact, New Activity
+- Active state highlighting via `useLocation`
 
----
+#### 2. Create Breadcrumbs component
+**New file**: `src/components/layout/AppBreadcrumbs.tsx`
+- Uses existing `breadcrumb.tsx` UI components
+- Reads current route + any detail context (property name, contact name) from a React context or props
+- Shows: Section > Detail Name when on a detail view
 
-## Piano di implementazione
+#### 3. Create new layout wrapper
+**New file**: `src/components/layout/AppLayout.tsx`
+- Wraps `SidebarProvider` + `AppSidebar` + `SidebarInset` with header containing `SidebarTrigger` + breadcrumbs + notification bell
+- Replaces the old `Header` + `DesktopQuickNav` combo
+- Contains the main content area with `PullToRefresh`
 
-### Step 1 — Fix NotiziaDetail useEffect dependency
-In `src/components/notizie/NotiziaDetail.tsx`, linea 204:
-- Cambiare `}, [notizia]);` in `}, [notizia?.id]);`
+#### 4. Update routing in App.tsx
+- Update routes to use cleaner paths: `/`, `/properties`, `/contacts`, `/activities`, `/settings`
+- Keep old paths as redirects temporarily
 
-### Step 2 — Fix NotiziaDetail rating: cancella debounce pendente
-In `src/components/notizie/NotiziaDetail.tsx`, linee 369-374, nella onChange del rating aggiungere:
-```tsx
-onChange={(val) => {
-  if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-  setEditData(prev => ({ ...prev, rating: val }));
-  if (notizia) {
-    updateNotizia.mutate({ id: notizia.id, rating: val, silent: true });
-  }
-}}
-```
+#### 5. Refactor Index.tsx
+- Remove old `Header` import and `DesktopQuickNav`
+- Remove `FloatingSparkles` and `MagicCursor` (not premium/calm)
+- Wrap content in new `AppLayout`
+- Derive active section from URL path instead of `activeTab` state
+- Map sections: Dashboard → `PersonalDashboard`, Properties → `NotiziePage`, Contacts → `ClientiPage`, Activities → `CalendarPage`, Settings → `SettingsPage`
 
-### Step 3 — Rimuovere i useEffect di sync in CalendarPage
-In `src/components/calendar/CalendarPage.tsx`, rimuovere le linee 465-480 (i due `useEffect` che sincronizzano `selectedCliente` e `selectedNotizia` dalla cache).
+#### 6. Update index.css
+- Remove `glass-header`, `glass-nav`, `ticker-smooth` styles (no longer needed)
+- Ensure sidebar CSS variables are clean
 
-Mantenere la riga 1618 (`setSelectedCliente(prev => ...)`) che fa il patch locale immediato per il buyer.
+#### 7. Remove obsolete files
+- `src/components/layout/DesktopQuickNav.tsx` — replaced by sidebar
+- Old hamburger menu code in `Header.tsx` — replaced entirely
+
+### Route Mapping (old → new)
+| Old | New | Component |
+|-----|-----|-----------|
+| `/` | `/` | PersonalDashboard |
+| `/notizie` | `/properties` | NotiziePage |
+| `/clienti` | `/contacts` | ClientiPage |
+| `/calendario` | `/activities` | CalendarPage |
+| `/impostazioni` | `/settings` | SettingsPage |
+| `/chat` | `/chat` | OfficeChatPage (hidden from sidebar for now) |
+| `/ufficio` | `/office` | UfficioPage (hidden from sidebar for now) |
+
+### "+New" Button Behavior
+- Positioned prominently in sidebar below nav items
+- Dropdown with 3 options that open the respective "Add" dialogs:
+  - New Property → opens `AddNotiziaDialog`
+  - New Contact → opens `AddClienteDialog`  
+  - New Activity → opens `AddAppointmentDialog`
 
