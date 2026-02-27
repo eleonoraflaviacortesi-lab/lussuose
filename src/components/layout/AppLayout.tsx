@@ -132,7 +132,7 @@ export default function AppLayout() {
             <img
               src={logo}
               alt="Logo"
-              className="h-9 w-auto cursor-pointer select-none"
+              className="h-14 -my-3 w-auto cursor-pointer select-none"
               onClick={() => navigate('/')}
             />
             <div className="h-4 w-px bg-border/40 mx-1" />
