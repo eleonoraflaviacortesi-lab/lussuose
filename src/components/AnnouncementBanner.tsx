@@ -23,14 +23,11 @@ export const AnnouncementBanner = ({
   ));
 
   return (
-    <div className="w-full select-none relative">
-      {/* Banner background + text */}
+    <div className="w-full select-none">
+      {/* Banner bg + scrolling text */}
       <div style={{ backgroundColor: bgColor, color: textColor }}>
         <div className="overflow-hidden py-2">
-          <div
-            className="flex whitespace-nowrap animate-scroll"
-            style={animationStyle}
-          >
+          <div className="flex whitespace-nowrap animate-scroll" style={animationStyle}>
             <span className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
               {textBlock}
             </span>
@@ -41,13 +38,11 @@ export const AnnouncementBanner = ({
         </div>
       </div>
 
-      {/* Wave decoration - semicircles in page bg color overlapping the banner bottom */}
-      <div className="relative -mt-[1px]" style={{ backgroundColor: bgColor }}>
-        <div className="overflow-hidden" style={{ height: '10px' }}>
-          <div className="flex" style={{ width: 'max-content' }}>
-            <WaveMarquee color="hsl(var(--background))" strokeColor="hsl(var(--background))" />
-            <WaveMarquee color="hsl(var(--background))" strokeColor="hsl(var(--background))" />
-          </div>
+      {/* Scalloped edge: white semicircles biting into the black banner */}
+      <div className="relative -mt-[10px] overflow-hidden" style={{ height: '12px', pointerEvents: 'none' }}>
+        <div className="flex" style={{ width: 'max-content' }}>
+          <WaveMarquee color="hsl(var(--background))" />
+          <WaveMarquee color="hsl(var(--background))" />
         </div>
       </div>
     </div>
