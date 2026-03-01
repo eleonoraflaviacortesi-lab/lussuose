@@ -4,6 +4,7 @@ import { LogOut, Menu, X, House, CalendarDays, Send, Briefcase, Building2, Messa
 import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
+import { useBannerSettings } from '@/hooks/useBannerSettings';
 import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
@@ -42,6 +43,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
   const { signOut, profile } = useAuth();
   const { kpis } = useKPIs('year');
   const { targets } = useSedeTargets();
+  const { settings: bannerSettings } = useBannerSettings();
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -114,20 +116,34 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
   const remaining = Math.max(0, target - current);
   const fatturatoCredito = kpis?.fatturatoCredito?.value || 0;
 
+  const interpolateBannerText = (template: string) => {
+    return template
+      .replace(/\{remaining\}/g, formatCurrency(remaining))
+      .replace(/\{target\}/g, formatCurrency(target))
+      .replace(/\{fatturatoCredito\}/g, formatCurrency(fatturatoCredito));
+  };
+
+  const bannerTexts = [bannerSettings.text1, bannerSettings.text2, bannerSettings.text3, bannerSettings.text4]
+    .filter(Boolean)
+    .map(interpolateBannerText);
+
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-[60]">
-        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black" />
-        <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
-          <div className="flex ticker-smooth whitespace-nowrap pt-2">
+        <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)]" style={{ backgroundColor: bannerSettings.bgColor }} />
+        <div className="pt-[env(safe-area-inset-top)] pb-2 overflow-hidden" style={{ backgroundColor: bannerSettings.bgColor, color: bannerSettings.textColor }}>
+          <div
+            className="flex ticker-smooth whitespace-nowrap pt-2"
+            style={{ animationDuration: `${bannerSettings.speed}s` }}
+          >
             {[...Array(3)].map((_, i) => (
               <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
-                <span>MANCANO €{formatCurrency(remaining)} AL TRAGUARDO</span>
-                <span>★</span>
-                <span>OBBIETTIVO FATTURATO AGENZIA €{formatCurrency(target)}</span>
-                <span>★</span>
-                <span>FATTURATO A CREDITO €{formatCurrency(fatturatoCredito)}</span>
-                <span>★</span>
+                {bannerTexts.map((text, j) => (
+                  <span key={j} className="flex items-center gap-6">
+                    <span>{text}</span>
+                    <span>★</span>
+                  </span>
+                ))}
               </span>
             ))}
           </div>
