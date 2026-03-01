@@ -7,6 +7,7 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { useBannerSettings } from '@/hooks/useBannerSettings';
+import { AnnouncementBanner } from '@/components/AnnouncementBanner';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import logo from '@/assets/app_logo.svg';
 import { AppSidebar } from './AppSidebar';
@@ -187,21 +188,13 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          {/* Scrolling banner */}
-          <div className="overflow-hidden pb-1.5 pt-1.5" style={{ backgroundColor: bannerSettings.bgColor, color: bannerSettings.textColor }}>
-            <div className="flex animate-ticker whitespace-nowrap" style={{ animationDuration: `${bannerSettings.speed}s` }}>
-              {[...Array(3)].map((_, i) => (
-                <span key={i} className="flex items-center gap-6 mx-6 text-xs font-bold tracking-[0.15em] uppercase">
-                  {bannerTexts.map((text, j) => (
-                    <span key={j} className="flex items-center gap-6">
-                      <span>{text}</span>
-                      <span>★</span>
-                    </span>
-                  ))}
-                </span>
-              ))}
-            </div>
-          </div>
+          {/* Scrolling banner with waves */}
+          <AnnouncementBanner
+            texts={bannerTexts}
+            bgColor={bannerSettings.bgColor}
+            textColor={bannerSettings.textColor}
+            speed={bannerSettings.speed}
+          />
           {/* Liquid glass header with logo */}
           <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 px-4"
             style={{
