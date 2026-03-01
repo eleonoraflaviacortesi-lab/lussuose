@@ -133,7 +133,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
         <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)]" style={{ backgroundColor: bannerSettings.bgColor }} />
         <div className="pt-[env(safe-area-inset-top)] pb-2 overflow-hidden" style={{ backgroundColor: bannerSettings.bgColor, color: bannerSettings.textColor }}>
           <div
-            className="flex ticker-smooth whitespace-nowrap pt-2"
+            className="flex animate-ticker whitespace-nowrap pt-2"
             style={{ animationDuration: `${bannerSettings.speed}s` }}
           >
             {[...Array(3)].map((_, i) => (

@@ -4,6 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
+import { useKPIs } from '@/hooks/useKPIs';
+import { useSedeTargets } from '@/hooks/useSedeTargets';
+import { useBannerSettings } from '@/hooks/useBannerSettings';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import logo from '@/assets/app_logo.svg';
 import { AppSidebar } from './AppSidebar';
@@ -57,6 +60,9 @@ export default function AppLayout() {
 
   const { createCliente } = useClienti();
   const { profiles } = useProfiles();
+  const { kpis } = useKPIs('year');
+  const { targets } = useSedeTargets();
+  const { settings: bannerSettings } = useBannerSettings();
   const agents = (profiles || []).map(p => ({ user_id: p.user_id, full_name: p.full_name, avatar_emoji: p.avatar_emoji || '👤' }));
 
   const section = pathToSection[location.pathname] || 'dashboard';
@@ -157,7 +163,20 @@ export default function AppLayout() {
     }
   };
 
-  return (
+    const fatTarget = targets.fatturato_target || 500000;
+    const fatCurrent = kpis?.fatturato?.value || 0;
+    const fatRemaining = Math.max(0, fatTarget - fatCurrent);
+    const fatCredito = kpis?.fatturatoCredito?.value || 0;
+    const formatCurrency = (v: number) => new Intl.NumberFormat('it-IT', { style: 'decimal', minimumFractionDigits: 0 }).format(v);
+    const interpolate = (t: string) => t
+      .replace(/\{remaining\}/g, formatCurrency(fatRemaining))
+      .replace(/\{target\}/g, formatCurrency(fatTarget))
+      .replace(/\{fatturatoCredito\}/g, formatCurrency(fatCredito));
+    const bannerTexts = [bannerSettings.text1, bannerSettings.text2, bannerSettings.text3, bannerSettings.text4]
+      .filter(Boolean)
+      .map(interpolate);
+
+    return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <AppSidebar
@@ -168,6 +187,21 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
+          {/* Scrolling banner */}
+          <div className="overflow-hidden pb-1.5 pt-1.5" style={{ backgroundColor: bannerSettings.bgColor, color: bannerSettings.textColor }}>
+            <div className="flex animate-ticker whitespace-nowrap" style={{ animationDuration: `${bannerSettings.speed}s` }}>
+              {[...Array(3)].map((_, i) => (
+                <span key={i} className="flex items-center gap-6 mx-6 text-xs font-bold tracking-[0.15em] uppercase">
+                  {bannerTexts.map((text, j) => (
+                    <span key={j} className="flex items-center gap-6">
+                      <span>{text}</span>
+                      <span>★</span>
+                    </span>
+                  ))}
+                </span>
+              ))}
+            </div>
+          </div>
           {/* Liquid glass header with logo */}
           <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 px-4"
             style={{
