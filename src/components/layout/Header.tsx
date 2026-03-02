@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { useBannerSettings } from '@/hooks/useBannerSettings';
-import { AnnouncementBanner } from '@/components/AnnouncementBanner';
 import logo from '@/assets/app_logo.svg';
 import ProfileModal from '@/components/profile/ProfileModal';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
@@ -132,13 +131,22 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
     <>
       <header className="fixed top-0 left-0 right-0 z-[60]">
         <div className="absolute inset-x-0 top-0 h-[env(safe-area-inset-top)]" style={{ backgroundColor: bannerSettings.bgColor }} />
-        <div className="pt-[env(safe-area-inset-top)]">
-          <AnnouncementBanner
-            texts={bannerTexts}
-            bgColor={bannerSettings.bgColor}
-            textColor={bannerSettings.textColor}
-            speed={bannerSettings.speed}
-          />
+        <div className="pt-[env(safe-area-inset-top)] pb-2 overflow-hidden" style={{ backgroundColor: bannerSettings.bgColor, color: bannerSettings.textColor }}>
+          <div
+            className="flex ticker-smooth whitespace-nowrap pt-2"
+            style={{ animationDuration: `${bannerSettings.speed}s` }}
+          >
+            {[...Array(3)].map((_, i) => (
+              <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
+                {bannerTexts.map((text, j) => (
+                  <span key={j} className="flex items-center gap-6">
+                    <span>{text}</span>
+                    <span>★</span>
+                  </span>
+                ))}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="glass-header flex items-center px-4 py-1 rounded-b-[2rem]">
           <div className="flex-1 flex justify-start">

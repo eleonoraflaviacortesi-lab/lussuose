@@ -27,33 +27,28 @@ export const useBannerSettings = () => {
 
   useEffect(() => {
     const fetchBannerSettings = async () => {
-      try {
-        const { data } = await supabase
-          .from('app_settings' as any)
-          .select('key, value')
-          .in('key', [
-            'banner_text_1', 'banner_text_2', 'banner_text_3', 'banner_text_4',
-            'banner_bg_color', 'banner_text_color', 'banner_speed'
-          ]);
+      const { data } = await supabase
+        .from('app_settings' as any)
+        .select('key, value')
+        .in('key', [
+          'banner_text_1', 'banner_text_2', 'banner_text_3', 'banner_text_4',
+          'banner_bg_color', 'banner_text_color', 'banner_speed'
+        ]);
 
-        if (data) {
-          const newSettings = { ...defaultSettings };
-          (data as any[]).forEach((item: { key: string; value: string }) => {
-            if (item.key === 'banner_text_1') newSettings.text1 = item.value;
-            if (item.key === 'banner_text_2') newSettings.text2 = item.value;
-            if (item.key === 'banner_text_3') newSettings.text3 = item.value;
-            if (item.key === 'banner_text_4') newSettings.text4 = item.value;
-            if (item.key === 'banner_bg_color') newSettings.bgColor = item.value;
-            if (item.key === 'banner_text_color') newSettings.textColor = item.value;
-            if (item.key === 'banner_speed') newSettings.speed = Number(item.value) || 40;
-          });
-          setSettings(newSettings);
-        }
-      } catch (error) {
-        console.error('Error fetching banner settings:', error);
-      } finally {
-        setIsLoading(false);
+      if (data) {
+        const newSettings = { ...defaultSettings };
+        (data as any[]).forEach((item: { key: string; value: string }) => {
+          if (item.key === 'banner_text_1') newSettings.text1 = item.value;
+          if (item.key === 'banner_text_2') newSettings.text2 = item.value;
+          if (item.key === 'banner_text_3') newSettings.text3 = item.value;
+          if (item.key === 'banner_text_4') newSettings.text4 = item.value;
+          if (item.key === 'banner_bg_color') newSettings.bgColor = item.value;
+          if (item.key === 'banner_text_color') newSettings.textColor = item.value;
+          if (item.key === 'banner_speed') newSettings.speed = Number(item.value) || 40;
+        });
+        setSettings(newSettings);
       }
+      setIsLoading(false);
     };
 
     fetchBannerSettings();
