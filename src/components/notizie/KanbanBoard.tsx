@@ -320,7 +320,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
             <p className={cn(
               "font-medium text-sm leading-tight whitespace-normal",
               isDark ? "text-white" : "text-foreground"
-            )} style={{ wordBreak: 'break-word' }}>
+            )} style={{ wordBreak: 'break-word', fontFamily: "'Instrument Serif', serif" }}>
               {notizia.name}
             </p>
             {notizia.zona && (
