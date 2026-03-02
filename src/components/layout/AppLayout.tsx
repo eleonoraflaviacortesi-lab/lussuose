@@ -12,6 +12,7 @@ import { NotificationBell } from './NotificationBell';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
+import AnnouncementBanner from './AnnouncementBanner';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -159,7 +160,8 @@ export default function AppLayout() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <AnnouncementBanner />
+      <div className="min-h-screen flex w-full pt-[var(--banner-height,28px)]">
         <AppSidebar
           onNewProperty={() => setShowNewProperty(true)}
           onNewContact={() => setShowNewContact(true)}
