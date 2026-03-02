@@ -1,71 +1,36 @@
 
 
-## Plan: Restructure Navigation with Left Sidebar
+## Plan: Add Scrolling Banner Above Header and Sidebar
+
+The user wants the announcement banner (with goal achievement text) to sit **above** both the sidebar and the header, spanning the full width of the viewport.
 
 ### Current State
-- Navigation uses a hamburger menu in the header (slide-in drawer) + a floating right-side quick-nav on desktop
-- All pages are tab-based, rendered via `activeTab` state in `Index.tsx`
-- The shadcn `Sidebar` component already exists in `src/components/ui/sidebar.tsx`
-- Breadcrumb component already exists in `src/components/ui/breadcrumb.tsx`
+- The app uses `AppLayout.tsx` with a sidebar + header layout (desktop)
+- The banner with ticker animation and KPI interpolation currently lives only in `Header.tsx` (the legacy mobile component, not used in AppLayout)
+- `AppLayout.tsx` has no banner — just sidebar + header + content
+- The `useBannerSettings` hook fetches texts/colors/speed from `app_settings` table
+- KPI data comes from `useKPIs` and `useSedeTargets`
 
-### Implementation Steps
+### Plan
 
-#### 1. Create AppSidebar component
-**New file**: `src/components/layout/AppSidebar.tsx`
-- 5 nav items: Dashboard, Properties, Contacts, Activities, Settings
-- Icons: LayoutDashboard, Building2, Users, CalendarDays, Settings
-- Use shadcn `Sidebar` with `collapsible="icon"` (mini mode on collapse)
-- Logo at top in `SidebarHeader`
-- Profile avatar + sign-out in `SidebarFooter`
-- Persistent "+ New" dropdown button using `DropdownMenu` with 3 options: New Property, New Contact, New Activity
-- Active state highlighting via `useLocation`
+1. **Create an `AnnouncementBanner` component** (`src/components/layout/AnnouncementBanner.tsx`)
+   - Uses `useBannerSettings` for text/colors/speed
+   - Uses `useKPIs('year')` and `useSedeTargets` for the interpolation variables (`{remaining}`, `{target}`, `{fatturatoCredito}`)
+   - Renders a full-width fixed bar at the very top (`z-40+`) with the ticker animation
+   - Uses the existing `ticker` animation from tailwind config
 
-#### 2. Create Breadcrumbs component
-**New file**: `src/components/layout/AppBreadcrumbs.tsx`
-- Uses existing `breadcrumb.tsx` UI components
-- Reads current route + any detail context (property name, contact name) from a React context or props
-- Shows: Section > Detail Name when on a detail view
+2. **Update `AppLayout.tsx`**
+   - Add `AnnouncementBanner` as the first element, **outside** the sidebar/header flex container, positioned fixed at `top-0` spanning full width
+   - Push down the rest of the layout (sidebar + header) by the banner height using a top offset (e.g., `top-[banner-height]` on the sticky header, and padding-top on the sidebar)
+   - The banner sits above everything: full viewport width, above sidebar and header
 
-#### 3. Create new layout wrapper
-**New file**: `src/components/layout/AppLayout.tsx`
-- Wraps `SidebarProvider` + `AppSidebar` + `SidebarInset` with header containing `SidebarTrigger` + breadcrumbs + notification bell
-- Replaces the old `Header` + `DesktopQuickNav` combo
-- Contains the main content area with `PullToRefresh`
+3. **Adjust sidebar top offset**
+   - In `AppSidebar` or via CSS, ensure the sidebar starts below the banner height so the banner visually covers the full top strip
 
-#### 4. Update routing in App.tsx
-- Update routes to use cleaner paths: `/`, `/properties`, `/contacts`, `/activities`, `/settings`
-- Keep old paths as redirects temporarily
+### Technical Details
 
-#### 5. Refactor Index.tsx
-- Remove old `Header` import and `DesktopQuickNav`
-- Remove `FloatingSparkles` and `MagicCursor` (not premium/calm)
-- Wrap content in new `AppLayout`
-- Derive active section from URL path instead of `activeTab` state
-- Map sections: Dashboard → `PersonalDashboard`, Properties → `NotiziePage`, Contacts → `ClientiPage`, Activities → `CalendarPage`, Settings → `SettingsPage`
-
-#### 6. Update index.css
-- Remove `glass-header`, `glass-nav`, `ticker-smooth` styles (no longer needed)
-- Ensure sidebar CSS variables are clean
-
-#### 7. Remove obsolete files
-- `src/components/layout/DesktopQuickNav.tsx` — replaced by sidebar
-- Old hamburger menu code in `Header.tsx` — replaced entirely
-
-### Route Mapping (old → new)
-| Old | New | Component |
-|-----|-----|-----------|
-| `/` | `/` | PersonalDashboard |
-| `/notizie` | `/properties` | NotiziePage |
-| `/clienti` | `/contacts` | ClientiPage |
-| `/calendario` | `/activities` | CalendarPage |
-| `/impostazioni` | `/settings` | SettingsPage |
-| `/chat` | `/chat` | OfficeChatPage (hidden from sidebar for now) |
-| `/ufficio` | `/office` | UfficioPage (hidden from sidebar for now) |
-
-### "+New" Button Behavior
-- Positioned prominently in sidebar below nav items
-- Dropdown with 3 options that open the respective "Add" dialogs:
-  - New Property → opens `AddNotiziaDialog`
-  - New Contact → opens `AddClienteDialog`  
-  - New Activity → opens `AddAppointmentDialog`
+- Banner height: ~28-30px (compact single-line ticker)
+- The sidebar's top position and the header's `sticky top` value both need to account for the banner height
+- The `ticker-smooth` class from Header.tsx maps to the `ticker` animation in tailwind config — will use `animate-ticker` with custom duration via inline style
+- CSS variable `--banner-height` can coordinate offsets across sidebar and header
 
