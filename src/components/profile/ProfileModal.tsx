@@ -96,10 +96,10 @@ const ProfileModal = ({ open, onClose, onOpenSettings }: ProfileModalProps) => {
   return (
     <div 
       className={cn(
-        "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background",
+        "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background md:left-[var(--sidebar-width,16rem)]",
         "animate-in slide-in-from-bottom duration-300",
       )}
-      style={{ top: '3.5rem' }}
+      style={{ top: 'calc(var(--banner-height, 28px) + 3.5rem)' }}
     >
       <div className="flex-1 overflow-y-auto px-4 py-6 max-w-sm mx-auto w-full">
         {/* Close button */}
