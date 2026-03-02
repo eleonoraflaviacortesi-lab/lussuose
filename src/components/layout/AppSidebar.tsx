@@ -32,7 +32,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { title: 'Dashboard', url: '/', icon: LayoutDashboard },
   { title: 'Properties', url: '/properties', icon: Building2 },
-  { title: 'Contacts', url: '/contacts', icon: Users },
+  { title: 'Buyers', url: '/contacts', icon: Users },
   { title: 'Activities', url: '/activities', icon: CalendarDays },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];

@@ -11,7 +11,7 @@ import {
 const routeLabels: Record<string, string> = {
   '/': 'Dashboard',
   '/properties': 'Properties',
-  '/contacts': 'Contacts',
+  '/contacts': 'Buyers',
   '/activities': 'Activities',
   '/settings': 'Settings',
   '/chat': 'Chat',
