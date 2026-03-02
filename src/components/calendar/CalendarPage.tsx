@@ -1685,13 +1685,23 @@ const CalendarPage = () => {
         onColorChange={(color) => handleTaskColorChange(taskContextMenu.task.id, color)}
         onUrgentToggle={() => handleTaskUrgentToggle(taskContextMenu.task.id, taskContextMenu.task.is_urgent)}
         onDateChange={async (newDate) => {
-          await updateTask.mutateAsync({ id: taskContextMenu.task.id, due_date: newDate });
-          toast.success('Data aggiornata');
+          try {
+            await updateTask.mutateAsync({ id: taskContextMenu.task.id, due_date: newDate });
+            toast.success('Data aggiornata');
+          } catch (error) {
+            console.error('Error updating task date:', error);
+            toast.error('Errore aggiornamento data');
+          }
           setTaskContextMenu(null);
         }}
         onDelete={async () => {
-          await deleteTask.mutateAsync(taskContextMenu.task.id);
-          toast.success('Task eliminata');
+          try {
+            await deleteTask.mutateAsync(taskContextMenu.task.id);
+            toast.success('Task eliminata');
+          } catch (error) {
+            console.error('Error deleting task:', error);
+            toast.error('Errore eliminazione task');
+          }
           setTaskContextMenu(null);
         }}
         onClose={() => setTaskContextMenu(null)} />
