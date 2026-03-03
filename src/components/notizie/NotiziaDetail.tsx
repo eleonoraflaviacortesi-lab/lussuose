@@ -290,7 +290,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         </button>
         {/* Side peek scrollable content */}
         <div className="flex-1 overflow-y-auto">
-          <div className="w-full p-5 pb-10">
+          <div className="w-full pt-10 px-5 pb-10">
 
         {/* Saved indicator */}
         {showSaved && (
