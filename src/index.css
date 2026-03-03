@@ -201,11 +201,22 @@
     font-size: 9px;
   }
 
-  /* Preserve normal casing for text inputs and textareas */
-  input, textarea, [contenteditable="true"] {
+  /* Preserve normal casing for user-editable content */
+  input, textarea, [contenteditable="true"],
+  .text-normal {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-weight: 400;
+    font-size: inherit;
+  }
+
+  /* User content: card titles, names, notes, status labels, spans inside cards */
+  p, span, td, th,
+  [data-user-content] {
     text-transform: none;
     letter-spacing: normal;
-    font-weight: 400;
+    font-family: inherit;
+    font-size: inherit;
   }
 
   p {
