@@ -950,6 +950,9 @@ const CalendarPage = () => {
 
 
 
+
+
+
             // Use default values
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);if (cliente) {// Use default time of 09:00 if no reminder_date exists
         let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();minutes = oldDate.getMinutes();}} catch {
@@ -985,10 +988,7 @@ const CalendarPage = () => {
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}}}, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]); // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {// Reset dragging state after a short delay to prevent click from firing
       setTimeout(() => setIsDragging(false), 100);try {const { destination, source, draggableId } = result; // Dropped outside
-        if (!destination) {
-          return;
-        }
-
+        if (!destination) {return;}
         // Handle week navigation drops
         if (destination.droppableId === 'prev-week') {
           const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
@@ -1326,11 +1326,11 @@ const CalendarPage = () => {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={cn(
-                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                snapshot.isDraggingOver ?
-                "border-primary bg-primary/10 text-primary" :
-                "border-muted-foreground/20 text-muted-foreground/50"
+              className={cn("w-12 shrink-0 rounded-2xl border-dashed transition-all flex flex-col items-center justify-center gap-2 border-0",
+
+              snapshot.isDraggingOver ?
+              "border-primary bg-primary/10 text-primary" :
+              "border-muted-foreground/20 text-muted-foreground/50"
               )}>
               
                     <ChevronLeft className="w-5 h-5" />
@@ -1471,7 +1471,7 @@ const CalendarPage = () => {
                         setSelectedDate(day);
                         setShowAddMenu(true);
                       }}
-                      className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1">
+                      className="w-full mt-2 py-1.5 rounded-lg border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1 border-0">
                       
                             <Plus className="w-3 h-3" />
                             <span className="text-[10px] font-medium">Aggiungi</span>
@@ -1490,11 +1490,11 @@ const CalendarPage = () => {
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={cn(
-                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                snapshot.isDraggingOver ?
-                "border-primary bg-primary/10 text-primary" :
-                "border-muted-foreground/20 text-muted-foreground/50"
+              className={cn("w-12 shrink-0 rounded-2xl border-dashed transition-all flex flex-col items-center justify-center gap-2 border-0",
+
+              snapshot.isDraggingOver ?
+              "border-primary bg-primary/10 text-primary" :
+              "border-muted-foreground/20 text-muted-foreground/50"
               )}>
               
                     <ChevronRight className="w-5 h-5" />
