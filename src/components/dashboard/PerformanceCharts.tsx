@@ -31,15 +31,15 @@ const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeri
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
-    const filteredData = myData
-      .filter((d) => new Date(d.date) >= startDate)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const filteredData = myData.
+    filter((d) => new Date(d.date) >= startDate).
+    sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     return filteredData.map((d) => ({
       date: new Date(d.date).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' }),
       incarichi: d.incarichi_vendita || 0,
       vendite: d.vendite_numero || 0,
-      fatturato: Number(d.vendite_valore) || 0,
+      fatturato: Number(d.vendite_valore) || 0
     }));
   }, [myData, chartPeriod]);
 
@@ -48,14 +48,14 @@ const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeri
       (acc, d) => ({
         incarichi: acc.incarichi + d.incarichi,
         vendite: acc.vendite + d.vendite,
-        fatturato: acc.fatturato + d.fatturato,
+        fatturato: acc.fatturato + d.fatturato
       }),
       { incarichi: 0, vendite: 0, fatturato: 0 }
     );
   }, [performanceChartData]);
 
   return (
-    <div ref={ref} className="bg-card rounded-2xl shadow-lg p-4 space-y-3">
+    <div ref={ref} className="bg-card rounded-2xl p-4 space-y-3 border shadow-none">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
           <TrendingUp className="w-3 h-3 text-foreground" />
@@ -64,18 +64,18 @@ const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeri
 
         {/* Compact toggle buttons */}
         <div className="inline-flex items-center bg-muted rounded-full p-0.5">
-          {(['week', 'month', 'year'] as const).map((p) => (
-            <button
-              key={p}
-              onClick={() => onChartPeriodChange(p)}
-              className={
-                `px-2.5 py-1 text-[8px] font-semibold tracking-wide uppercase rounded-full transition-all ` +
-                (chartPeriod === p ? 'bg-foreground text-background' : 'text-muted-foreground')
-              }
-            >
+          {(['week', 'month', 'year'] as const).map((p) =>
+          <button
+            key={p}
+            onClick={() => onChartPeriodChange(p)}
+            className={
+            `px-2.5 py-1 text-[8px] font-semibold tracking-wide uppercase rounded-full transition-all ` + (
+            chartPeriod === p ? 'bg-foreground text-background' : 'text-muted-foreground')
+            }>
+            
               {p === 'week' ? 'S' : p === 'month' ? 'M' : 'A'}
             </button>
-          ))}
+          )}
         </div>
       </div>
 
@@ -144,15 +144,15 @@ const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeri
                   dataKey="fatturato"
                   stroke="hsl(var(--accent))"
                   strokeWidth={1.5}
-                  fill="url(#fatturatoGradient)"
-                />
+                  fill="url(#fatturatoGradient)" />
+                
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 });
 
 PerformanceCharts.displayName = 'PerformanceCharts';

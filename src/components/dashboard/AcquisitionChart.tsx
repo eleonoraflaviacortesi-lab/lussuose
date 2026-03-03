@@ -52,7 +52,7 @@ const AcquisitionChart = () => {
   }
 
   return (
-    <div className="bg-card rounded-2xl shadow-lg p-5">
+    <div className="bg-card rounded-2xl p-5 shadow-none border">
       <h3 className="text-sm tracking-tight mb-4 font-light">Focus Acquisizione (Ultimi 7 gg)</h3>
       
       <div className="h-48">

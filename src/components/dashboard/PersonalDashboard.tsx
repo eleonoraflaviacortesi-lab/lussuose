@@ -137,12 +137,12 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       {/* === ROW 2: Contatti, Notizie, Appuntamenti === */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Contatti', kpiKey: 'contatti' as KPIKey, value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Phone },
-          { label: 'Notizie', kpiKey: 'notizie' as KPIKey, value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: FileText },
-          { label: 'Appuntamenti', kpiKey: 'appuntamenti' as KPIKey, value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: CalendarCheck },
-        ].map((w) => {
+        { label: 'Contatti', kpiKey: 'contatti' as KPIKey, value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Phone },
+        { label: 'Notizie', kpiKey: 'notizie' as KPIKey, value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: FileText },
+        { label: 'Appuntamenti', kpiKey: 'appuntamenti' as KPIKey, value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: CalendarCheck }].
+        map((w) => {
           const Icon = w.icon;
-          const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
+          const pct = w.target > 0 ? Math.min(100, Math.round(w.value / w.target * 100)) : 0;
           const isHit = w.target > 0 && w.value >= w.target;
           return (
             <button key={w.label} onClick={() => setSelectedKPI(w.kpiKey)} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97] text-left cursor-pointer">
@@ -161,20 +161,20 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
                 <span>{pct}%</span>
                 {isHit && <span className="font-semibold text-foreground">✓</span>}
               </div>
-            </button>
-          );
+            </button>);
+
         })}
       </div>
 
       {/* === ROW 3: Acquisizioni, Incarichi, Trattative Chiuse === */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Acquisizioni', kpiKey: 'acquisizioni' as KPIKey, value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Home },
-          { label: 'Incarichi', kpiKey: 'incarichi' as KPIKey, value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Handshake },
-          { label: 'Trattative Chiuse', kpiKey: 'trattativeChiuse' as KPIKey, value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp },
-        ].map((w) => {
+        { label: 'Acquisizioni', kpiKey: 'acquisizioni' as KPIKey, value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Home },
+        { label: 'Incarichi', kpiKey: 'incarichi' as KPIKey, value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Handshake },
+        { label: 'Trattative Chiuse', kpiKey: 'trattativeChiuse' as KPIKey, value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp }].
+        map((w) => {
           const Icon = w.icon;
-          const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
+          const pct = w.target > 0 ? Math.min(100, Math.round(w.value / w.target * 100)) : 0;
           const isHit = w.target > 0 && w.value >= w.target;
           return (
             <button key={w.label} onClick={() => setSelectedKPI(w.kpiKey)} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97] text-left cursor-pointer">
@@ -193,8 +193,8 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
                 <span>{pct}%</span>
                 {isHit && <span className="font-semibold text-foreground">✓</span>}
               </div>
-            </button>
-          );
+            </button>);
+
         })}
       </div>
 
@@ -227,7 +227,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       </div>
 
       {/* Incarichi Team */}
-      <div className="bg-card rounded-2xl border border-border shadow p-4 relative overflow-hidden">
+      <div className="bg-card rounded-2xl border border-border p-4 relative overflow-hidden shadow-none">
         <div className="absolute right-2 top-2 opacity-5">
           <Gift className="w-20 h-20 text-foreground" />
         </div>
@@ -267,13 +267,13 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           onOpenChange={(open) => !open && setSelectedKPI(null)}
           kpiKey={selectedKPI}
           title={
-            { contatti: 'CONTATTI REALI', notizie: 'NOTIZIE ACQUISITE', chiusure: 'CHIUSURE TOTALI', conversioni: 'CONVERSIONI', appuntamenti: 'APPUNTAMENTI', acquisizioni: 'ACQUISIZIONI', incarichi: 'INCARICHI', trattativeChiuse: 'TRATTATIVE CHIUSE' }[selectedKPI || 'contatti']
+          { contatti: 'CONTATTI REALI', notizie: 'NOTIZIE ACQUISITE', chiusure: 'CHIUSURE TOTALI', conversioni: 'CONVERSIONI', appuntamenti: 'APPUNTAMENTI', acquisizioni: 'ACQUISIZIONI', incarichi: 'INCARICHI', trattativeChiuse: 'TRATTATIVE CHIUSE' }[selectedKPI || 'contatti']
           }
           value={
-            { contatti, notizie, chiusure, conversioni, appuntamenti: kpis?.appuntamenti?.value || 0, acquisizioni: kpis?.acquisizioni?.value || 0, incarichi: kpis?.incarichi?.value || 0, trattativeChiuse: kpis?.trattativeChiuse?.value || 0 }[selectedKPI || 'contatti']
+          { contatti, notizie, chiusure, conversioni, appuntamenti: kpis?.appuntamenti?.value || 0, acquisizioni: kpis?.acquisizioni?.value || 0, incarichi: kpis?.incarichi?.value || 0, trattativeChiuse: kpis?.trattativeChiuse?.value || 0 }[selectedKPI || 'contatti']
           }
           icon={
-            { contatti: Phone, notizie: FileText, chiusure: Award, conversioni: Zap, appuntamenti: CalendarCheck, acquisizioni: Home, incarichi: Handshake, trattativeChiuse: TrendingUp }[selectedKPI || 'contatti']
+          { contatti: Phone, notizie: FileText, chiusure: Award, conversioni: Zap, appuntamenti: CalendarCheck, acquisizioni: Home, incarichi: Handshake, trattativeChiuse: TrendingUp }[selectedKPI || 'contatti']
           } />
       </Suspense>
     </div>);

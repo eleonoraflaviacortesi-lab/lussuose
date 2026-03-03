@@ -11,24 +11,24 @@ const IncarchiWidget = () => {
   const { incarichiMese, targetMensile, mancanti, percent } = useMemo(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
+
     // Calculate incarichi this month
-    const incarichiMese = myData
-      ?.filter(d => new Date(d.date) >= startOfMonth)
-      .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0) || 0;
-    
+    const incarichiMese = myData?.
+    filter((d) => new Date(d.date) >= startOfMonth).
+    reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0) || 0;
+
     // Calculate monthly target based on weekly ideal * 4
     const weeklyIdeal = settings?.incarichi_settimana || 1;
     const targetMensile = weeklyIdeal * 4;
-    
+
     const mancanti = Math.max(0, targetMensile - incarichiMese);
-    const percent = targetMensile > 0 ? Math.min(100, Math.round((incarichiMese / targetMensile) * 100)) : 0;
-    
+    const percent = targetMensile > 0 ? Math.min(100, Math.round(incarichiMese / targetMensile * 100)) : 0;
+
     return { incarichiMese, targetMensile, mancanti, percent };
   }, [myData, settings]);
 
   return (
-    <div className="bg-card rounded-2xl shadow-lg p-5 relative overflow-hidden">
+    <div className="bg-card rounded-2xl p-5 relative overflow-hidden shadow-none border">
       <div className="absolute right-3 top-3 opacity-5">
         <Target className="w-24 h-24 text-foreground" />
       </div>
@@ -55,8 +55,8 @@ const IncarchiWidget = () => {
           <span className="font-semibold text-foreground">{percent}%</span>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default IncarchiWidget;
