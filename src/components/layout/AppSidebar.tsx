@@ -216,7 +216,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 {isMobile ? (
                   <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
                 ) : (
-                  <span className="!uppercase !tracking-[0.15em]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
+                  <span className="!uppercase !tracking-[0.15em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
                 )}
               </SidebarMenuButton>
             </SidebarMenuItem>
