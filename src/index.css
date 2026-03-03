@@ -138,7 +138,6 @@
 
   html {
     padding: 0 env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    -webkit-overflow-scrolling: touch;
   }
 
   body {
@@ -148,8 +147,6 @@
     font-size: 14px;
     letter-spacing: 0.01em;
     overscroll-behavior-y: contain;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-text-size-adjust: 100%;
   }
 
   h1 {

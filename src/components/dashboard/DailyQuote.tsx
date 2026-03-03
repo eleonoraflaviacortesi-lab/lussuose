@@ -45,7 +45,7 @@ const DailyQuote = () => {
 
   return (
     <div className="py-3 text-center pt-0">
-      <p className="text-[11px] md:text-[12px] tracking-wide text-foreground/70 italic font-light leading-[1.6] pt-0">
+      <p className="text-[12px] tracking-wide text-foreground/70 italic font-light leading-relaxed pt-0">
         "{todayQuote.text}"
       </p>
       <p className="mt-1 text-[9px] tracking-[0.15em] uppercase text-muted-foreground/70">

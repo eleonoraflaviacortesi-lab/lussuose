@@ -7,8 +7,8 @@ const tabs = [
   { label: 'Home', icon: LayoutDashboard, path: '/' },
   { label: 'Notizie', icon: Building2, path: '/properties' },
   { label: 'Buyers', icon: Users, path: '/contacts' },
-  { label: 'Agenda', icon: CalendarDays, path: '/activities' },
-  { label: 'Impost.', icon: Settings, path: '/settings' },
+  { label: 'Calendar', icon: CalendarDays, path: '/activities' },
+  { label: 'Settings', icon: Settings, path: '/settings' },
 ];
 
 export default function MobileTabBar() {
@@ -21,10 +21,8 @@ export default function MobileTabBar() {
   };
 
   return (
-    <nav
-      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-lg border-t border-border/30"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-    >
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-lg border-t border-border/30"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
       <div className="flex items-center justify-around h-14 px-2">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
