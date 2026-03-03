@@ -43,14 +43,20 @@ const pathToSection: Record<string, string> = {
   '/inserisci': 'inserisci',
 };
 
-function FixedHeader({ onOpenCliente }: { logoWiggle?: boolean; onLogoTap?: () => void; onOpenCliente: (id: string) => void }) {
+function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void }) {
   const { state, isMobile } = useSidebar();
   const sidebarLeft = isMobile ? '0px' : state === 'expanded' ? '18rem' : '3.5rem';
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) inputRef.current?.focus();
+  }, [searchOpen]);
 
   return (
     <header
-      className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
+      className="fixed z-30 flex h-14 items-center gap-2 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
       style={{
         left: sidebarLeft,
         top: 'var(--banner-height, 28px)',
@@ -58,22 +64,43 @@ function FixedHeader({ onOpenCliente }: { logoWiggle?: boolean; onLogoTap?: () =
         borderBottomRightRadius: '1.5rem',
       }}
     >
-      <SidebarTrigger className="-ml-1 md:flex hidden shrink-0" />
-
-      {/* Search pill */}
-      <div className="flex-1 max-w-md relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cerca..."
-          className="w-full h-9 rounded-full bg-muted/60 pl-9 pr-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring/30 transition-all"
-        />
+      {/* Left: sidebar trigger + notifications */}
+      <div className="flex items-center gap-1 shrink-0">
+        <SidebarTrigger className="-ml-1 md:flex hidden" />
+        <NotificationBell onOpenCliente={onOpenCliente} inline />
       </div>
 
-      <div className="shrink-0 flex items-center">
-        <NotificationBell onOpenCliente={onOpenCliente} inline />
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Expandable search */}
+      <div className="flex items-center shrink-0">
+        {!searchOpen && (
+          <button
+            onClick={() => setSearchOpen(true)}
+            className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
+          >
+            <Search className="h-4 w-4" />
+          </button>
+        )}
+        <div
+          className={`flex items-center overflow-hidden transition-all duration-300 ease-out ${
+            searchOpen ? 'w-56 opacity-100' : 'w-0 opacity-0'
+          }`}
+        >
+          <div className="relative w-full">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onBlur={() => { if (!search) setSearchOpen(false); }}
+              placeholder="Cerca..."
+              className="w-full h-8 rounded-full bg-muted/60 pl-8 pr-3 text-xs outline-none placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring/30 transition-all"
+            />
+          </div>
+        </div>
       </div>
     </header>
   );
