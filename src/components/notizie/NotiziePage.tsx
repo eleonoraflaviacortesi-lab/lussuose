@@ -110,7 +110,7 @@ const NotiziePage = () => {
   }, [notizie]);
 
   return (
-    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 lg:h-[calc(100vh-100px)] lg:flex lg:flex-col">
+    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2">
       <div className="flex items-center justify-between gap-4 pt-[25px] shadow-none">
         {/* View toggle */}
         <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
@@ -168,7 +168,7 @@ const NotiziePage = () => {
         <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
       )}
 
-      <div className="lg:flex-1 lg:min-h-0">
+      <div>
         {viewMode === 'kanban' ? (
           isLoading ?
           <BoardSkeleton /> :
