@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import { AttachmentsSection } from '@/components/shared/AttachmentsSection';
 import { format } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -266,18 +266,26 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   };
 
   return (
-    <div 
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background md:left-[var(--sidebar-width,16rem)]",
-        "animate-in slide-in-from-bottom duration-300",
-      )}
-      style={{ top: 'calc(var(--banner-height, 28px) + 3.5rem)' }}
-    >
-      {/* Full-screen scrollable content */}
+    <Fragment>
+      {/* Backdrop overlay */}
       <div 
-        className="flex-1 overflow-y-auto"
+        className="fixed inset-0 z-[54] bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200"
+        onClick={() => onOpenChange(false)}
+      />
+      {/* Side peek panel */}
+      <div 
+        className={cn(
+          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.1)]",
+          "animate-in slide-in-from-right duration-300",
+          "w-full sm:w-[480px] md:w-[520px]",
+        )}
+        style={{ top: 'calc(var(--banner-height, 28px) + 3.5rem)' }}
       >
-        <div className="w-full max-w-lg mx-auto p-5 pb-10">
+        {/* Side peek scrollable content */}
+        <div 
+          className="flex-1 overflow-y-auto"
+        >
+          <div className="w-full p-5 pb-10">
         {/* Close button */}
         <button 
           onClick={() => onOpenChange(false)}
@@ -292,7 +300,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             Modifica Notizia
           </h3>
           {showSaved && (
-            <span className="flex items-center gap-1 text-xs text-green-600 animate-in fade-in duration-200">
+            <span className="flex items-center gap-1 text-xs text-success animate-in fade-in duration-200">
               <Check className="w-3 h-3" />
               Salvato
             </span>
@@ -733,8 +741,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           </div>
         </div>
         </div>
+        </div>
       </div>
-    </div>
+    </Fragment>
   );
 };
 
