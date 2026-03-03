@@ -22,7 +22,7 @@
 
 @layer base {
   :root {
-    --banner-height: 28px;
+    --banner-height: 34px;
     --background: 0 0% 95%;
     --foreground: 0 0% 10%;
 
