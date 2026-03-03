@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        serif: ["Playfair Display", "Georgia", "serif"],
-        sans: ["Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        serif: ["Space Mono", "Courier New", "monospace"],
+        sans: ["Space Mono", "Courier New", "monospace"],
+        mono: ["Space Mono", "Courier New", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",
