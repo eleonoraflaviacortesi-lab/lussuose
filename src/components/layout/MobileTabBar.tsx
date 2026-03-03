@@ -22,10 +22,10 @@ export default function MobileTabBar() {
 
   return (
     <nav
-      className="fixed bottom-3 left-3 right-3 z-40 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-card/95 backdrop-blur-lg border-t border-border/30"
       style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
     >
-      <div className="flex items-center justify-around h-[58px] px-1 bg-foreground/95 backdrop-blur-xl rounded-2xl shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)]">
+      <div className="flex items-center justify-around h-14 px-2">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           return (
@@ -36,28 +36,18 @@ export default function MobileTabBar() {
                 navigate(tab.path);
               }}
               className={cn(
-                'flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 rounded-xl transition-all active:scale-95',
-                active ? 'text-background' : 'text-background/40'
+                'flex flex-col items-center justify-center gap-0.5 flex-1 py-1 rounded-lg transition-colors',
+                active ? 'text-foreground' : 'text-muted-foreground'
               )}
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <div
-                className={cn(
-                  'w-9 h-9 rounded-xl flex items-center justify-center transition-all',
-                  active && 'bg-background/20'
-                )}
-              >
-                <tab.icon
-                  className={cn('w-[18px] h-[18px]', active && 'text-background')}
-                  strokeWidth={active ? 2.2 : 1.5}
-                />
+              <div className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center transition-all',
+                active && 'bg-foreground'
+              )}>
+                <tab.icon className={cn('w-4 h-4', active && 'text-background')} strokeWidth={active ? 2.2 : 1.5} />
               </div>
-              <span
-                className={cn(
-                  'text-[8px] leading-none tracking-wide uppercase',
-                  active ? 'font-bold' : 'font-medium'
-                )}
-              >
+              <span className={cn('text-[9px] leading-none', active ? 'font-semibold' : 'font-medium')}>
                 {tab.label}
               </span>
             </button>
