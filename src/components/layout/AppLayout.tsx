@@ -7,6 +7,7 @@ import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import logo from '@/assets/app_logo.svg';
+import starIcon from '@/assets/star_icon.png';
 import { AppSidebar } from './AppSidebar';
 import { AppBreadcrumbs } from './AppBreadcrumbs';
 import { NotificationBell } from './NotificationBell';
@@ -100,13 +101,15 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
       </div>
 
       {/* Center: daily quote */}
-      <div className="flex-1 min-w-0 text-center px-2">
+      <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2">
+        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
         <p
           className="text-[9px] uppercase truncate text-muted-foreground/70"
           style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}
         >
           {quote.text} — {quote.author}
         </p>
+        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
       </div>
 
       {/* Right: expandable search */}
