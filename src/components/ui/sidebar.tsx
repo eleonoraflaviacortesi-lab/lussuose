@@ -156,13 +156,14 @@ const Sidebar = React.forwardRef<
         <SheetContent
           data-sidebar="sidebar"
           data-mobile="true"
-          className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden top-[var(--banner-height,0px)] h-[calc(100svh-var(--banner-height,0px))] pb-[env(safe-area-inset-bottom)]"
+          className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden top-[var(--banner-height,0px)] h-[calc(100svh-var(--banner-height,0px))] pb-[env(safe-area-inset-bottom)] border-r border-border/30"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
           side={side}
+          overlayClassName="bg-black/10"
         >
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>
