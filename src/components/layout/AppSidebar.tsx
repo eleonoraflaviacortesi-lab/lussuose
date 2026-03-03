@@ -74,10 +74,10 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
               onClick={() => setShowProfile(true)}
               className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
             >
-              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
+              <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm shrink-0">
                 {profile.avatar_emoji || '👤'}
               </span>
-              <span className="text-sm font-medium truncate min-w-0">{profile.full_name}</span>
+              <span className="text-[9px] uppercase tracking-[0.15em] font-medium truncate min-w-0">{profile.full_name}</span>
             </button>
           )}
 
@@ -85,9 +85,9 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                className="w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-9 text-xs font-semibold tracking-wide"
+                className="w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-8 text-[9px] tracking-[0.15em]"
               >
-                <Plus className="h-3.5 w-3.5" />
+                <Plus className="h-3 w-3" />
                 <span>Aggiungi</span>
               </Button>
             </DropdownMenuTrigger>
@@ -128,15 +128,15 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           end={item.url === '/'}
                           onClick={handleNavClick}
                           className={cn(
-                            'transition-colors rounded-lg',
-                            isMobile ? 'h-12 text-base gap-3' : '',
+                            'transition-colors rounded-lg text-[9px] tracking-[0.15em] uppercase',
+                            isMobile ? 'h-10 gap-3' : '',
                             active
-                              ? 'bg-foreground text-background font-semibold hover:bg-foreground/90 hover:text-background'
-                              : 'hover:bg-muted text-muted-foreground'
+                              ? 'bg-foreground text-background font-medium hover:bg-foreground/90 hover:text-background'
+                              : 'hover:bg-muted text-muted-foreground font-normal'
                           )}
                           activeClassName=""
                         >
-                          <item.icon className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
+                          <item.icon className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
                           <span>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
@@ -157,11 +157,11 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 onClick={handleSignOut}
                 tooltip="Sign out"
                 className={cn(
-                  'text-muted-foreground hover:text-destructive',
-                  isMobile && 'h-12 text-base gap-3'
+                  'text-muted-foreground hover:text-destructive text-[9px] tracking-[0.15em] uppercase',
+                  isMobile && 'h-10 gap-3'
                 )}
               >
-                <LogOut className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
+                <LogOut className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
                 <span>Sign out</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
