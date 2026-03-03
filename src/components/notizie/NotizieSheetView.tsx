@@ -845,7 +845,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
-    <div className="border border-border rounded-2xl bg-background overflow-hidden"
+    <div className="rounded-2xl bg-card overflow-hidden"
       onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
 
       {/* Add new + filter bar */}

@@ -77,7 +77,7 @@ export const EntityCardWrapper = memo(({
   return (
     <div
       className={cn(
-        "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 border border-border select-none active:scale-[0.97]",
+        "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 border border-border/30 select-none active:scale-[0.97]",
         cardColor ? "backdrop-blur-sm" : "bg-card",
         isDragging && "opacity-70 rotate-2",
         className,
