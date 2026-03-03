@@ -185,7 +185,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className="hover:bg-sidebar-accent/60"
+                      className={`hover:bg-sidebar-accent/60 ${collapsed ? 'justify-center' : 'justify-start'}`}
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4" />
