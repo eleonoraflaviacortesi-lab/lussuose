@@ -92,8 +92,8 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 {profile.avatar_emoji || '👤'}
               </span>
               <div className="min-w-0">
-                <p className="!uppercase !tracking-[0.15em] text-sm font-medium truncate" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.full_name}</p>
-                <p className="!uppercase !tracking-[0.12em] text-xs text-muted-foreground truncate" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.sede}</p>
+                <p className="!uppercase !tracking-[0.15em] !text-[10px] font-medium break-words leading-tight" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.full_name}</p>
+                <p className="!uppercase !tracking-[0.12em] !text-[9px] text-muted-foreground truncate mt-0.5" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.sede}</p>
               </div>
             </div>
           )}
