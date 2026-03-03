@@ -28,7 +28,7 @@ const KPISummaryWidgets = ({ kpis }: KPISummaryWidgetsProps) => {
   if (!kpis) return null;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <div className="grid grid-cols-3 gap-2 md:gap-3">
       {widgets.map((w) => {
         const Icon = w.icon;
         const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
@@ -37,31 +37,34 @@ const KPISummaryWidgets = ({ kpis }: KPISummaryWidgetsProps) => {
         return (
           <div
             key={w.label}
-            className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]"
+            className="rounded-2xl p-3 md:p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]"
           >
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-[10px] font-semibold tracking-[0.15em] uppercase text-muted-foreground">
+            <div className="flex items-center justify-between mb-2 md:mb-3">
+              <p
+                className="text-[8px] md:text-[10px] font-semibold tracking-[0.12em] md:tracking-[0.15em] uppercase text-muted-foreground whitespace-nowrap truncate"
+                style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}
+              >
                 {w.label}
               </p>
-              <Icon className="w-4 h-4 text-muted-foreground" />
+              <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-muted-foreground shrink-0 ml-1" />
             </div>
 
-            <div className="flex items-baseline gap-1.5 mb-3">
-              <span className="text-3xl font-medium">{w.value}</span>
-              <span className="text-sm text-muted-foreground">/ {w.target}</span>
+            <div className="flex items-baseline gap-1 md:gap-1.5 mb-2 md:mb-3">
+              <span className="text-2xl md:text-3xl font-medium">{w.value}</span>
+              <span className="text-xs md:text-sm text-muted-foreground">/ {w.target}</span>
             </div>
 
             <div className="space-y-1">
-              <div className="h-1.5 w-full rounded-full overflow-hidden bg-muted">
+              <div className="h-1 md:h-1.5 w-full rounded-full overflow-hidden bg-muted">
                 <div
                   className="h-full rounded-full transition-all duration-500 bg-foreground"
                   style={{ width: `${pct}%` }}
                 />
               </div>
-              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+              <div className="flex items-center justify-between text-[8px] md:text-[10px] text-muted-foreground">
                 <span>{pct}%</span>
                 {isHit && (
-                  <span className="font-semibold text-foreground">✓ Raggiunto</span>
+                  <span className="font-semibold text-foreground">✓</span>
                 )}
               </div>
             </div>
