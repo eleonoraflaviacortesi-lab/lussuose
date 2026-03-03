@@ -138,7 +138,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
       </div>
 
       {/* Center: daily quote - triple tap for arcane fog */}
-      <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2 cursor-pointer select-none">
+      <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-1 px-1 cursor-pointer select-none">
         <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
         <p
           className={`text-[9px] uppercase text-muted-foreground/70 ${
