@@ -55,7 +55,8 @@ export default function AnnouncementBanner() {
       style={{
         backgroundColor: settings.bgColor,
         color: settings.textColor,
-        height: 'var(--banner-height, 34px)',
+        paddingTop: 'env(safe-area-inset-top, 0px)',
+        height: 'calc(var(--banner-height, 34px) + env(safe-area-inset-top, 0px))',
       }}
     >
       <div

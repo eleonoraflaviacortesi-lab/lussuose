@@ -23,6 +23,8 @@
 @layer base {
   :root {
     --banner-height: 34px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --total-banner-height: calc(var(--banner-height) + var(--safe-top));
     --background: 0 0% 95%;
     --foreground: 0 0% 10%;
 
