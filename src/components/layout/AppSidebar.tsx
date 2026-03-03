@@ -96,6 +96,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
         <SidebarSeparator className="bg-border/30" />
 
+        {/* "+ New" button */}
         <div className="px-2 pt-3 pb-1 flex justify-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -151,13 +152,14 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           onClick={handleNavClick}
                           className={cn(
                             'transition-colors rounded-lg',
+                            isMobile ? 'h-12 text-base gap-3' : '',
                             active
                               ? 'bg-foreground text-background font-semibold hover:bg-foreground/90 hover:text-background'
                               : 'hover:bg-muted text-muted-foreground'
                           )}
                           activeClassName=""
                         >
-                          <item.icon className="h-4 w-4" />
+                          <item.icon className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
                           <span>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
@@ -177,9 +179,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
               <SidebarMenuButton
                 onClick={handleSignOut}
                 tooltip="Sign out"
-                className="text-muted-foreground hover:text-destructive"
+                className={cn(
+                  'text-muted-foreground hover:text-destructive',
+                  isMobile && 'h-12 text-base gap-3'
+                )}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className={cn(isMobile ? 'h-5 w-5' : 'h-4 w-4')} />
                 <span>Sign out</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
