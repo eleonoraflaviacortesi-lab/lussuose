@@ -24,6 +24,7 @@ const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
 const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
 const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
 const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
+const SedeTargetsPage = lazy(() => import('@/components/settings/SedeTargetsPage'));
 const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
@@ -39,6 +40,7 @@ const pathToSection: Record<string, string> = {
   '/contacts': 'contacts',
   '/activities': 'activities',
   '/settings': 'settings',
+  '/sede-targets': 'sede-targets',
   '/chat': 'chat',
   '/office': 'office',
   '/inserisci': 'inserisci',
@@ -279,6 +281,8 @@ export default function AppLayout() {
         return <CalendarPage />;
       case 'settings':
         return <SettingsPage />;
+      case 'sede-targets':
+        return <SedeTargetsPage />;
       case 'chat':
         return <OfficeChatPage />;
       case 'office':
