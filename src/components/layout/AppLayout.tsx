@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 import logo from '@/assets/app_logo.svg';
 import { AppSidebar } from './AppSidebar';
 import { AppBreadcrumbs } from './AppBreadcrumbs';
@@ -41,6 +41,50 @@ const pathToSection: Record<string, string> = {
   '/office': 'office',
   '/inserisci': 'inserisci',
 };
+
+function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boolean; onLogoTap: () => void; onOpenCliente: (id: string) => void }) {
+  const { state, isMobile } = useSidebar();
+  const sidebarLeft = isMobile ? '0px' : state === 'expanded' ? '18rem' : '3.5rem';
+
+  return (
+    <>
+      <header
+        className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear"
+        style={{
+          left: sidebarLeft,
+          top: 'var(--banner-height, 28px)',
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
+          backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+          WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+          boxShadow: 'none',
+          borderBottom: '1px solid rgba(255,255,255,0.4)',
+          borderBottomRightRadius: '1.5rem',
+        }}
+      >
+        <SidebarTrigger className="-ml-1 md:flex hidden" />
+        {/* Mobile: centered logo only */}
+        <div className="md:hidden flex-1 flex justify-center">
+          <img
+            src={logo}
+            alt="Logo"
+            className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+            onClick={onLogoTap}
+          />
+        </div>
+        {/* Desktop: logo + notification */}
+        <img
+          src={logo}
+          alt="Logo"
+          className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 hidden md:block ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
+          onClick={onLogoTap}
+        />
+        <div className="ml-auto hidden md:block">
+          <NotificationBell onOpenCliente={onOpenCliente} inline />
+        </div>
+      </header>
+    </>
+  );
+}
 
 export default function AppLayout() {
   const location = useLocation();
@@ -166,39 +210,11 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          {/* Fixed header - never scrolls */}
-          <header className="fixed z-30 flex h-14 items-center gap-3 px-4 left-0 right-0 md:left-[var(--sidebar-width,3.5rem)]"
-            style={{
-              top: 'var(--banner-height, 28px)',
-              background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
-              backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
-              WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
-              boxShadow: 'none',
-              borderBottom: '1px solid rgba(255,255,255,0.4)',
-              borderBottomRightRadius: '1.5rem',
-            }}
-          >
-            <SidebarTrigger className="-ml-1 md:flex hidden" />
-            {/* Mobile: centered logo only */}
-            <div className="md:hidden flex-1 flex justify-center">
-              <img
-                src={logo}
-                alt="Logo"
-                className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
-                onClick={handleLogoTap}
-              />
-            </div>
-            {/* Desktop: logo + notification */}
-            <img
-              src={logo}
-              alt="Logo"
-              className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 hidden md:block ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
-              onClick={handleLogoTap}
-            />
-            <div className="ml-auto hidden md:block">
-              <NotificationBell onOpenCliente={handleOpenCliente} inline />
-            </div>
-          </header>
+          <FixedHeader
+            logoWiggle={logoWiggle}
+            onLogoTap={handleLogoTap}
+            onOpenCliente={handleOpenCliente}
+          />
           {/* Spacer for fixed header */}
           <div className="h-14 shrink-0" />
 
