@@ -124,7 +124,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
       className="fixed z-30 flex h-14 items-center gap-2 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
       style={{
         left: sidebarLeft,
-        top: 'var(--banner-height, 28px)',
+        top: 'var(--total-banner-height, 28px)',
         backgroundColor: 'white',
         borderBottomRightRadius: '1.5rem',
       }}
@@ -297,7 +297,7 @@ export default function AppLayout() {
   return (
     <SidebarProvider defaultOpen={false}>
       <AnnouncementBanner />
-      <div className="min-h-screen flex w-full min-w-0 overflow-x-hidden pt-[var(--banner-height,28px)]">
+      <div className="min-h-screen flex w-full min-w-0 overflow-x-hidden" style={{ paddingTop: 'var(--total-banner-height, 28px)' }}>
         <AppSidebar
           onNewProperty={() => setShowNewProperty(true)}
           onNewContact={() => setShowNewContact(true)}
