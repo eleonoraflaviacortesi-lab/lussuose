@@ -267,24 +267,21 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   return (
     <Fragment>
-      {/* Backdrop overlay */}
+      {/* Backdrop overlay - transparent to keep content visible */}
       <div 
-        className="fixed inset-0 z-[54] bg-black/20 backdrop-blur-[2px] animate-in fade-in duration-200"
+        className="fixed inset-0 z-[54] bg-black/10 animate-in fade-in duration-200"
         onClick={() => onOpenChange(false)}
       />
       {/* Side peek panel */}
       <div 
         className={cn(
-          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.1)]",
+          "fixed right-0 top-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.12)]",
           "animate-in slide-in-from-right duration-300",
           "w-full sm:w-[480px] md:w-[520px]",
         )}
-        style={{ top: 'calc(var(--banner-height, 28px) + 3.5rem)' }}
       >
         {/* Side peek scrollable content */}
-        <div 
-          className="flex-1 overflow-y-auto"
-        >
+        <div className="flex-1 overflow-y-auto">
           <div className="w-full p-5 pb-10">
         {/* Close button */}
         <button 
