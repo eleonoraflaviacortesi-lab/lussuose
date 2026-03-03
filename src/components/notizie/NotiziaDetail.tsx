@@ -279,7 +279,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           "animate-in slide-in-from-right duration-300",
           "w-full sm:w-[480px] md:w-[520px]",
         )}
-        style={{ top: 'var(--banner-height, 28px)' }}
+        style={{ top: 'calc(var(--banner-height, 28px))' }}
       >
         {/* Side peek scrollable content */}
         <div className="flex-1 overflow-y-auto">
