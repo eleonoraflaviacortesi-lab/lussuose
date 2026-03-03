@@ -903,7 +903,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
       {/* Table */}
       <div
         ref={tableViewportRef}
-        className="overflow-x-hidden [transform:rotateX(180deg)]"
+        className="overflow-x-auto [transform:rotateX(180deg)]"
         onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
         <div style={{ width: totalWidth, minWidth: '100%' }} className="[transform:rotateX(180deg)]">
           <div className="flex sticky top-0 z-10 bg-card border-b border-border/40">

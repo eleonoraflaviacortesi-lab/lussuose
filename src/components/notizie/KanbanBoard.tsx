@@ -548,7 +548,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                 }
               }}
               {...provided.droppableProps}
-              className="flex gap-3 pb-3 overflow-x-hidden lg:gap-3"
+              className="flex gap-3 pb-3 overflow-x-auto lg:gap-3"
             >
               {columns.map((column, columnIndex) => (
                 <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
