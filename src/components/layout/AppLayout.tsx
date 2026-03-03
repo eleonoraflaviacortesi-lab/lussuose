@@ -166,10 +166,10 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          {/* Liquid glass header with logo */}
-          <header className="sticky z-30 flex h-14 shrink-0 items-center gap-3 px-4"
+          {/* Fixed header - never scrolls */}
+          <header className="fixed z-30 flex h-14 items-center gap-3 px-4 left-[var(--sidebar-width,3.5rem)] right-0"
             style={{
-              top: '0px',
+              top: 'var(--banner-height, 28px)',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
               backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
               WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
@@ -199,6 +199,8 @@ export default function AppLayout() {
               <NotificationBell onOpenCliente={handleOpenCliente} inline />
             </div>
           </header>
+          {/* Spacer for fixed header */}
+          <div className="h-14 shrink-0" />
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 overflow-x-hidden">
