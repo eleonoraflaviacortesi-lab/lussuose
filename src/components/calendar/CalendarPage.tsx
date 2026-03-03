@@ -953,6 +953,9 @@ const CalendarPage = () => {
 
 
 
+
+
+
             // Use default values
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);if (cliente) {// Use default time of 09:00 if no reminder_date exists
         let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();minutes = oldDate.getMinutes();}} catch {
@@ -988,12 +991,9 @@ const CalendarPage = () => {
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}}}, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]); // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {// Reset dragging state after a short delay to prevent click from firing
       setTimeout(() => setIsDragging(false), 100);try {const { destination, source, draggableId } = result; // Dropped outside
-        if (!destination) {return;}
-        // Handle week navigation drops
-        if (destination.droppableId === 'prev-week') {
-          const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
-          moveEvent(draggableId, targetDate);
-          return;
+        if (!destination) {return;} // Handle week navigation drops
+        if (destination.droppableId === 'prev-week') {const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
+          moveEvent(draggableId, targetDate);return;
         }
 
         if (destination.droppableId === 'next-week') {
@@ -1080,7 +1080,7 @@ const CalendarPage = () => {
     <div className="pb-8 animate-fade-in pt-[3px]">
 
       {/* Week Navigation - Mobile optimized */}
-      <div className="bg-card rounded-2xl p-3 sm:p-4 mb-6 mx-6 opacity-100 shadow-xl pt-[16px]">
+      <div className="bg-card rounded-2xl p-3 sm:p-4 mb-6 opacity-100 shadow-xl pt-[16px] mx-0 px-0">
         {/* View mode toggle */}
         <div className="flex items-center justify-center gap-1 mb-3">
           {(['day', '3days', 'week', 'month'] as CalendarViewMode[]).map((mode) =>
@@ -1319,7 +1319,7 @@ const CalendarPage = () => {
         </div> :
 
       <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          <div className="flex items-stretch gap-2 px-6">
+          <div className="flex items-stretch gap-2 px-0">
             {viewMode === 'week' &&
           <Droppable droppableId="prev-week">
                 {(provided, snapshot) =>
