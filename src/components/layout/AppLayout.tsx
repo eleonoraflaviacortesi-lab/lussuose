@@ -173,7 +173,7 @@ export default function AppLayout() {
               background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
               backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
               WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
-              boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06), inset 0 1px 1px rgba(255,255,255,1)',
+              boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06), inset 0 -1px 1px rgba(255,255,255,0.6)',
               borderBottom: '1px solid rgba(255,255,255,0.4)',
               borderBottomRightRadius: '1.5rem',
             }}
