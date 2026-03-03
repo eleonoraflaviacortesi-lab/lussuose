@@ -1431,7 +1431,7 @@ const SheetRow = memo(function SheetRow({
       className={cn(
         "flex border-b border-border/20 transition-colors",
         isSelected ? 'ring-1 ring-foreground/20 ring-inset' : '',
-        !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-background' : 'bg-secondary/30'),
+        !cliente.row_bg_color && (idx % 2 === 0 ? 'bg-card' : 'bg-card'),
         rowFormat?.bold && 'font-bold',
         rowFormat?.italic && 'italic',
         rowFormat?.strikethrough && 'line-through',
@@ -2224,7 +2224,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       >
         <div style={{ minWidth: totalWidth }} className="[transform:rotateX(180deg)]">
           {/* Header */}
-          <div className="flex sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b border-border/40">
+          <div className="flex sticky top-0 z-10 bg-card border-b border-border/40">
             <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r border-border/20" style={{ width: rowNumWidth }}>
               #
             </div>
@@ -2373,7 +2373,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       </div>
 
       {/* Footer */}
-      <div className="bg-background border-t border-border/40 px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
+      <div className="bg-card border-t border-border/40 px-3 py-1.5 text-xs text-muted-foreground flex items-center gap-2">
         <span className="flex-1">{sorted.length} buyers{filtered.length !== sorted.length ? ` (${filtered.length} totali)` : ''}</span>
         {Object.values(colFilters).some(s => s.size > 0) && (
           <Button variant="ghost" size="sm" className="h-5 text-[10px] px-2" onClick={() => setColFilters({})}>
