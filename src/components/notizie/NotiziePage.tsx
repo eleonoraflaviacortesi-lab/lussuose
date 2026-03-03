@@ -111,10 +111,10 @@ const NotiziePage = () => {
   }, [notizie]);
 
   return (
-    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 px-0 sm:px-0">
-      <div className="flex items-center justify-between gap-4 pt-[25px] shadow-none">
+    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 px-1 sm:px-0">
+      <div className="flex flex-wrap items-center gap-2 pt-[25px] shadow-none">
         {/* View toggle */}
-        <div className="flex items-center gap-1 bg-card rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-card rounded-lg p-0.5 shrink-0">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
@@ -135,7 +135,7 @@ const NotiziePage = () => {
           </Button>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex w-full sm:w-auto items-center justify-end gap-2 flex-wrap">
           <UndoRedoButtons />
           <Button variant="outline" size="sm" className="gap-1.5 bg-card border-0 hover:bg-muted" onClick={handleExportExcel}>
             <FileSpreadsheet className="w-4 h-4" />
