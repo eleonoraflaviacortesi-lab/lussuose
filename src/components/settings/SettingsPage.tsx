@@ -13,29 +13,29 @@ const SEDI = ['CITTÀ DI CASTELLO', 'AREZZO'] as const;
 
 const pillInputClass = "w-full bg-muted border-0 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 h-12";
 
-const InputField = ({ 
-  label, value, field, suffix, onChange,
-}: { 
-  label: string; value: number; field: string; suffix?: string;
-  onChange: (field: string, value: number) => void;
-}) => (
-  <div className="space-y-2">
+const InputField = ({
+  label, value, field, suffix, onChange
+
+
+
+}: {label: string;value: number;field: string;suffix?: string;onChange: (field: string, value: number) => void;}) =>
+<div className="space-y-2">
     <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground">{label}</span>
     <div className="relative">
       <Input
-        type="number"
-        inputMode="numeric"
-        value={value || ''}
-        onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
-        placeholder="0"
-        className="bg-muted border-0 rounded-xl h-12 text-base pr-12"
-      />
-      {suffix && (
-        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{suffix}</span>
-      )}
+      type="number"
+      inputMode="numeric"
+      value={value || ''}
+      onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+      placeholder="0"
+      className="bg-muted border-0 rounded-xl h-12 text-base pr-12" />
+    
+      {suffix &&
+    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{suffix}</span>
+    }
     </div>
-  </div>
-);
+  </div>;
+
 
 const SettingsPage = () => {
   const { settings, isLoading, saveSettings, defaultSettings } = useUserSettings();
@@ -71,7 +71,7 @@ const SettingsPage = () => {
         trattative_chiuse_settimana: settings.trattative_chiuse_settimana,
         vendite_settimana: settings.vendite_settimana,
         fatturato_credito_settimana: Number(settings.fatturato_credito_settimana),
-        fatturato_generato_settimana: Number(settings.fatturato_generato_settimana),
+        fatturato_generato_settimana: Number(settings.fatturato_generato_settimana)
       });
     }
   }, [settings]);
@@ -88,7 +88,7 @@ const SettingsPage = () => {
 
   const toggleSede = (s: string) => {
     triggerHaptic('selection');
-    setSelectedSedi(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s]);
+    setSelectedSedi((prev) => prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]);
   };
 
   const fatturatoNetto = localSettings.obbiettivo_fatturato;
@@ -98,7 +98,7 @@ const SettingsPage = () => {
   const mediaVenditeMese = (venditeTotali / 11).toFixed(1);
 
   const handleChange = useCallback((field: string, value: number) => {
-    setLocalSettings(prev => ({ ...prev, [field]: value }));
+    setLocalSettings((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   const handleSaveAll = async () => {
@@ -108,16 +108,16 @@ const SettingsPage = () => {
       try {
         const avatarToSave = customEmoji || selectedEmoji;
         const isCoord = role === 'coordinatore' || role === 'admin';
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            full_name: fullName,
-            avatar_emoji: avatarToSave,
-            sede,
-            role,
-            sedi: isCoord ? selectedSedi : [],
-          })
-          .eq('user_id', user.id);
+        const { error } = await supabase.
+        from('profiles').
+        update({
+          full_name: fullName,
+          avatar_emoji: avatarToSave,
+          sede,
+          role,
+          sedi: isCoord ? selectedSedi : []
+        }).
+        eq('user_id', user.id);
         if (error) throw error;
         await refetchProfile();
       } catch (error: any) {
@@ -140,8 +140,8 @@ const SettingsPage = () => {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-6 w-6 border-2 border-foreground border-t-transparent"></div>
-      </div>
-    );
+      </div>);
+
   }
 
   const currentEmoji = customEmoji || selectedEmoji;
@@ -149,17 +149,17 @@ const SettingsPage = () => {
   return (
     <div className="px-4 md:px-6 pb-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-8">
-        <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-          <Settings className="w-7 h-7" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-wide uppercase">IMPOSTAZIONI</h2>
-          <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-            PROFILO & OBIETTIVI
-          </p>
-        </div>
-      </div>
+      
+
+
+
+
+
+
+
+
+
+      
 
       <div className="space-y-6">
         {/* ── PROFILO ── */}
@@ -180,27 +180,27 @@ const SettingsPage = () => {
           <div className="space-y-2">
             <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground text-center">SCEGLI AVATAR</p>
             <div className="flex justify-center gap-2 flex-wrap">
-              {EMOJI_OPTIONS.map((emoji) => (
-                <button
-                  key={emoji}
-                  onClick={() => { setSelectedEmoji(emoji); setCustomEmoji(''); }}
-                  className={cn(
-                    "w-10 h-10 text-xl rounded-full flex items-center justify-center transition-all active:scale-95",
-                    selectedEmoji === emoji && !customEmoji
-                      ? 'bg-foreground text-background'
-                      : 'bg-muted hover:bg-accent'
-                  )}
-                >
+              {EMOJI_OPTIONS.map((emoji) =>
+              <button
+                key={emoji}
+                onClick={() => {setSelectedEmoji(emoji);setCustomEmoji('');}}
+                className={cn(
+                  "w-10 h-10 text-xl rounded-full flex items-center justify-center transition-all active:scale-95",
+                  selectedEmoji === emoji && !customEmoji ?
+                  'bg-foreground text-background' :
+                  'bg-muted hover:bg-accent'
+                )}>
+                
                   {emoji}
                 </button>
-              ))}
+              )}
             </div>
             <input
               placeholder="Oppure incolla emoji personalizzata..."
               value={customEmoji}
               onChange={(e) => setCustomEmoji(e.target.value)}
-              className={cn(pillInputClass, "text-center")}
-            />
+              className={cn(pillInputClass, "text-center")} />
+            
           </div>
 
           {/* Name */}
@@ -212,8 +212,8 @@ const SettingsPage = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 className={cn(pillInputClass, "pl-11")}
-                placeholder="Il tuo nome"
-              />
+                placeholder="Il tuo nome" />
+              
             </div>
           </div>
 
@@ -222,18 +222,18 @@ const SettingsPage = () => {
             <div className="space-y-2">
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">RUOLO</p>
               <div className="flex gap-1">
-                {(['agente', 'coordinatore'] as const).map((r) => (
-                  <button
-                    key={r}
-                    onClick={() => { triggerHaptic('selection'); setRole(r); }}
-                    className={cn(
-                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center capitalize active:scale-95",
-                      role === r ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                    )}
-                  >
+                {(['agente', 'coordinatore'] as const).map((r) =>
+                <button
+                  key={r}
+                  onClick={() => {triggerHaptic('selection');setRole(r);}}
+                  className={cn(
+                    "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center capitalize active:scale-95",
+                    role === r ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                  )}>
+                  
                     {r === 'coordinatore' ? 'Coord.' : 'Agente'}
                   </button>
-                ))}
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -241,50 +241,50 @@ const SettingsPage = () => {
                 {isCoordinator ? 'SEDE PRINCIPALE' : 'SEDE'}
               </p>
               <div className="flex gap-1">
-                {SEDI.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => { triggerHaptic('selection'); setSede(s); }}
-                    className={cn(
-                      "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center gap-1 active:scale-95",
-                      sede === s ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
-                    )}
-                  >
+                {SEDI.map((s) =>
+                <button
+                  key={s}
+                  onClick={() => {triggerHaptic('selection');setSede(s);}}
+                  className={cn(
+                    "flex-1 h-10 rounded-full text-[10px] font-medium transition-all flex items-center justify-center gap-1 active:scale-95",
+                    sede === s ? "bg-foreground text-background" : "bg-muted text-muted-foreground"
+                  )}>
+                  
                     <MapPin className="w-3 h-3" />
                     {s === 'CITTÀ DI CASTELLO' ? 'CDT' : 'AR'}
                   </button>
-                ))}
+                )}
               </div>
             </div>
           </div>
 
           {/* Multi-sede for coordinators */}
-          {isCoordinator && (
-            <div className="space-y-2">
+          {isCoordinator &&
+          <div className="space-y-2">
               <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">SEDI GESTITE</p>
               <div className="flex gap-2">
-                {SEDI.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => toggleSede(s)}
-                    className={cn(
-                      "flex-1 h-12 rounded-2xl text-xs font-medium transition-all flex items-center justify-center gap-2 active:scale-95",
-                      selectedSedi.includes(s)
-                        ? "bg-foreground text-background"
-                        : "bg-muted text-muted-foreground border-2 border-dashed border-muted-foreground/30"
-                    )}
-                  >
+                {SEDI.map((s) =>
+              <button
+                key={s}
+                onClick={() => toggleSede(s)}
+                className={cn(
+                  "flex-1 h-12 rounded-2xl text-xs font-medium transition-all flex items-center justify-center gap-2 active:scale-95",
+                  selectedSedi.includes(s) ?
+                  "bg-foreground text-background" :
+                  "bg-muted text-muted-foreground border-2 border-dashed border-muted-foreground/30"
+                )}>
+                
                     <MapPin className="w-4 h-4" />
                     {s === 'CITTÀ DI CASTELLO' ? 'Città di Castello' : 'Arezzo'}
                     {selectedSedi.includes(s) && <Check className="w-4 h-4" />}
                   </button>
-                ))}
+              )}
               </div>
               <p className="text-[10px] text-muted-foreground text-center">
                 Seleziona le sedi di cui vuoi vedere clienti e notizie
               </p>
             </div>
-          )}
+          }
         </div>
 
         {/* ── PIANO FINANZIARIO ── */}
@@ -351,14 +351,14 @@ const SettingsPage = () => {
         <button
           onClick={handleSaveAll}
           disabled={isSaving}
-          className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
-        >
+          className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50">
+          
           {isSaving ? 'SALVATAGGIO...' : 'SALVA TUTTO'}
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>
-    </div>
-  );
+    </div>);
+
 };
 
 export default SettingsPage;
