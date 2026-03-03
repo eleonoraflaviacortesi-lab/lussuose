@@ -1,12 +1,12 @@
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
 import "./index.css";
 
 // PWA: abilita service worker solo in produzione (evita blank screen in preview/dev)
 import { registerSW } from "virtual:pwa-register";
 
 const BUILD_VERSION = "v2.2.2";
-console.info(`[build] ${BUILD_VERSION} - ${__BUILD_ID__}`);
+const buildId = typeof __BUILD_ID__ !== "undefined" ? __BUILD_ID__ : "no-build-id";
+console.info(`[build] ${BUILD_VERSION} - ${buildId}`);
 
 if (import.meta.env.PROD) {
   // Nuke old caches only in production PWA mode
@@ -57,5 +57,26 @@ if (import.meta.env.PROD) {
   }
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+const rootElement = document.getElementById("root");
 
+if (!rootElement) {
+  throw new Error("Root element not found");
+}
+
+const root = createRoot(rootElement);
+
+async function bootstrap() {
+  try {
+    const { default: App } = await import("./App.tsx");
+    root.render(<App />);
+  } catch (error) {
+    console.error("[bootstrap] Failed to load app", error);
+    root.render(
+      <div className="min-h-screen flex items-center justify-center bg-background text-foreground px-6 text-center">
+        Errore di caricamento app. Ricarica la pagina.
+      </div>
+    );
+  }
+}
+
+bootstrap();
