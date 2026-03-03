@@ -36,7 +36,6 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       data: any;
     }> = [];
 
-    // Add cliente reminders for today
     clienti?.forEach((cliente) => {
       if (cliente.reminder_date && isSameDay(parseISO(cliente.reminder_date), today)) {
         const comments = (cliente.comments || []) as Array<{id: string;text: string;created_at?: string;createdAt?: string;}>;
@@ -58,7 +57,6 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       }
     });
 
-    // Add notizia reminders for today
     notizie?.forEach((notizia) => {
       if (notizia.reminder_date && isSameDay(parseISO(notizia.reminder_date), today)) {
         const comments = notizia.comments || [];
@@ -76,7 +74,6 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       }
     });
 
-    // Sort by time
     return reminders.sort((a, b) => a.time.localeCompare(b.time));
   }, [clienti, notizie, columns, today]);
 
@@ -84,7 +81,6 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
     if (reminder.type === 'notizia' && onNotiziaClick) {
       onNotiziaClick(reminder.data);
     } else if (onGoToCalendar) {
-      // For clienti reminders, go to calendar
       onGoToCalendar();
     }
   };
@@ -100,21 +96,21 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
   }
 
   return (
-    <div className="bg-card rounded-2xl border border-border">
+    <div className="bg-card rounded-3xl border border-border">
       {/* Header */}
       <button
         onClick={goToCalendar}
-        className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors shadow-none">
-        
+        className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition-colors rounded-t-3xl"
+      >
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center">
             <Calendar className="w-5 h-5 text-background" />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground">
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
               Oggi, {format(today, 'd MMMM', { locale: it })}
             </p>
-            <p className="font-semibold">
+            <p className="font-bold text-lg">
               {todayReminders.length} promemoria
             </p>
           </div>
@@ -122,8 +118,8 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
         <ChevronRight className="w-5 h-5 text-muted-foreground" />
       </button>
 
-      {/* Reminders list - compact */}
-      <div className="px-4 pb-4 space-y-2">
+      {/* Reminders list */}
+      <div className="px-5 pb-5 space-y-2">
         {todayReminders.slice(0, 5).map((reminder) => {
           const isBuyer = reminder.type === 'cliente';
 
@@ -132,50 +128,49 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
               key={reminder.id}
               onClick={() => handleReminderClick(reminder)}
               className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all active:scale-[0.98] relative",
-                isBuyer ?
-                "bg-white border border-foreground" :
-                ""
+                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all active:scale-[0.98] relative",
+                isBuyer
+                  ? "bg-background border border-foreground/10"
+                  : ""
               )}
-              style={!isBuyer ? { backgroundColor: reminder.statusColor } : undefined}>
-              
-              {/* Buyer badge */}
-              {isBuyer &&
-              <div className="absolute -top-1.5 right-2 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+              style={!isBuyer ? { backgroundColor: reminder.statusColor } : undefined}
+            >
+              {isBuyer && (
+                <div className="absolute -top-1.5 right-3 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
                   Buyer
                 </div>
-              }
-              
-              {reminder.emoji ?
-              <span className="text-lg">{reminder.emoji}</span> :
+              )}
 
-              <div className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center",
-                isBuyer ? "bg-muted" : "bg-white/20"
-              )}>
-                  {isBuyer ?
-                <User className="w-4 h-4 text-foreground" /> :
-
-                <FileText className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
-                }
+              {reminder.emoji ? (
+                <span className="text-lg">{reminder.emoji}</span>
+              ) : (
+                <div className={cn(
+                  "w-8 h-8 rounded-full flex items-center justify-center",
+                  isBuyer ? "bg-muted" : "bg-white/20"
+                )}>
+                  {isBuyer ? (
+                    <User className="w-4 h-4 text-foreground" />
+                  ) : (
+                    <FileText className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
+                  )}
                 </div>
-              }
+              )}
               <div className="flex-1 min-w-0 text-left">
                 <p className={cn(
-                  "font-medium text-sm truncate",
+                  "font-semibold text-sm truncate",
                   isBuyer ? "text-foreground" : isDarkColor(reminder.statusColor) ? "text-white" : "text-black"
                 )}>
                   {reminder.name}
                 </p>
-                {reminder.lastComment?.text &&
-                <p className={cn(
-                  "text-[9px] truncate mt-0.5 opacity-80",
-                  isBuyer ? "text-muted-foreground" : isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60"
-                )}>
+                {reminder.lastComment?.text && (
+                  <p className={cn(
+                    "text-[9px] truncate mt-0.5 opacity-80",
+                    isBuyer ? "text-muted-foreground" : isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60"
+                  )}>
                     💬 {reminder.lastComment.text.replace(/<[^>]*>/g, '').trim()}
                     {reminder.lastComment.created_at && ` · ${format(parseISO(reminder.lastComment.created_at), 'd MMM', { locale: it })}`}
                   </p>
-                }
+                )}
               </div>
               <span className={cn(
                 "text-xs font-medium",
@@ -183,21 +178,21 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
               )}>
                 {reminder.time}
               </span>
-            </button>);
-
+            </button>
+          );
         })}
-        
-        {todayReminders.length > 5 &&
-        <button
-          onClick={goToCalendar}
-          className="w-full text-center py-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-          
+
+        {todayReminders.length > 5 && (
+          <button
+            onClick={goToCalendar}
+            className="w-full text-center py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
             +{todayReminders.length - 5} altri
           </button>
-        }
+        )}
       </div>
-    </div>);
-
+    </div>
+  );
 };
 
 export default TodayRemindersWidget;
