@@ -155,7 +155,7 @@ export default function AppLayout() {
   };
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <AnnouncementBanner />
       <div className="min-h-screen flex w-full pt-[var(--banner-height,28px)]">
         <AppSidebar
