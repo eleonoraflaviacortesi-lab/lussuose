@@ -12,6 +12,7 @@ import { AppSidebar } from './AppSidebar';
 import { AppBreadcrumbs } from './AppBreadcrumbs';
 import { NotificationBell } from './NotificationBell';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
+import MobileTabBar from './MobileTabBar';
 import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import AnnouncementBanner from './AnnouncementBanner';
@@ -121,7 +122,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
 
   return (
     <header
-      className="fixed z-30 flex h-14 items-center gap-2 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
+      className="fixed z-30 flex h-12 md:h-14 items-center gap-2 px-3 md:px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
       style={{
         left: sidebarLeft,
         top: 'var(--total-banner-height, 28px)',
@@ -308,11 +309,11 @@ export default function AppLayout() {
         <SidebarInset className="min-w-0 max-w-full">
           <FixedHeader onOpenCliente={handleOpenCliente} />
           {/* Spacer for fixed header */}
-          <div className="h-14 shrink-0" />
+          <div className="h-12 md:h-14 shrink-0" />
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 min-w-0 overflow-x-hidden">
-            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6`}>
+            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6 pb-24 md:pb-6`}>
               <Suspense
                 fallback={
                   <div className="py-10 flex items-center justify-center">
@@ -328,6 +329,8 @@ export default function AppLayout() {
           </PullToRefresh>
         </SidebarInset>
 
+        {/* Mobile bottom tab bar */}
+        <MobileTabBar />
 
         {/* Global chat listener */}
         <ChatGlobalListener
