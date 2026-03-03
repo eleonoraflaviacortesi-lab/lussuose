@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Search } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
@@ -42,40 +43,39 @@ const pathToSection: Record<string, string> = {
   '/inserisci': 'inserisci',
 };
 
-function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boolean; onLogoTap: () => void; onOpenCliente: (id: string) => void }) {
+function FixedHeader({ onOpenCliente }: { logoWiggle?: boolean; onLogoTap?: () => void; onOpenCliente: (id: string) => void }) {
   const { state, isMobile } = useSidebar();
   const sidebarLeft = isMobile ? '0px' : state === 'expanded' ? '18rem' : '3.5rem';
+  const [search, setSearch] = useState('');
 
   return (
-    <>
-      <header
-        className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
-        style={{
-          left: sidebarLeft,
-          top: 'var(--banner-height, 28px)',
-          backgroundColor: 'white',
-          borderBottomRightRadius: '1.5rem',
-        }}
-      >
-        {/* Left spacer - matches right side width */}
-        <div className="w-10 shrink-0 flex items-center">
-          <SidebarTrigger className="-ml-1 md:flex hidden" />
-        </div>
-        {/* Centered logo */}
-        <div className="flex-1 flex justify-center">
-          <img
-            src={logo}
-            alt="Logo"
-            className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
-            onClick={onLogoTap}
-          />
-        </div>
-        {/* Right spacer - matches left side width */}
-        <div className="w-10 shrink-0 flex items-center justify-end">
-          <NotificationBell onOpenCliente={onOpenCliente} inline />
-        </div>
-      </header>
-    </>
+    <header
+      className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
+      style={{
+        left: sidebarLeft,
+        top: 'var(--banner-height, 28px)',
+        backgroundColor: 'white',
+        borderBottomRightRadius: '1.5rem',
+      }}
+    >
+      <SidebarTrigger className="-ml-1 md:flex hidden shrink-0" />
+
+      {/* Search pill */}
+      <div className="flex-1 max-w-md relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cerca..."
+          className="w-full h-9 rounded-full bg-muted/60 pl-9 pr-4 text-sm outline-none placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring/30 transition-all"
+        />
+      </div>
+
+      <div className="shrink-0 flex items-center">
+        <NotificationBell onOpenCliente={onOpenCliente} inline />
+      </div>
+    </header>
   );
 }
 
@@ -203,11 +203,7 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          <FixedHeader
-            logoWiggle={logoWiggle}
-            onLogoTap={handleLogoTap}
-            onOpenCliente={handleOpenCliente}
-          />
+          <FixedHeader onOpenCliente={handleOpenCliente} />
           {/* Spacer for fixed header */}
           <div className="h-14 shrink-0" />
 
