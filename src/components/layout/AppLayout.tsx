@@ -49,7 +49,7 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
   return (
     <>
       <header
-        className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear"
+        className="fixed z-30 flex h-14 items-center gap-3 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
         style={{
           left: sidebarLeft,
           top: 'var(--banner-height, 28px)',
