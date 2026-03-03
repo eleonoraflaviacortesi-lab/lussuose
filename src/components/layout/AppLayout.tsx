@@ -53,8 +53,8 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
         style={{
           left: sidebarLeft,
           top: 'var(--banner-height, 28px)',
-          backgroundColor: 'hsl(0 0% 95%)',
-          borderBottom: '1px solid hsl(0 0% 90%)',
+          backgroundColor: 'white',
+          borderBottomRightRadius: '1.5rem',
         }}
       >
         {/* Left spacer - matches right side width */}
