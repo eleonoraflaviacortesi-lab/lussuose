@@ -112,13 +112,11 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           'bg-muted text-muted-foreground' :
           'bg-foreground text-background shadow-[0_0_25px_8px_rgba(0,0,0,0.25)]'}`
           }>
-
           {hasReportedToday ?
           <>
               <Check className="w-4 h-4" />
               FATTO
             </> :
-
           <>
               <Plus className="w-4 h-4" />
               CICLO PRODUTTIVO
@@ -127,82 +125,115 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </button>
       </div>
 
-      {/* Weekly Goals Widget */}
-      <WeeklyGoalsWidget />
+      {/* === BENTO GRID LAYOUT === */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
-      {/* Today's Reminders Widget */}
-      <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
-
-      {/* Incarichi del Mese - below calendar reminders */}
-      <IncarchiWidget />
-
-      {/* Status Annuale Personale */}
-      <div className="text-center space-y-2">
-        <div className="flex items-center justify-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full bg-foreground" />
-          <h2 className="text-[10px] font-medium tracking-[0.3em] uppercase text-foreground">
-            STATUS ANNUALE
-          </h2>
-        </div>
-
-        {/* Big Number */}
-        <div className="flex items-baseline justify-center gap-1.5">
-          <span className="text-6xl font-light text-foreground tracking-tight">
-            {currentSales}
-          </span>
-          <span className="text-2xl font-light text-muted-foreground">/ {annualTarget}</span>
-          <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground ml-1">
-            VENDITE
-          </span>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="max-w-xs mx-auto">
+        {/* Status Annuale - spans 2 cols */}
+        <div className="col-span-2 bg-card rounded-2xl border border-border p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-1.5 h-1.5 rounded-full bg-foreground" />
+            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
+              STATUS ANNUALE
+            </p>
+          </div>
+          <div className="flex items-baseline gap-1.5 mb-3">
+            <span className="text-5xl font-light text-foreground tracking-tight">
+              {currentSales}
+            </span>
+            <span className="text-xl font-light text-muted-foreground">/ {annualTarget}</span>
+            <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground ml-1">
+              VENDITE
+            </span>
+          </div>
           <Progress value={completionPercent} className="h-1 bg-muted" />
-          <p className="text-[10px] text-muted-foreground mt-1">{completionPercent}% target</p>
+          <p className="text-[10px] text-muted-foreground mt-1.5">{completionPercent}% target</p>
         </div>
-      </div>
 
-      {/* Volume Generato & Volume a Credito */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="dark-card py-3 px-4">
-          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
+        {/* Volume Generato */}
+        <div className="col-span-1 dark-card py-4 px-4 flex flex-col justify-between">
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
             VOLUME GENERATO
           </p>
-          <p className="text-xl text-white whitespace-nowrap font-medium">
+          <p className="text-2xl text-white whitespace-nowrap font-medium">
             {formatCompactCurrency(fatturato)}
           </p>
         </div>
-        <div className="dark-card py-3 px-4">
-          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
+
+        {/* Volume a Credito */}
+        <div className="col-span-1 dark-card py-4 px-4 flex flex-col justify-between">
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
             VOLUME A CREDITO
           </p>
-          <p className="text-xl text-white whitespace-nowrap font-medium">
+          <p className="text-2xl text-white whitespace-nowrap font-medium">
             {formatCompactCurrency(fatturatoCredito)}
           </p>
         </div>
-      </div>
 
-      {/* Focus Acquisizione Chart */}
-      <AcquisitionChart />
+        {/* Weekly Goals - spans 2 cols */}
+        <div className="col-span-2">
+          <WeeklyGoalsWidget />
+        </div>
 
-      <Suspense
-        fallback={
-        <div className="bg-card rounded-2xl shadow-lg p-4">
-            <div className="h-24 rounded-xl bg-muted animate-pulse" />
+        {/* Today Reminders - spans 2 cols */}
+        <div className="col-span-2">
+          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
+        </div>
+
+        {/* Incarichi del Mese - spans 2 cols on mobile, 1 on desktop */}
+        <div className="col-span-2 md:col-span-2">
+          <IncarchiWidget />
+        </div>
+
+        {/* Incarichi Team - spans 2 cols on mobile, 2 on desktop */}
+        <div className="col-span-2 bg-card rounded-2xl border border-border shadow p-4 relative overflow-hidden">
+          <div className="absolute right-2 top-2 opacity-5">
+            <Gift className="w-20 h-20 text-foreground" />
           </div>
-        }>
+          <div className="relative z-10">
+            <div className="flex items-center gap-2 mb-2">
+              <Gift className="w-4 h-4 text-foreground" />
+              <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase">
+                INCARICHI TEAM
+              </h3>
+            </div>
+            <div className="flex items-baseline gap-1.5 mb-2">
+              <span className="text-4xl text-foreground font-medium">{incarichiTeam}</span>
+              <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
+            </div>
+            <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
+            <div className="flex items-center justify-between text-[10px]">
+              <span className="text-muted-foreground">Progresso ufficio</span>
+              <span className="font-semibold text-foreground">{incarichiPercent}%</span>
+            </div>
+          </div>
+        </div>
 
-        <PerformanceCharts
-          myData={myData}
-          chartPeriod={chartPeriod}
-          onChartPeriodChange={setChartPeriod}
-          formatCompactCurrency={formatCompactCurrency} />
+        {/* KPI Summary Widgets - full width */}
+        <div className="col-span-2 md:col-span-4">
+          <KPISummaryWidgets kpis={kpis} />
+        </div>
 
-      </Suspense>
+        {/* Acquisition Chart - spans full width */}
+        <div className="col-span-2 md:col-span-4">
+          <AcquisitionChart />
+        </div>
 
-      {/* Colorful KPI Summary Widgets */}
-      <KPISummaryWidgets kpis={kpis} />
+        {/* Performance Charts - full width */}
+        <div className="col-span-2 md:col-span-4">
+          <Suspense
+            fallback={
+            <div className="bg-card rounded-2xl shadow-lg p-4">
+                <div className="h-24 rounded-xl bg-muted animate-pulse" />
+              </div>
+            }>
+            <PerformanceCharts
+              myData={myData}
+              chartPeriod={chartPeriod}
+              onChartPeriodChange={setChartPeriod}
+              formatCompactCurrency={formatCompactCurrency} />
+          </Suspense>
+        </div>
+      </div>
 
       <Suspense fallback={null}>
         <KPIDetailModal
@@ -227,36 +258,9 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           selectedKPI === 'chiusure' ? Award :
           Zap
           } />
-
       </Suspense>
-
-      {/* Incarichi Team Card */}
-      <div className="bg-card rounded-2xl shadow p-4 relative overflow-hidden">
-        <div className="absolute right-2 top-2 opacity-5">
-          <Gift className="w-20 h-20 text-foreground" />
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <Gift className="w-4 h-4 text-foreground" />
-            <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase">
-              INCARICHI TEAM
-            </h3>
-          </div>
-          
-          <div className="flex items-baseline gap-1.5 mb-2">
-            <span className="text-4xl text-foreground font-medium">{incarichiTeam}</span>
-            <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
-          </div>
-
-          <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
-          <div className="flex items-center justify-between text-[10px]">
-            <span className="text-muted-foreground">Progresso ufficio</span>
-            <span className="font-semibold text-foreground">{incarichiPercent}%</span>
-          </div>
-        </div>
-      </div>
-
     </div>);
+
 
 };
 
