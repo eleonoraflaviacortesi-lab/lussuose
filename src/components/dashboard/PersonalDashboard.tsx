@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
+import { useUserSettings } from '@/hooks/useUserSettings';
 import { Users, Zap, Award, Gift, TrendingUp, Plus, Check, Phone, FileText, CalendarCheck, Home, Handshake, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
@@ -60,6 +61,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const { kpis, isLoading } = useKPIs('year');
   const { myData, allData } = useDailyData();
   const { annualTargets, targets: sedeTargets } = useSedeTargets();
+  const { settings } = useUserSettings();
   const navigate = useNavigate();
   const { hasReportedToday } = useTodayReportStatus();
 
@@ -81,6 +83,18 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
     if (!myData) return 0;
     return myData.reduce((sum, d) => sum + (Number(d.fatturato_a_credito) || 0), 0);
   }, [myData]);
+
+  const { incarichiMese, incarichiTarget: incarichiMeseTarget, incarichiPercent: incarichiMesePercent } = useMemo(() => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const incarichiMese = myData
+      ?.filter((d) => new Date(d.date) >= startOfMonth)
+      .reduce((acc, d) => acc + (d.incarichi_vendita || 0), 0) || 0;
+    const weeklyIdeal = settings?.incarichi_settimana || 1;
+    const incarichiTarget = weeklyIdeal * 4;
+    const incarichiPercent = incarichiTarget > 0 ? Math.min(100, Math.round(incarichiMese / incarichiTarget * 100)) : 0;
+    return { incarichiMese, incarichiTarget, incarichiPercent };
+  }, [myData, settings]);
 
   const incarichiTeam = useMemo(() => {
     if (!allData) return 0;
@@ -192,16 +206,18 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
         </div>
 
-        {/* Right: Annual Progress (circular) */}
+        {/* Right: Incarichi del Mese (circular) */}
         <div className="bg-card rounded-3xl border border-border p-6 flex flex-col items-center justify-center gap-3">
-          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">Status Annuale</p>
-          <CircularProgress percent={completionPercent} />
+          <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">Incarichi del Mese</p>
+          <CircularProgress percent={incarichiMesePercent} />
           <div className="text-center">
             <div className="flex items-baseline justify-center gap-1">
-              <span className="text-2xl font-bold">{currentSales}</span>
-              <span className="text-sm text-muted-foreground font-light">/ {annualTarget}</span>
+              <span className="text-2xl font-bold">{incarichiMese}</span>
+              <span className="text-sm text-muted-foreground font-light">/ {incarichiMeseTarget}</span>
             </div>
-            <p className="text-[10px] text-muted-foreground tracking-wider uppercase mt-0.5">vendite</p>
+            <p className="text-[10px] text-muted-foreground tracking-wider uppercase mt-0.5">
+              {incarichiMesePercent >= 100 ? 'Obiettivo raggiunto! 🎉' : `mancano ${Math.max(0, incarichiMeseTarget - incarichiMese)}`}
+            </p>
           </div>
         </div>
       </div>
