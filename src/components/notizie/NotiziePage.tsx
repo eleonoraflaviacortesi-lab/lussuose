@@ -169,7 +169,7 @@ const NotiziePage = () => {
         <NotizieStatsChart notizieByStatus={filteredNotizieByStatus} />
       )}
 
-      <div>
+      <div className="w-full min-w-0">
         {viewMode === 'kanban' ? (
           isLoading ?
           <BoardSkeleton /> :

@@ -505,9 +505,11 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     if (!viewportWidth) return 240;
 
     const gap = 12;
-    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, totalColumns);
+    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, viewportWidth);
     const idealWidth = Math.floor(availableWidth / totalColumns);
-    return Math.min(260, Math.max(1, idealWidth));
+
+    // Non comprimere il contenuto: box adattata al viewport, scroll interno per colonne in eccesso.
+    return Math.max(220, Math.min(260, idealWidth));
   }, [columns.length, viewportWidth]);
 
   if (isLoading || columns.length === 0) {

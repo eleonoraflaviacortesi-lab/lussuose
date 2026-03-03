@@ -842,41 +842,18 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   }, [selectedRowId, selectedCellCol, notizie, handleCellChange]);
 
   const tableViewportRef = useRef<HTMLDivElement>(null);
-  const [tableViewportWidth, setTableViewportWidth] = useState(0);
-
-  useEffect(() => {
-    const el = tableViewportRef.current;
-    if (!el) return;
-
-    const updateWidth = () => setTableViewportWidth(el.clientWidth);
-    updateWidth();
-
-    const observer = new ResizeObserver(updateWidth);
-    observer.observe(el);
-    window.addEventListener('resize', updateWidth);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', updateWidth);
-    };
-  }, []);
 
   const rowNumWidth = 52;
-  const viewportAvailableWidth = Math.max(tableViewportWidth - 2, 1);
-  const rawTotalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
-  const widthScale = rawTotalWidth > 0
-    ? Math.min(1, viewportAvailableWidth / rawTotalWidth)
-    : 1;
 
-  const adaptiveRowNumWidth = Math.max(1, Math.floor(rowNumWidth * widthScale));
+  // Manteniamo la larghezza naturale delle colonne: niente compressione del contenuto.
+  const adaptiveRowNumWidth = rowNumWidth;
   const adaptiveColWidths = useMemo(() => {
     const next: Record<string, number> = {};
     orderedColumns.forEach((col) => {
-      const baseWidth = colWidths[col.key] || col.width;
-      next[col.key] = Math.max(1, Math.floor(baseWidth * widthScale));
+      next[col.key] = colWidths[col.key] || col.width;
     });
     return next;
-  }, [orderedColumns, colWidths, widthScale]);
+  }, [orderedColumns, colWidths]);
 
   const totalWidth = adaptiveRowNumWidth + orderedColumns.reduce((sum, col) => sum + (adaptiveColWidths[col.key] || col.width), 0);
 
