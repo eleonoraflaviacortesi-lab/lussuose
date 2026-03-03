@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import ProfileModal from '@/components/profile/ProfileModal';
 import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList, Target } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
@@ -48,7 +46,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
   const { signOut, profile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [showProfile, setShowProfile] = useState(false);
+  
 
   const handleSignOut = async () => {
     await signOut();
@@ -68,48 +66,97 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
     <>
       <Sidebar collapsible="icon" className="border-none">
         <SidebarHeader className="p-2 space-y-2">
-          {/* Profile row */}
-          {profile && (
-            <button
-              onClick={() => setShowProfile(true)}
-              className="flex items-start gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
-            >
+          {/* Mobile: profile + name + add button */}
+          {isMobile && profile && (
+            <div className="flex items-start gap-2 px-1 py-1">
               <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm shrink-0 mt-0.5">
                 {profile.avatar_emoji || '👤'}
               </span>
               <span className="!uppercase !tracking-[0.18em] !text-[10px] min-w-0 break-words leading-relaxed" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.full_name}</span>
-            </button>
+            </div>
           )}
 
-          {/* Add button */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                className="w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-8 text-[9px] tracking-[0.15em]"
-              >
-                <Plus className="h-3 w-3" />
-                <span>Aggiungi</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" className="w-48">
-              <DropdownMenuItem onClick={() => { onNewProperty?.(); handleNavClick(); }} className="gap-2">
-                <Building2 className="h-4 w-4" />
-                New Property
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { onNewContact?.(); handleNavClick(); }} className="gap-2">
-                <Users className="h-4 w-4" />
-                New Contact
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { onNewActivity?.(); handleNavClick(); }} className="gap-2">
-                <CalendarDays className="h-4 w-4" />
-                New Activity
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { onNewDailyReport?.(); handleNavClick(); }} className="gap-2">
-                <ClipboardList className="h-4 w-4" />
-                New Daily Report
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {/* Desktop collapsed: just emoji */}
+          {!isMobile && collapsed && profile && (
+            <div className="w-full flex justify-center py-1">
+              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base">
+                {profile.avatar_emoji || '👤'}
+              </span>
+            </div>
+          )}
+
+          {/* Desktop expanded: emoji + name */}
+          {!isMobile && !collapsed && profile && (
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
+                {profile.avatar_emoji || '👤'}
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">{profile.full_name}</p>
+                <p className="text-xs text-muted-foreground truncate">{profile.sede}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile: pill add button */}
+          {isMobile && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-8">
+                  <Plus className="h-3 w-3" />
+                  <span className="!uppercase !tracking-[0.15em] !text-[9px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Aggiungi</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="start" className="w-48">
+                <DropdownMenuItem onClick={() => { onNewProperty?.(); handleNavClick(); }} className="gap-2">
+                  <Building2 className="h-4 w-4" /> New Property
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { onNewContact?.(); handleNavClick(); }} className="gap-2">
+                  <Users className="h-4 w-4" /> New Contact
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { onNewActivity?.(); handleNavClick(); }} className="gap-2">
+                  <CalendarDays className="h-4 w-4" /> New Activity
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => { onNewDailyReport?.(); handleNavClick(); }} className="gap-2">
+                  <ClipboardList className="h-4 w-4" /> New Daily Report
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
+          {/* Desktop: original + New button */}
+          {!isMobile && (
+            <div className="flex justify-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  {collapsed ? (
+                    <Button size="icon" className="h-10 w-10 rounded-full bg-foreground text-background hover:bg-foreground/90">
+                      <Plus className="h-5 w-5" />
+                    </Button>
+                  ) : (
+                    <Button className="w-full gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90 h-11">
+                      <Plus className="h-4 w-4" />
+                      <span className="text-xs font-semibold tracking-wide uppercase">New</span>
+                    </Button>
+                  )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent side="right" align="start" className="w-48">
+                  <DropdownMenuItem onClick={onNewProperty} className="gap-2">
+                    <Building2 className="h-4 w-4" /> New Property
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onNewContact} className="gap-2">
+                    <Users className="h-4 w-4" /> New Contact
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onNewActivity} className="gap-2">
+                    <CalendarDays className="h-4 w-4" /> New Activity
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={onNewDailyReport} className="gap-2">
+                    <ClipboardList className="h-4 w-4" /> New Daily Report
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </SidebarHeader>
 
         <SidebarSeparator className="bg-border/30" />
@@ -136,8 +183,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           )}
                           activeClassName=""
                         >
-                          <item.icon className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
-                          <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                          <item.icon className={cn(isMobile ? 'h-4 w-4' : 'h-4 w-4')} />
+                          {isMobile ? (
+                            <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{item.title}</span>
+                          ) : (
+                            <span>{item.title}</span>
+                          )}
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -161,22 +212,17 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                   isMobile && 'h-10 gap-3'
                 )}
               >
-                <LogOut className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
-                <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
+                <LogOut className="h-4 w-4" />
+                {isMobile ? (
+                  <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
+                ) : (
+                  <span>Sign out</span>
+                )}
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
-
-      <ProfileModal
-        open={showProfile}
-        onClose={() => setShowProfile(false)}
-        onOpenSettings={() => {
-          setShowProfile(false);
-          navigate('/settings');
-        }}
-      />
     </>
   );
 }
