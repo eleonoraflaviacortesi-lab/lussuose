@@ -270,7 +270,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       {/* Backdrop overlay - transparent to keep content visible */}
       <div 
         className="fixed inset-0 z-[54] bg-black/10 animate-in fade-in duration-200"
-        style={{ top: 'var(--total-banner-height, 28px)' }}
+        style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}
         onClick={() => onOpenChange(false)}
       />
       {/* Side peek panel */}
@@ -280,7 +280,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           "animate-in slide-in-from-right duration-300",
           "w-full sm:w-[480px] md:w-[520px]",
         )}
-        style={{ top: 'var(--total-banner-height, 28px)' }}
+        style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}
       >
         {/* Close button - fixed at top right of panel */}
         <button 
