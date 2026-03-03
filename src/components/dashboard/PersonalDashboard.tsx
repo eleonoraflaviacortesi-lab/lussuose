@@ -220,6 +220,11 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </div>
       </div>
 
+      {/* KPI Row 1 */}
+      <div className="grid grid-cols-3 gap-4">
+        {kpiRow1.map(renderKPICard)}
+      </div>
+
       {/* KPI Row 2 */}
       <div className="grid grid-cols-3 gap-4">
         {kpiRow2.map(renderKPICard)}
