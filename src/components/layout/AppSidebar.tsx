@@ -174,9 +174,9 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className={collapsed ? 'items-center' : ''}>
+            <SidebarMenu className={collapsed ? 'items-center px-0' : ''}>
               {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} className={collapsed ? 'flex justify-center' : ''}>
                   <SidebarMenuButton
                     asChild
                     isActive={isActive(item.url)}
@@ -185,7 +185,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className={`hover:bg-sidebar-accent/60 ${collapsed ? 'justify-center' : 'justify-start'}`}
+                      className={`hover:bg-sidebar-accent/60 ${collapsed ? 'justify-center !px-0' : 'justify-start'}`}
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >
                       <item.icon className="h-4 w-4" />
