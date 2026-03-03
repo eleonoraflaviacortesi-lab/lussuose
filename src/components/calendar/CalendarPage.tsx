@@ -940,12 +940,16 @@ const CalendarPage = () => {
 
 
 
+
+
+
+
             // Use default values
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);if (cliente) {// Use default time of 09:00 if no reminder_date exists
-        let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();
-              minutes = oldDate.getMinutes();
-            }
-          } catch {
+        let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();minutes = oldDate.getMinutes();}} catch {
+
+
+
 
 
 
@@ -972,11 +976,7 @@ const CalendarPage = () => {
 
 
             // Use default values
-          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}
-    }
-  }, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]);
-
-  // Drag and drop handler
+          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}}}, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]); // Drag and drop handler
   const handleDragEnd = useCallback((result: DropResult) => {
     // Reset dragging state after a short delay to prevent click from firing
     setTimeout(() => setIsDragging(false), 100);
@@ -1128,7 +1128,7 @@ const CalendarPage = () => {
 
           <button
             onClick={() => navigateCalendar('next')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors shrink-0 bg-white">
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -1427,7 +1427,7 @@ const CalendarPage = () => {
                         </div>
 
                         {viewMode === 'day' ?
-                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted">
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted border-0">
                             <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -1435,7 +1435,7 @@ const CalendarPage = () => {
                           setShowAddMenu(true);
                           setAddMenuInitialType('cliente');
                         }}
-                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        className="flex-1 py-2 rounded-xl border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium border-0 shadow-2xl">
                         
                               <User className="w-3.5 h-3.5" />
                               Buyer
