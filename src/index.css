@@ -71,6 +71,20 @@
     --pink-light: 326 70% 90%;
     --pink-dark: 326 85% 45%;
 
+    /* Widget accent colors */
+    --widget-peach: 25 90% 92%;
+    --widget-peach-foreground: 25 60% 30%;
+    --widget-mint: 155 45% 88%;
+    --widget-mint-foreground: 155 40% 25%;
+    --widget-lavender: 260 45% 92%;
+    --widget-lavender-foreground: 260 35% 35%;
+    --widget-cream: 45 70% 90%;
+    --widget-cream-foreground: 40 50% 28%;
+    --widget-rose: 340 55% 90%;
+    --widget-rose-foreground: 340 45% 30%;
+    --widget-sky: 200 55% 90%;
+    --widget-sky-foreground: 200 45% 28%;
+
     --font-serif: "Playfair Display", Georgia, serif;
     --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -124,6 +138,20 @@
     --sidebar-accent-foreground: 0 0% 95%;
     --sidebar-border: 0 0% 20%;
     --sidebar-ring: 0 0% 95%;
+
+    /* Widget accent colors - dark */
+    --widget-peach: 25 40% 18%;
+    --widget-peach-foreground: 25 70% 75%;
+    --widget-mint: 155 30% 16%;
+    --widget-mint-foreground: 155 45% 70%;
+    --widget-lavender: 260 30% 20%;
+    --widget-lavender-foreground: 260 40% 78%;
+    --widget-cream: 45 35% 16%;
+    --widget-cream-foreground: 45 55% 72%;
+    --widget-rose: 340 30% 18%;
+    --widget-rose-foreground: 340 40% 75%;
+    --widget-sky: 200 30% 17%;
+    --widget-sky-foreground: 200 45% 72%;
   }
 }
 

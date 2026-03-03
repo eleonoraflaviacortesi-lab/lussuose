@@ -6,6 +6,7 @@ import { useDailyData } from '@/hooks/useDailyData';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
 import { Users, Zap, Award, Gift, TrendingUp, Plus, Check } from 'lucide-react';
+import KPISummaryWidgets from './KPISummaryWidgets';
 import { useNavigate } from 'react-router-dom';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
 import IncarchiWidget from './IncarchiWidget';
@@ -200,41 +201,8 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
       </Suspense>
 
-      {/* Stats Grid - Clickable Cards */}
-      <div className="grid grid-cols-4 gap-2">
-        <button
-          onClick={() => setSelectedKPI('contatti')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
-
-          <Users className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl text-foreground font-medium">{contatti}</p>
-          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONTATTI</p>
-        </button>
-        <button
-          onClick={() => setSelectedKPI('notizie')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
-
-          <TrendingUp className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl text-foreground font-medium">{notizie}</p>
-          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">NOTIZIE</p>
-        </button>
-        <button
-          onClick={() => setSelectedKPI('chiusure')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
-
-          <Award className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl text-foreground font-medium">{chiusure}</p>
-          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CHIUSURE</p>
-        </button>
-        <button
-          onClick={() => setSelectedKPI('conversioni')}
-          className="bg-card rounded-xl shadow p-3 text-center transition-transform active:scale-[0.97]">
-
-          <Zap className="w-3.5 h-3.5 text-muted-foreground mx-auto mb-1" />
-          <p className="text-xl text-foreground font-medium">{conversioni}%</p>
-          <p className="text-[8px] font-medium tracking-[0.1em] uppercase text-muted-foreground">CONV.</p>
-        </button>
-      </div>
+      {/* Colorful KPI Summary Widgets */}
+      <KPISummaryWidgets kpis={kpis} />
 
       <Suspense fallback={null}>
         <KPIDetailModal
