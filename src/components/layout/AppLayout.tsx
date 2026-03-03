@@ -61,9 +61,9 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
           borderBottomRightRadius: '1.5rem',
         }}
       >
-        <SidebarTrigger className="-ml-1 md:flex hidden" />
-        {/* Mobile: centered logo only */}
-        <div className="md:hidden flex-1 flex justify-center">
+        <SidebarTrigger className="-ml-1 md:flex hidden shrink-0" />
+        {/* Centered logo */}
+        <div className="flex-1 flex justify-center">
           <img
             src={logo}
             alt="Logo"
@@ -71,14 +71,7 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
             onClick={onLogoTap}
           />
         </div>
-        {/* Desktop: logo + notification */}
-        <img
-          src={logo}
-          alt="Logo"
-          className={`h-20 -my-6 w-auto cursor-pointer select-none transition-all duration-75 hidden md:block ${logoWiggle ? 'scale-95 opacity-70' : ''}`}
-          onClick={onLogoTap}
-        />
-        <div className="ml-auto hidden md:block">
+        <div className="hidden md:block shrink-0">
           <NotificationBell onOpenCliente={onOpenCliente} inline />
         </div>
       </header>
