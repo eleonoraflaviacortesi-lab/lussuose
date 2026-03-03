@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
+import { cn } from '@/lib/utils';
 import ProfileModal from '@/components/profile/ProfileModal';
 import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -175,25 +176,34 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className={collapsed ? 'items-center px-0' : ''}>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title} className={collapsed ? 'flex justify-center' : ''}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={isActive(item.url)}
-                    tooltip={item.title}
-                  >
-                    <NavLink
-                      to={item.url}
-                      end={item.url === '/'}
-                      className={`hover:bg-sidebar-accent/60 ${collapsed ? 'justify-center !px-0' : 'justify-start'}`}
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              {navItems.map((item) => {
+                const active = isActive(item.url);
+                return (
+                  <SidebarMenuItem key={item.title} className={collapsed ? 'flex justify-center' : ''}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.title}
                     >
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <NavLink
+                        to={item.url}
+                        end={item.url === '/'}
+                        className={cn(
+                          'transition-colors rounded-lg',
+                          collapsed ? 'justify-center !px-0' : 'justify-start',
+                          active
+                            ? 'bg-foreground text-background font-semibold hover:bg-foreground/90 hover:text-background'
+                            : 'hover:bg-muted text-muted-foreground'
+                        )}
+                        activeClassName=""
+                      >
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
