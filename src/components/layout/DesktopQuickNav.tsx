@@ -38,9 +38,9 @@ const DesktopQuickNav = ({ activeTab, onTabChange }: DesktopQuickNavProps) => {
             key={item.id}
             onClick={() => handleClick(item.id, item.path)}
             className={cn(
-              "group relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 shadow-md backdrop-blur-md",
+              "group relative flex items-center justify-center w-10 h-10 rounded-full transition-all duration-200 border border-border",
               isActive
-                ? "bg-foreground text-background shadow-lg scale-110"
+                ? "bg-foreground text-background scale-110"
                 : "bg-background/80 text-muted-foreground hover:bg-foreground hover:text-background hover:scale-110"
             )}
             title={item.label}

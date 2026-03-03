@@ -192,7 +192,7 @@ export function ClienteDetail({
             <div className="space-y-4">
 
               {/* Notes */}
-              <div className="bg-white rounded-2xl shadow-lg p-3 space-y-2">
+              <div className="bg-card rounded-2xl border border-border p-3 space-y-2">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1">Note</h3>
                 <InlineEditText
                   value={cliente.note_extra}
@@ -205,7 +205,7 @@ export function ClienteDetail({
               </div>
 
               {/* Dati Personali & CRM */}
-              <div className="bg-white rounded-2xl shadow-lg p-3">
+              <div className="bg-card rounded-2xl border border-border p-3">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1 mb-3">Dati Personali & CRM</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
                   <div>
@@ -352,7 +352,7 @@ export function ClienteDetail({
               </div>
 
               {/* Ricerca Immobiliare */}
-              <div className="bg-white rounded-2xl shadow-lg p-3">
+              <div className="bg-card rounded-2xl border border-border p-3">
                 <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground border-b pb-1 mb-3">Ricerca Immobiliare</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-3">
                   <div>
@@ -458,7 +458,7 @@ export function ClienteDetail({
             <div className="space-y-4">
 
               {/* Assignment */}
-              <div className="bg-white rounded-2xl shadow-lg p-3">
+              <div className="bg-card rounded-2xl border border-border p-3">
                 <Select
                   value={cliente.assigned_to || 'unassigned'}
                   onValueChange={(v) => onAssign(v === 'unassigned' ? null : v)}
@@ -490,7 +490,7 @@ export function ClienteDetail({
               </div>
 
               {/* Quick Actions */}
-              <div className="bg-white rounded-2xl shadow-lg p-3 space-y-3">
+              <div className="bg-card rounded-2xl border border-border p-3 space-y-3">
                 <h3 className="font-medium text-sm flex items-center gap-2">
                   <Phone className="w-4 h-4" /> Azioni Rapide
                 </h3>
@@ -520,7 +520,7 @@ export function ClienteDetail({
 
               {/* Activity Log */}
               <Accordion type="single" collapsible defaultValue="activity">
-                <AccordionItem value="activity" className="bg-white rounded-2xl shadow-lg border-0">
+                <AccordionItem value="activity" className="bg-card rounded-2xl border border-border">
                   <AccordionTrigger className="px-3 py-2 hover:no-underline">
                     <div className="flex items-center gap-2">
                       <History className="w-4 h-4" />
@@ -569,7 +569,7 @@ export function ClienteDetail({
                 {(() => {
                   const comments = Array.isArray(cliente.comments) ? cliente.comments : [];
                   return comments.length > 0 ? (
-                  <div className="bg-white rounded-2xl shadow-lg p-3">
+                  <div className="bg-card rounded-2xl border border-border p-3">
                     <h3 className="font-medium text-sm mb-3 flex items-center gap-2">
                       <MessageSquare className="w-4 h-4" /> Commenti Precedenti
                     </h3>
@@ -590,7 +590,7 @@ export function ClienteDetail({
                 ) : null;
                 })()}
 
-                <div className="text-xs text-muted-foreground bg-white rounded-2xl shadow-lg p-3 space-y-1">
+                <div className="text-xs text-muted-foreground bg-card rounded-2xl border border-border p-3 space-y-1">
                   <p>Creato: {format(new Date(cliente.created_at), 'dd MMM yyyy HH:mm', { locale: it })}</p>
                   {cliente.data_submission && (
                     <p>Submission: {format(new Date(cliente.data_submission), 'dd MMM yyyy HH:mm', { locale: it })}</p>

@@ -136,7 +136,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
           <DropdownMenuTrigger asChild>
             <Button
               size={collapsed ? 'icon' : 'default'}
-              className="w-full gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+              className="w-full gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90"
             >
               <Plus className="h-4 w-4" />
               {!collapsed && <span className="text-xs font-semibold tracking-wide uppercase">New</span>}

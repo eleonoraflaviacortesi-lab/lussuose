@@ -95,7 +95,7 @@ const AgencyDashboard = () => {
     };
 
     return (
-      <div className="bg-card rounded-2xl shadow-lg p-4">
+      <div className="bg-card rounded-2xl border border-border p-4">
         <div className="flex items-center justify-between mb-2">
           <p className="text-[10px] font-medium tracking-[0.1em] uppercase text-muted-foreground truncate pr-2">
             {title}
@@ -125,7 +125,7 @@ const AgencyDashboard = () => {
   return (
     <div className="px-4 pb-8 space-y-4 animate-fade-in">
       {/* Header with Period Toggle */}
-      <div className="bg-card rounded-2xl shadow-lg p-4">
+      <div className="bg-card rounded-2xl border border-border p-4">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-12 h-12 rounded-xl bg-foreground text-background flex items-center justify-center">
             <Star className="w-6 h-6" />
@@ -177,7 +177,7 @@ const AgencyDashboard = () => {
         <KPICard title="Fatturato" value={fatturato} target={fatturatoTarget} delta={fatturatoDelta} icon={Euro} format="currency" />
         <KPICard title="Trattative Chiuse" value={trattativeChiuse} target={trattativeChiuseTarget} delta={trattativeChiuseDelta} icon={TrendingDown} />
         {/* Fatturato a Credito - no target, just value */}
-        <div className="bg-card rounded-2xl shadow-lg p-4">
+        <div className="bg-card rounded-2xl border border-border p-4">
           <div className="flex items-center justify-between mb-2">
             <p className="text-[10px] font-medium tracking-[0.1em] uppercase text-muted-foreground truncate pr-2">
               Fatturato a Credito

@@ -10,10 +10,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-black text-white shadow-lg active:bg-black/90",
-        destructive: "bg-destructive text-destructive-foreground shadow-lg active:bg-destructive/90",
-        outline: "border-0 bg-white shadow-lg active:bg-muted text-foreground",
-        secondary: "bg-white text-foreground shadow-lg active:bg-muted",
+        default: "bg-foreground text-background border border-border active:bg-foreground/90",
+        destructive: "bg-destructive text-destructive-foreground border border-destructive active:bg-destructive/90",
+        outline: "border border-border bg-background active:bg-muted text-foreground",
+        secondary: "bg-card text-foreground border border-border active:bg-muted",
         ghost: "active:bg-accent active:text-accent-foreground",
         link: "text-primary underline-offset-4 active:opacity-70",
       },

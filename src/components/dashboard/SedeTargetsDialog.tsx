@@ -30,7 +30,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
 
   const inputClass = cn(
     "w-full bg-white rounded-xl px-4 py-3.5 text-base font-medium",
-    "border border-border/50 shadow-sm",
+    "border border-border",
     "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30",
     "placeholder:text-muted-foreground/50"
   );
@@ -42,7 +42,7 @@ const SedeTargetsDialog = ({ open, onOpenChange }: SedeTargetsDialogProps) => {
       <DialogContent className="max-w-md mx-auto p-0 rounded-3xl border-0 bg-white/95 backdrop-blur-2xl shadow-[0_25px_80px_-20px_rgba(0,0,0,0.25)] overflow-hidden [&>button]:hidden">
         {/* Header */}
         <div className="flex items-start gap-4 p-6 pb-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg flex-shrink-0">
+          <div className="w-14 h-14 rounded-2xl bg-foreground flex items-center justify-center flex-shrink-0">
             <Target className="w-7 h-7 text-primary-foreground" />
           </div>
           <div className="flex-1 min-w-0">

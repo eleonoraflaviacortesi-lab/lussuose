@@ -151,7 +151,7 @@ export const MeetingsPage = () => {
       {/* Current week meeting card */}
       <Card
         className={cn(
-          "p-6 cursor-pointer transition-all hover:shadow-lg",
+          "p-6 cursor-pointer transition-all",
           currentMeeting ? "border-primary/50" : "border-dashed"
         )}
         onClick={handleOpenMeeting}>

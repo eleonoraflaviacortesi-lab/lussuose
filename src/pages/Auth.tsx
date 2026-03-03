@@ -203,9 +203,9 @@ const Auth = () => {
                       onClick={() => handleSelectAccount(account)}
                       disabled={loading !== null}
                       className={cn(
-                        "w-full flex items-center gap-4 p-3 rounded-2xl transition-all shadow-md",
-                        "bg-card border border-border/30",
-                        "hover:scale-[1.02] hover:shadow-lg",
+                        "w-full flex items-center gap-4 p-3 rounded-2xl transition-all",
+                        "bg-card border border-border",
+                        "hover:scale-[1.02]",
                         "active:scale-[0.98]",
                         "disabled:opacity-50 disabled:cursor-not-allowed",
                         loading === account.user_id && "ring-2 ring-foreground"
@@ -230,7 +230,7 @@ const Auth = () => {
 
           {/* Add Account Form */}
           {showAddForm ? (
-            <div className="mt-6 p-4 bg-card rounded-2xl border border-border/30 shadow-lg animate-in slide-in-from-bottom-2">
+            <div className="mt-6 p-4 bg-card rounded-2xl border border-border animate-in slide-in-from-bottom-2">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold">Nuovo Account</h3>
                 <button onClick={() => setShowAddForm(false)} className="text-muted-foreground">

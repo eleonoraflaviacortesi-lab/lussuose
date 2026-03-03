@@ -63,7 +63,7 @@ export const EmojiGridWithCustom = memo(({ currentEmoji, onSelect, onRemove, emo
       ) : (
         <button
           onClick={() => setShowInput(true)}
-          className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted"
+          className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center text-sm font-bold text-foreground transition-all active:scale-90 hover:bg-muted"
         >
           +
         </button>

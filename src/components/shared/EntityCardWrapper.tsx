@@ -77,14 +77,14 @@ export const EntityCardWrapper = memo(({
   return (
     <div
       className={cn(
-        "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 shadow-sm select-none active:scale-[0.97] active:shadow-md",
+        "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 border border-border select-none active:scale-[0.97]",
         cardColor ? "backdrop-blur-sm" : "bg-card",
-        isDragging && "opacity-70 rotate-2 shadow-xl",
+        isDragging && "opacity-70 rotate-2",
         className,
       )}
       style={cardColor ? {
         backgroundColor: cardColor,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.4)'
+        boxShadow: 'none'
       } : undefined}
       onClick={handleClick}
       onContextMenu={handleContextMenu}

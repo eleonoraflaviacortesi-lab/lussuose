@@ -709,7 +709,7 @@ const OfficeChatPage = () => {
                   <Popover>
                     <PopoverTrigger asChild>
                       <button className={cn(
-                        'absolute -bottom-3 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-background border border-border rounded-full px-1.5 py-0.5 shadow-sm',
+                        'absolute -bottom-3 opacity-0 group-hover:opacity-100 transition-opacity text-xs bg-background border border-border rounded-full px-1.5 py-0.5',
                         isOwn ? 'left-0' : 'right-0'
                       )}>
                         😊
@@ -761,7 +761,7 @@ const OfficeChatPage = () => {
       {showScrollBtn && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-28 right-6 w-9 h-9 rounded-full glass-surface shadow-lg flex items-center justify-center z-10"
+          className="absolute bottom-28 right-6 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center z-10"
         >
           <ChevronDown className="w-5 h-5" />
         </button>
@@ -769,7 +769,7 @@ const OfficeChatPage = () => {
 
       {/* Mention dropdown */}
       {showMentionDropdown && filteredMentionProfiles.length > 0 && (
-        <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl shadow-xl border border-border z-50 overflow-hidden">
+        <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl border border-border z-50 overflow-hidden">
           {filteredMentionProfiles.map((p, idx) => (
             <button
               key={p.user_id}
@@ -790,7 +790,7 @@ const OfficeChatPage = () => {
 
       {/* # Hashtag dropdown */}
       {showHashDropdown && (
-        <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl shadow-xl border border-border z-50 overflow-hidden max-h-64 overflow-y-auto">
+        <div className="absolute bottom-20 left-3 right-3 max-w-lg bg-background rounded-xl border border-border z-50 overflow-hidden max-h-64 overflow-y-auto">
           {hashQuery.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">Scrivi un nome dopo # per cercare notizie e buyer</p>
           ) : hashResults.length === 0 && !hashLoading ? (

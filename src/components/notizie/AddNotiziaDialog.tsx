@@ -111,7 +111,7 @@ const AddNotiziaDialog = ({
       {showTrigger && (
         <button 
           onClick={() => handleOpen(true)}
-          className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center shadow-lg active:scale-95 transition-transform"
+          className="w-9 h-9 rounded-full bg-foreground text-background flex items-center justify-center border border-border active:scale-95 transition-transform"
         >
           <Plus className="w-5 h-5" />
         </button>

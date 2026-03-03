@@ -117,7 +117,7 @@ const SettingsPage = () => {
 
       <div className="space-y-6">
         {/* Piano Finanziario Personale */}
-        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
           <div className="flex items-center gap-2 pb-3 border-b border-muted">
             <Target className="w-4 h-4 text-muted-foreground" />
             <h3 className="text-sm font-bold tracking-wider uppercase">
@@ -168,7 +168,7 @@ const SettingsPage = () => {
         </div>
 
         {/* Obiettivi Settimanali */}
-        <div className="bg-card rounded-2xl shadow-lg p-6 space-y-5">
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-5">
           <div className="flex items-center gap-2 pb-3 border-b border-muted">
             <span className="text-base">✨</span>
             <h3 className="text-sm font-bold tracking-wider uppercase">

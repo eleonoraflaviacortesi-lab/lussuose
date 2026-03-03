@@ -65,7 +65,7 @@ const KPIDetailModal = memo(forwardRef<HTMLDivElement, KPIDetailModalProps>(({ o
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm p-0 border-0 bg-transparent shadow-none">
         {/* Liquid Glass Container */}
-        <div className="bg-white/80 backdrop-blur-2xl rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] p-6 space-y-5">
+        <div className="bg-card border border-border rounded-3xl p-6 space-y-5">
           {/* Header */}
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-foreground/5 flex items-center justify-center">
@@ -106,9 +106,9 @@ const KPIDetailModal = memo(forwardRef<HTMLDivElement, KPIDetailModalProps>(({ o
                   contentStyle={{
                     background: 'rgba(255,255,255,0.95)',
                     backdropFilter: 'blur(8px)',
-                    border: '0',
+                    border: '1px solid hsl(var(--border))',
                     borderRadius: '12px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    boxShadow: 'none',
                     fontSize: '11px',
                   }}
                   formatter={(val: number) => [

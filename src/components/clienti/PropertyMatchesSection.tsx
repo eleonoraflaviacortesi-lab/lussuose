@@ -138,7 +138,7 @@ function PropertyCard({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-3 backdrop-blur-xl">
+    <div className="bg-card rounded-2xl border border-border p-3">
       <div className="flex gap-2.5">
         {/* Drag handle */}
         <div
@@ -239,7 +239,7 @@ function PropertyCard({
             className={cn(
               "p-1.5 rounded-full transition-all",
               match.reaction === 'liked'
-                ? 'bg-blue-500 text-white shadow-md'
+                ? 'bg-blue-500 text-white'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
             title="Piace al cliente"
@@ -253,7 +253,7 @@ function PropertyCard({
             className={cn(
               "p-1.5 rounded-full transition-all",
               match.reaction === 'disliked'
-                ? 'bg-red-500 text-white shadow-md'
+                ? 'bg-red-500 text-white'
                 : 'bg-muted/50 text-muted-foreground hover:bg-muted'
             )}
             title="Non piace al cliente"
@@ -474,7 +474,7 @@ function AddPropertyDialog({
         <DialogHeader><DialogTitle>Cerca proprietà sul sito</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="flex gap-2">
-            <Input placeholder="Cerca villa, casale, Cortona, Ref 1023..." value={searchQuery} onChange={(e) => handleQueryChange(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }} className="flex-1 border-0 shadow-lg rounded-xl bg-white" autoFocus />
+            <Input placeholder="Cerca villa, casale, Cortona, Ref 1023..." value={searchQuery} onChange={(e) => handleQueryChange(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearch(); } }} className="flex-1 border border-border rounded-xl bg-background" autoFocus />
             <Button onClick={handleSearch} disabled={isSearching || searchQuery.length < 2} className="bg-black text-white hover:bg-black/80">
               {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
             </Button>
@@ -483,7 +483,7 @@ function AddPropertyDialog({
           {isSearching && searchResults.length === 0 ? (
             <div className="space-y-2">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg">
+                <div key={i} className="flex gap-3 p-3 rounded-2xl bg-card border border-border">
                   <Skeleton className="w-20 h-20 rounded-xl flex-shrink-0" />
                   <div className="flex-1 space-y-2"><Skeleton className="h-4 w-3/4" /><Skeleton className="h-3 w-1/2" /><Skeleton className="h-5 w-24" /></div>
                 </div>
@@ -497,7 +497,7 @@ function AddPropertyDialog({
             <ScrollArea className="h-[400px]">
               <div className="space-y-2">
                 {searchResults.map((result, idx) => (
-                  <div key={idx} className="flex gap-3 p-3 rounded-2xl bg-white shadow-lg">
+                  <div key={idx} className="flex gap-3 p-3 rounded-2xl bg-card border border-border">
                     <div className="flex-shrink-0">
                       {result.image_url ? (
                         <img src={result.image_url} alt={result.title} className="w-20 h-20 rounded-xl object-cover" />
@@ -690,7 +690,7 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
   return (
     <div className="space-y-3">
       {/* Header */}
-      <div className="flex items-center justify-between bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg p-3">
+      <div className="flex items-center justify-between bg-card rounded-2xl border border-border p-3">
         <div className="flex items-center gap-2 flex-wrap">
           <Home className="h-4 w-4 text-foreground" />
           <h3 className="font-semibold text-sm">Proprietà</h3>
@@ -724,7 +724,7 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
 
       {/* Property list with drag-drop */}
       {displayMatches.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground bg-white/60 backdrop-blur-xl rounded-2xl shadow-lg">
+        <div className="text-center py-6 text-muted-foreground bg-card rounded-2xl border border-border">
           {autoMatching ? (
             <>
               <Loader2 className="h-8 w-8 mx-auto mb-2 animate-spin opacity-50" />
@@ -756,8 +756,8 @@ export function PropertyMatchesSection({ clienteId, clientePhone, noteExtra }: P
                         ref={provided.innerRef}
                         {...provided.draggableProps}
                         className={cn(
-                          "transition-shadow",
-                          snapshot.isDragging && "shadow-xl"
+                          "transition-all",
+                          snapshot.isDragging && "opacity-80"
                         )}
                       >
                         <PropertyCard 

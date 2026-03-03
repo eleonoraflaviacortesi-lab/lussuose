@@ -58,7 +58,7 @@ export function AttachmentsSection({ entityType, entityId }: AttachmentsSectionP
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg p-3 space-y-2">
+    <div className="bg-card rounded-2xl border border-border p-3 space-y-2">
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-xs uppercase tracking-wide text-muted-foreground flex items-center gap-1.5">
           <Paperclip className="w-3.5 h-3.5" />

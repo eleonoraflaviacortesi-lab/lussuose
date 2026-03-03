@@ -141,8 +141,8 @@ const ProfileModal = ({ open, onClose, onOpenSettings }: ProfileModalProps) => {
                   className={cn(
                     "w-10 h-10 text-xl rounded-full flex items-center justify-center transition-all active:scale-95",
                     selectedEmoji === emoji && !customEmoji
-                      ? 'bg-foreground text-background shadow-lg'
-                      : 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-md'
+                      ? 'bg-foreground text-background'
+                      : 'bg-card border border-border hover:bg-muted'
                   )}
                 >
                   {emoji}
@@ -240,7 +240,7 @@ const ProfileModal = ({ open, onClose, onOpenSettings }: ProfileModalProps) => {
                     className={cn(
                       "flex-1 h-12 rounded-2xl text-xs font-medium transition-all flex items-center justify-center gap-2 active:scale-95",
                       selectedSedi.includes(s)
-                        ? "bg-foreground text-background shadow-lg"
+                        ? "bg-foreground text-background"
                         : "bg-muted/50 text-muted-foreground border-2 border-dashed border-muted-foreground/30"
                     )}
                   >
