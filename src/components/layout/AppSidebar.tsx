@@ -131,15 +131,14 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
       <SidebarSeparator className="bg-white/30" />
 
       {/* + New button */}
-      <div className="px-2 pt-3 pb-1">
+      <div className="px-2 pt-3 pb-1 flex justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              size={collapsed ? 'icon' : 'default'}
-              className="w-full gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90"
+              size="icon"
+              className="h-12 w-12 rounded-full bg-foreground text-background hover:bg-foreground/90"
             >
-              <Plus className="h-4 w-4" />
-              {!collapsed && <span className="text-xs font-semibold tracking-wide uppercase">New</span>}
+              <Plus className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="right" align="start" className="w-48">
@@ -166,7 +165,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="items-center">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
