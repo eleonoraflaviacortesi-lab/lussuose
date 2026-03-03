@@ -58,7 +58,7 @@ const NotizieStatsChart = memo(({ notizieByStatus }: NotizieStatsChartProps) => 
         </div>
 
         {/* Legend - hidden on desktop to save space, visible on mobile */}
-        <div className="flex flex-wrap gap-x-3 gap-y-1 lg:hidden">
+        <div className="hidden lg:flex flex-wrap gap-x-3 gap-y-1">
           {bars.filter(b => b.count > 0).map(({ key, label, color, count }) => (
             <div key={key} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />

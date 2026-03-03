@@ -72,7 +72,7 @@ const ClientiStatsChart = memo(({ clienti }: ClientiStatsChartProps) => {
         </div>
 
         {/* Legend - only show statuses with items */}
-        <div className="flex flex-wrap gap-x-3 gap-y-1">
+        <div className="hidden lg:flex flex-wrap gap-x-3 gap-y-1">
           {bars.filter(b => b.count > 0).map(({ key, label, color, count }) => (
             <div key={key} className="flex items-center gap-1">
               <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
