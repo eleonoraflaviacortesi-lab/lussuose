@@ -202,7 +202,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       {/* Main Grid: Reminders + Annual Progress */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Left: Today Reminders (2 cols) */}
-        <div className="md:col-span-2">
+        <div className="md:col-span-2 [&>div]:h-full">
           <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
         </div>
 
@@ -220,11 +220,6 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
             </p>
           </div>
         </div>
-      </div>
-
-      {/* KPI Row 1 */}
-      <div className="grid grid-cols-3 gap-4">
-        {kpiRow1.map(renderKPICard)}
       </div>
 
       {/* KPI Row 2 */}
