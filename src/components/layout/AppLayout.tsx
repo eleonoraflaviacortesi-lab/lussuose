@@ -74,11 +74,44 @@ function useHeaderQuote() {
 
 function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void }) {
   const { state, isMobile } = useSidebar();
+  const navigate = useNavigate();
   const sidebarLeft = isMobile ? '0px' : state === 'expanded' ? '18rem' : '3.5rem';
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const tapCountRef = useRef(0);
+  const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const quote = useHeaderQuote();
+
+  const playTrillo = useCallback(() => {
+    try {
+      const audio = new Audio('/sounds/trillo_msn.mp3');
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
+    } catch {}
+  }, []);
+
+  const handleQuoteTap = useCallback(() => {
+    tapCountRef.current += 1;
+    if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+    if (tapCountRef.current >= 3) {
+      tapCountRef.current = 0;
+      triggerHaptic('success');
+      triggerArcaneFog();
+      playTrillo();
+      supabase.channel('arcane-fog-broadcast').send({ type: 'broadcast', event: 'arcane-fog', payload: {} });
+    } else if (tapCountRef.current === 1) {
+      tapTimerRef.current = setTimeout(() => {
+        if (tapCountRef.current === 1) {
+          triggerHaptic('selection');
+          navigate('/');
+        }
+        tapCountRef.current = 0;
+      }, 400);
+    } else {
+      tapTimerRef.current = setTimeout(() => { tapCountRef.current = 0; }, 600);
+    }
+  }, [navigate, playTrillo]);
 
   useEffect(() => {
     if (searchOpen) inputRef.current?.focus();
@@ -100,8 +133,8 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
         <NotificationBell onOpenCliente={onOpenCliente} inline />
       </div>
 
-      {/* Center: daily quote */}
-      <div className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2">
+      {/* Center: daily quote - triple tap for arcane fog */}
+      <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2 cursor-pointer select-none">
         <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
         <p
           className="text-[9px] uppercase truncate text-muted-foreground/70"
@@ -110,7 +143,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
           {quote.text} — {quote.author}
         </p>
         <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
-      </div>
+      </button>
 
       {/* Right: expandable search */}
       <div className="flex items-center shrink-0">
