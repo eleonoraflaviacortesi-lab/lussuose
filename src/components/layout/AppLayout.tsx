@@ -167,7 +167,7 @@ export default function AppLayout() {
 
         <SidebarInset>
           {/* Fixed header - never scrolls */}
-          <header className="fixed z-30 flex h-14 items-center gap-3 px-4 left-0 right-0"
+          <header className="fixed z-30 flex h-14 items-center gap-3 px-4 left-0 right-0 md:left-[var(--sidebar-width,3.5rem)]"
             style={{
               top: 'var(--banner-height, 28px)',
               background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
