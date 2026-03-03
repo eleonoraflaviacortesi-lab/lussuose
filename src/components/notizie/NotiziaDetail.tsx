@@ -284,7 +284,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         {/* Close button - fixed at top right of panel */}
         <button 
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-10 z-10 text-muted-foreground active:scale-95 transition-transform"
+          className="absolute right-8 top-10 z-10 text-muted-foreground active:scale-95 transition-transform"
         >
           <X className="w-4 h-4" />
         </button>
