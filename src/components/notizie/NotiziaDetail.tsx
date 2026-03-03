@@ -275,10 +275,11 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       {/* Side peek panel */}
       <div 
         className={cn(
-          "fixed right-0 top-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.12)]",
+          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.12)]",
           "animate-in slide-in-from-right duration-300",
           "w-full sm:w-[480px] md:w-[520px]",
         )}
+        style={{ top: 'var(--banner-height, 28px)' }}
       >
         {/* Side peek scrollable content */}
         <div className="flex-1 overflow-y-auto">
