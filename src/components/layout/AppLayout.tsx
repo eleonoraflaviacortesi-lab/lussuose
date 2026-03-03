@@ -97,7 +97,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
               onChange={(e) => setSearch(e.target.value)}
               onBlur={() => { if (!search) setSearchOpen(false); }}
               placeholder="Cerca..."
-              className="w-full h-8 rounded-full bg-muted/60 pl-8 pr-3 text-xs outline-none placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring/30 transition-all"
+              className="w-full h-8 rounded-full bg-muted/60 pl-8 pr-3 text-xs outline-none placeholder:text-muted-foreground/60 border-none focus:ring-0 transition-all"
             />
           </div>
         </div>
