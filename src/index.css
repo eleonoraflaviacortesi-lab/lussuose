@@ -163,22 +163,44 @@
 
   h1 {
     font-family: var(--font-sans);
-    @apply tracking-normal uppercase font-extrabold text-xl;
+    @apply uppercase font-semibold text-xl;
+    letter-spacing: 0.15em;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply tracking-normal uppercase font-extrabold text-lg;
+    @apply uppercase font-semibold text-lg;
+    letter-spacing: 0.15em;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply tracking-wide uppercase font-medium text-base;
+    @apply uppercase font-medium text-base;
+    letter-spacing: 0.12em;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply tracking-wide font-medium text-sm;
+    @apply uppercase font-medium text-sm;
+    letter-spacing: 0.1em;
+  }
+
+  /* Chic typography for interactive elements */
+  button, [role="button"],
+  select, [data-radix-select-trigger],
+  nav a, .nav-link,
+  label {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
+  }
+
+  /* Preserve normal casing for text inputs and textareas */
+  input, textarea, [contenteditable="true"] {
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
   }
 
   p {
@@ -191,6 +213,8 @@
 
   small {
     @apply text-xs font-light;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 }
 
