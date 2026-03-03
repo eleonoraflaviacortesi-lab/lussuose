@@ -5,7 +5,7 @@ import "./index.css";
 // PWA: abilita service worker solo in produzione (evita blank screen in preview/dev)
 import { registerSW } from "virtual:pwa-register";
 
-const BUILD_VERSION = "v2.2.1";
+const BUILD_VERSION = "v2.2.2";
 console.info(`[build] ${BUILD_VERSION} - ${__BUILD_ID__}`);
 
 if (import.meta.env.PROD) {
@@ -34,6 +34,27 @@ if (import.meta.env.PROD) {
       console.info("[pwa] offline ready");
     },
   });
+} else {
+  // Preview/Dev safety: remove any previously registered SW + stale caches
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      registrations.forEach((registration) => {
+        registration.unregister();
+        console.info("[pwa] unregistered service worker in preview/dev");
+      });
+    });
+  }
+
+  if ("caches" in window) {
+    caches.keys().then((names) => {
+      names.forEach((name) => {
+        if (name.includes("workbox") || name.includes("precache")) {
+          caches.delete(name);
+          console.info(`[pwa] deleted dev cache: ${name}`);
+        }
+      });
+    });
+  }
 }
 
 createRoot(document.getElementById("root")!).render(<App />);
