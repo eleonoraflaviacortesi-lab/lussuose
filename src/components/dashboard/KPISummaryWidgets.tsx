@@ -18,8 +18,8 @@ const KPISummaryWidgets = ({ kpis }: KPISummaryWidgetsProps) => {
     return [
       { label: 'Contatti', value: kpis.contatti?.value || 0, target: kpis.contatti?.target || 0, icon: Phone },
       { label: 'Notizie', value: kpis.notizie?.value || 0, target: kpis.notizie?.target || 0, icon: FileText },
-      { label: 'Appuntamenti', value: kpis.appuntamenti?.value || 0, target: kpis.appuntamenti?.target || 0, icon: CalendarCheck },
-      { label: 'Acquisizioni', value: kpis.acquisizioni?.value || 0, target: kpis.acquisizioni?.target || 0, icon: Home },
+      { label: 'App.', value: kpis.appuntamenti?.value || 0, target: kpis.appuntamenti?.target || 0, icon: CalendarCheck },
+      { label: 'Acq.', value: kpis.acquisizioni?.value || 0, target: kpis.acquisizioni?.target || 0, icon: Home },
       { label: 'Incarichi', value: kpis.incarichi?.value || 0, target: kpis.incarichi?.target || 0, icon: Handshake },
       { label: 'Trattative', value: kpis.trattativeChiuse?.value || 0, target: kpis.trattativeChiuse?.target || 0, icon: TrendingUp },
     ];
