@@ -246,9 +246,9 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }
 
   return (
-    <div className="py-4 space-y-4 px-1 sm:px-[10px] w-full min-w-0">
+    <div className="py-1 sm:py-4 space-y-2 sm:space-y-4 px-1 sm:px-[10px] w-full min-w-0">
       {/* Header row: view toggle + actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2 pt-[15px] overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1">
+      <div className="flex items-center gap-1.5 sm:gap-2 pt-1 sm:pt-[15px] overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1">
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* View toggle */}
           <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
