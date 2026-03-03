@@ -308,7 +308,7 @@ export default function AppLayout() {
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 overflow-x-hidden">
-            <main className={`mx-auto animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6`}>
+            <main className={`mx-auto animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-0 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6`}>
               <Suspense
                 fallback={
                   <div className="py-10 flex items-center justify-center">

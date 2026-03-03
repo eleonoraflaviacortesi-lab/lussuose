@@ -231,7 +231,7 @@ export function ClientiKanban({
     <DragDropContext onDragEnd={handleDragEnd}>
       <div 
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4 bg-card rounded-2xl p-3"
+        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4 bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3"
       >
         {columns.map(column => (
           <Droppable key={column.id} droppableId={column.id}>

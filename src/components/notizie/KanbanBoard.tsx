@@ -508,7 +508,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="bg-card rounded-2xl p-3">
+      <div className="bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3">
         {/* Top scrollbar (desktop only) */}
         <div
           ref={topScrollRef}
