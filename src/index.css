@@ -163,26 +163,30 @@
 
   h1 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-sm;
-    letter-spacing: 0.15em;
+    @apply uppercase font-medium;
+    font-size: 10px;
+    letter-spacing: 0.2em;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-xs;
-    letter-spacing: 0.15em;
+    @apply uppercase font-medium;
+    font-size: 10px;
+    letter-spacing: 0.2em;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-xs;
-    letter-spacing: 0.12em;
+    @apply uppercase font-medium;
+    font-size: 9px;
+    letter-spacing: 0.18em;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-[11px];
-    letter-spacing: 0.1em;
+    @apply uppercase font-medium;
+    font-size: 9px;
+    letter-spacing: 0.15em;
   }
 
   /* Chic typography for interactive elements */
@@ -192,9 +196,9 @@
   label {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.15em;
     font-weight: 400;
-    font-size: 11px;
+    font-size: 9px;
   }
 
   /* Preserve normal casing for text inputs and textareas */
