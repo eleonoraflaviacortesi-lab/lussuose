@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, memo, useEffect } from 'react';
+import { useCallback, useMemo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Cliente, ClienteStatus, ClienteGroupBy } from '@/types';
 import { ClienteCard } from './ClienteCard';
@@ -64,26 +64,7 @@ export function ClientiKanban({
   onDeleteCliente,
   searchQuery = '',
 }: ClientiKanbanProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [viewportWidth, setViewportWidth] = useState(0);
   const { columns: kanbanColumns, updateColumn, deleteColumn, addColumn, isLoading: columnsLoading } = useClientKanbanColumns();
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const update = () => setViewportWidth(container.clientWidth);
-    update();
-
-    const observer = new ResizeObserver(update);
-    observer.observe(container);
-    window.addEventListener('resize', update);
-
-    return () => {
-      observer.disconnect();
-      window.removeEventListener('resize', update);
-    };
-  }, []);
 
   // Get agent info for display
   const getAgent = useCallback((agentId: string | null) => {
@@ -172,16 +153,9 @@ export function ClientiKanban({
   [kanbanColumns]);
 
   const adaptiveColumnWidth = useMemo(() => {
-    const totalColumns = Math.max(columns.length + (groupBy === 'status' ? 1 : 0), 1);
-    if (!viewportWidth) return 260;
-
-    const gap = 12;
-    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, viewportWidth);
-    const idealWidth = Math.floor(availableWidth / totalColumns);
-
-    // Non comprimere il contenuto: box adattata al viewport, scroll interno per colonne in eccesso.
-    return Math.max(240, Math.min(280, idealWidth));
-  }, [columns.length, groupBy, viewportWidth]);
+    // Contenuto fisso: la box si adatta allo schermo, le colonne scorrono internamente.
+    return 260;
+  }, []);
 
   // Handle drag end
   const handleDragEnd = useCallback((result: DropResult) => {
@@ -259,9 +233,8 @@ export function ClientiKanban({
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div 
-        ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4 bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3 w-full"
+      <div
+        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4 bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3 w-full min-w-0 max-w-full"
       >
         {columns.map(column => (
           <Droppable key={column.id} droppableId={column.id}>

@@ -407,7 +407,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   const topScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
-  const [viewportWidth, setViewportWidth] = useState(0);
 
   // Sync scroll between top and main scrollbars
   useEffect(() => {
@@ -417,7 +416,6 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
 
     const updateMetrics = () => {
       setScrollWidth(mainEl.scrollWidth);
-      setViewportWidth(mainEl.clientWidth);
     };
     updateMetrics();
 
@@ -501,16 +499,9 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   }, [notizieByStatus, updateNotizia, deleteColumn]);
 
   const adaptiveColumnWidth = useMemo(() => {
-    const totalColumns = Math.max(columns.length + 1, 1);
-    if (!viewportWidth) return 240;
-
-    const gap = 12;
-    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, viewportWidth);
-    const idealWidth = Math.floor(availableWidth / totalColumns);
-
-    // Non comprimere il contenuto: box adattata al viewport, scroll interno per colonne in eccesso.
-    return Math.max(220, Math.min(260, idealWidth));
-  }, [columns.length, viewportWidth]);
+    // Contenuto fisso: la box si adatta allo schermo, le colonne scorrono internamente.
+    return 240;
+  }, []);
 
   if (isLoading || columns.length === 0) {
     return (
@@ -550,7 +541,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                 }
               }}
               {...provided.droppableProps}
-              className="flex gap-3 pb-3 overflow-x-auto lg:gap-3"
+              className="flex gap-3 pb-3 overflow-x-auto w-full min-w-0 max-w-full lg:gap-3"
             >
               {columns.map((column, columnIndex) => (
                 <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>

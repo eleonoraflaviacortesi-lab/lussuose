@@ -246,7 +246,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }
 
   return (
-    <div className="py-4 space-y-4 px-1 sm:px-[10px]">
+    <div className="py-4 space-y-4 px-1 sm:px-[10px] w-full min-w-0">
       {/* Header row: view toggle + actions */}
       <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 gap-y-2 pt-[15px]">
         {/* View toggle */}
