@@ -172,14 +172,15 @@ export function ClientiKanban({
   [kanbanColumns]);
 
   const adaptiveColumnWidth = useMemo(() => {
-    const extraColumn = groupBy === 'status' ? 1 : 0;
-    const totalColumns = Math.max(columns.length + extraColumn, 1);
+    const totalColumns = Math.max(columns.length + (groupBy === 'status' ? 1 : 0), 1);
     if (!viewportWidth) return 260;
 
     const gap = 12;
-    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, totalColumns);
+    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, viewportWidth);
     const idealWidth = Math.floor(availableWidth / totalColumns);
-    return Math.min(280, Math.max(1, idealWidth));
+
+    // Non comprimere il contenuto: box adattata al viewport, scroll interno per colonne in eccesso.
+    return Math.max(240, Math.min(280, idealWidth));
   }, [columns.length, groupBy, viewportWidth]);
 
   // Handle drag end
