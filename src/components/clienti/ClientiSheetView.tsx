@@ -2187,7 +2187,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   return (
     <div
-      className="rounded-2xl bg-card overflow-hidden"
+      className="rounded-2xl bg-card overflow-hidden w-full min-w-0 max-w-full"
       onClick={(e) => {
         // Deselect when clicking on the container background (not on rows/headers)
         if (e.target === e.currentTarget) {
@@ -2233,7 +2233,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       {/* Table */}
       <div
         ref={tableViewportRef}
-        className="overflow-x-auto [transform:rotateX(180deg)]"
+        className="overflow-x-auto w-full min-w-0 [transform:rotateX(180deg)]"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedRowId(null);

@@ -111,7 +111,7 @@ const NotiziePage = () => {
   }, [notizie]);
 
   return (
-    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 px-1 sm:px-0">
+    <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 px-1 sm:px-0 w-full min-w-0">
       <div className="flex flex-wrap items-center gap-2 pt-[25px] shadow-none">
         {/* View toggle */}
         <div className="flex items-center gap-1 bg-card rounded-lg p-0.5 shrink-0">

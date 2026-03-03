@@ -858,7 +858,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   const totalWidth = adaptiveRowNumWidth + orderedColumns.reduce((sum, col) => sum + (adaptiveColWidths[col.key] || col.width), 0);
 
   return (
-    <div className="rounded-lg sm:rounded-2xl bg-card overflow-hidden"
+    <div className="rounded-lg sm:rounded-2xl bg-card overflow-hidden w-full min-w-0 max-w-full"
       onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
 
       {/* Add new + filter bar */}
@@ -880,7 +880,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
       {/* Table */}
       <div
         ref={tableViewportRef}
-        className="overflow-x-auto [transform:rotateX(180deg)]"
+        className="overflow-x-auto w-full min-w-0 [transform:rotateX(180deg)]"
         onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
         <div style={{ width: totalWidth, minWidth: '100%' }} className="[transform:rotateX(180deg)]">
           <div className="flex sticky top-0 z-10 bg-card border-b border-border/40">
