@@ -5,7 +5,7 @@ import { useKPIs } from '@/hooks/useKPIs';
 import { useDailyData } from '@/hooks/useDailyData';
 import { useSedeTargets } from '@/hooks/useSedeTargets';
 import { Progress } from '@/components/ui/progress';
-import { Users, Zap, Award, Gift, TrendingUp, Plus, Check } from 'lucide-react';
+import { Users, Zap, Award, Gift, TrendingUp, Plus, Check, Phone, FileText, CalendarCheck, Home, Handshake } from 'lucide-react';
 import KPISummaryWidgets from './KPISummaryWidgets';
 import { useNavigate } from 'react-router-dom';
 import { useTodayReportStatus } from '@/hooks/useTodayReportStatus';
@@ -21,7 +21,7 @@ const PerformanceCharts = lazy(() => import('./PerformanceCharts'));
 const KPIDetailModal = lazy(() => import('./KPIDetailModal'));
 
 type Period = 'week' | 'month' | 'year';
-type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni';
+type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni' | 'appuntamenti' | 'acquisizioni' | 'incarichi' | 'trattativeChiuse';
 
 type PersonalDashboardProps = {
   onGoToCalendar?: () => void;
@@ -137,15 +137,15 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       {/* === ROW 2: Contatti, Notizie, Appuntamenti === */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Contatti', value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Users },
-          { label: 'Notizie', value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: TrendingUp },
-          { label: 'Appuntamenti', value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: Award },
+          { label: 'Contatti', kpiKey: 'contatti' as KPIKey, value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Phone },
+          { label: 'Notizie', kpiKey: 'notizie' as KPIKey, value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: FileText },
+          { label: 'Appuntamenti', kpiKey: 'appuntamenti' as KPIKey, value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: CalendarCheck },
         ].map((w) => {
           const Icon = w.icon;
           const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
           const isHit = w.target > 0 && w.value >= w.target;
           return (
-            <div key={w.label} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]">
+            <button key={w.label} onClick={() => setSelectedKPI(w.kpiKey)} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97] text-left cursor-pointer">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">{w.label}</p>
                 <Icon className="w-3.5 h-3.5 text-muted-foreground" />
@@ -161,7 +161,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
                 <span>{pct}%</span>
                 {isHit && <span className="font-semibold text-foreground">✓</span>}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -169,15 +169,15 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       {/* === ROW 3: Acquisizioni, Incarichi, Trattative Chiuse === */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Acquisizioni', value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Zap },
-          { label: 'Incarichi', value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Award },
-          { label: 'Trattative Chiuse', value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp },
+          { label: 'Acquisizioni', kpiKey: 'acquisizioni' as KPIKey, value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Home },
+          { label: 'Incarichi', kpiKey: 'incarichi' as KPIKey, value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Handshake },
+          { label: 'Trattative Chiuse', kpiKey: 'trattativeChiuse' as KPIKey, value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp },
         ].map((w) => {
           const Icon = w.icon;
           const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
           const isHit = w.target > 0 && w.value >= w.target;
           return (
-            <div key={w.label} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]">
+            <button key={w.label} onClick={() => setSelectedKPI(w.kpiKey)} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97] text-left cursor-pointer">
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">{w.label}</p>
                 <Icon className="w-3.5 h-3.5 text-muted-foreground" />
@@ -193,7 +193,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
                 <span>{pct}%</span>
                 {isHit && <span className="font-semibold text-foreground">✓</span>}
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
@@ -267,22 +267,13 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           onOpenChange={(open) => !open && setSelectedKPI(null)}
           kpiKey={selectedKPI}
           title={
-          selectedKPI === 'contatti' ? 'CONTATTI REALI' :
-          selectedKPI === 'notizie' ? 'NOTIZIE ACQUISITE' :
-          selectedKPI === 'chiusure' ? 'CHIUSURE TOTALI' :
-          'CONVERSIONI'
+            { contatti: 'CONTATTI REALI', notizie: 'NOTIZIE ACQUISITE', chiusure: 'CHIUSURE TOTALI', conversioni: 'CONVERSIONI', appuntamenti: 'APPUNTAMENTI', acquisizioni: 'ACQUISIZIONI', incarichi: 'INCARICHI', trattativeChiuse: 'TRATTATIVE CHIUSE' }[selectedKPI || 'contatti']
           }
           value={
-          selectedKPI === 'contatti' ? contatti :
-          selectedKPI === 'notizie' ? notizie :
-          selectedKPI === 'chiusure' ? chiusure :
-          conversioni
+            { contatti, notizie, chiusure, conversioni, appuntamenti: kpis?.appuntamenti?.value || 0, acquisizioni: kpis?.acquisizioni?.value || 0, incarichi: kpis?.incarichi?.value || 0, trattativeChiuse: kpis?.trattativeChiuse?.value || 0 }[selectedKPI || 'contatti']
           }
           icon={
-          selectedKPI === 'contatti' ? Users :
-          selectedKPI === 'notizie' ? TrendingUp :
-          selectedKPI === 'chiusure' ? Award :
-          Zap
+            { contatti: Phone, notizie: FileText, chiusure: Award, conversioni: Zap, appuntamenti: CalendarCheck, acquisizioni: Home, incarichi: Handshake, trattativeChiuse: TrendingUp }[selectedKPI || 'contatti']
           } />
       </Suspense>
     </div>);
