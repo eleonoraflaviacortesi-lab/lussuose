@@ -133,11 +133,11 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   const kpiRow1 = [
     { label: 'Contatti', kpiKey: 'contatti' as KPIKey, value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Phone },
     { label: 'Notizie', kpiKey: 'notizie' as KPIKey, value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: FileText },
-    { label: 'Appuntamenti', kpiKey: 'appuntamenti' as KPIKey, value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: CalendarCheck },
+    { label: 'App.', kpiKey: 'appuntamenti' as KPIKey, value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: CalendarCheck },
   ];
 
   const kpiRow2 = [
-    { label: 'Acquisizioni', kpiKey: 'acquisizioni' as KPIKey, value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Home },
+    { label: 'Acq.', kpiKey: 'acquisizioni' as KPIKey, value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Home },
     { label: 'Incarichi', kpiKey: 'incarichi' as KPIKey, value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Handshake },
     { label: 'Trattative', kpiKey: 'trattativeChiuse' as KPIKey, value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp },
   ];
@@ -150,20 +150,25 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <button
         key={w.label}
         onClick={() => setSelectedKPI(w.kpiKey)}
-        className="bg-card rounded-3xl border border-border p-5 text-left transition-all active:scale-[0.97] cursor-pointer hover:border-foreground/20"
+        className="bg-card rounded-3xl border border-border p-3 md:p-5 text-left transition-all active:scale-[0.97] cursor-pointer hover:border-foreground/20"
       >
-        <div className="flex items-center justify-between mb-3">
-          <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
-            <Icon className="w-4 h-4 text-foreground" />
+        <div className="flex items-center justify-between mb-2 md:mb-3">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4 text-foreground" />
           </div>
-          {isHit && <span className="text-xs font-semibold text-foreground bg-muted px-2 py-0.5 rounded-full">✓</span>}
+          {isHit && <span className="text-[10px] font-semibold text-foreground bg-muted px-2 py-0.5 rounded-full">✓</span>}
         </div>
-        <p className="text-xs font-medium tracking-wide uppercase text-muted-foreground mb-1">{w.label}</p>
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-3xl font-bold tracking-tight">{w.value}</span>
-          <span className="text-sm text-muted-foreground font-light">/ {w.target}</span>
+        <p
+          className="text-[8px] md:text-xs font-medium tracking-[0.12em] md:tracking-wide uppercase text-muted-foreground mb-1 whitespace-nowrap overflow-hidden text-ellipsis"
+          style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}
+        >
+          {w.label}
+        </p>
+        <div className="flex items-baseline gap-1 whitespace-nowrap">
+          <span className="text-2xl md:text-3xl font-bold tracking-tight leading-none">{w.value}</span>
+          <span className="text-[11px] md:text-sm text-muted-foreground font-light">/ {w.target}</span>
         </div>
-        <div className="mt-3 h-1.5 w-full rounded-full overflow-hidden bg-muted">
+        <div className="mt-2 md:mt-3 h-1 md:h-1.5 w-full rounded-full overflow-hidden bg-muted">
           <div
             className="h-full rounded-full transition-all duration-500 bg-foreground"
             style={{ width: `${pct}%` }}
