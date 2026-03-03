@@ -61,7 +61,10 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
           borderBottomRightRadius: '1.5rem',
         }}
       >
-        <SidebarTrigger className="-ml-1 md:flex hidden shrink-0" />
+        {/* Left spacer - matches right side width */}
+        <div className="w-10 shrink-0 flex items-center">
+          <SidebarTrigger className="-ml-1 md:flex hidden" />
+        </div>
         {/* Centered logo */}
         <div className="flex-1 flex justify-center">
           <img
@@ -71,7 +74,8 @@ function FixedHeader({ logoWiggle, onLogoTap, onOpenCliente }: { logoWiggle: boo
             onClick={onLogoTap}
           />
         </div>
-        <div className="hidden md:block shrink-0">
+        {/* Right spacer - matches left side width */}
+        <div className="w-10 shrink-0 flex items-center justify-end">
           <NotificationBell onOpenCliente={onOpenCliente} inline />
         </div>
       </header>
