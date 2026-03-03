@@ -281,16 +281,16 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           "w-full sm:w-[480px] md:w-[520px]",
         )}
       >
-        {/* Side peek scrollable content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="w-full p-5 pb-10">
-        {/* Close button */}
+        {/* Close button - fixed at top right of panel */}
         <button 
           onClick={() => onOpenChange(false)}
-          className="absolute right-4 top-4 text-muted-foreground active:scale-95 transition-transform"
+          className="absolute right-4 top-3 z-10 text-muted-foreground active:scale-95 transition-transform"
         >
           <X className="w-4 h-4" />
         </button>
+        {/* Side peek scrollable content */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="w-full p-5 pb-10">
 
         {/* Saved indicator */}
         {showSaved && (
