@@ -43,7 +43,7 @@ const ClientiStatsChart = memo(({ clienti }: ClientiStatsChartProps) => {
     <>
       <div 
         onClick={() => setFunnelOpen(true)}
-        className="bg-card rounded-xl p-3 shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]"
+        className="bg-card rounded-xl p-3 border border-border cursor-pointer transition-all active:scale-[0.99]"
       >
         <div className="flex items-center justify-between mb-2">
           <span className="text-[10px] font-medium tracking-wide uppercase text-muted-foreground">

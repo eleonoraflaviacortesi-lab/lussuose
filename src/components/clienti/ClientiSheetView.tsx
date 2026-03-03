@@ -1323,7 +1323,7 @@ function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: str
   return (
     <div className="relative">
       <div className="fixed inset-0 z-[150]" onClick={() => setOpen(false)} />
-      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl shadow-lg p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
+      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
         <button onClick={() => { onChange?.(''); setOpen(false); }} className="w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground">— Vuoto</button>
         {opts.map(o => <button key={o} onClick={() => { onChange?.(o); setOpen(false); }} className={cn("w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60", value === o && "font-semibold")}>{o}</button>)}
         {adding ? <input autoFocus className="w-full text-xs px-2 py-1 border border-border rounded mt-1" value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { saveOpts([...opts, draft.trim()]); setDraft(''); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} onBlur={() => setAdding(false)} placeholder="Nuova opzione…" /> : <button onClick={() => setAdding(true)} className="w-full text-left px-2 py-1 text-xs text-muted-foreground hover:text-foreground">+ Aggiungi</button>}
@@ -2169,7 +2169,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   return (
     <div
-      className="border border-border/30 rounded-2xl bg-background overflow-hidden shadow-sm"
+      className="border border-border rounded-2xl bg-background overflow-hidden"
       onClick={(e) => {
         // Deselect when clicking on the container background (not on rows/headers)
         if (e.target === e.currentTarget) {

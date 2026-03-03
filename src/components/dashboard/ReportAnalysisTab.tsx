@@ -250,7 +250,7 @@ const ReportAnalysisTab = () => {
   };
 
   const StatCard = ({ label, value, isCurrency = false }: {label: string;value: number;isCurrency?: boolean;}) =>
-  <div className="bg-card rounded-2xl shadow-lg p-4">
+  <div className="bg-card rounded-2xl border border-border p-4">
       <p className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground mb-1">
         {label}
       </p>
@@ -285,7 +285,7 @@ const ReportAnalysisTab = () => {
 
       {/* Monthly Trend Chart */}
       {chartData.length > 0 &&
-      <div className="bg-card rounded-2xl shadow-lg p-6 mb-8">
+      <div className="bg-card rounded-2xl border border-border p-6 mb-8">
           <div className="flex items-center gap-2 pb-4 border-b border-muted mb-4">
             <TrendingUp className="w-4 h-4 text-muted-foreground" />
             <h3 className="text-sm font-bold tracking-[0.15em] uppercase">ANDAMENTO ULTIMO MESE</h3>
@@ -358,7 +358,7 @@ const ReportAnalysisTab = () => {
       }
 
       {/* Period Filter */}
-      <div className="bg-card rounded-2xl shadow-lg p-4 mb-6">
+      <div className="bg-card rounded-2xl border border-border p-4 mb-6">
         <div className="flex flex-wrap items-center justify-center gap-2">
           {(['week', 'month', '6months', 'year'] as const).map((p) =>
           <button
@@ -425,14 +425,14 @@ const ReportAnalysisTab = () => {
         
         <div className="space-y-3">
           {filteredData.length === 0 ?
-          <div className="bg-card rounded-2xl shadow-lg p-8 text-center">
+          <div className="bg-card rounded-2xl border border-border p-8 text-center">
               <p className="text-muted-foreground">Nessun report trovato per questo periodo</p>
             </div> :
 
           filteredData.map((entry) =>
           <div
             key={entry.id}
-            className="bg-card rounded-2xl shadow-lg p-4 transition-all duration-150 cursor-pointer hover:shadow-xl"
+            className="bg-card rounded-2xl border border-border p-4 transition-all duration-150 cursor-pointer"
             onClick={() => openReportDetail(entry)}>
 
                 <div className="flex items-center justify-between">

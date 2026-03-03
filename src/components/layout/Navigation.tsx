@@ -59,7 +59,7 @@ const Navigation = ({ activeTab, onTabChange }: NavigationProps) => {
               {isActive && (
                 <span
                   className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[34px] h-[34px] rounded-full bg-white"
-                  style={{ boxShadow: '0 3px 8px rgba(0,0,0,0.18)' }}
+                  style={{ boxShadow: 'none', border: '1px solid hsl(var(--border))' }}
                 />
               )}
               <Icon className="w-4 h-4 relative z-10" strokeWidth={isActive ? 2 : 1.5} />

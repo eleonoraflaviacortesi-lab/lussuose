@@ -244,7 +244,7 @@ export const LiquidGlassColorPicker = memo(({
       >
         {/* Picker indicator */}
         <div
-          className="absolute w-5 h-5 rounded-full border-[3px] border-white shadow-lg pointer-events-none"
+          className="absolute w-5 h-5 rounded-full border-[3px] border-white border pointer-events-none"
           style={{
             left: `calc(${hsv.s}% - 10px)`,
             top: `calc(${100 - hsv.v}% - 10px)`,
@@ -268,7 +268,7 @@ export const LiquidGlassColorPicker = memo(({
 
         {/* Color Preview Circle */}
         <div
-          className="w-10 h-10 rounded-full shadow-lg shrink-0 ring-2 ring-white"
+          className="w-10 h-10 rounded-full shrink-0 ring-2 ring-white"
           style={{ backgroundColor: currentColorHex }}
         />
 
@@ -284,7 +284,7 @@ export const LiquidGlassColorPicker = memo(({
         >
           {/* Hue indicator */}
           <div
-            className="absolute w-5 h-5 rounded-full border-[3px] border-white shadow-lg pointer-events-none -top-0.5"
+            className="absolute w-5 h-5 rounded-full border-[3px] border-white pointer-events-none -top-0.5"
             style={{
               left: `calc(${(hsv.h / 360) * 100}% - 10px)`,
               backgroundColor: hueColorHex,
@@ -321,7 +321,7 @@ export const LiquidGlassColorPicker = memo(({
       {/* Save Button */}
       <button
         onClick={handleSave}
-        className="w-full mt-4 py-3 bg-foreground text-background text-sm font-semibold rounded-full shadow-lg active:scale-[0.98] transition-transform"
+        className="w-full mt-4 py-3 bg-foreground text-background text-sm font-semibold rounded-full border border-border active:scale-[0.98] transition-transform"
       >
         Salva
       </button>

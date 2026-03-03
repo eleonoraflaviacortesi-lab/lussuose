@@ -95,7 +95,7 @@ const ClientiFunnelChartModal = memo(({ open, onOpenChange, clienti }: ClientiFu
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm bg-white/95 backdrop-blur-xl rounded-3xl border-0 shadow-2xl p-6">
+      <DialogContent className="max-w-sm bg-card rounded-3xl border border-border p-6">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-center">
             Funnel Clienti

@@ -306,7 +306,7 @@ export const ClienteCard = memo(({
       isDragging={isDragging}
       onClick={handleCardClick}
       onContextAction={handleContextAction}
-      className={cn("relative p-3 shadow-lg hover:shadow-xl", !cliente.card_color && "bg-white", textColor)}
+      className={cn("relative p-3", !cliente.card_color && "bg-card", textColor)}
     >
       {/* Header with emoji and name */}
       <div className="flex items-start gap-2 mb-2">

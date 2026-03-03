@@ -202,7 +202,7 @@ const MentionInput = ({
       {showDropdown && filteredProfiles.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute bottom-full left-0 right-0 mb-1 bg-white rounded-xl shadow-xl border border-border z-50 overflow-hidden max-h-52 overflow-y-auto"
+          className="absolute bottom-full left-0 right-0 mb-1 bg-popover rounded-xl border border-border z-50 overflow-hidden max-h-52 overflow-y-auto"
         >
           {filteredProfiles.map((profile, idx) => (
             <button

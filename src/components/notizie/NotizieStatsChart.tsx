@@ -29,7 +29,7 @@ const NotizieStatsChart = memo(({ notizieByStatus }: NotizieStatsChartProps) => 
     <>
       <div 
         onClick={() => setFunnelOpen(true)}
-        className="bg-card rounded-xl p-2.5 lg:p-2 shadow-sm cursor-pointer hover:shadow-md transition-shadow active:scale-[0.99]"
+        className="bg-card rounded-xl p-2.5 lg:p-2 border border-border cursor-pointer transition-all active:scale-[0.99]"
       >
         <div className="flex items-center justify-between mb-1.5 lg:mb-1">
           <span className="text-[10px] font-medium tracking-wide uppercase text-muted-foreground">

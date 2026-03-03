@@ -96,7 +96,7 @@ const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) =
         }}
       >
         <div className={cn(
-          "w-10 h-10 rounded-full bg-card shadow-lg flex items-center justify-center",
+          "w-10 h-10 rounded-full bg-card border border-border flex items-center justify-center",
           isRefreshing && "animate-pulse"
         )}>
           <RefreshCw

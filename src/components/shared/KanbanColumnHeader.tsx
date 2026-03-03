@@ -72,7 +72,7 @@ export const KanbanColumnHeader = memo(({
             if (e.key === 'Enter') handleSave();
             if (e.key === 'Escape') { setLabel(column.label); setEditing(false); }
           }}
-          className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-white shadow-lg outline-none w-24"
+          className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-card border border-border outline-none w-24"
         />
       ) : (
         <button
@@ -133,7 +133,7 @@ export const KanbanColumnHeader = memo(({
                   key={color}
                   onClick={() => { onUpdate({ color }); setShowColorPicker(false); }}
                   className={cn(
-                    "w-8 h-8 rounded-full transition-all active:scale-90 shadow-sm",
+                    "w-8 h-8 rounded-full transition-all active:scale-90 border border-border",
                     column.color === color && "ring-2 ring-foreground ring-offset-2"
                   )}
                   style={{ backgroundColor: color }}
@@ -142,7 +142,7 @@ export const KanbanColumnHeader = memo(({
               <button
                 onClick={() => setShowCustomPicker(!showCustomPicker)}
                 className={cn(
-                  "w-8 h-8 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
+                  "w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center text-sm font-bold text-foreground transition-all active:scale-90",
                   showCustomPicker && "ring-2 ring-foreground ring-offset-2"
                 )}
               >

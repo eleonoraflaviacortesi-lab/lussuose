@@ -136,7 +136,7 @@ const ColorStatusPickerPill = memo(({
                 key={c.value || 'default'}
                 onClick={() => { onColorSelect(c.value); onClose(); }}
                 className={cn(
-                  "w-7 h-7 rounded-full transition-transform active:scale-90 shadow-sm",
+                  "w-7 h-7 rounded-full transition-transform active:scale-90 border border-border",
                   c.color,
                   currentColor === c.value && "ring-2 ring-foreground ring-offset-1"
                 )}
@@ -147,7 +147,7 @@ const ColorStatusPickerPill = memo(({
             <button
               onClick={() => setShowCustomPicker(!showCustomPicker)}
               className={cn(
-                "w-7 h-7 rounded-full bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90",
+                "w-7 h-7 rounded-full bg-card border border-border flex items-center justify-center text-sm font-bold text-foreground transition-all active:scale-90",
                 showCustomPicker && "ring-2 ring-foreground ring-offset-1"
               )}
             >
@@ -339,7 +339,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
               className={cn(
                 "shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all active:scale-90",
                 notizia.is_online 
-                  ? "bg-green-500 text-white shadow-sm" 
+                  ? "bg-green-500 text-white" 
                   : isDark 
                     ? "bg-white/20 text-white/60" 
                     : "bg-muted text-muted-foreground"
@@ -570,7 +570,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                     ref={provided.innerRef}
                                     {...provided.draggableProps}
                                     {...provided.dragHandleProps}
-                                    className={cn(snapshot.isDragging && "scale-105 shadow-lg rotate-1")}
+                                    className={cn(snapshot.isDragging && "scale-105 rotate-1")}
                                   >
                                     <Card 
                                       notizia={notizia}

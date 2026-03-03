@@ -1080,7 +1080,7 @@ const CalendarPage = () => {
     <div className="pb-8 animate-fade-in pt-[3px]">
 
       {/* Week Navigation - Mobile optimized */}
-      <div className="bg-card rounded-2xl p-3 sm:p-4 mb-6 opacity-100 shadow-xl pt-[16px] mx-0 px-0">
+      <div className="bg-card rounded-2xl p-3 sm:p-4 mb-6 opacity-100 border border-border pt-[16px] mx-0 px-0">
         {/* View mode toggle */}
         <div className="flex items-center justify-center gap-1 mb-3">
           {(['day', '3days', 'week', 'month'] as CalendarViewMode[]).map((mode) =>
@@ -1111,7 +1111,7 @@ const CalendarPage = () => {
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateCalendar('prev')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors shrink-0 bg-white shadow-2xl">
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors shrink-0 bg-card border border-border">
             <ChevronLeft className="w-5 h-5" />
           </button>
           
@@ -1257,7 +1257,7 @@ const CalendarPage = () => {
               key={dayKey}
               data-today={isToday ? 'true' : undefined}
               className={cn(
-                "bg-card rounded-2xl shadow-lg p-3 transition-all",
+                "bg-card rounded-2xl border border-border p-3 transition-all",
                 viewMode === 'day' ? 'w-full' : 'min-w-[280px] flex-shrink-0',
                 isToday && "ring-2 ring-foreground"
               )}
@@ -1361,7 +1361,7 @@ const CalendarPage = () => {
                     ref={provided.innerRef}
                     {...provided.droppableProps}
                     className={cn(
-                      "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                      "bg-card rounded-2xl border border-border p-3 min-h-[200px] transition-all cursor-pointer",
                       isToday && "ring-2 ring-foreground",
                       snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
                     )}
@@ -1435,7 +1435,7 @@ const CalendarPage = () => {
                           setShowAddMenu(true);
                           setAddMenuInitialType('cliente');
                         }}
-                        className="flex-1 py-2 rounded-xl border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium border-0 shadow-2xl">
+                        className="flex-1 py-2 rounded-xl border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
                         
                               <User className="w-3.5 h-3.5" />
                               Buyer
@@ -1447,7 +1447,7 @@ const CalendarPage = () => {
                           setShowAddMenu(true);
                           setAddMenuInitialType('notizia');
                         }}
-                        className="flex-1 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium border-0 border-black border-none shadow-2xl">
+                        className="flex-1 py-2 rounded-xl border border-border text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
                         
                               <FileText className="w-3.5 h-3.5" />
                               Seller
@@ -1458,7 +1458,7 @@ const CalendarPage = () => {
                           setSelectedDate(day);
                           setShowAddTaskDialog(true);
                         }}
-                        className="flex-1 py-2 rounded-xl border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium shadow-2xl border-0">
+                        className="flex-1 py-2 rounded-xl border border-border text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
                         
                               <Pencil className="w-3.5 h-3.5" />
                               Task
@@ -1988,7 +1988,7 @@ const DraggableEventCard = memo(({
         styles.bg,
         styles.border,
         event.urgent && "ring-2 ring-red-500",
-        isDragging && "shadow-xl ring-2 ring-primary scale-105 opacity-90"
+        isDragging && "ring-2 ring-primary scale-105 opacity-90"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
       onClick={(e) => {

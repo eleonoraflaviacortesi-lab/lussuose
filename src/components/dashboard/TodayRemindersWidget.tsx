@@ -100,7 +100,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
   }
 
   return (
-    <div className="bg-card rounded-2xl shadow-lg">
+    <div className="bg-card rounded-2xl border border-border">
       {/* Header */}
       <button
         onClick={goToCalendar}

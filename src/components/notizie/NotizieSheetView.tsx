@@ -82,7 +82,7 @@ const EmojiGridWithCustom = memo(function EmojiGridWithCustom({ currentEmoji, on
           onBlur={() => { setShowInput(false); setCustomEmoji(''); }}
           className="w-10 h-7 text-center text-base bg-muted rounded-lg border-0 outline-none focus:ring-1 focus:ring-foreground" placeholder="😀" maxLength={2} />
       ) : (
-        <button onClick={() => setShowInput(true)} className="w-7 h-7 rounded-lg bg-white shadow-md flex items-center justify-center text-sm font-bold text-black transition-all active:scale-90 hover:bg-muted">+</button>
+        <button onClick={() => setShowInput(true)} className="w-7 h-7 rounded-lg bg-card border border-border flex items-center justify-center text-sm font-bold text-foreground transition-all active:scale-90 hover:bg-muted">+</button>
       )}
     </div>
   );
@@ -258,7 +258,7 @@ function LazyStatusCell({ value, onChange, statusOptions }: { value: string; onC
       <SelectTrigger className="h-7 border-0 bg-transparent shadow-none text-xs px-1 focus:ring-0">
         <span className="px-2 py-0.5 rounded-full text-white text-[10px] font-semibold" style={{ backgroundColor: status?.color || '#666' }}>{status?.label || value}</span>
       </SelectTrigger>
-      <SelectContent className="z-[200] bg-background border border-border shadow-lg">
+      <SelectContent className="z-[200] bg-background border border-border">
         {statusOptions.map(s => (
           <SelectItem key={s.value} value={s.value}>
             <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />{s.label}</span>
@@ -484,7 +484,7 @@ function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: str
   return (
     <div className="relative">
       <div className="fixed inset-0 z-[150]" onClick={() => setOpen(false)} />
-      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl shadow-lg p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
+      <div className="absolute left-0 top-0 z-[151] bg-background border border-border rounded-xl p-1.5 min-w-[140px] max-h-[200px] overflow-y-auto">
         <button onClick={() => { onChange?.(''); setOpen(false); }} className="w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60 text-muted-foreground">— Vuoto</button>
         {opts.map(o => <button key={o} onClick={() => { onChange?.(o); setOpen(false); }} className={cn("w-full text-left px-2 py-1 text-xs rounded hover:bg-muted/60", value === o && "font-semibold")}>{o}</button>)}
         {adding ? <input autoFocus className="w-full text-xs px-2 py-1 border border-border rounded mt-1" value={draft} onChange={e => setDraft(e.target.value)} onKeyDown={e => { if (e.key === 'Enter' && draft.trim()) { saveOpts([...opts, draft.trim()]); setDraft(''); setAdding(false); } if (e.key === 'Escape') setAdding(false); }} onBlur={() => setAdding(false)} placeholder="Nuova opzione…" /> : <button onClick={() => setAdding(true)} className="w-full text-left px-2 py-1 text-xs text-muted-foreground hover:text-foreground">+ Aggiungi</button>}
@@ -845,7 +845,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
 
   return (
-    <div className="border border-border/30 rounded-2xl bg-background overflow-hidden shadow-sm"
+    <div className="border border-border rounded-2xl bg-background overflow-hidden"
       onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
 
       {/* Add new + filter bar */}

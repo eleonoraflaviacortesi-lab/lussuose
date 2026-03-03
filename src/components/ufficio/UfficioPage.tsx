@@ -28,7 +28,7 @@ const UfficioPage = () => {
             className={cn(
               'px-5 py-1.5 rounded-full text-sm font-medium transition-all duration-300 ease-out',
               active === tab.id ?
-              'bg-foreground text-background shadow-md' :
+              'bg-foreground text-background' :
               'text-muted-foreground hover:text-foreground'
             )}>
 

@@ -42,7 +42,7 @@ const AcquisitionChart = () => {
 
   if (chartData.length === 0) {
     return (
-      <div className="bg-card rounded-2xl shadow-lg p-5">
+      <div className="bg-card rounded-2xl border border-border p-5">
         <h3 className="text-sm font-bold tracking-tight mb-4">Focus Acquisizione (Ultimi 7 gg)</h3>
         <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
           Nessun dato disponibile
@@ -73,9 +73,9 @@ const AcquisitionChart = () => {
             <Tooltip
               contentStyle={{
                 backgroundColor: 'hsl(var(--card))',
-                border: 'none',
+                border: '1px solid hsl(var(--border))',
                 borderRadius: '12px',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+                boxShadow: 'none',
                 fontSize: '12px'
               }}
               cursor={{ fill: 'hsl(var(--muted) / 0.3)' }} />

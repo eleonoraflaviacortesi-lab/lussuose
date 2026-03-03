@@ -176,7 +176,7 @@ const Header = ({ onOpenProfile, onOpenSettings, activeTab, onTabChange, onOpenC
         <div className="fixed inset-0 z-[70]" onClick={() => setMenuOpen(false)}>
           <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
           <div
-            className="absolute left-0 top-0 bottom-0 w-72 bg-background shadow-2xl animate-in slide-in-from-left duration-200 flex flex-col"
+            className="absolute left-0 top-0 bottom-0 w-72 bg-background border-r border-border animate-in slide-in-from-left duration-200 flex flex-col"
             style={{ paddingTop: 'env(safe-area-inset-top)' }}
             onClick={(e) => e.stopPropagation()}
           >
