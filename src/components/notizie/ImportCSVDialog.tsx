@@ -416,9 +416,9 @@ const ImportCSVDialog = () => {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-1.5 bg-card border-0 hover:bg-muted">
           <Upload className="w-4 h-4" />
-          Importa CSV
+          <span className="hidden md:inline">Importa CSV</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

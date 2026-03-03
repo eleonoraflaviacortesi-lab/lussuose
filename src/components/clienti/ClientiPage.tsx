@@ -246,9 +246,9 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }
 
   return (
-    <div className="py-4 space-y-4 overflow-x-hidden px-0 sm:px-[10px]">
+    <div className="py-4 space-y-4 overflow-x-hidden px-1 sm:px-[10px]">
       {/* Header row: view toggle + actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2 pt-[15px]">
+      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 gap-y-2 pt-[15px]">
         {/* View toggle */}
         <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
           <Button
@@ -281,7 +281,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             <span className="hidden sm:inline">Qualificati</span>
           </Button>
         )}
-        <div className="flex-1" />
+        <div className="hidden sm:block flex-1" />
 
         {isCoordinator &&
         <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
