@@ -99,15 +99,15 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
   return (
     <>
-    <Sidebar collapsible="icon" className="border-none">
+    <Sidebar collapsible="icon" className="border-none rounded-none">
       <SidebarHeader className="p-3">
         {/* Profile avatar - clickable to open profile modal */}
         {!collapsed && profile && (
           <button
             onClick={() => setShowProfile(true)}
-            className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
+            className="flex items-center gap-2 px-1 py-1 border-2 border-border hover:bg-accent transition-colors w-full text-left"
           >
-            <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
+            <span className="w-8 h-8 bg-muted flex items-center justify-center text-base shrink-0 border-2 border-border">
               {profile.avatar_emoji || '👤'}
             </span>
             <div className="min-w-0">
@@ -119,9 +119,9 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
         {collapsed && profile && (
           <button
             onClick={() => setShowProfile(true)}
-            className="flex justify-center w-full rounded-lg hover:bg-sidebar-accent/60 transition-colors py-1"
+            className="flex justify-center w-full hover:bg-accent transition-colors py-1"
           >
-            <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm">
+            <span className="w-7 h-7 bg-muted flex items-center justify-center text-sm border-2 border-border">
               {profile.avatar_emoji || '👤'}
             </span>
           </button>
@@ -136,7 +136,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
           <DropdownMenuTrigger asChild>
             <Button
               size={collapsed ? 'icon' : 'default'}
-              className="w-full gap-2 rounded-lg bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+              className="w-full gap-2 bg-foreground text-background hover:bg-foreground/90 border-2 border-border shadow-[3px_3px_0_hsl(var(--border))] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
             >
               <Plus className="h-4 w-4" />
               {!collapsed && <span className="text-xs font-semibold tracking-wide uppercase">New</span>}
@@ -177,8 +177,8 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                     <NavLink
                       to={item.url}
                       end={item.url === '/'}
-                      className="hover:bg-sidebar-accent/60"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                      className="hover:bg-accent"
+                      activeClassName="bg-foreground text-background font-bold"
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
