@@ -26,55 +26,55 @@ const CounterField = ({
   field,
   ideal,
   icon: Icon,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  field: FieldKey;
-  ideal?: number;
-  icon: any;
-  onChange: (field: FieldKey, value: number) => void;
-}) => (
-  <div className="space-y-2">
+  onChange
+
+
+
+
+
+
+
+}: {label: string;value: number;field: FieldKey;ideal?: number;icon: any;onChange: (field: FieldKey, value: number) => void;}) =>
+<div className="space-y-2">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Icon className="w-4 h-4 text-muted-foreground" />
-        <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
+        <span className="text-xs tracking-[0.15em] uppercase text-muted-foreground font-normal">
           {label}
         </span>
       </div>
-      {ideal !== undefined && (
-        <span className="text-xs text-muted-foreground flex items-center gap-1">
+      {ideal !== undefined &&
+    <span className="text-xs text-muted-foreground flex items-center gap-1">
           <span className="w-2 h-2 rounded-full bg-muted-foreground/30" />
           IDEALE: {ideal}
         </span>
-      )}
+    }
     </div>
     <input
-      type="number"
-      inputMode="numeric"
-      value={value || ''}
-      onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
-      placeholder="0"
-      className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary"
-    />
-  </div>
-);
+    type="number"
+    inputMode="numeric"
+    value={value || ''}
+    onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+    placeholder="0"
+    className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary" />
+  
+  </div>;
+
 
 const CurrencyField = ({
   label,
   value,
   field,
   icon: Icon,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  field: FieldKey;
-  icon: any;
-  onChange: (field: FieldKey, value: number) => void;
-}) => (
-  <div className="space-y-2">
+  onChange
+
+
+
+
+
+
+}: {label: string;value: number;field: FieldKey;icon: any;onChange: (field: FieldKey, value: number) => void;}) =>
+<div className="space-y-2">
     <div className="flex items-center gap-2">
       <Icon className="w-4 h-4 text-muted-foreground" />
       <span className="text-xs font-medium tracking-[0.15em] uppercase text-muted-foreground">
@@ -84,16 +84,16 @@ const CurrencyField = ({
     <div className="flex items-center rounded-xl border border-border bg-background h-12 px-3">
       <span className="text-muted-foreground mr-2">€</span>
       <input
-        type="number"
-        inputMode="numeric"
-        value={value || ''}
-        onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
-        placeholder="0"
-        className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none"
-      />
+      type="number"
+      inputMode="numeric"
+      value={value || ''}
+      onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
+      placeholder="0"
+      className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none" />
+    
     </div>
-  </div>
-);
+  </div>;
+
 
 const ReportForm = () => {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
@@ -108,7 +108,7 @@ const ReportForm = () => {
     nuove_trattative: 0,
     trattative_chiuse: 0,
     fatturato_a_credito: 0,
-    notes: '',
+    notes: ''
   });
 
   const { saveDailyData, myData } = useDailyData();
@@ -123,13 +123,13 @@ const ReportForm = () => {
     acquisizioni: Math.round((settings?.acquisizioni_settimana || 0) / 6 * 10) / 10,
     nuove_trattative: Math.round((settings?.nuove_trattative_settimana || 0) / 6 * 10) / 10,
     trattative_chiuse: Math.round((settings?.trattative_chiuse_settimana || 0) / 6 * 10) / 10,
-    vendite: Math.round((settings?.vendite_settimana || 0) / 6 * 10) / 10,
+    vendite: Math.round((settings?.vendite_settimana || 0) / 6 * 10) / 10
   }), [settings]);
 
   // Load existing data for selected date
   useEffect(() => {
     if (myData) {
-      const existingEntry = myData.find(entry => entry.date === date);
+      const existingEntry = myData.find((entry) => entry.date === date);
       if (existingEntry) {
         setFormData({
           contatti_reali: existingEntry.contatti_reali,
@@ -142,7 +142,7 @@ const ReportForm = () => {
           nuove_trattative: existingEntry.nuove_trattative || 0,
           trattative_chiuse: existingEntry.trattative_chiuse || 0,
           fatturato_a_credito: Number(existingEntry.fatturato_a_credito) || 0,
-          notes: (existingEntry as any).notes || '',
+          notes: (existingEntry as any).notes || ''
         });
       } else {
         setFormData({
@@ -156,18 +156,18 @@ const ReportForm = () => {
           nuove_trattative: 0,
           trattative_chiuse: 0,
           fatturato_a_credito: 0,
-          notes: '',
+          notes: ''
         });
       }
     }
   }, [date, myData]);
 
   const handleValueChange = useCallback((field: FieldKey, value: number) => {
-    setFormData(prev => ({ ...prev, [field]: Math.max(0, value) }));
+    setFormData((prev) => ({ ...prev, [field]: Math.max(0, value) }));
   }, []);
 
   const handleNotesChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setFormData(prev => ({ ...prev, notes: e.target.value }));
+    setFormData((prev) => ({ ...prev, notes: e.target.value }));
   }, []);
 
   const handleSave = () => {
@@ -181,7 +181,7 @@ const ReportForm = () => {
       affitti_numero: 0,
       affitti_valore: 0,
       nuove_trattative_ideali: 2,
-      trattative_chiuse_ideali: 1,
+      trattative_chiuse_ideali: 1
     };
     saveDailyData.mutate(input);
   };
@@ -205,8 +205,8 @@ const ReportForm = () => {
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="bg-muted border-0 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary w-[120px] shrink-0"
-        />
+          className="bg-muted border-0 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary w-[120px] shrink-0" />
+        
       </div>
 
       {/* Three Column Layout */}
@@ -224,8 +224,8 @@ const ReportForm = () => {
             field="contatti_reali"
             ideal={dailyIdeals.contatti}
             icon={Phone}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CounterField
             label="NOTIZIE ACQUISITE"
@@ -233,8 +233,8 @@ const ReportForm = () => {
             field="notizie_reali"
             ideal={dailyIdeals.notizie}
             icon={FileText}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CounterField
             label="APPUNTAMENTI VENDITA"
@@ -242,8 +242,8 @@ const ReportForm = () => {
             field="appuntamenti_vendita"
             ideal={dailyIdeals.appuntamenti}
             icon={CalendarDays}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CounterField
             label="INCARICHI PRESI"
@@ -251,8 +251,8 @@ const ReportForm = () => {
             field="incarichi_vendita"
             ideal={dailyIdeals.incarichi}
             icon={Handshake}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CounterField
             label="ACQUISIZIONI FATTE"
@@ -260,8 +260,8 @@ const ReportForm = () => {
             field="valutazioni_fatte"
             ideal={dailyIdeals.acquisizioni}
             icon={ClipboardCheck}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
         </div>
 
         {/* Trattative */}
@@ -277,8 +277,8 @@ const ReportForm = () => {
             field="nuove_trattative"
             ideal={dailyIdeals.nuove_trattative}
             icon={Handshake}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CounterField
             label="TRATTATIVE CHIUSE"
@@ -286,16 +286,16 @@ const ReportForm = () => {
             field="trattative_chiuse"
             ideal={dailyIdeals.trattative_chiuse}
             icon={CheckCircle}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
 
           <CurrencyField
             label="FATTURATO A CREDITO"
             value={formData.fatturato_a_credito}
             field="fatturato_a_credito"
             icon={CreditCard}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
         </div>
 
         {/* Risultati Chiusura */}
@@ -311,16 +311,16 @@ const ReportForm = () => {
             field="vendite_numero"
             ideal={dailyIdeals.vendite}
             icon={Check}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
           
           <CurrencyField
             label="FATTURATO (€)"
             value={formData.vendite_valore}
             field="vendite_valore"
             icon={Euro}
-            onChange={handleValueChange}
-          />
+            onChange={handleValueChange} />
+          
         </div>
         </div>
 
@@ -331,24 +331,24 @@ const ReportForm = () => {
             <h3 className="text-sm font-bold tracking-[0.15em] uppercase">NOTE</h3>
           </div>
           <Textarea
-            value={formData.notes}
-            onChange={handleNotesChange}
-            placeholder="Aggiungi note sulla giornata..."
-            className="min-h-[100px] bg-background border border-border"
-          />
+          value={formData.notes}
+          onChange={handleNotesChange}
+          placeholder="Aggiungi note sulla giornata..."
+          className="min-h-[100px] bg-background border border-border" />
+        
         </div>
 
       {/* Save Button */}
       <button
         onClick={handleSave}
         disabled={saveDailyData.isPending}
-        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-2 font-medium text-sm tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50"
-      >
+        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-2 font-medium text-sm tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50">
+        
         <span>{saveDailyData.isPending ? 'SALVATAGGIO...' : 'SALVA REPORT'}</span>
         <Check className="w-4 h-4" />
       </button>
-    </div>
-  );
+    </div>);
+
 };
 
 export default ReportForm;
