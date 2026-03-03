@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useRef, memo } from 'react';
+import { useState, useCallback, useMemo, useRef, memo, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Cliente, ClienteStatus, ClienteGroupBy } from '@/types';
 import { ClienteCard } from './ClienteCard';
@@ -65,7 +65,25 @@ export function ClientiKanban({
   searchQuery = '',
 }: ClientiKanbanProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [viewportWidth, setViewportWidth] = useState(0);
   const { columns: kanbanColumns, updateColumn, deleteColumn, addColumn, isLoading: columnsLoading } = useClientKanbanColumns();
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const update = () => setViewportWidth(container.clientWidth);
+    update();
+
+    const observer = new ResizeObserver(update);
+    observer.observe(container);
+    window.addEventListener('resize', update);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, []);
 
   // Get agent info for display
   const getAgent = useCallback((agentId: string | null) => {
@@ -153,6 +171,16 @@ export function ClientiKanban({
     kanbanColumns.map(c => ({ id: c.key as ClienteStatus, label: c.label, color: c.color })),
   [kanbanColumns]);
 
+  const adaptiveColumnWidth = useMemo(() => {
+    const extraColumn = groupBy === 'status' ? 1 : 0;
+    const totalColumns = Math.max(columns.length + extraColumn, 1);
+    if (!viewportWidth) return 260;
+
+    const gap = 12;
+    const availableWidth = viewportWidth - gap * (totalColumns - 1) - 8;
+    return Math.min(280, Math.max(92, Math.floor(availableWidth / totalColumns)));
+  }, [columns.length, groupBy, viewportWidth]);
+
   // Handle drag end
   const handleDragEnd = useCallback((result: DropResult) => {
     const { source, destination, draggableId } = result;
@@ -231,7 +259,7 @@ export function ClientiKanban({
     <DragDropContext onDragEnd={handleDragEnd}>
       <div 
         ref={scrollContainerRef}
-        className="flex gap-3 overflow-x-auto overflow-y-hidden pb-4 bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3"
+        className="flex gap-3 overflow-x-hidden overflow-y-hidden pb-4 bg-card rounded-xl sm:rounded-2xl p-2 sm:p-3"
       >
         {columns.map(column => (
           <Droppable key={column.id} droppableId={column.id}>
@@ -240,9 +268,10 @@ export function ClientiKanban({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={cn(
-                  "w-[280px] flex-shrink-0 rounded-xl p-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto",
+                  "flex-shrink-0 rounded-xl p-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto",
                   snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"
                 )}
+                style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}
               >
                 {/* Column header */}
                 {groupBy === 'status' && 'columnId' in column ? (
@@ -306,7 +335,8 @@ export function ClientiKanban({
         {groupBy === 'status' && (
           <button
             onClick={handleAddColumn}
-            className="w-[280px] flex-shrink-0 rounded-xl p-4 min-h-[100px] border-2 border-dashed border-muted-foreground/30 flex items-center justify-center gap-2 text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground transition-colors"
+            className="flex-shrink-0 rounded-xl p-4 min-h-[100px] border-2 border-dashed border-muted-foreground/30 flex items-center justify-center gap-2 text-muted-foreground hover:border-muted-foreground/50 hover:text-foreground transition-colors"
+            style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}
           >
             <Plus className="w-5 h-5" />
             <span className="text-sm font-medium">Aggiungi colonna</span>

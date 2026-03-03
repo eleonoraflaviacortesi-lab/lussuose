@@ -1,4 +1,4 @@
-import { memo, useCallback, useState, useRef, useEffect } from 'react';
+import { memo, useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
@@ -388,10 +388,11 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
 Card.displayName = 'Card';
 
 // Add Column Button
-const AddColumnButton = memo(({ onAdd }: { onAdd: () => void }) => (
+const AddColumnButton = memo(({ onAdd, width }: { onAdd: () => void; width: number }) => (
   <button
     onClick={onAdd}
-    className="flex flex-col items-center justify-center w-[240px] min-w-[240px] h-24 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-muted-foreground"
+    className="flex flex-col items-center justify-center h-24 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-muted-foreground"
+    style={{ width, minWidth: width, maxWidth: width }}
   >
     <Plus className="w-6 h-6 mb-1" />
     <span className="text-xs">Aggiungi colonna</span>
@@ -406,6 +407,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
   const topScrollRef = useRef<HTMLDivElement>(null);
   const mainScrollRef = useRef<HTMLDivElement>(null);
   const [scrollWidth, setScrollWidth] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
   // Sync scroll between top and main scrollbars
   useEffect(() => {
@@ -413,15 +415,23 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     const topEl = topScrollRef.current;
     if (!mainEl || !topEl) return;
 
-    setScrollWidth(mainEl.scrollWidth);
+    const updateMetrics = () => {
+      setScrollWidth(mainEl.scrollWidth);
+      setViewportWidth(mainEl.clientWidth);
+    };
+    updateMetrics();
 
     const syncTop = () => { if (mainEl) mainEl.scrollLeft = topEl.scrollLeft; };
     const syncMain = () => { if (topEl) topEl.scrollLeft = mainEl.scrollLeft; };
+
+    const resizeObserver = new ResizeObserver(updateMetrics);
+    resizeObserver.observe(mainEl);
 
     topEl.addEventListener('scroll', syncTop);
     mainEl.addEventListener('scroll', syncMain);
 
     return () => {
+      resizeObserver.disconnect();
       topEl.removeEventListener('scroll', syncTop);
       mainEl.removeEventListener('scroll', syncMain);
     };
@@ -490,6 +500,15 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     deleteColumn(columnId);
   }, [notizieByStatus, updateNotizia, deleteColumn]);
 
+  const adaptiveColumnWidth = useMemo(() => {
+    const totalColumns = Math.max(columns.length + 1, 1);
+    if (!viewportWidth) return 240;
+
+    const gap = 12;
+    const availableWidth = viewportWidth - gap * (totalColumns - 1) - 8;
+    return Math.min(260, Math.max(92, Math.floor(availableWidth / totalColumns)));
+  }, [columns.length, viewportWidth]);
+
   if (isLoading || columns.length === 0) {
     return (
       <div className="flex gap-4 pb-4 overflow-x-auto animate-pulse">
@@ -528,7 +547,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                 }
               }}
               {...provided.droppableProps}
-              className="flex gap-3 pb-3 overflow-x-auto lg:gap-3 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+              className="flex gap-3 pb-3 overflow-x-hidden lg:gap-3"
             >
               {columns.map((column, columnIndex) => (
                 <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
@@ -537,9 +556,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                       ref={columnProvided.innerRef}
                       {...columnProvided.draggableProps}
                       className={cn(
-                        "flex flex-col w-[240px] min-w-[240px] max-w-[240px] lg:w-[260px] lg:min-w-[260px] lg:max-w-[260px] relative",
+                        "flex flex-col relative flex-shrink-0",
                         columnSnapshot.isDragging && "z-50"
                       )}
+                      style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}
                     >
                       <div {...columnProvided.dragHandleProps}>
                         <KanbanColumnHeader
@@ -604,7 +624,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               ))}
               {provided.placeholder}
               
-              <AddColumnButton onAdd={handleAddColumn} />
+              <AddColumnButton onAdd={handleAddColumn} width={adaptiveColumnWidth} />
             </div>
           )}
         </Droppable>

@@ -27,7 +27,6 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
-const MobileTabBar = lazy(() => import('@/components/layout/MobileTabBar'));
 
 // Dialog components for "+ New" actions
 const AddNotiziaDialog = lazy(() => import('@/components/notizie/AddNotiziaDialog'));
@@ -130,7 +129,7 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
     >
       {/* Left: sidebar trigger + notifications */}
       <div className="flex items-center gap-1 shrink-0">
-        <SidebarTrigger className="-ml-1 hidden md:flex" />
+        <SidebarTrigger className="-ml-1 flex" />
         <NotificationBell onOpenCliente={onOpenCliente} inline />
       </div>
 
@@ -309,7 +308,7 @@ export default function AppLayout() {
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 overflow-x-hidden">
-            <main className={`mx-auto animate-in fade-in duration-150 pb-20 md:pb-0 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6`}>
+            <main className={`mx-auto animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-6`}>
               <Suspense
                 fallback={
                   <div className="py-10 flex items-center justify-center">
@@ -325,10 +324,6 @@ export default function AppLayout() {
           </PullToRefresh>
         </SidebarInset>
 
-        {/* Mobile bottom tab bar */}
-        <Suspense fallback={null}>
-          <MobileTabBar />
-        </Suspense>
 
         {/* Global chat listener */}
         <ChatGlobalListener
