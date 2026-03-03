@@ -14,8 +14,8 @@ const PullToRefresh = ({ onRefresh, children, className }: PullToRefreshProps) =
   const startY = useRef(0);
   const isPulling = useRef(false);
 
-  const threshold = 80;
-  const maxPull = 120;
+  const threshold = 100;
+  const maxPull = 140;
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     if (isRefreshing) return;

@@ -121,7 +121,9 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
 
   return (
     <header
-      className="fixed z-30 flex h-14 items-center gap-2 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible"
+      className={`fixed z-30 flex items-center gap-2 px-4 right-0 transition-[left] duration-200 ease-linear overflow-visible ${
+        isMobile ? 'min-h-14 py-2' : 'h-14'
+      }`}
       style={{
         left: sidebarLeft,
         top: 'var(--total-banner-height, 28px)',
@@ -137,14 +139,16 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
 
       {/* Center: daily quote - triple tap for arcane fog */}
       <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-2 px-2 cursor-pointer select-none">
-        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50 hidden sm:block" />
         <p
-          className="text-[9px] uppercase truncate text-muted-foreground/70"
+          className={`text-[9px] uppercase text-muted-foreground/70 ${
+            isMobile ? 'text-center leading-relaxed' : 'truncate'
+          }`}
           style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}
         >
           {quote.text} — {quote.author}
         </p>
-        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50 hidden sm:block" />
       </button>
 
       {/* Right: expandable search */}
