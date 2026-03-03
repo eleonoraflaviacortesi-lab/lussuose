@@ -198,6 +198,9 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         })}
       </div>
 
+      {/* Focus Acquisizione Chart - right after row 3 */}
+      <AcquisitionChart />
+
       {/* Status Annuale + Volumi */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="col-span-2 bg-card rounded-2xl border border-border p-5">
@@ -244,9 +247,6 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
           </div>
         </div>
       </div>
-
-      {/* Charts */}
-      <AcquisitionChart />
 
       <Suspense
         fallback={
