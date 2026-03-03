@@ -1,14 +1,13 @@
 import { useState, useCallback, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import ProfileModal from '@/components/profile/ProfileModal';
-import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList, Target } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
 import { triggerArcaneFog } from '@/lib/arcaneFog';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
-import logo from '@/assets/app_logo.svg';
 import {
   Sidebar,
   SidebarContent,
@@ -52,9 +51,10 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
   const navigate = useNavigate();
   const location = useLocation();
   const [showProfile, setShowProfile] = useState(false);
-  const [logoWiggle, setLogoWiggle] = useState(false);
   const tapCountRef = useRef(0);
   const tapTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
 
   const playTrillo = useCallback(() => {
     try {
@@ -67,8 +67,6 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
   const handleLogoTap = useCallback(() => {
     tapCountRef.current += 1;
     if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-    setLogoWiggle(true);
-    setTimeout(() => setLogoWiggle(false), 400);
     if (tapCountRef.current >= 3) {
       tapCountRef.current = 0;
       triggerHaptic('success');
@@ -101,12 +99,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
   return (
     <>
     <Sidebar collapsible="icon" className="border-none">
-      <SidebarHeader className="p-3">
-        {/* Profile avatar - clickable to open profile modal */}
+      <SidebarHeader className="p-2">
+        {/* Profile avatar */}
         {!collapsed && profile && (
           <button
             onClick={() => setShowProfile(true)}
-            className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
           >
             <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
               {profile.avatar_emoji || '👤'}
@@ -120,31 +118,31 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
         {collapsed && profile && (
           <button
             onClick={() => setShowProfile(true)}
-            className="flex justify-center w-full rounded-lg hover:bg-sidebar-accent/60 transition-colors py-1"
+            className="w-full flex justify-center py-1"
           >
-            <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm">
+            <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base">
               {profile.avatar_emoji || '👤'}
             </span>
           </button>
         )}
       </SidebarHeader>
 
-      <SidebarSeparator className="bg-white/30" />
+      <SidebarSeparator className="bg-border/30" />
 
       {/* + New button */}
-      <div className={`px-2 pt-3 pb-1 ${collapsed ? 'flex justify-center' : ''}`}>
+      <div className="px-2 pt-3 pb-1 flex justify-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             {collapsed ? (
               <Button
                 size="icon"
-                className="h-12 w-12 rounded-full bg-foreground text-background hover:bg-foreground/90"
+                className="h-10 w-10 rounded-full bg-foreground text-background hover:bg-foreground/90"
               >
                 <Plus className="h-5 w-5" />
               </Button>
             ) : (
               <Button
-                className="w-full gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90 h-12"
+                className="w-full gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90 h-11"
               >
                 <Plus className="h-4 w-4" />
                 <span className="text-xs font-semibold tracking-wide uppercase">New</span>
@@ -175,11 +173,11 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu className={collapsed ? 'items-center px-0' : ''}>
+            <SidebarMenu>
               {navItems.map((item) => {
                 const active = isActive(item.url);
                 return (
-                  <SidebarMenuItem key={item.title} className={collapsed ? 'flex justify-center' : ''}>
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       isActive={active}
@@ -190,7 +188,6 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                         end={item.url === '/'}
                         className={cn(
                           'transition-colors rounded-lg',
-                          collapsed ? 'justify-center !px-0' : 'justify-start',
                           active
                             ? 'bg-foreground text-background font-semibold hover:bg-foreground/90 hover:text-background'
                             : 'hover:bg-muted text-muted-foreground'
@@ -213,6 +210,30 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
       <SidebarFooter className="p-2">
         <SidebarMenu>
+          {/* Sede Targets - only for coordinators */}
+          {isCoordinator && (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/sede-targets')}
+                tooltip="Obiettivi Agenzia"
+              >
+                <NavLink
+                  to="/sede-targets"
+                  className={cn(
+                    'transition-colors rounded-lg',
+                    isActive('/sede-targets')
+                      ? 'bg-foreground text-background font-semibold hover:bg-foreground/90 hover:text-background'
+                      : 'hover:bg-muted text-muted-foreground'
+                  )}
+                  activeClassName=""
+                >
+                  <Target className="h-4 w-4" />
+                  <span>Obiettivi Agenzia</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={handleSignOut}
