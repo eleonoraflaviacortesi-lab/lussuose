@@ -189,25 +189,25 @@ const ReportForm = () => {
   return (
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-foreground text-background flex items-center justify-center">
-            <Calendar className="w-7 h-7" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold tracking-tight">CICLO PRODUTTIVO</h2>
-            <p className="text-xs font-medium tracking-[0.2em] uppercase text-muted-foreground">
-              PERFORMANCE ODIERNE
-            </p>
-          </div>
-        </div>
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="bg-muted border-0 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary w-[120px] shrink-0" />
-        
-      </div>
+      
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
 
       {/* Three Column Layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -325,7 +325,7 @@ const ReportForm = () => {
         </div>
 
         {/* Notes Section */}
-        <div className="bg-card rounded-2xl border border-border p-6 md:col-span-3">
+        <div className="bg-card rounded-2xl border border-border p-6 md:col-span-3 my-[24px]">
           <div className="flex items-center gap-2 pb-4 border-b border-muted mb-4">
             <StickyNote className="w-5 h-5 text-muted-foreground" />
             <h3 className="text-sm font-bold tracking-[0.15em] uppercase">NOTE</h3>
@@ -342,7 +342,7 @@ const ReportForm = () => {
       <button
         onClick={handleSave}
         disabled={saveDailyData.isPending}
-        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-2 font-medium text-sm tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50">
+        className="w-full bg-foreground text-background rounded-full h-14 flex items-center justify-center gap-2 font-medium text-sm tracking-[0.15em] uppercase hover:bg-foreground/90 transition-colors disabled:opacity-50 pt-0">
         
         <span>{saveDailyData.isPending ? 'SALVATAGGIO...' : 'SALVA REPORT'}</span>
         <Check className="w-4 h-4" />
