@@ -508,7 +508,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
 
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
-      <div className="lg:h-full lg:flex lg:flex-col">
+      <div>
         {/* Top scrollbar (desktop only) */}
         <div
           ref={topScrollRef}
@@ -528,7 +528,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                 }
               }}
               {...provided.droppableProps}
-              className="flex gap-3 pb-3 overflow-x-auto lg:flex-1 lg:gap-3 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
+              className="flex gap-3 pb-3 overflow-x-auto lg:gap-3 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40"
             >
               {columns.map((column, columnIndex) => (
                 <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
@@ -559,7 +559,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                             className={cn(
-                              "flex flex-col gap-1 lg:gap-1 min-h-[80px] rounded-lg p-1 transition-colors lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40",
+                              "flex flex-col gap-1 lg:gap-1 min-h-[80px] rounded-lg p-1 transition-colors",
                               snapshot.isDraggingOver && "bg-accent/20"
                             )}
                           >
