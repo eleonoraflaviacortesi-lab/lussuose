@@ -125,115 +125,141 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
         </button>
       </div>
 
-      {/* === BENTO GRID LAYOUT === */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      {/* Weekly Goals Widget */}
+      <WeeklyGoalsWidget />
 
-        {/* Status Annuale - spans 2 cols */}
+      {/* === ROW 1: Calendario + Incarichi del Mese (big cards) === */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
+        <IncarchiWidget />
+      </div>
+
+      {/* === ROW 2: Contatti, Notizie, Appuntamenti === */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Contatti', value: kpis?.contatti?.value || 0, target: kpis?.contatti?.target || 0, icon: Users },
+          { label: 'Notizie', value: kpis?.notizie?.value || 0, target: kpis?.notizie?.target || 0, icon: TrendingUp },
+          { label: 'Appuntamenti', value: kpis?.appuntamenti?.value || 0, target: kpis?.appuntamenti?.target || 0, icon: Award },
+        ].map((w) => {
+          const Icon = w.icon;
+          const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
+          const isHit = w.target > 0 && w.value >= w.target;
+          return (
+            <div key={w.label} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">{w.label}</p>
+                <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-2xl md:text-3xl font-medium">{w.value}</span>
+                <span className="text-xs text-muted-foreground">/ {w.target}</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full overflow-hidden bg-muted">
+                <div className="h-full rounded-full transition-all duration-500 bg-foreground" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1">
+                <span>{pct}%</span>
+                {isHit && <span className="font-semibold text-foreground">✓</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* === ROW 3: Acquisizioni, Incarichi, Trattative Chiuse === */}
+      <div className="grid grid-cols-3 gap-3">
+        {[
+          { label: 'Acquisizioni', value: kpis?.acquisizioni?.value || 0, target: kpis?.acquisizioni?.target || 0, icon: Zap },
+          { label: 'Incarichi', value: kpis?.incarichi?.value || 0, target: kpis?.incarichi?.target || 0, icon: Award },
+          { label: 'Trattative Chiuse', value: kpis?.trattativeChiuse?.value || 0, target: kpis?.trattativeChiuse?.target || 0, icon: TrendingUp },
+        ].map((w) => {
+          const Icon = w.icon;
+          const pct = w.target > 0 ? Math.min(100, Math.round((w.value / w.target) * 100)) : 0;
+          const isHit = w.target > 0 && w.value >= w.target;
+          return (
+            <div key={w.label} className="rounded-2xl p-4 border border-border bg-card text-card-foreground transition-transform active:scale-[0.97]">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-semibold tracking-[0.12em] uppercase text-muted-foreground">{w.label}</p>
+                <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div className="flex items-baseline gap-1 mb-2">
+                <span className="text-2xl md:text-3xl font-medium">{w.value}</span>
+                <span className="text-xs text-muted-foreground">/ {w.target}</span>
+              </div>
+              <div className="h-1.5 w-full rounded-full overflow-hidden bg-muted">
+                <div className="h-full rounded-full transition-all duration-500 bg-foreground" style={{ width: `${pct}%` }} />
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground mt-1">
+                <span>{pct}%</span>
+                {isHit && <span className="font-semibold text-foreground">✓</span>}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Status Annuale + Volumi */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="col-span-2 bg-card rounded-2xl border border-border p-5">
           <div className="flex items-center gap-2 mb-3">
             <div className="w-1.5 h-1.5 rounded-full bg-foreground" />
-            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">
-              STATUS ANNUALE
-            </p>
+            <p className="text-[10px] font-medium tracking-[0.3em] uppercase text-muted-foreground">STATUS ANNUALE</p>
           </div>
           <div className="flex items-baseline gap-1.5 mb-3">
-            <span className="text-5xl font-light text-foreground tracking-tight">
-              {currentSales}
-            </span>
+            <span className="text-5xl font-light text-foreground tracking-tight">{currentSales}</span>
             <span className="text-xl font-light text-muted-foreground">/ {annualTarget}</span>
-            <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground ml-1">
-              VENDITE
-            </span>
+            <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground ml-1">VENDITE</span>
           </div>
           <Progress value={completionPercent} className="h-1 bg-muted" />
           <p className="text-[10px] text-muted-foreground mt-1.5">{completionPercent}% target</p>
         </div>
-
-        {/* Volume Generato */}
         <div className="col-span-1 dark-card py-4 px-4 flex flex-col justify-between">
-          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
-            VOLUME GENERATO
-          </p>
-          <p className="text-2xl text-white whitespace-nowrap font-medium">
-            {formatCompactCurrency(fatturato)}
-          </p>
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">VOLUME GENERATO</p>
+          <p className="text-2xl text-white whitespace-nowrap font-medium">{formatCompactCurrency(fatturato)}</p>
         </div>
-
-        {/* Volume a Credito */}
         <div className="col-span-1 dark-card py-4 px-4 flex flex-col justify-between">
-          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">
-            VOLUME A CREDITO
-          </p>
-          <p className="text-2xl text-white whitespace-nowrap font-medium">
-            {formatCompactCurrency(fatturatoCredito)}
-          </p>
-        </div>
-
-        {/* Weekly Goals - spans 2 cols */}
-        <div className="col-span-2">
-          <WeeklyGoalsWidget />
-        </div>
-
-        {/* Today Reminders - spans 2 cols */}
-        <div className="col-span-2">
-          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
-        </div>
-
-        {/* Incarichi del Mese - spans 2 cols on mobile, 1 on desktop */}
-        <div className="col-span-2 md:col-span-2">
-          <IncarchiWidget />
-        </div>
-
-        {/* Incarichi Team - spans 2 cols on mobile, 2 on desktop */}
-        <div className="col-span-2 bg-card rounded-2xl border border-border shadow p-4 relative overflow-hidden">
-          <div className="absolute right-2 top-2 opacity-5">
-            <Gift className="w-20 h-20 text-foreground" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-2">
-              <Gift className="w-4 h-4 text-foreground" />
-              <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase">
-                INCARICHI TEAM
-              </h3>
-            </div>
-            <div className="flex items-baseline gap-1.5 mb-2">
-              <span className="text-4xl text-foreground font-medium">{incarichiTeam}</span>
-              <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
-            </div>
-            <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
-            <div className="flex items-center justify-between text-[10px]">
-              <span className="text-muted-foreground">Progresso ufficio</span>
-              <span className="font-semibold text-foreground">{incarichiPercent}%</span>
-            </div>
-          </div>
-        </div>
-
-        {/* KPI Summary Widgets - full width */}
-        <div className="col-span-2 md:col-span-4">
-          <KPISummaryWidgets kpis={kpis} />
-        </div>
-
-        {/* Acquisition Chart - spans full width */}
-        <div className="col-span-2 md:col-span-4">
-          <AcquisitionChart />
-        </div>
-
-        {/* Performance Charts - full width */}
-        <div className="col-span-2 md:col-span-4">
-          <Suspense
-            fallback={
-            <div className="bg-card rounded-2xl shadow-lg p-4">
-                <div className="h-24 rounded-xl bg-muted animate-pulse" />
-              </div>
-            }>
-            <PerformanceCharts
-              myData={myData}
-              chartPeriod={chartPeriod}
-              onChartPeriodChange={setChartPeriod}
-              formatCompactCurrency={formatCompactCurrency} />
-          </Suspense>
+          <p className="text-[10px] font-medium tracking-[0.15em] uppercase text-muted-foreground mb-2">VOLUME A CREDITO</p>
+          <p className="text-2xl text-white whitespace-nowrap font-medium">{formatCompactCurrency(fatturatoCredito)}</p>
         </div>
       </div>
+
+      {/* Incarichi Team */}
+      <div className="bg-card rounded-2xl border border-border shadow p-4 relative overflow-hidden">
+        <div className="absolute right-2 top-2 opacity-5">
+          <Gift className="w-20 h-20 text-foreground" />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-2">
+            <Gift className="w-4 h-4 text-foreground" />
+            <h3 className="text-[10px] font-bold tracking-[0.15em] uppercase">INCARICHI TEAM</h3>
+          </div>
+          <div className="flex items-baseline gap-1.5 mb-2">
+            <span className="text-4xl text-foreground font-medium">{incarichiTeam}</span>
+            <span className="text-lg font-light text-muted-foreground">/ {incarichiTarget}</span>
+          </div>
+          <Progress value={incarichiPercent} className="h-1 bg-muted mb-2" />
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground">Progresso ufficio</span>
+            <span className="font-semibold text-foreground">{incarichiPercent}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts */}
+      <AcquisitionChart />
+
+      <Suspense
+        fallback={
+        <div className="bg-card rounded-2xl shadow-lg p-4">
+            <div className="h-24 rounded-xl bg-muted animate-pulse" />
+          </div>
+        }>
+        <PerformanceCharts
+          myData={myData}
+          chartPeriod={chartPeriod}
+          onChartPeriodChange={setChartPeriod}
+          formatCompactCurrency={formatCompactCurrency} />
+      </Suspense>
 
       <Suspense fallback={null}>
         <KPIDetailModal
