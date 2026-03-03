@@ -163,25 +163,25 @@
 
   h1 {
     font-family: var(--font-sans);
-    @apply uppercase font-semibold text-xl;
+    @apply uppercase font-medium text-sm;
     letter-spacing: 0.15em;
   }
 
   h2 {
     font-family: var(--font-sans);
-    @apply uppercase font-semibold text-lg;
+    @apply uppercase font-medium text-xs;
     letter-spacing: 0.15em;
   }
 
   h3 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-base;
+    @apply uppercase font-medium text-xs;
     letter-spacing: 0.12em;
   }
 
   h4, h5, h6 {
     font-family: var(--font-sans);
-    @apply uppercase font-medium text-sm;
+    @apply uppercase font-medium text-[11px];
     letter-spacing: 0.1em;
   }
 
@@ -193,7 +193,8 @@
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-weight: 500;
+    font-weight: 400;
+    font-size: 11px;
   }
 
   /* Preserve normal casing for text inputs and textareas */
