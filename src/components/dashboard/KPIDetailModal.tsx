@@ -4,10 +4,12 @@ import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'rec
 import { useDailyData } from '@/hooks/useDailyData';
 import { LucideIcon } from 'lucide-react';
 
+type KPIKeyType = 'contatti' | 'notizie' | 'chiusure' | 'conversioni' | 'appuntamenti' | 'acquisizioni' | 'incarichi' | 'trattativeChiuse' | null;
+
 interface KPIDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  kpiKey: 'contatti' | 'notizie' | 'chiusure' | 'conversioni' | null;
+  kpiKey: KPIKeyType;
   title: string;
   value: number | string;
   icon: LucideIcon;
@@ -17,7 +19,11 @@ const dataKeyMap: Record<string, string> = {
   contatti: 'contatti_reali',
   notizie: 'notizie_reali',
   chiusure: 'vendite_numero',
-  conversioni: 'vendite_numero', // We'll compute conversion rate
+  conversioni: 'vendite_numero',
+  appuntamenti: 'appuntamenti_vendita',
+  acquisizioni: 'acquisizioni',
+  incarichi: 'incarichi_vendita',
+  trattativeChiuse: 'trattative_chiuse',
 };
 
 const KPIDetailModal = memo(forwardRef<HTMLDivElement, KPIDetailModalProps>(({ open, onOpenChange, kpiKey, title, value, icon: Icon }, ref) => {
