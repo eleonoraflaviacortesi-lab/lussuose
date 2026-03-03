@@ -841,8 +841,43 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
     return () => window.removeEventListener('keydown', handler);
   }, [selectedRowId, selectedCellCol, notizie, handleCellChange]);
 
+  const tableViewportRef = useRef<HTMLDivElement>(null);
+  const [tableViewportWidth, setTableViewportWidth] = useState(0);
+
+  useEffect(() => {
+    const el = tableViewportRef.current;
+    if (!el) return;
+
+    const updateWidth = () => setTableViewportWidth(el.clientWidth);
+    updateWidth();
+
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(el);
+    window.addEventListener('resize', updateWidth);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateWidth);
+    };
+  }, []);
+
   const rowNumWidth = 52;
-  const totalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
+  const rawTotalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
+  const widthScale = tableViewportWidth > 0 && rawTotalWidth > 0
+    ? Math.min(1, (tableViewportWidth - 2) / rawTotalWidth)
+    : 1;
+
+  const adaptiveRowNumWidth = Math.max(38, Math.floor(rowNumWidth * widthScale));
+  const adaptiveColWidths = useMemo(() => {
+    const next: Record<string, number> = {};
+    orderedColumns.forEach((col) => {
+      const baseWidth = colWidths[col.key] || col.width;
+      next[col.key] = Math.max(58, Math.floor(baseWidth * widthScale));
+    });
+    return next;
+  }, [orderedColumns, colWidths, widthScale]);
+
+  const totalWidth = adaptiveRowNumWidth + orderedColumns.reduce((sum, col) => sum + (adaptiveColWidths[col.key] || col.width), 0);
 
   return (
     <div className="rounded-lg sm:rounded-2xl bg-card overflow-hidden"
@@ -865,12 +900,13 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
         currentBgColor={currentBgColor} currentTextColor={currentTextColor} />
 
       {/* Table */}
-      <div className="overflow-x-auto [transform:rotateX(180deg)]"
+      <div
+        ref={tableViewportRef}
+        className="overflow-x-hidden [transform:rotateX(180deg)]"
         onClick={e => { if (e.target === e.currentTarget) { setSelectedRowId(null); setSelectedColKey(null); } }}>
-        <div style={{ minWidth: totalWidth }} className="[transform:rotateX(180deg)]">
-          {/* Header */}
+        <div style={{ width: totalWidth, minWidth: '100%' }} className="[transform:rotateX(180deg)]">
           <div className="flex sticky top-0 z-10 bg-card border-b border-border/40">
-            <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r border-border/20" style={{ width: rowNumWidth }}>#</div>
+            <div className="flex-shrink-0 flex items-center justify-center text-[10px] text-muted-foreground font-medium border-r border-border/20" style={{ width: adaptiveRowNumWidth }}>#</div>
             {orderedColumns.map(col => (
               <div key={col.key} draggable
                 onDragStart={e => handleColDragStart(col.key, e)}
@@ -882,7 +918,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
                   selectedColKey === col.key && "bg-accent/40 text-foreground",
                   dragOverCol === col.key && "bg-accent/60 border-l-2 border-l-foreground/30"
                 )}
-                style={{ width: colWidths[col.key], flexShrink: 0 }}
+                style={{ width: adaptiveColWidths[col.key], flexShrink: 0 }}
                 onClick={() => handleHeaderClick(col.key)}
                 onContextMenu={e => { e.preventDefault(); setColTypeMenu({ colKey: col.key, colLabel: col.label, x: e.clientX, y: e.clientY }); }}>
                 <GripHorizontal className="w-3 h-3 mr-0.5 opacity-30 flex-shrink-0" />
@@ -899,7 +935,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
           {/* Rows */}
           <div>
             {sorted.map((notizia, i) => (
-              <SheetRow key={notizia.id} notizia={notizia} idx={i} colWidths={colWidths} rowNumWidth={rowNumWidth} colTypeOverrides={colTypeOverrides}
+              <SheetRow key={notizia.id} notizia={notizia} idx={i} colWidths={adaptiveColWidths} rowNumWidth={adaptiveRowNumWidth} colTypeOverrides={colTypeOverrides}
                 isSelected={selectedRowId === notizia.id} selectedColKey={selectedColKey}
                 rowFormat={rowFormats[notizia.id]} colFormats={colFormats} orderedColumns={orderedColumns}
                 onSelect={setSelectedRowId} onCardClick={onNotiziaClick}
