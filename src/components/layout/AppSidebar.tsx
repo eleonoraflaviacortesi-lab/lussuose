@@ -72,12 +72,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
           {profile && (
             <button
               onClick={() => setShowProfile(true)}
-              className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
+              className="flex items-start gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
             >
-              <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm shrink-0">
+              <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm shrink-0 mt-0.5">
                 {profile.avatar_emoji || '👤'}
               </span>
-              <span className="text-[9px] uppercase tracking-[0.15em] font-medium truncate min-w-0">{profile.full_name}</span>
+              <span className="text-[9px] uppercase tracking-[0.15em] font-medium min-w-0 break-words leading-relaxed">{profile.full_name}</span>
             </button>
           )}
 
