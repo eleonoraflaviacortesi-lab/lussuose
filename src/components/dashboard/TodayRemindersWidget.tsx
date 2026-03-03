@@ -91,10 +91,6 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
     }
   };
 
-  if (todayReminders.length === 0) {
-    return null;
-  }
-
   return (
     <div className="bg-card rounded-3xl border border-border">
       {/* Header */}
@@ -111,7 +107,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
               Oggi, {format(today, 'd MMMM', { locale: it })}
             </p>
             <p className="font-bold text-lg">
-              {todayReminders.length} promemoria
+              {todayReminders.length > 0 ? `${todayReminders.length} promemoria` : 'Nessun promemoria'}
             </p>
           </div>
         </div>
