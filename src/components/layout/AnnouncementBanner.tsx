@@ -13,7 +13,7 @@ function Star8({ className = '' }: { className?: string }) {
 }
 
 function StarSep() {
-  return <Star8 className="inline-block h-2.5 w-2.5 mx-3 opacity-50 shrink-0" />;
+  return <Star8 className="inline-block h-2.5 w-2.5 mx-3 opacity-80 shrink-0 text-white" />;
 }
 
 export default function AnnouncementBanner() {
