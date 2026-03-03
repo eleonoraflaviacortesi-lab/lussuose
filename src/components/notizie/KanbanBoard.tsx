@@ -11,6 +11,7 @@ import { useUndoRedo } from '@/hooks/useUndoRedo';
 import { EmojiGridWithCustom } from '@/components/shared/EmojiGridWithCustom';
 import { KanbanColumnHeader } from '@/components/shared/KanbanColumnHeader';
 import { EntityCardWrapper } from '@/components/shared/EntityCardWrapper';
+import { TitleFormatControls, getTitleFormat, titleFormatToCustomFields, titleStyle } from '@/components/shared/TitleFormatControls';
 
 // Common emojis for quick selection
 const QUICK_EMOJIS = ['🏠', '🏢', '🏘️', '🏡', '📍', '⭐', '🔑', '💎', '🌟', '❤️', '📋', '📞', '📸'];
@@ -46,10 +47,12 @@ const ColorStatusPickerPill = memo(({
   currentColor,
   currentStatus,
   currentEmoji,
+  currentCustomFields,
   columns,
   onColorSelect, 
   onStatusChange,
   onEmojiSelect,
+  onTitleFormatChange,
   onDelete,
   onClose 
 }: { 
@@ -57,10 +60,12 @@ const ColorStatusPickerPill = memo(({
   currentColor: string | null;
   currentStatus: NotiziaStatus;
   currentEmoji: string | null;
+  currentCustomFields: any;
   columns: KanbanColumn[];
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
   onEmojiSelect: (emoji: string | null) => void;
+  onTitleFormatChange?: (customFields: Record<string, any>) => void;
   onDelete?: () => void;
   onClose: () => void;
 }) => {
@@ -113,6 +118,20 @@ const ColorStatusPickerPill = memo(({
         
         {/* Separator */}
         <div className="h-px bg-muted/50" />
+        
+        {/* Title format */}
+        {onTitleFormatChange && (
+          <>
+            <TitleFormatControls
+              format={getTitleFormat(currentCustomFields)}
+              onChange={(fmt) => {
+                const existing = currentCustomFields || {};
+                onTitleFormatChange({ ...existing, ...titleFormatToCustomFields(fmt) });
+              }}
+            />
+            <div className="h-px bg-muted/50" />
+          </>
+        )}
         
         {/* Emoji picker */}
         <div>
@@ -265,7 +284,7 @@ const EmojiPickerPill = memo(({
 EmojiPickerPill.displayName = 'EmojiPickerPill';
 
 // Card component
-const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange, onOnlineToggle, onDelete }: { 
+const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, onStatusChange, onOnlineToggle, onTitleFormatChange, onDelete }: { 
   notizia: Notizia; 
   columns: KanbanColumn[];
   onClick: () => void;
@@ -273,6 +292,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
   onEmojiChange: (emoji: string | null) => void;
   onStatusChange: (status: NotiziaStatus) => void;
   onOnlineToggle: (isOnline: boolean) => void;
+  onTitleFormatChange?: (customFields: Record<string, any>) => void;
   onDelete?: () => void;
 }) => {
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -318,9 +338,9 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           </button>
           <div className="flex-1">
             <p className={cn(
-              "font-medium text-sm leading-tight whitespace-normal",
+              "text-sm leading-tight whitespace-normal",
               isDark ? "text-white" : "text-foreground"
-            )} style={{ wordBreak: 'break-word' }}>
+            )} style={{ wordBreak: 'break-word', ...titleStyle(getTitleFormat((notizia as any).custom_fields)) }}>
               {notizia.name}
             </p>
             {notizia.zona && (
@@ -365,10 +385,12 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
           currentColor={notizia.card_color}
           currentStatus={notizia.status as NotiziaStatus}
           currentEmoji={notizia.emoji}
+          currentCustomFields={(notizia as any).custom_fields}
           columns={columns}
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
           onEmojiSelect={onEmojiChange}
+          onTitleFormatChange={onTitleFormatChange}
           onDelete={onDelete}
           onClose={() => setPickerOpen(false)}
         />
@@ -486,6 +508,10 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     updateNotizia.mutate({ id, is_online: isOnline, silent: true });
   }, [updateNotizia]);
 
+  const handleTitleFormatChange = useCallback((id: string, customFields: Record<string, any>) => {
+    updateNotizia.mutate({ id, custom_fields: customFields, silent: true } as any);
+  }, [updateNotizia]);
+
   const handleAddColumn = useCallback(() => {
     addColumn({ label: 'Nuova', color: '#6b7280' });
   }, [addColumn]);
@@ -573,7 +599,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                             ref={provided.innerRef}
                             {...provided.droppableProps}
                             className={cn(
-                              "flex flex-col gap-1 lg:gap-1 min-h-[80px] rounded-lg p-1 transition-colors",
+                              "flex flex-col gap-1 lg:gap-1 min-h-[80px] max-h-[calc(100vh-220px)] overflow-y-auto rounded-lg p-1 transition-colors",
                               snapshot.isDraggingOver && "bg-accent/20"
                             )}
                           >
@@ -594,13 +620,14 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                                       onEmojiChange={(emoji) => handleEmojiChange(notizia.id, emoji)}
                                       onStatusChange={(status) => onStatusChange(notizia.id, status)}
                                       onOnlineToggle={(isOnline) => handleOnlineToggle(notizia.id, isOnline)}
+                                      onTitleFormatChange={(cf) => handleTitleFormatChange(notizia.id, cf)}
                                       onDelete={() => {
-                                        const snapshot = notizia;
+                                        const notiziaSnap = notizia;
                                         deleteNotizia.mutate(notizia.id);
                                         pushAction({
-                                          description: `Elimina ${snapshot.name}`,
-                                          undo: async () => { await addNotizia.mutateAsync({ name: snapshot.name, zona: snapshot.zona, phone: snapshot.phone, type: snapshot.type, notes: snapshot.notes, status: snapshot.status, emoji: snapshot.emoji, card_color: snapshot.card_color, is_online: snapshot.is_online }); },
-                                          redo: async () => { deleteNotizia.mutate(snapshot.id); },
+                                          description: `Elimina ${notiziaSnap.name}`,
+                                          undo: async () => { await addNotizia.mutateAsync({ name: notiziaSnap.name, zona: notiziaSnap.zona, phone: notiziaSnap.phone, type: notiziaSnap.type, notes: notiziaSnap.notes, status: notiziaSnap.status, emoji: notiziaSnap.emoji, card_color: notiziaSnap.card_color, is_online: notiziaSnap.is_online }); },
+                                          redo: async () => { deleteNotizia.mutate(notiziaSnap.id); },
                                         });
                                       }}
                                     />
