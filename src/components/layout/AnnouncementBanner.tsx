@@ -32,7 +32,7 @@ export default function AnnouncementBanner() {
 
   return (
     <div
-      className="fixed top-0 left-0 right-0 z-50 overflow-hidden select-none"
+      className="fixed top-0 left-0 right-0 z-[60] overflow-hidden select-none"
       style={{
         backgroundColor: settings.bgColor,
         color: settings.textColor,

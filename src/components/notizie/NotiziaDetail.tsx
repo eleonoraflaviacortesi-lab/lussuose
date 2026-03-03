@@ -270,6 +270,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       {/* Backdrop overlay - transparent to keep content visible */}
       <div 
         className="fixed inset-0 z-[54] bg-black/10 animate-in fade-in duration-200"
+        style={{ top: 'var(--banner-height, 28px)' }}
         onClick={() => onOpenChange(false)}
       />
       {/* Side peek panel */}
