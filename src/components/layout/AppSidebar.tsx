@@ -92,8 +92,8 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 {profile.avatar_emoji || '👤'}
               </span>
               <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{profile.full_name}</p>
-                <p className="text-xs text-muted-foreground truncate">{profile.sede}</p>
+                <p className="!uppercase !tracking-[0.15em] text-sm font-medium truncate" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.full_name}</p>
+                <p className="!uppercase !tracking-[0.12em] text-xs text-muted-foreground truncate" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.sede}</p>
               </div>
             </div>
           )}
@@ -136,7 +136,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                   ) : (
                     <Button className="w-full gap-2 rounded-full bg-foreground text-background hover:bg-foreground/90 h-11">
                       <Plus className="h-4 w-4" />
-                      <span className="text-xs font-semibold tracking-wide uppercase">New</span>
+                      <span className="!uppercase !tracking-[0.15em] text-xs font-semibold" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>New</span>
                     </Button>
                   )}
                 </DropdownMenuTrigger>
@@ -187,7 +187,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           {isMobile ? (
                             <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{item.title}</span>
                           ) : (
-                            <span>{item.title}</span>
+                            <span className="!uppercase !tracking-[0.15em]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{item.title}</span>
                           )}
                         </NavLink>
                       </SidebarMenuButton>
@@ -216,7 +216,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 {isMobile ? (
                   <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
                 ) : (
-                  <span>Sign out</span>
+                  <span className="!uppercase !tracking-[0.15em]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
                 )}
               </SidebarMenuButton>
             </SidebarMenuItem>
