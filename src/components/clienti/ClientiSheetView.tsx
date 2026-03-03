@@ -2186,22 +2186,23 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   const rowNumWidth = 62;
   const addColumnWidth = addingColumn ? 140 : 40;
+  const viewportAvailableWidth = Math.max(tableViewportWidth - 2, 1);
   const rawTotalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0) + addColumnWidth;
-  const widthScale = tableViewportWidth > 0 && rawTotalWidth > 0
-    ? Math.min(1, (tableViewportWidth - 2) / rawTotalWidth)
+  const widthScale = rawTotalWidth > 0
+    ? Math.min(1, viewportAvailableWidth / rawTotalWidth)
     : 1;
 
-  const adaptiveRowNumWidth = Math.max(42, Math.floor(rowNumWidth * widthScale));
+  const adaptiveRowNumWidth = Math.max(1, Math.floor(rowNumWidth * widthScale));
   const adaptiveColWidths = useMemo(() => {
     const next: Record<string, number> = {};
     orderedColumns.forEach((col) => {
       const baseWidth = colWidths[col.key] || col.width;
-      next[col.key] = Math.max(56, Math.floor(baseWidth * widthScale));
+      next[col.key] = Math.max(1, Math.floor(baseWidth * widthScale));
     });
     return next;
   }, [orderedColumns, colWidths, widthScale]);
 
-  const adaptiveAddColumnWidth = Math.max(30, Math.floor(addColumnWidth * widthScale));
+  const adaptiveAddColumnWidth = Math.max(1, Math.floor(addColumnWidth * widthScale));
   const totalWidth = adaptiveRowNumWidth + orderedColumns.reduce((sum, col) => sum + (adaptiveColWidths[col.key] || col.width), 0) + adaptiveAddColumnWidth;
 
   return (

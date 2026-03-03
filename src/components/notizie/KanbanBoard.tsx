@@ -394,8 +394,8 @@ const AddColumnButton = memo(({ onAdd, width }: { onAdd: () => void; width: numb
     className="flex flex-col items-center justify-center h-24 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors text-muted-foreground"
     style={{ width, minWidth: width, maxWidth: width }}
   >
-    <Plus className="w-6 h-6 mb-1" />
-    <span className="text-xs">Aggiungi colonna</span>
+    <Plus className={cn("w-6 h-6", width >= 140 && "mb-1")} />
+    {width >= 140 && <span className="text-xs truncate">Aggiungi colonna</span>}
   </button>
 ));
 AddColumnButton.displayName = 'AddColumnButton';
@@ -505,8 +505,9 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
     if (!viewportWidth) return 240;
 
     const gap = 12;
-    const availableWidth = viewportWidth - gap * (totalColumns - 1) - 8;
-    return Math.min(260, Math.max(92, Math.floor(availableWidth / totalColumns)));
+    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, totalColumns);
+    const idealWidth = Math.floor(availableWidth / totalColumns);
+    return Math.min(260, Math.max(1, idealWidth));
   }, [columns.length, viewportWidth]);
 
   if (isLoading || columns.length === 0) {
