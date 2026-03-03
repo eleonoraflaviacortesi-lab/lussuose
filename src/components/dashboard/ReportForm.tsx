@@ -219,7 +219,7 @@ const ReportForm = () => {
           </div>
           
           <CounterField
-            label="CONTATTI REALI"
+            label="CONTATTI"
             value={formData.contatti_reali}
             field="contatti_reali"
             ideal={dailyIdeals.contatti}
@@ -228,7 +228,7 @@ const ReportForm = () => {
           
           
           <CounterField
-            label="NOTIZIE ACQUISITE"
+            label="NOTIZIE"
             value={formData.notizie_reali}
             field="notizie_reali"
             ideal={dailyIdeals.notizie}
@@ -237,7 +237,7 @@ const ReportForm = () => {
           
           
           <CounterField
-            label="APPUNTAMENTI VENDITA"
+            label="APPUNTAMENTI"
             value={formData.appuntamenti_vendita}
             field="appuntamenti_vendita"
             ideal={dailyIdeals.appuntamenti}
@@ -246,7 +246,7 @@ const ReportForm = () => {
           
           
           <CounterField
-            label="INCARICHI PRESI"
+            label="INCARICHI"
             value={formData.incarichi_vendita}
             field="incarichi_vendita"
             ideal={dailyIdeals.incarichi}
@@ -255,7 +255,7 @@ const ReportForm = () => {
           
           
           <CounterField
-            label="ACQUISIZIONI FATTE"
+            label="ACQUISIZIONI"
             value={formData.valutazioni_fatte}
             field="valutazioni_fatte"
             ideal={dailyIdeals.acquisizioni}
@@ -272,7 +272,7 @@ const ReportForm = () => {
           </div>
           
           <CounterField
-            label="NUOVE TRATTATIVE"
+            label="TRATTATIVE"
             value={formData.nuove_trattative}
             field="nuove_trattative"
             ideal={dailyIdeals.nuove_trattative}
@@ -281,7 +281,7 @@ const ReportForm = () => {
           
           
           <CounterField
-            label="TRATTATIVE CHIUSE"
+            label="TRATT CHIUSE"
             value={formData.trattative_chiuse}
             field="trattative_chiuse"
             ideal={dailyIdeals.trattative_chiuse}
@@ -306,7 +306,7 @@ const ReportForm = () => {
           </div>
           
           <CounterField
-            label="NUMERO VENDITE"
+            label="VENDITE"
             value={formData.vendite_numero}
             field="vendite_numero"
             ideal={dailyIdeals.vendite}
@@ -315,7 +315,7 @@ const ReportForm = () => {
           
           
           <CurrencyField
-            label="FATTURATO (€)"
+            label="FATTURATO"
             value={formData.vendite_valore}
             field="vendite_valore"
             icon={Euro}
