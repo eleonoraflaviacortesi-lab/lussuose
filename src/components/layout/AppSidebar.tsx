@@ -77,7 +77,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
               <span className="w-7 h-7 rounded-full bg-muted flex items-center justify-center text-sm shrink-0 mt-0.5">
                 {profile.avatar_emoji || '👤'}
               </span>
-              <span className="text-[9px] uppercase tracking-[0.15em] font-medium min-w-0 break-words leading-relaxed">{profile.full_name}</span>
+              <span className="!uppercase !tracking-[0.18em] !text-[10px] min-w-0 break-words leading-relaxed" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{profile.full_name}</span>
             </button>
           )}
 
@@ -128,7 +128,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           end={item.url === '/'}
                           onClick={handleNavClick}
                           className={cn(
-                            'transition-colors rounded-lg text-[9px] tracking-[0.15em] uppercase',
+                            'transition-colors rounded-lg',
                             isMobile ? 'h-10 gap-3' : '',
                             active
                               ? 'bg-foreground text-background font-medium hover:bg-foreground/90 hover:text-background'
@@ -137,7 +137,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                           activeClassName=""
                         >
                           <item.icon className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
-                          <span>{item.title}</span>
+                          <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>{item.title}</span>
                         </NavLink>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -157,12 +157,12 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 onClick={handleSignOut}
                 tooltip="Sign out"
                 className={cn(
-                  'text-muted-foreground hover:text-destructive text-[9px] tracking-[0.15em] uppercase',
+                  'text-muted-foreground hover:text-destructive',
                   isMobile && 'h-10 gap-3'
                 )}
               >
                 <LogOut className={cn(isMobile ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
-                <span>Sign out</span>
+                <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
