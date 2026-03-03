@@ -23,7 +23,7 @@
 @layer base {
   :root {
     --banner-height: 28px;
-    --background: 0 0% 100%;
+    --background: 0 0% 95%;
     --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
@@ -75,11 +75,11 @@
     --font-serif: "Playfair Display", Georgia, serif;
     --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-    --sidebar-background: 0 0% 100%;
+    --sidebar-background: 0 0% 95%;
     --sidebar-foreground: 0 0% 26%;
     --sidebar-primary: 0 0% 10%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent: 0 0% 100%;
     --sidebar-accent-foreground: 0 0% 10%;
     --sidebar-border: 0 0% 90%;
     --sidebar-ring: 0 0% 10%;

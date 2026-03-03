@@ -99,7 +99,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
   return (
     <>
-    <Sidebar collapsible="icon" className="border-r border-border">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       <SidebarHeader className="p-3">
         {/* Profile avatar - clickable to open profile modal */}
         {!collapsed && profile && (
