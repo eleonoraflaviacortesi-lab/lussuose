@@ -81,7 +81,7 @@
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 0 0% 100%;
     --sidebar-accent-foreground: 0 0% 10%;
-    --sidebar-border: 0 0% 90%;
+    --sidebar-border: 0 0% 100%;
     --sidebar-ring: 0 0% 10%;
   }
 
@@ -123,7 +123,7 @@
     --sidebar-primary-foreground: 0 0% 10%;
     --sidebar-accent: 0 0% 15%;
     --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 0 0% 20%;
+    --sidebar-border: 0 0% 8%;
     --sidebar-ring: 0 0% 95%;
 
   }
