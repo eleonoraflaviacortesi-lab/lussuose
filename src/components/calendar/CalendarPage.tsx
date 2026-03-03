@@ -107,7 +107,7 @@ const EventContextMenu = memo(({
         className="fixed z-50 flex flex-col gap-2.5 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.15)] animate-in zoom-in-95 fade-in duration-150 w-[340px] max-w-[90vw] max-h-[80vh] overflow-y-auto"
         style={{
           left: Math.min(Math.max(10, position.x), window.innerWidth - 360),
-          top: Math.min(Math.max(10, position.y), window.innerHeight * 0.15),
+          top: Math.min(Math.max(10, position.y), window.innerHeight * 0.15)
         }}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={(e) => e.stopPropagation()}
@@ -193,8 +193,8 @@ const EventContextMenu = memo(({
         }
 
         {/* Color picker - for both notizie and clienti */}
-        {(isNotiziaReminder || isClienteReminder) && onColorChange && (
-          <>
+        {(isNotiziaReminder || isClienteReminder) && onColorChange &&
+        <>
             <div className="h-px bg-muted/50" />
             <div>
               <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1.5 block flex items-center gap-1">
@@ -202,73 +202,73 @@ const EventContextMenu = memo(({
                 Colore
               </span>
                <div className="flex flex-wrap items-center gap-1.5">
-                {currentCardColor && (
-                  <button
-                    onClick={() => { onColorChange(null); onClose(); }}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
-                    title="Rimuovi colore"
-                  >
+                {currentCardColor &&
+              <button
+                onClick={() => {onColorChange(null);onClose();}}
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-muted hover:bg-destructive hover:text-white transition-colors"
+                title="Rimuovi colore">
+                
                     <X className="w-3.5 h-3.5" />
                   </button>
+              }
+                {['#FEF3C7', '#DCFCE7', '#DBEAFE', '#FCE7F3', '#E9D5FF', '#FED7AA', '#F3F4F6', '#FFFFFF'].map((color) =>
+              <button
+                key={color}
+                onClick={() => {onColorChange(color);onClose();}}
+                className={cn(
+                  "w-7 h-7 rounded-lg transition-all hover:scale-110",
+                  currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
                 )}
-                {['#FEF3C7','#DCFCE7','#DBEAFE','#FCE7F3','#E9D5FF','#FED7AA','#F3F4F6','#FFFFFF'].map((color) => (
-                  <button
-                    key={color}
-                    onClick={() => { onColorChange(color); onClose(); }}
-                    className={cn(
-                      "w-7 h-7 rounded-lg transition-all hover:scale-110",
-                      currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
-                    )}
-                    style={{ backgroundColor: color, border: color === '#FFFFFF' ? '1px solid #e5e7eb' : 'none' }}
-                  />
-                ))}
+                style={{ backgroundColor: color, border: color === '#FFFFFF' ? '1px solid #e5e7eb' : 'none' }} />
+
+              )}
                 <button
-                  onClick={() => setShowColorPicker(true)}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-red-400 via-purple-400 to-blue-400 hover:scale-110 transition-transform"
-                  title="Colore personalizzato"
-                >
+                onClick={() => setShowColorPicker(true)}
+                className="w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br from-red-400 via-purple-400 to-blue-400 hover:scale-110 transition-transform"
+                title="Colore personalizzato">
+                
                   <span className="text-white text-xs font-bold">+</span>
                 </button>
               </div>
               {/* Favorite colors */}
-              {favorites.length > 0 && (
-                <div className="mt-2">
+              {favorites.length > 0 &&
+            <div className="mt-2">
                   <span className="text-[9px] uppercase tracking-wider text-muted-foreground mb-1 block flex items-center gap-1">
                     <Star className="w-3 h-3" />
                     Preferiti
                   </span>
                   <div className="flex flex-wrap items-center gap-1.5">
-                    {favorites.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => { onColorChange(color); onClose(); }}
-                        onContextMenu={(e) => { e.preventDefault(); removeFavorite(color); triggerHaptic('light'); }}
-                        className={cn(
-                          "w-7 h-7 rounded-lg transition-all hover:scale-110 relative group",
-                          currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
-                        )}
-                        style={{ backgroundColor: color }}
-                        title="Click: applica · Tasto destro: rimuovi"
-                      >
+                    {favorites.map((color) =>
+                <button
+                  key={color}
+                  onClick={() => {onColorChange(color);onClose();}}
+                  onContextMenu={(e) => {e.preventDefault();removeFavorite(color);triggerHaptic('light');}}
+                  className={cn(
+                    "w-7 h-7 rounded-lg transition-all hover:scale-110 relative group",
+                    currentCardColor === color && "ring-2 ring-offset-1 ring-foreground"
+                  )}
+                  style={{ backgroundColor: color }}
+                  title="Click: applica · Tasto destro: rimuovi">
+                  
                         <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-destructive text-white text-[8px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">×</span>
                       </button>
-                    ))}
+                )}
                   </div>
                 </div>
-              )}
+            }
               {/* Save as favorite */}
-              {currentCardColor && !['#FEF3C7','#DCFCE7','#DBEAFE','#FCE7F3','#E9D5FF','#FED7AA','#F3F4F6','#FFFFFF'].includes(currentCardColor) && !favorites.includes(currentCardColor) && (
-                <button
-                  onClick={() => { addFavorite(currentCardColor); triggerHaptic('light'); }}
-                  className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-                >
+              {currentCardColor && !['#FEF3C7', '#DCFCE7', '#DBEAFE', '#FCE7F3', '#E9D5FF', '#FED7AA', '#F3F4F6', '#FFFFFF'].includes(currentCardColor) && !favorites.includes(currentCardColor) &&
+            <button
+              onClick={() => {addFavorite(currentCardColor);triggerHaptic('light');}}
+              className="mt-1.5 flex items-center gap-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors">
+              
                   <Star className="w-3 h-3" />
                   Salva come preferito
                 </button>
-              )}
+            }
             </div>
           </>
-        )}
+        }
 
         {isNotiziaReminder &&
         <>
@@ -350,60 +350,60 @@ const EventContextMenu = memo(({
         }
 
         {/* Change date */}
-        {onDateChange && (
-          <>
+        {onDateChange &&
+        <>
             <div className="h-px bg-muted/50" />
             <div>
               <button
-                onClick={() => setShowDatePicker(!showDatePicker)}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-accent text-foreground transition-all w-full"
-              >
+              onClick={() => setShowDatePicker(!showDatePicker)}
+              className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium bg-muted hover:bg-accent text-foreground transition-all w-full">
+              
                 <CalendarDays className="w-4 h-4" />
                 <span>Cambia data</span>
                 <span className="ml-auto text-xs text-muted-foreground">
                   {currentDate ? format(parseISO(currentDate), 'd MMM', { locale: it }) : ''}
                 </span>
               </button>
-              {showDatePicker && (
-                <span className="text-xs text-muted-foreground">Seleziona data…</span>
-              )}
+              {showDatePicker &&
+            <span className="text-xs text-muted-foreground">Seleziona data…</span>
+            }
             </div>
           </>
-        )}
+        }
       </div>
       {/* Date picker as separate floating window */}
-      {showDatePicker && onDateChange && (
-        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/25 backdrop-blur-[3px]" onClick={(e) => { e.stopPropagation(); setShowDatePicker(false); }}>
-          <div 
-            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-5 animate-in zoom-in-95 fade-in duration-200 border border-white/60"
-            onClick={(e) => e.stopPropagation()}
-          >
+      {showDatePicker && onDateChange &&
+      <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/25 backdrop-blur-[3px]" onClick={(e) => {e.stopPropagation();setShowDatePicker(false);}}>
+          <div
+          className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] p-5 animate-in zoom-in-95 fade-in duration-200 border border-white/60"
+          onClick={(e) => e.stopPropagation()}>
+          
             <Calendar
-              mode="single"
-              selected={currentDate ? parseISO(currentDate) : undefined}
-              onSelect={(date) => {
-                if (date) {
-                  onDateChange(format(date, 'yyyy-MM-dd'));
-                  triggerHaptic('light');
-                  onClose();
-                }
-              }}
-              locale={it}
-              className="rounded-2xl p-2 pointer-events-auto"
-            />
+            mode="single"
+            selected={currentDate ? parseISO(currentDate) : undefined}
+            onSelect={(date) => {
+              if (date) {
+                onDateChange(format(date, 'yyyy-MM-dd'));
+                triggerHaptic('light');
+                onClose();
+              }
+            }}
+            locale={it}
+            className="rounded-2xl p-2 pointer-events-auto" />
+          
           </div>
         </div>
-      )}
+      }
       {/* Color picker overlay */}
       <ColorPickerOverlay
         open={showColorPicker}
         color={currentCardColor || '#FEF3C7'}
         onChange={(newColor) => {
-          if (onColorChange) { onColorChange(newColor); onClose(); }
+          if (onColorChange) {onColorChange(newColor);onClose();}
           setShowColorPicker(false);
         }}
-        onClose={() => setShowColorPicker(false)}
-      />
+        onClose={() => setShowColorPicker(false)} />
+      
     </>);
 
 });
@@ -441,14 +441,14 @@ const CalendarPage = () => {
     try {
       const stored = localStorage.getItem('calendar_event_colors');
       return stored ? JSON.parse(stored) : {};
-    } catch { return {}; }
+    } catch {return {};}
   });
 
   const setCalendarEventColor = useCallback((eventId: string, color: string | null) => {
-    setCalendarEventColors(prev => {
+    setCalendarEventColors((prev) => {
       const next = { ...prev };
-      if (color) next[eventId] = color;
-      else delete next[eventId];
+      if (color) next[eventId] = color;else
+      delete next[eventId];
       localStorage.setItem('calendar_event_colors', JSON.stringify(next));
       return next;
     });
@@ -483,19 +483,19 @@ const CalendarPage = () => {
         return Array.from({ length: 3 }, (_, i) => addDays(currentWeekStart, i));
       case 'week':
         return Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
-      case 'month': {
-        const monthStart = startOfMonth(currentWeekStart);
-        const monthEnd = endOfMonth(currentWeekStart);
-        const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-        const days: Date[] = [];
-        let d = gridStart;
-        while (d <= monthEnd || days.length % 7 !== 0) {
-          days.push(d);
-          d = addDays(d, 1);
-          if (days.length > 42) break;
+      case 'month':{
+          const monthStart = startOfMonth(currentWeekStart);
+          const monthEnd = endOfMonth(currentWeekStart);
+          const gridStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+          const days: Date[] = [];
+          let d = gridStart;
+          while (d <= monthEnd || days.length % 7 !== 0) {
+            days.push(d);
+            d = addDays(d, 1);
+            if (days.length > 42) break;
+          }
+          return days;
         }
-        return days;
-      }
     }
   }, [viewMode, currentWeekStart]);
 
@@ -623,10 +623,10 @@ const CalendarPage = () => {
     const delta = direction === 'next' ? 1 : -1;
     setCurrentWeekStart((prev) => {
       switch (viewMode) {
-        case 'day': return addDays(prev, delta);
-        case '3days': return addDays(prev, delta * 3);
-        case 'week': return direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1);
-        case 'month': return addMonths(prev, delta);
+        case 'day':return addDays(prev, delta);
+        case '3days':return addDays(prev, delta * 3);
+        case 'week':return direction === 'next' ? addWeeks(prev, 1) : subWeeks(prev, 1);
+        case 'month':return addMonths(prev, delta);
       }
     });
   };
@@ -639,25 +639,25 @@ const CalendarPage = () => {
   const swipeHandlers = useSwipeGesture({
     onSwipe: handleSwipe,
     enabled: isMobile && (viewMode === 'day' || viewMode === '3days'),
-    threshold: 60,
+    threshold: 60
   });
 
   const goToToday = () => {
     const today = new Date();
     switch (viewMode) {
-      case 'day': setCurrentWeekStart(today); break;
-      case '3days': setCurrentWeekStart(today); break;
-      case 'week': setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 })); break;
-      case 'month': setCurrentWeekStart(startOfMonth(today)); break;
+      case 'day':setCurrentWeekStart(today);break;
+      case '3days':setCurrentWeekStart(today);break;
+      case 'week':setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));break;
+      case 'month':setCurrentWeekStart(startOfMonth(today));break;
     }
   };
 
   const headerLabel = useMemo(() => {
     switch (viewMode) {
-      case 'day': return format(currentWeekStart, 'd MMMM yyyy', { locale: it });
-      case '3days': return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 2), 'd MMM', { locale: it })}`;
-      case 'week': return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 6), 'd MMM', { locale: it })}`;
-      case 'month': return format(currentWeekStart, 'MMMM yyyy', { locale: it });
+      case 'day':return format(currentWeekStart, 'd MMMM yyyy', { locale: it });
+      case '3days':return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 2), 'd MMM', { locale: it })}`;
+      case 'week':return `${format(currentWeekStart, 'd MMM', { locale: it })} – ${format(addDays(currentWeekStart, 6), 'd MMM', { locale: it })}`;
+      case 'month':return format(currentWeekStart, 'MMMM yyyy', { locale: it });
     }
   }, [viewMode, currentWeekStart]);
 
@@ -879,7 +879,7 @@ const CalendarPage = () => {
     }
     if (event.clienteId && event.type === 'cliente_reminder') {
       const c = clienti?.find((x) => x.id === event.clienteId);
-      const raw = (c?.comments || []) as Array<{id: string; text: string; createdAt?: string; created_at?: string;}>;
+      const raw = (c?.comments || []) as Array<{id: string;text: string;createdAt?: string;created_at?: string;}>;
       return raw.map((r) => ({ id: r.id, text: r.text, created_at: r.created_at || r.createdAt || new Date().toISOString() }));
     }
     return [];
@@ -931,18 +931,18 @@ const CalendarPage = () => {
 
 
 
-            // Use default values
-          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);
-      if (cliente) {
-        // Use default time of 09:00 if no reminder_date exists
-        let hours = 9;
-        let minutes = 0;
 
-        if (cliente.reminder_date) {
-          try {
-            const oldDate = parseISO(cliente.reminder_date);
-            if (!isNaN(oldDate.getTime())) {
-              hours = oldDate.getHours();
+
+
+
+
+
+
+
+
+            // Use default values
+          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);if (cliente) {// Use default time of 09:00 if no reminder_date exists
+        let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();
               minutes = oldDate.getMinutes();
             }
           } catch {
@@ -962,17 +962,17 @@ const CalendarPage = () => {
 
 
 
-            // Use default values
-          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {
-        const newDateStr = format(targetDate, 'yyyy-MM-dd');
 
-        triggerHaptic('light');
-        updateTask.mutate({
-          id: taskId,
-          due_date: newDateStr
-        });
-        toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);
-      }
+
+
+
+
+
+
+
+
+            // Use default values
+          }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}
     }
   }, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]);
 
@@ -1077,41 +1077,41 @@ const CalendarPage = () => {
   const moveEventToDate = moveEvent;
 
   return (
-    <div className="pb-8 animate-fade-in pt-[55px]">
+    <div className="pb-8 animate-fade-in pt-[3px]">
 
       {/* Week Navigation - Mobile optimized */}
-      <div className="bg-card rounded-2xl shadow-lg p-3 sm:p-4 mb-6 mx-6 pt-[16px]">
+      <div className="bg-card rounded-2xl p-3 sm:p-4 mb-6 mx-6 opacity-100 shadow-xl pt-[16px]">
         {/* View mode toggle */}
         <div className="flex items-center justify-center gap-1 mb-3">
-          {(['day', '3days', 'week', 'month'] as CalendarViewMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => {
-                setViewMode(mode);
-                const today = new Date();
-                switch (mode) {
-                  case 'day': setCurrentWeekStart(today); break;
-                  case '3days': setCurrentWeekStart(today); break;
-                  case 'week': setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 })); break;
-                  case 'month': setCurrentWeekStart(startOfMonth(today)); break;
-                }
-              }}
-              className={cn(
-                "px-3 py-1 text-[10px] sm:text-xs font-medium tracking-wider uppercase rounded-full transition-colors",
-                viewMode === mode
-                  ? "bg-foreground text-background"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              )}
-            >
+          {(['day', '3days', 'week', 'month'] as CalendarViewMode[]).map((mode) =>
+          <button
+            key={mode}
+            onClick={() => {
+              setViewMode(mode);
+              const today = new Date();
+              switch (mode) {
+                case 'day':setCurrentWeekStart(today);break;
+                case '3days':setCurrentWeekStart(today);break;
+                case 'week':setCurrentWeekStart(startOfWeek(today, { weekStartsOn: 1 }));break;
+                case 'month':setCurrentWeekStart(startOfMonth(today));break;
+              }
+            }}
+            className={cn(
+              "px-3 py-1 text-[10px] sm:text-xs font-medium tracking-wider uppercase rounded-full transition-colors",
+              viewMode === mode ?
+              "bg-foreground text-background" :
+              "bg-muted text-muted-foreground hover:bg-muted/80"
+            )}>
+            
               {mode === 'day' ? 'Giorno' : mode === '3days' ? '3gg' : mode === 'week' ? 'Settimana' : 'Mese'}
             </button>
-          ))}
+          )}
         </div>
 
         <div className="flex items-center justify-between gap-2">
           <button
             onClick={() => navigateCalendar('prev')}
-            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors shrink-0">
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-colors shrink-0 bg-white shadow-2xl">
             <ChevronLeft className="w-5 h-5" />
           </button>
           
@@ -1135,135 +1135,135 @@ const CalendarPage = () => {
       </div>
 
       {/* Calendar Grid */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
+      {isLoading ?
+      <div className="flex items-center justify-center py-12">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
-        </div>
-      ) : viewMode === 'month' ? (
-        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        </div> :
+      viewMode === 'month' ?
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="px-6">
             <div className="grid grid-cols-7 gap-1 mb-1">
-              {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d) => (
-                <div key={d} className="text-center text-[10px] font-medium tracking-wider uppercase text-muted-foreground py-1">
+              {['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'].map((d) =>
+            <div key={d} className="text-center text-[10px] font-medium tracking-wider uppercase text-muted-foreground py-1">
                   {d}
                 </div>
-              ))}
+            )}
             </div>
             <div className="grid grid-cols-7 gap-1">
               {viewDays.map((day) => {
-                const dayKey = format(day, 'yyyy-MM-dd');
-                const events = eventsByDay.get(dayKey) || [];
-                const isToday = isSameDay(day, new Date());
-                const isCurrentMonth = isSameMonth(day, currentWeekStart);
-                const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
+              const dayKey = format(day, 'yyyy-MM-dd');
+              const events = eventsByDay.get(dayKey) || [];
+              const isToday = isSameDay(day, new Date());
+              const isCurrentMonth = isSameMonth(day, currentWeekStart);
+              const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
 
-                return (
-                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={cn(
-                          "bg-card rounded-xl p-1.5 sm:p-2 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-all",
-                          isToday && "ring-2 ring-foreground",
-                          !isCurrentMonth && "opacity-40",
-                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
-                        )}
-                        onClick={() => {
-                          setSelectedDate(day);
-                          if (isMobile) setShowDayView(true);
-                          else setShowAddMenu(true);
-                        }}
-                      >
+              return (
+                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) =>
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "bg-card rounded-xl p-1.5 sm:p-2 min-h-[80px] sm:min-h-[100px] cursor-pointer transition-all",
+                      isToday && "ring-2 ring-foreground",
+                      !isCurrentMonth && "opacity-40",
+                      snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                    )}
+                    onClick={() => {
+                      setSelectedDate(day);
+                      if (isMobile) setShowDayView(true);else
+                      setShowAddMenu(true);
+                    }}>
+                    
                         <p className={cn("text-[10px] sm:text-xs font-semibold mb-1", isToday ? "text-foreground" : "text-muted-foreground")}>
                           {format(day, 'd')}
                         </p>
                         <div className="space-y-0.5">
-                          {draggableEvents.slice(0, isMobile ? 2 : 3).map((event, index) => (
-                            <Draggable key={event.id} draggableId={event.id} index={index}>
-                              {(dragProv) => (
-                                <div
-                                  ref={dragProv.innerRef}
-                                  {...dragProv.draggableProps}
-                                  {...dragProv.dragHandleProps}
-                                  className={cn(
-                                    "text-[8px] sm:text-[9px] font-medium truncate rounded px-1 py-0.5 cursor-grab",
-                                    event.type === 'task' && event.completed && "line-through opacity-60"
-                                  )}
-                                  style={{
-                                    backgroundColor: event.cardColor
-                                      ? event.cardColor
-                                      : event.type === 'notizia_reminder' && event.statusColor
-                                        ? event.statusColor
-                                        : event.type === 'cliente_reminder' && event.statusColor
-                                          ? event.statusColor
-                                          : 'hsl(var(--muted))',
-                                    color: (() => {
-                                      const bg = event.cardColor || (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder') ? event.statusColor : null);
-                                      return bg && isDarkColor(bg) ? 'white' : undefined;
-                                    })(),
-                                    border: (() => {
-                                      const bg = event.cardColor
-                                        || (event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : null)
-                                        || (event.type === 'cliente_reminder' && event.statusColor ? event.statusColor : null);
-                                      return (bg && isDarkColor(bg)) ? 'none' : '1px solid #d1d5db';
-                                    })(),
-                                    ...dragProv.draggableProps.style,
-                                  }}
-                                  onClick={(e) => { e.stopPropagation(); handleEventClick(event); }}
-                                >
+                          {draggableEvents.slice(0, isMobile ? 2 : 3).map((event, index) =>
+                      <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(dragProv) =>
+                        <div
+                          ref={dragProv.innerRef}
+                          {...dragProv.draggableProps}
+                          {...dragProv.dragHandleProps}
+                          className={cn(
+                            "text-[8px] sm:text-[9px] font-medium truncate rounded px-1 py-0.5 cursor-grab",
+                            event.type === 'task' && event.completed && "line-through opacity-60"
+                          )}
+                          style={{
+                            backgroundColor: event.cardColor ?
+                            event.cardColor :
+                            event.type === 'notizia_reminder' && event.statusColor ?
+                            event.statusColor :
+                            event.type === 'cliente_reminder' && event.statusColor ?
+                            event.statusColor :
+                            'hsl(var(--muted))',
+                            color: (() => {
+                              const bg = event.cardColor || (event.statusColor && (event.type === 'notizia_reminder' || event.type === 'cliente_reminder') ? event.statusColor : null);
+                              return bg && isDarkColor(bg) ? 'white' : undefined;
+                            })(),
+                            border: (() => {
+                              const bg = event.cardColor || (
+                              event.type === 'notizia_reminder' && event.statusColor ? event.statusColor : null) || (
+                              event.type === 'cliente_reminder' && event.statusColor ? event.statusColor : null);
+                              return bg && isDarkColor(bg) ? 'none' : '1px solid #d1d5db';
+                            })(),
+                            ...dragProv.draggableProps.style
+                          }}
+                          onClick={(e) => {e.stopPropagation();handleEventClick(event);}}>
+                          
                                   {event.emoji && <span className="mr-0.5">{event.emoji}</span>}
                                   {event.title}
                                 </div>
-                              )}
+                        }
                             </Draggable>
-                          ))}
-                          {events.length > (isMobile ? 2 : 3) && (
-                            <p className="text-[8px] text-muted-foreground">+{events.length - (isMobile ? 2 : 3)}</p>
-                          )}
+                      )}
+                          {events.length > (isMobile ? 2 : 3) &&
+                      <p className="text-[8px] text-muted-foreground">+{events.length - (isMobile ? 2 : 3)}</p>
+                      }
                         </div>
                         {provided.placeholder}
                       </div>
-                    )}
-                  </Droppable>
-                );
-              })}
+                  }
+                  </Droppable>);
+
+            })}
             </div>
           </div>
-        </DragDropContext>
-      ) : isMobile ? (
-        <div
-          ref={weekScrollRef}
-          className={cn(
-            "pb-4 px-6 scrollbar-hide",
-            viewMode === 'day' ? 'flex flex-col gap-3' : 'flex gap-3 overflow-x-auto'
-          )}
-          {...swipeHandlers}
-          style={viewMode === 'day' ? undefined : {
-            scrollbarWidth: 'none',
-            msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch',
-            scrollSnapType: 'x proximity'
-          }}
-        >
+        </DragDropContext> :
+      isMobile ?
+      <div
+        ref={weekScrollRef}
+        className={cn(
+          "pb-4 px-6 scrollbar-hide",
+          viewMode === 'day' ? 'flex flex-col gap-3' : 'flex gap-3 overflow-x-auto'
+        )}
+        {...swipeHandlers}
+        style={viewMode === 'day' ? undefined : {
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          WebkitOverflowScrolling: 'touch',
+          scrollSnapType: 'x proximity'
+        }}>
+        
           {viewDays.map((day) => {
-            const dayKey = format(day, 'yyyy-MM-dd');
-            const events = eventsByDay.get(dayKey) || [];
-            const isToday = isSameDay(day, new Date());
-            const maxVisible = viewMode === 'day' ? 10 : 4;
+          const dayKey = format(day, 'yyyy-MM-dd');
+          const events = eventsByDay.get(dayKey) || [];
+          const isToday = isSameDay(day, new Date());
+          const maxVisible = viewMode === 'day' ? 10 : 4;
 
-            return (
-              <div
-                key={dayKey}
-                data-today={isToday ? 'true' : undefined}
-                className={cn(
-                  "bg-card rounded-2xl shadow-lg p-3 transition-all",
-                  viewMode === 'day' ? 'w-full' : 'min-w-[280px] flex-shrink-0',
-                  isToday && "ring-2 ring-foreground"
-                )}
-                style={viewMode !== 'day' ? { scrollSnapAlign: 'center' } : undefined}
-                onClick={() => handleDayClick(day)}
-              >
+          return (
+            <div
+              key={dayKey}
+              data-today={isToday ? 'true' : undefined}
+              className={cn(
+                "bg-card rounded-2xl shadow-lg p-3 transition-all",
+                viewMode === 'day' ? 'w-full' : 'min-w-[280px] flex-shrink-0',
+                isToday && "ring-2 ring-foreground"
+              )}
+              style={viewMode !== 'day' ? { scrollSnapAlign: 'center' } : undefined}
+              onClick={() => handleDayClick(day)}>
+              
                 <div className="text-center mb-3 pb-2 border-b border-muted">
                   <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                     {format(day, 'EEEE', { locale: it })}
@@ -1274,99 +1274,99 @@ const CalendarPage = () => {
                 </div>
 
                 <div className="space-y-2 min-h-[120px]">
-                  {events.length === 0 ? (
-                    <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                  {events.length === 0 ?
+                <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                       Nessun evento
-                    </p>
-                  ) : (
-                    events.slice(0, maxVisible).map((event) => (
-                      <EventCard
-                        key={event.id}
-                        event={event}
-                        onClick={() => handleEventClick(event)}
-                        onContextMenu={(e) => handleContextMenu(event, e)}
-                        onTouchStart={(e) => handleTouchStart(event, e)}
-                        onTouchEnd={handleTouchEnd}
-                        onToggle={handleToggleCompleted}
-                        hasComment={!!event.lastComment}
-                        comments={getEventComments(event)}
-                        onAddComment={(text) => handleEventAddComment(event, text)}
-                        compact
-                        isMobile={isMobile}
-                        onMobileMenu={() => handleMobileContextMenu(event)}
-                      />
-                    ))
-                  )}
-                  {events.length > maxVisible && (
-                    <p className="text-xs text-muted-foreground text-center">
+                    </p> :
+
+                events.slice(0, maxVisible).map((event) =>
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => handleEventClick(event)}
+                  onContextMenu={(e) => handleContextMenu(event, e)}
+                  onTouchStart={(e) => handleTouchStart(event, e)}
+                  onTouchEnd={handleTouchEnd}
+                  onToggle={handleToggleCompleted}
+                  hasComment={!!event.lastComment}
+                  comments={getEventComments(event)}
+                  onAddComment={(text) => handleEventAddComment(event, text)}
+                  compact
+                  isMobile={isMobile}
+                  onMobileMenu={() => handleMobileContextMenu(event)} />
+
+                )
+                }
+                  {events.length > maxVisible &&
+                <p className="text-xs text-muted-foreground text-center">
                       +{events.length - maxVisible} altri
                     </p>
-                  )}
+                }
                 </div>
 
                 <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDayClick(day);
-                  }}
-                  className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors"
-                >
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDayClick(day);
+                }}
+                className="w-full mt-2 py-2 rounded-lg bg-muted text-foreground font-medium text-xs tracking-wider uppercase hover:bg-muted/80 transition-colors">
+                
                   Vedi giorno
                 </button>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+              </div>);
+
+        })}
+        </div> :
+
+      <DragDropContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           <div className="flex items-stretch gap-2 px-6">
-            {viewMode === 'week' && (
-              <Droppable droppableId="prev-week">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                      snapshot.isDraggingOver
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-muted-foreground/20 text-muted-foreground/50"
-                    )}
-                  >
+            {viewMode === 'week' &&
+          <Droppable droppableId="prev-week">
+                {(provided, snapshot) =>
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={cn(
+                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                snapshot.isDraggingOver ?
+                "border-primary bg-primary/10 text-primary" :
+                "border-muted-foreground/20 text-muted-foreground/50"
+              )}>
+              
                     <ChevronLeft className="w-5 h-5" />
                     <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                       Sett. prec.
                     </span>
                     {provided.placeholder}
                   </div>
-                )}
+            }
               </Droppable>
-            )}
+          }
 
             <div className={cn(
-              "grid gap-2 flex-1",
-              viewMode === 'day' ? 'grid-cols-1 max-w-2xl mx-auto' : viewMode === '3days' ? 'grid-cols-3' : 'grid-cols-7'
-            )}>
+            "grid gap-2 flex-1",
+            viewMode === 'day' ? 'grid-cols-1 max-w-2xl mx-auto' : viewMode === '3days' ? 'grid-cols-3' : 'grid-cols-7'
+          )}>
               {viewDays.map((day) => {
-                const dayKey = format(day, 'yyyy-MM-dd');
-                const events = eventsByDay.get(dayKey) || [];
-                const isToday = isSameDay(day, new Date());
-                const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
-                const appointmentEvents = events.filter((e) => e.type === 'appointment');
+              const dayKey = format(day, 'yyyy-MM-dd');
+              const events = eventsByDay.get(dayKey) || [];
+              const isToday = isSameDay(day, new Date());
+              const draggableEvents = events.filter((e) => e.type === 'notizia_reminder' || e.type === 'cliente_reminder' || e.type === 'task');
+              const appointmentEvents = events.filter((e) => e.type === 'appointment');
 
-                return (
-                  <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.droppableProps}
-                        className={cn(
-                          "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
-                          isToday && "ring-2 ring-foreground",
-                          snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
-                        )}
-                        onClick={() => handleDayClick(day)}
-                      >
+              return (
+                <Droppable droppableId={`day-${dayKey}`} key={dayKey}>
+                    {(provided, snapshot) =>
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      "bg-card rounded-2xl shadow-lg p-3 min-h-[200px] transition-all cursor-pointer",
+                      isToday && "ring-2 ring-foreground",
+                      snapshot.isDraggingOver && "ring-2 ring-primary bg-primary/5"
+                    )}
+                    onClick={() => handleDayClick(day)}>
+                    
                         <div className="text-center mb-3 pb-2 border-b border-muted">
                           <p className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground">
                             {format(day, viewMode === 'day' ? 'EEEE' : 'EEE', { locale: it })}
@@ -1377,138 +1377,138 @@ const CalendarPage = () => {
                         </div>
 
                         <div className="space-y-2 min-h-[80px]">
-                          {appointmentEvents.map((event) => (
-                          <EventCard
-                              key={event.id}
-                              event={event}
-                              onClick={() => handleEventClick(event)}
-                              onContextMenu={(e) => handleContextMenu(event, e)}
-                              onTouchStart={(e) => handleTouchStart(event, e)}
-                              onTouchEnd={handleTouchEnd}
-                              onToggle={handleToggleCompleted}
-                              hasComment={false}
-                              showDetails={viewMode === 'day'}
-                            />
-                          ))}
+                          {appointmentEvents.map((event) =>
+                      <EventCard
+                        key={event.id}
+                        event={event}
+                        onClick={() => handleEventClick(event)}
+                        onContextMenu={(e) => handleContextMenu(event, e)}
+                        onTouchStart={(e) => handleTouchStart(event, e)}
+                        onTouchEnd={handleTouchEnd}
+                        onToggle={handleToggleCompleted}
+                        hasComment={false}
+                        showDetails={viewMode === 'day'} />
+
+                      )}
                           
-                          {draggableEvents.map((event, index) => (
-                            <Draggable key={event.id} draggableId={event.id} index={index}>
-                              {(dragProv, dragSnap) => (
-                                <div
-                                  ref={dragProv.innerRef}
-                                  {...dragProv.draggableProps}
-                                  style={dragProv.draggableProps.style}
-                                >
+                          {draggableEvents.map((event, index) =>
+                      <Draggable key={event.id} draggableId={event.id} index={index}>
+                              {(dragProv, dragSnap) =>
+                        <div
+                          ref={dragProv.innerRef}
+                          {...dragProv.draggableProps}
+                          style={dragProv.draggableProps.style}>
+                          
                                   <DraggableEventCard
-                                    event={event}
-                                    onClick={() => handleEventClick(event)}
-                                    onContextMenu={(e) => handleContextMenu(event, e)}
-                                    onTouchStart={(e) => handleTouchStart(event, e)}
-                                    onTouchEnd={handleTouchEnd}
-                                    onToggle={handleToggleCompleted}
-                                    isDragging={dragSnap.isDragging}
-                                    hasComment={!!event.lastComment}
-                                    comments={getEventComments(event)}
-                                    onAddComment={(text) => handleEventAddComment(event, text)}
-                                    dragHandleProps={dragProv.dragHandleProps}
-                                    showDetails={viewMode === 'day'}
-                                  />
-                                </div>
-                              )}
-                            </Draggable>
-                          ))}
+                            event={event}
+                            onClick={() => handleEventClick(event)}
+                            onContextMenu={(e) => handleContextMenu(event, e)}
+                            onTouchStart={(e) => handleTouchStart(event, e)}
+                            onTouchEnd={handleTouchEnd}
+                            onToggle={handleToggleCompleted}
+                            isDragging={dragSnap.isDragging}
+                            hasComment={!!event.lastComment}
+                            comments={getEventComments(event)}
+                            onAddComment={(text) => handleEventAddComment(event, text)}
+                            dragHandleProps={dragProv.dragHandleProps}
+                            showDetails={viewMode === 'day'} />
                           
-                          {events.length === 0 && (
-                            <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
+                                </div>
+                        }
+                            </Draggable>
+                      )}
+                          
+                          {events.length === 0 &&
+                      <p className="text-xs text-muted-foreground text-center py-4 opacity-50">
                               Nessun evento
                             </p>
-                          )}
+                      }
                           {provided.placeholder}
                         </div>
 
-                        {viewMode === 'day' ? (
-                          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted">
+                        {viewMode === 'day' ?
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-muted">
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedDate(day);
-                                setShowAddMenu(true);
-                                setAddMenuInitialType('cliente');
-                              }}
-                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
-                            >
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(day);
+                          setShowAddMenu(true);
+                          setAddMenuInitialType('cliente');
+                        }}
+                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        
                               <User className="w-3.5 h-3.5" />
                               Buyer
                             </button>
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedDate(day);
-                                setShowAddMenu(true);
-                                setAddMenuInitialType('notizia');
-                              }}
-                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
-                            >
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(day);
+                          setShowAddMenu(true);
+                          setAddMenuInitialType('notizia');
+                        }}
+                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        
                               <FileText className="w-3.5 h-3.5" />
                               Seller
                             </button>
                             <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedDate(day);
-                                setShowAddTaskDialog(true);
-                              }}
-                              className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium"
-                            >
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedDate(day);
+                          setShowAddTaskDialog(true);
+                        }}
+                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        
                               <Pencil className="w-3.5 h-3.5" />
                               Task
                             </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedDate(day);
-                              setShowAddMenu(true);
-                            }}
-                            className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                          >
+                          </div> :
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDate(day);
+                        setShowAddMenu(true);
+                      }}
+                      className="w-full mt-2 py-1.5 rounded-lg border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1">
+                      
                             <Plus className="w-3 h-3" />
                             <span className="text-[10px] font-medium">Aggiungi</span>
                           </button>
-                        )}
+                    }
                       </div>
-                    )}
-                  </Droppable>
-                );
-              })}
+                  }
+                  </Droppable>);
+
+            })}
             </div>
 
-            {viewMode === 'week' && (
-              <Droppable droppableId="next-week">
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={cn(
-                      "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
-                      snapshot.isDraggingOver
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-muted-foreground/20 text-muted-foreground/50"
-                    )}
-                  >
+            {viewMode === 'week' &&
+          <Droppable droppableId="next-week">
+                {(provided, snapshot) =>
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              className={cn(
+                "w-12 shrink-0 rounded-2xl border-2 border-dashed transition-all flex flex-col items-center justify-center gap-2",
+                snapshot.isDraggingOver ?
+                "border-primary bg-primary/10 text-primary" :
+                "border-muted-foreground/20 text-muted-foreground/50"
+              )}>
+              
                     <ChevronRight className="w-5 h-5" />
                     <span className="text-[9px] font-medium tracking-wider uppercase" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>
                       Sett. succ.
                     </span>
                     {provided.placeholder}
                   </div>
-                )}
+            }
               </Droppable>
-            )}
+          }
           </div>
         </DragDropContext>
-      )}
+      }
 
       {/* Add Appointment Dialog */}
       <AddAppointmentDialog
@@ -1521,7 +1521,7 @@ const CalendarPage = () => {
       {selectedDate &&
       <AddToCalendarMenu
         open={showAddMenu}
-        onOpenChange={(open) => { setShowAddMenu(open); if (!open) setAddMenuInitialType(null); }}
+        onOpenChange={(open) => {setShowAddMenu(open);if (!open) setAddMenuInitialType(null);}}
         date={selectedDate}
         clienti={clienti || []}
         notizie={notizie || []}
@@ -1599,7 +1599,7 @@ const CalendarPage = () => {
         }}
         onUpdate={(updates) => {
           if (selectedCliente) {
-            setSelectedCliente((prev: any) => (prev ? { ...prev, ...updates } : prev));
+            setSelectedCliente((prev: any) => prev ? { ...prev, ...updates } : prev);
             updateCliente({ id: selectedCliente.id, ...updates });
           }
         }} />
@@ -1707,8 +1707,8 @@ const CalendarPage = () => {
         onClose={() => setTaskContextMenu(null)} />
 
       }
-    </div>
-  );
+    </div>);
+
 };
 
 // Event Card component for rendering individual events
@@ -1743,7 +1743,7 @@ const EventCard = memo(({
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
-        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
+        border: hasCustomColor ? baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300' : 'border border-foreground',
         textClass: textColor,
         timeClass: hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: true,
@@ -1829,32 +1829,32 @@ const EventCard = memo(({
 
       {/* Top-right badge row */}
       <div className="absolute -top-1.5 -right-1 flex items-center gap-0.5">
-        {event.urgent && (
-          <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+        {event.urgent &&
+        <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
             <AlertTriangle className="w-2.5 h-2.5 text-white" />
           </div>
-        )}
-        {hasComment && comments && onAddComment && (
-          <CommentPopover
-            comments={comments}
-            onAddComment={onAddComment}
-            trigger={
-              <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+        }
+        {hasComment && comments && onAddComment &&
+        <CommentPopover
+          comments={comments}
+          onAddComment={onAddComment}
+          trigger={
+          <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
                 <MessageCircle className="w-2.5 h-2.5 text-background" />
               </div>
-            }
-          />
-        )}
-        {styles.showBuyerBadge && !event.urgent && !hasComment && (
-          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          } />
+
+        }
+        {styles.showBuyerBadge && !event.urgent && !hasComment &&
+        <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
             Buyer
           </div>
-        )}
-        {styles.showTaskBadge && !event.urgent && !hasComment && (
-          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+        }
+        {styles.showTaskBadge && !event.urgent && !hasComment &&
+        <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
             Task
           </div>
-        )}
+        }
       </div>
       <div className="flex items-start gap-2">
         {canToggle ?
@@ -1882,21 +1882,21 @@ const EventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass, event.completed && "line-through opacity-60")}>
             {event.title}
           </p>
-          {showDetails && event.lastComment?.text?.trim() && (
-            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
+          {showDetails && event.lastComment?.text?.trim() &&
+          <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               💬 {event.lastComment.text.replace(/<[^>]*>/g, '').trim()} · {format(parseISO(event.lastComment.created_at), 'd MMM', { locale: it })}
             </p>
-          )}
+          }
         </div>
         {/* Mobile: explicit menu button instead of long-press */}
-        {isMobile && onMobileMenu && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onMobileMenu(); }}
-            className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-muted/60 hover:bg-muted transition-colors"
-          >
+        {isMobile && onMobileMenu &&
+        <button
+          onClick={(e) => {e.stopPropagation();onMobileMenu();}}
+          className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 bg-muted/60 hover:bg-muted transition-colors">
+          
             <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
           </button>
-        )}
+        }
       </div>
     </div>);
 
@@ -1944,7 +1944,7 @@ const DraggableEventCard = memo(({
       return {
         bg: hasCustomColor ? '' : 'bg-white',
         customBg: baseColor,
-        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
+        border: hasCustomColor ? baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300' : 'border border-foreground',
         textClass: textColor,
         showBuyerBadge: true,
         showTaskBadge: false,
@@ -2002,32 +2002,32 @@ const DraggableEventCard = memo(({
 
       {/* Top-right badge row */}
       <div className="absolute -top-1.5 -right-1 flex items-center gap-0.5">
-        {event.urgent && (
-          <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+        {event.urgent &&
+        <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
             <AlertTriangle className="w-2.5 h-2.5 text-white" />
           </div>
-        )}
-        {hasComment && comments && onAddComment && (
-          <CommentPopover
-            comments={comments}
-            onAddComment={onAddComment}
-            trigger={
-              <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
+        }
+        {hasComment && comments && onAddComment &&
+        <CommentPopover
+          comments={comments}
+          onAddComment={onAddComment}
+          trigger={
+          <div className="w-4 h-4 bg-foreground rounded-full flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity">
                 <MessageCircle className="w-2.5 h-2.5 text-background" />
               </div>
-            }
-          />
-        )}
-        {styles.showBuyerBadge && !event.urgent && !hasComment && (
-          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+          } />
+
+        }
+        {styles.showBuyerBadge && !event.urgent && !hasComment &&
+        <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
             Buyer
           </div>
-        )}
-        {styles.showTaskBadge && !event.urgent && !hasComment && (
-          <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
+        }
+        {styles.showTaskBadge && !event.urgent && !hasComment &&
+        <div className="bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
             Task
           </div>
-        )}
+        }
       </div>
       <div className="flex items-center gap-2">
         {/* Checkbox for tasks, emoji/dot for others */}
@@ -2060,11 +2060,11 @@ const DraggableEventCard = memo(({
           <p className={cn("text-[10px] font-medium whitespace-normal break-words leading-tight", styles.textClass, event.completed && "line-through opacity-60")}>
             {event.title}
           </p>
-          {showDetails && event.lastComment?.text?.trim() && (
-            <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
+          {showDetails && event.lastComment?.text?.trim() &&
+          <p className={cn("text-[9px] mt-0.5 whitespace-normal break-words leading-tight opacity-80", styles.textClass)}>
               💬 {event.lastComment.text.replace(/<[^>]*>/g, '').trim()} · {format(parseISO(event.lastComment.created_at), 'd MMM', { locale: it })}
             </p>
-          )}
+          }
         </div>
       </div>
     </div>);
