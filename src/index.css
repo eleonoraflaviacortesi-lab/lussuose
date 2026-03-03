@@ -2,8 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/space-mono/400.css";
-@import "@fontsource/space-mono/700.css";
+@import "@fontsource/playfair-display/400.css";
+@import "@fontsource/playfair-display/500.css";
+@import "@fontsource/playfair-display/600.css";
+@import "@fontsource/playfair-display/700.css";
 
 /* Outfit font family */
 @font-face { font-family: 'Outfit'; src: url('/fonts/Outfit-Thin.ttf') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
@@ -16,113 +18,114 @@
 @font-face { font-family: 'Outfit'; src: url('/fonts/Outfit-ExtraBold.ttf') format('truetype'); font-weight: 800; font-style: normal; font-display: swap; }
 @font-face { font-family: 'Outfit'; src: url('/fonts/Outfit-Black.ttf') format('truetype'); font-weight: 900; font-style: normal; font-display: swap; }
 
-/* ═══════════════════════════════════════════════════
-   NEO-BRUTALIST DESIGN SYSTEM
-   Inspired by old computers, thick borders, raw UI
-   ═══════════════════════════════════════════════════ */
+/* Le Lussuose Design System - Pink & White Style */
 
 @layer base {
   :root {
     --banner-height: 28px;
-    --background: 0 0% 96%;
-    --foreground: 0 0% 5%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 10%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 5%;
+    --card-foreground: 0 0% 10%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 5%;
+    --popover-foreground: 0 0% 10%;
 
-    --primary: 0 0% 5%;
-    --primary-foreground: 0 0% 96%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 90%;
-    --secondary-foreground: 0 0% 5%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 88%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 0 0% 85%;
-    --accent-foreground: 0 0% 5%;
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 10%;
     
-    --banner: 0 0% 5%;
-    --banner-foreground: 0 0% 96%;
+    /* Banner/highlight - mantiene il rosa */
+    --banner: 326 80% 55%;
+    --banner-foreground: 0 0% 100%;
 
     --success: 145 60% 40%;
     --success-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 50%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 5%;
-    --input: 0 0% 5%;
-    --ring: 0 0% 5%;
-
-    --radius: 0px;
-
-    /* Dashboard specific */
-    --dashboard-bg: 0 0% 92%;
-    --dashboard-card: 0 0% 5%;
-    --dashboard-card-hover: 0 0% 15%;
-    --dashboard-border: 0 0% 5%;
-    
-    --pink: 0 0% 5%;
-    --pink-light: 0 0% 90%;
-    --pink-dark: 0 0% 20%;
-
-    --font-mono: "Space Mono", "Courier New", monospace;
-    --font-sans: "Space Mono", "Courier New", monospace;
-
-    --sidebar-background: 0 0% 96%;
-    --sidebar-foreground: 0 0% 5%;
-    --sidebar-primary: 0 0% 5%;
-    --sidebar-primary-foreground: 0 0% 96%;
-    --sidebar-accent: 0 0% 88%;
-    --sidebar-accent-foreground: 0 0% 5%;
-    --sidebar-border: 0 0% 5%;
-    --sidebar-ring: 0 0% 5%;
-  }
-
-  .dark {
-    --background: 0 0% 8%;
-    --foreground: 0 0% 90%;
-
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 90%;
-
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 90%;
-
-    --primary: 0 0% 90%;
-    --primary-foreground: 0 0% 8%;
-
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 90%;
-
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 55%;
-
-    --accent: 0 0% 90%;
-    --accent-foreground: 0 0% 8%;
-    
-    --banner: 0 0% 90%;
-    --banner-foreground: 0 0% 8%;
-
-    --destructive: 0 62.8% 50%;
+    --destructive: 0 65% 55%;
     --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 90%;
     --input: 0 0% 90%;
-    --ring: 0 0% 90%;
+    --ring: 0 0% 10%;
+
+    --radius: 1rem;
+
+    /* Dashboard specific */
+    --dashboard-bg: 0 0% 95%;
+    --dashboard-card: 0 0% 12%;
+    --dashboard-card-hover: 0 0% 18%;
+    --dashboard-border: 0 0% 20%;
+    
+    /* Pink theme */
+    --pink: 326 80% 55%;
+    --pink-light: 326 70% 90%;
+    --pink-dark: 326 85% 45%;
+
+
+    --font-serif: "Playfair Display", Georgia, serif;
+    --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 26%;
+    --sidebar-primary: 0 0% 10%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 96%;
+    --sidebar-accent-foreground: 0 0% 10%;
+    --sidebar-border: 0 0% 90%;
+    --sidebar-ring: 0 0% 10%;
+  }
+
+  .dark {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 95%;
+
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 10%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 10%;
+    
+    --banner: 326 80% 55%;
+    --banner-foreground: 0 0% 100%;
+
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 95%;
 
     --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 90%;
-    --sidebar-primary: 0 0% 90%;
-    --sidebar-primary-foreground: 0 0% 8%;
-    --sidebar-accent: 0 0% 18%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 0 0% 90%;
-    --sidebar-ring: 0 0% 90%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 10%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 0 0% 95%;
+
   }
 }
 
@@ -137,31 +140,31 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-weight: 400;
-    font-size: 13px;
-    letter-spacing: -0.01em;
+    font-size: 14px;
+    letter-spacing: 0.01em;
     overscroll-behavior-y: contain;
   }
 
   h1 {
-    font-family: var(--font-mono);
-    @apply tracking-normal uppercase font-bold text-xl;
+    font-family: var(--font-sans);
+    @apply tracking-normal uppercase font-extrabold text-xl;
   }
 
   h2 {
-    font-family: var(--font-mono);
-    @apply tracking-normal uppercase font-bold text-lg;
+    font-family: var(--font-sans);
+    @apply tracking-normal uppercase font-extrabold text-lg;
   }
 
   h3 {
-    font-family: var(--font-mono);
-    @apply tracking-wide uppercase font-bold text-base;
+    font-family: var(--font-sans);
+    @apply tracking-wide uppercase font-medium text-base;
   }
 
   h4, h5, h6 {
-    font-family: var(--font-mono);
-    @apply tracking-wide font-bold text-sm;
+    font-family: var(--font-sans);
+    @apply tracking-wide font-medium text-sm;
   }
 
   p {
@@ -173,27 +176,24 @@
   }
 
   small {
-    @apply text-xs font-normal;
+    @apply text-xs font-light;
   }
 }
 
 @layer components {
-  .font-mono {
-    font-family: var(--font-mono);
+  .font-serif {
+    font-family: var(--font-serif);
   }
   
   .font-sans {
-    font-family: var(--font-mono);
-  }
-
-  .font-serif {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
   }
 
   /* ========== TOUCH OPTIMIZED INTERACTIONS ========== */
   
+  /* Replace hover with active states for touch */
   .touch-scale {
-    @apply transition-transform duration-100 active:scale-95;
+    @apply transition-transform duration-150 active:scale-95;
   }
   
   .touch-scale-sm {
@@ -201,7 +201,7 @@
   }
   
   .touch-opacity {
-    @apply transition-opacity duration-100 active:opacity-70;
+    @apply transition-opacity duration-150 active:opacity-70;
   }
   
   .touch-highlight {
@@ -213,7 +213,7 @@
     @apply bg-muted/50;
   }
 
-  /* Disable hover on touch devices */
+  /* Disable hover on touch devices, enable active states */
   @media (hover: none) and (pointer: coarse) {
     .hover\:bg-muted:hover,
     .hover\:bg-accent:hover,
@@ -224,6 +224,7 @@
       transform: none;
     }
     
+    /* Active states for touch */
     button, 
     [role="button"],
     a,
@@ -240,113 +241,132 @@
     }
   }
 
-  /* ═══════ BRUTALIST SIDEBAR ═══════ */
+  /* Liquid Glass Sidebar */
   [data-sidebar="sidebar"] {
-    background: hsl(var(--sidebar-background)) !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    border-right: 3px solid hsl(var(--border)) !important;
-    border-radius: 0 !important;
-    box-shadow: 4px 4px 0 hsl(var(--border));
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.82) 0%,
+      rgba(255, 255, 255, 0.65) 50%,
+      rgba(255, 255, 255, 0.82) 100%
+    ) !important;
+    backdrop-filter: blur(60px) saturate(220%) brightness(1.1);
+    -webkit-backdrop-filter: blur(60px) saturate(220%) brightness(1.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.5) !important;
+    border-bottom-right-radius: 1.5rem;
+    box-shadow:
+      4px 0 24px -4px rgba(0, 0, 0, 0.05),
+      inset -1px 0 0 rgba(255, 255, 255, 0.6);
   }
 
-  /* ═══════ BRUTALIST GLASS OVERRIDES ═══════ */
+  /* Glass effects - retained for cards/popovers only */
+
   .glass-button {
-    background: hsl(var(--card));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 3px 3px 0 hsl(var(--border));
-    transition: all 0.1s ease;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    transition: all 0.15s ease;
   }
 
   .glass-button:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 hsl(var(--border));
+    transform: scale(0.97);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 1px 4px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9);
   }
 
-  /* Brutalist Select */
+  /* Liquid Glass Select */
   .glass-select-trigger {
-    background: hsl(var(--card));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 3px 3px 0 hsl(var(--border));
-    transition: all 0.1s ease;
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.85) 0%,
+      rgba(255, 255, 255, 0.65) 50%,
+      rgba(255, 255, 255, 0.8) 100%
+    );
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 8px 32px rgba(0, 0, 0, 0.04),
+      inset 0 1px 1px rgba(255, 255, 255, 0.9),
+      inset 0 -1px 2px rgba(0, 0, 0, 0.02);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .glass-select-trigger:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 hsl(var(--border));
+    transform: scale(0.98);
+    background: linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.75) 50%,
+      rgba(255, 255, 255, 0.9) 100%
+    );
   }
 
   .glass-select-content {
-    background: hsl(var(--card));
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 4px 4px 0 hsl(var(--border));
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(255, 255, 255, 0.85) 100%
+    );
+    backdrop-filter: blur(40px) saturate(200%);
+    -webkit-backdrop-filter: blur(40px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow: 
+      0 10px 40px rgba(0, 0, 0, 0.12),
+      0 20px 60px rgba(0, 0, 0, 0.08),
+      inset 0 1px 1px rgba(255, 255, 255, 0.95);
   }
 
   .glass-select-item {
-    transition: all 0.05s ease;
+    transition: all 0.1s ease;
   }
 
   .glass-select-item:active,
   .glass-select-item[data-highlighted] {
-    background: hsl(var(--accent));
+    background: rgba(0, 0, 0, 0.06);
   }
 
-  /* Report Button - Brutalist */
+  /* Report Button - Dynamic States with touch */
   .btn-report {
-    @apply px-6 py-2.5 font-bold uppercase tracking-widest text-xs;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 3px 3px 0 hsl(var(--border));
+    @apply rounded-full px-6 py-2.5 font-medium uppercase tracking-widest text-xs;
     transition: all 0.1s ease;
     -webkit-tap-highlight-color: transparent;
-    border-radius: 0;
   }
 
   .btn-report.pending {
-    background: hsl(0 0% 5%);
+    background: hsl(0 0% 10%);
     color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   }
 
   .btn-report.completed {
     background: hsl(0 0% 35%);
     color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 
   .btn-report:active {
-    transform: translate(2px, 2px);
-    box-shadow: 1px 1px 0 hsl(var(--border));
+    transform: scale(0.97);
   }
 
-  /* Dark Card - Brutalist */
+  /* Dark Card - Compact */
   .dark-card {
-    @apply bg-foreground text-background p-4;
-    border: 2px solid hsl(var(--border));
-    box-shadow: 4px 4px 0 hsl(var(--border));
+    @apply bg-dashboard-card text-white rounded-xl p-4;
   }
 }
 
 @layer utilities {
   .text-gradient-pink {
-    /* No gradients in brutalism */
-    color: hsl(var(--foreground));
-  }
-
-  /* Brutalist offset shadow utility */
-  .shadow-brutal {
-    box-shadow: 4px 4px 0 hsl(var(--border));
-  }
-
-  .shadow-brutal-sm {
-    box-shadow: 2px 2px 0 hsl(var(--border));
-  }
-
-  .shadow-brutal-lg {
-    box-shadow: 6px 6px 0 hsl(var(--border));
+    background: linear-gradient(135deg, hsl(326 80% 55%) 0%, hsl(326 85% 65%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
@@ -371,36 +391,21 @@ input[type="number"] {
   appearance: textfield;
 }
 
-/* Color picker styling */
+/* Color picker styling for better mobile usability */
 input[type="color"] {
   -webkit-appearance: none;
   appearance: none;
-  border: 2px solid hsl(var(--border));
+  border: none;
   padding: 0;
   cursor: pointer;
 }
 
 input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
-  border-radius: 0;
+  border-radius: 0.5rem;
 }
 
 input[type="color"]::-webkit-color-swatch {
   border: none;
-  border-radius: 0;
-}
-
-/* Scrollbar brutalist */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: hsl(var(--background));
-  border-left: 2px solid hsl(var(--border));
-}
-
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--foreground));
-  border: 1px solid hsl(var(--background));
+  border-radius: 0.5rem;
 }

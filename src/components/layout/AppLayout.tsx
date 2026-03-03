@@ -166,11 +166,16 @@ export default function AppLayout() {
         />
 
         <SidebarInset>
-          {/* Brutalist header */}
-          <header className="sticky z-30 flex h-14 shrink-0 items-center gap-3 px-4 bg-background border-b-3 border-border"
+          {/* Liquid glass header with logo */}
+          <header className="sticky z-30 flex h-14 shrink-0 items-center gap-3 px-4"
             style={{
               top: '0px',
-              borderBottom: '3px solid hsl(var(--border))',
+              background: 'linear-gradient(135deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.85) 100%)',
+              backdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+              WebkitBackdropFilter: 'blur(60px) saturate(250%) brightness(1.15)',
+              boxShadow: '0 4px 20px -4px rgba(0,0,0,0.06), inset 0 -1px 1px rgba(255,255,255,0.6)',
+              borderBottom: '1px solid rgba(255,255,255,0.4)',
+              borderBottomRightRadius: '1.5rem',
             }}
           >
             <SidebarTrigger className="-ml-1 md:flex hidden" />
