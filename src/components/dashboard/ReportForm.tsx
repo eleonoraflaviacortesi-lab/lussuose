@@ -56,7 +56,7 @@ const CounterField = ({
     value={value || ''}
     onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
     placeholder="0"
-    className="w-full h-12 text-center text-lg font-light bg-background rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary" />
+    className="w-full h-9 text-center text-sm font-light bg-background rounded-lg border border-border focus:outline-none focus:ring-2 focus:ring-primary" />
   
   </div>;
 
@@ -81,7 +81,7 @@ const CurrencyField = ({
         {label}
       </span>
     </div>
-    <div className="flex items-center rounded-xl border border-border bg-background h-12 px-3">
+    <div className="flex items-center rounded-lg border border-border bg-background h-9 px-3">
       <span className="text-muted-foreground mr-2">€</span>
       <input
       type="number"
@@ -89,7 +89,7 @@ const CurrencyField = ({
       value={value || ''}
       onChange={(e) => onChange(field, parseInt(e.target.value) || 0)}
       placeholder="0"
-      className="flex-1 text-center text-lg font-light bg-transparent border-0 focus:outline-none" />
+      className="flex-1 text-center text-sm font-light bg-transparent border-0 focus:outline-none" />
     
     </div>
   </div>;
