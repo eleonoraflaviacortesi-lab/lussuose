@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Search } from 'lucide-react';
@@ -43,12 +43,41 @@ const pathToSection: Record<string, string> = {
   '/inserisci': 'inserisci',
 };
 
+const headerQuotes = [
+  { text: "The obstacle is the way.", author: "Ryan Holiday" },
+  { text: "What you seek is seeking you.", author: "Rumi" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "What we resist, persists.", author: "Carl Jung" },
+  { text: "You are not your thoughts.", author: "Eckhart Tolle" },
+  { text: "How we spend our days is how we spend our lives.", author: "Annie Dillard" },
+  { text: "The only way out is through.", author: "Robert Frost" },
+  { text: "He who has a why can bear almost any how.", author: "Nietzsche" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Einstein" },
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "One day or day one. You decide.", author: "Paulo Coelho" },
+  { text: "The mind is everything. What you think, you become.", author: "Buddha" },
+  { text: "Where attention goes, energy flows.", author: "James Redfield" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "What consumes your mind, controls your life.", author: "Stoic proverb" },
+];
+
+function useHeaderQuote() {
+  return useMemo(() => {
+    const today = new Date();
+    const dayOfYear = Math.floor(
+      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return headerQuotes[dayOfYear % headerQuotes.length];
+  }, []);
+}
+
 function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void }) {
   const { state, isMobile } = useSidebar();
   const sidebarLeft = isMobile ? '0px' : state === 'expanded' ? '18rem' : '3.5rem';
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const quote = useHeaderQuote();
 
   useEffect(() => {
     if (searchOpen) inputRef.current?.focus();
@@ -70,10 +99,17 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
         <NotificationBell onOpenCliente={onOpenCliente} inline />
       </div>
 
-      {/* Spacer */}
-      <div className="flex-1" />
+      {/* Center: daily quote */}
+      <div className="flex-1 min-w-0 text-center px-2">
+        <p
+          className="text-[9px] uppercase truncate text-muted-foreground/70"
+          style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}
+        >
+          {quote.text} — {quote.author}
+        </p>
+      </div>
 
-      {/* Expandable search */}
+      {/* Right: expandable search */}
       <div className="flex items-center shrink-0">
         {!searchOpen && (
           <button
