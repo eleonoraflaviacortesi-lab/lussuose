@@ -2253,7 +2253,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
       {/* Table */}
       <div
         ref={tableViewportRef}
-        className="overflow-x-hidden [transform:rotateX(180deg)]"
+        className="overflow-x-auto [transform:rotateX(180deg)]"
         onClick={(e) => {
           if (e.target === e.currentTarget) {
             setSelectedRowId(null);
