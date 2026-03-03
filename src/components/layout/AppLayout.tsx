@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
@@ -116,10 +116,6 @@ export default function AppLayout() {
     navigate('/contacts');
   }, [navigate]);
 
-  useEffect(() => {
-    if (!loading && !user) navigate('/auth');
-  }, [user, loading, navigate]);
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -128,7 +124,7 @@ export default function AppLayout() {
     );
   }
 
-  if (!user) return null;
+  if (!user) return <Navigate to="/auth" replace />;
 
   const renderContent = () => {
     switch (section) {
