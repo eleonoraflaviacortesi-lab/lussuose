@@ -67,46 +67,49 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
   return (
     <>
       <Sidebar collapsible="icon" className="border-none">
-        <SidebarHeader className="p-2">
-          {/* Profile + Add button on same row */}
-          <div className="flex items-center gap-2 px-1">
-            {profile && (
-              <button
-                onClick={() => setShowProfile(true)}
-                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0 hover:bg-muted/80 transition-colors"
-              >
+        <SidebarHeader className="p-2 space-y-2">
+          {/* Profile row */}
+          {profile && (
+            <button
+              onClick={() => setShowProfile(true)}
+              className="flex items-center gap-2 px-1 py-1 rounded-xl hover:bg-sidebar-accent/60 transition-colors w-full text-left"
+            >
+              <span className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-base shrink-0">
                 {profile.avatar_emoji || '👤'}
-              </button>
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="flex-1 gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-8 text-xs font-semibold tracking-wide"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  <span>+</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" className="w-48">
-                <DropdownMenuItem onClick={() => { onNewProperty?.(); handleNavClick(); }} className="gap-2">
-                  <Building2 className="h-4 w-4" />
-                  New Property
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { onNewContact?.(); handleNavClick(); }} className="gap-2">
-                  <Users className="h-4 w-4" />
-                  New Contact
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { onNewActivity?.(); handleNavClick(); }} className="gap-2">
-                  <CalendarDays className="h-4 w-4" />
-                  New Activity
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => { onNewDailyReport?.(); handleNavClick(); }} className="gap-2">
-                  <ClipboardList className="h-4 w-4" />
-                  New Daily Report
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              </span>
+              <span className="text-sm font-medium truncate min-w-0">{profile.full_name}</span>
+            </button>
+          )}
+
+          {/* Add button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                className="w-full gap-1.5 rounded-full bg-foreground text-background hover:bg-foreground/90 h-9 text-xs font-semibold tracking-wide"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Aggiungi</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side={isMobile ? "bottom" : "right"} align="start" className="w-48">
+              <DropdownMenuItem onClick={() => { onNewProperty?.(); handleNavClick(); }} className="gap-2">
+                <Building2 className="h-4 w-4" />
+                New Property
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { onNewContact?.(); handleNavClick(); }} className="gap-2">
+                <Users className="h-4 w-4" />
+                New Contact
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { onNewActivity?.(); handleNavClick(); }} className="gap-2">
+                <CalendarDays className="h-4 w-4" />
+                New Activity
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { onNewDailyReport?.(); handleNavClick(); }} className="gap-2">
+                <ClipboardList className="h-4 w-4" />
+                New Daily Report
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </SidebarHeader>
 
         <SidebarSeparator className="bg-border/30" />
