@@ -248,60 +248,63 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   return (
     <div className="py-4 space-y-4 px-1 sm:px-[10px] w-full min-w-0">
       {/* Header row: view toggle + actions */}
-      <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 gap-y-2 pt-[15px]">
-        {/* View toggle */}
-        <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
-          <Button
-            variant={viewMode === 'kanban' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'kanban' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
-            onClick={() => setViewMode('kanban')}>
-            <LayoutGrid className="w-4 h-4" />
-            <span className="hidden sm:inline">Kanban</span>
-          </Button>
-          <Button
-            variant={viewMode === 'sheet' ? 'default' : 'ghost'}
-            size="sm"
-            className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'sheet' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
-            onClick={() => setViewMode('sheet')}>
-            <Table className="w-4 h-4" />
-            <span className="hidden sm:inline">Spreadsheet</span>
-          </Button>
+      <div className="flex items-center gap-1.5 sm:gap-2 pt-[15px] overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* View toggle */}
+          <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
+            <Button
+              variant={viewMode === 'kanban' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'kanban' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
+              onClick={() => setViewMode('kanban')}>
+              <LayoutGrid className="w-4 h-4" />
+              <span className="hidden sm:inline">Kanban</span>
+            </Button>
+            <Button
+              variant={viewMode === 'sheet' ? 'default' : 'ghost'}
+              size="sm"
+              className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'sheet' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
+              onClick={() => setViewMode('sheet')}>
+              <Table className="w-4 h-4" />
+              <span className="hidden sm:inline">Spreadsheet</span>
+            </Button>
+          </div>
+
+          {viewMode === 'kanban' && <UndoRedoButtons />}
+          {viewMode === 'kanban' && (
+            <Button
+              variant={filterQualified ? 'default' : 'outline'}
+              size="sm"
+              className={cn("gap-1.5 px-2.5 sm:px-3 h-9 border-0", filterQualified ? 'bg-foreground text-background' : 'bg-card hover:bg-muted')}
+              onClick={() => setFilterQualified(prev => !prev)}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden sm:inline">Qualificati</span>
+            </Button>
+          )}
         </div>
 
-        {viewMode === 'kanban' && <UndoRedoButtons />}
-        {viewMode === 'kanban' && (
-          <Button
-            variant={filterQualified ? 'default' : 'outline'}
-            size="sm"
-            className={cn("gap-1.5 px-2.5 sm:px-3 h-9 border-0", filterQualified ? 'bg-foreground text-background' : 'bg-card hover:bg-muted')}
-            onClick={() => setFilterQualified(prev => !prev)}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span className="hidden sm:inline">Qualificati</span>
+        <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {isCoordinator &&
+          <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Analisi</span>
+            </Button>
+          }
+          {isCoordinator &&
+          <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">CSV</span>
+            </Button>
+          }
+          <Button variant="outline" size="icon" onClick={handleExportExcel} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
+            <FileSpreadsheet className="w-4 h-4" />
+            <span className="hidden sm:inline">Excel</span>
           </Button>
-        )}
-        <div className="hidden sm:block flex-1" />
-
-        {isCoordinator &&
-        <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
-            <BarChart3 className="w-4 h-4" />
-            <span className="hidden sm:inline">Analisi</span>
+          <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-9 h-9 p-0">
+            <Plus className="w-4 h-4" />
           </Button>
-        }
-        {isCoordinator &&
-        <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
-            <Upload className="w-4 h-4" />
-            <span className="hidden sm:inline">CSV</span>
-          </Button>
-        }
-        <Button variant="outline" size="icon" onClick={handleExportExcel} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
-          <FileSpreadsheet className="w-4 h-4" />
-          <span className="hidden sm:inline">Excel</span>
-        </Button>
-        <Button onClick={() => setAddDialogOpen(true)} className="rounded-full w-9 h-9 p-0">
-          <Plus className="w-4 h-4" />
-        </Button>
+        </div>
       </div>
 
       {/* Stats Chart - only for coordinators */}

@@ -112,7 +112,7 @@ const NotiziePage = () => {
 
   return (
     <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2 px-1 sm:px-0 w-full min-w-0">
-      <div className="flex flex-wrap items-center gap-2 shadow-none pt-0">
+      <div className="flex items-center gap-2 shadow-none pt-0 overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1">
         {/* View toggle */}
         <div className="flex items-center gap-1 bg-card rounded-lg p-0.5 shrink-0 pt-[2px]">
           <Button
@@ -135,7 +135,7 @@ const NotiziePage = () => {
           </Button>
         </div>
         
-        <div className="ml-auto flex w-full sm:w-auto items-center justify-end gap-2 flex-wrap">
+        <div className="ml-auto flex items-center gap-2 shrink-0">
           <UndoRedoButtons />
           <Button variant="outline" size="sm" className="gap-1.5 bg-card border-0 hover:bg-muted" onClick={handleExportExcel}>
             <FileSpreadsheet className="w-4 h-4" />
