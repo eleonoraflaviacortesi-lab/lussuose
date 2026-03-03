@@ -8,6 +8,7 @@ import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 import { EmojiGridWithCustom } from '@/components/shared/EmojiGridWithCustom';
 import { EntityCardWrapper } from '@/components/shared/EntityCardWrapper';
+import { TitleFormatControls, getTitleFormat, titleFormatToCustomFields, titleStyle } from '@/components/shared/TitleFormatControls';
 
 interface ClienteCardProps {
   cliente: Cliente & { reminder_date?: string | null };
@@ -15,6 +16,7 @@ interface ClienteCardProps {
   onColorChange?: (color: string | null) => void;
   onEmojiChange?: (emoji: string | null) => void;
   onStatusChange?: (status: ClienteStatus) => void;
+  onTitleFormatChange?: (customFields: Record<string, any>) => void;
   onDelete?: () => void;
   isDragging?: boolean;
   showAgent?: boolean;
@@ -60,10 +62,12 @@ const ColorStatusPickerPill = memo(({
   currentColor,
   currentStatus,
   currentEmoji,
+  currentCustomFields,
   statusColumns,
   onColorSelect, 
   onStatusChange,
   onEmojiSelect,
+  onTitleFormatChange,
   onDelete,
   onClose 
 }: { 
@@ -71,10 +75,12 @@ const ColorStatusPickerPill = memo(({
   currentColor: string | null;
   currentStatus: ClienteStatus;
   currentEmoji: string | null;
+  currentCustomFields: any;
   statusColumns: Array<{ id: ClienteStatus; label: string; color: string }>;
   onColorSelect: (color: string | null) => void;
   onStatusChange: (status: ClienteStatus) => void;
   onEmojiSelect: (emoji: string | null) => void;
+  onTitleFormatChange?: (customFields: Record<string, any>) => void;
   onDelete?: () => void;
   onClose: () => void;
 }) => {
@@ -123,6 +129,20 @@ const ColorStatusPickerPill = memo(({
         </div>
         
         <div className="h-px bg-muted/50" />
+        
+        {/* Title format */}
+        {onTitleFormatChange && (
+          <>
+            <TitleFormatControls
+              format={getTitleFormat(currentCustomFields)}
+              onChange={(fmt) => {
+                const existing = currentCustomFields || {};
+                onTitleFormatChange({ ...existing, ...titleFormatToCustomFields(fmt) });
+              }}
+            />
+            <div className="h-px bg-muted/50" />
+          </>
+        )}
         
         {/* Emoji picker */}
         <div>
@@ -256,6 +276,7 @@ export const ClienteCard = memo(({
   onColorChange,
   onEmojiChange,
   onStatusChange,
+  onTitleFormatChange,
   onDelete,
   isDragging,
   showAgent = true,
@@ -314,7 +335,7 @@ export const ClienteCard = memo(({
           {cliente.emoji}
         </span>
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-sm whitespace-normal break-words">{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
+          <h4 className="text-sm whitespace-normal break-words" style={titleStyle(getTitleFormat((cliente as any).custom_fields))}>{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
           {cliente.paese && (
             <span className="text-xs opacity-70">{cliente.paese}</span>
           )}
@@ -405,10 +426,12 @@ export const ClienteCard = memo(({
           currentColor={cliente.card_color}
           currentStatus={cliente.status as ClienteStatus}
           currentEmoji={cliente.emoji}
+          currentCustomFields={(cliente as any).custom_fields}
           statusColumns={statusColumns}
           onColorSelect={onColorChange}
           onStatusChange={onStatusChange}
           onEmojiSelect={(emoji) => onEmojiChange?.(emoji)}
+          onTitleFormatChange={onTitleFormatChange}
           onDelete={onDelete}
           onClose={() => setPickerOpen(false)}
         />

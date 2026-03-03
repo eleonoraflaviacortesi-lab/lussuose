@@ -17,6 +17,7 @@ interface ClientiKanbanProps {
   onOrderChange: (items: { id: string; display_order: number; status?: ClienteStatus }[]) => void;
   onColorChange: (clienteId: string, color: string | null) => void;
   onEmojiChange: (clienteId: string, emoji: string | null) => void;
+  onTitleFormatChange?: (clienteId: string, customFields: Record<string, any>) => void;
   onDeleteCliente?: (clienteId: string) => void;
   searchQuery?: string;
 }
@@ -61,6 +62,7 @@ export function ClientiKanban({
   onOrderChange,
   onColorChange,
   onEmojiChange,
+  onTitleFormatChange,
   onDeleteCliente,
   searchQuery = '',
 }: ClientiKanbanProps) {
@@ -243,7 +245,7 @@ export function ClientiKanban({
                 ref={provided.innerRef}
                 {...provided.droppableProps}
                 className={cn(
-                  "flex-shrink-0 rounded-xl p-2 min-h-[400px] max-h-[calc(100vh-300px)] overflow-y-auto",
+                  "flex-shrink-0 rounded-xl p-2 max-h-[calc(100vh-220px)] overflow-y-auto",
                   snapshot.isDraggingOver ? "bg-accent/50" : "bg-muted/30"
                 )}
                 style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}
@@ -288,6 +290,7 @@ export function ClientiKanban({
                             onColorChange={(color) => onColorChange(cliente.id, color)}
                             onEmojiChange={(emoji) => onEmojiChange(cliente.id, emoji)}
                             onStatusChange={(status) => onStatusChange(cliente.id, status)}
+                            onTitleFormatChange={onTitleFormatChange ? (cf) => onTitleFormatChange(cliente.id, cf) : undefined}
                             onDelete={onDeleteCliente ? () => onDeleteCliente(cliente.id) : undefined}
                             isDragging={snapshot.isDragging}
                             showAgent={groupBy !== 'agente'}

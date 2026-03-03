@@ -392,6 +392,9 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         onOrderChange={handleOrderChange}
         onColorChange={handleColorChange}
         onEmojiChange={handleEmojiChange}
+        onTitleFormatChange={async (clienteId, customFields) => {
+          await trackedUpdate(clienteId, { custom_fields: customFields } as any, 'formato titolo');
+        }}
         onDeleteCliente={async (clienteId) => {
           const snapshot = clienti.find((c) => c.id === clienteId);
           await deleteCliente(clienteId);

@@ -34,6 +34,7 @@ export interface Notizia {
   prezzo_richiesto: number | null;
   valore: number | null;
   rating: number | null;
+  custom_fields: Record<string, any> | null;
 }
 
 export interface NotiziaInput {
