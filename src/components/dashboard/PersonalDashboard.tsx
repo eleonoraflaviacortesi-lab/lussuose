@@ -175,8 +175,6 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
 
   return (
     <div className="pb-8 space-y-6 animate-fade-in">
-      {/* Daily Quote */}
-      <DailyQuote />
 
       {/* Ciclo Produttivo CTA */}
       <div className="flex justify-center">
