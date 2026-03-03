@@ -1,12 +1,19 @@
 import { useBannerSettings } from '@/hooks/useBannerSettings';
 import { useKPIs } from '@/hooks/useKPIs';
-import starIcon from '@/assets/star_icon.png';
 
 const formatCurrency = (n: number) =>
   n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
+function Star8({ className = '' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor">
+      <path d="M12 0 L14.1 8.5 L21.6 4.4 L16.5 11 L24 12 L16.5 13 L21.6 19.6 L14.1 15.5 L12 24 L9.9 15.5 L2.4 19.6 L7.5 13 L0 12 L7.5 11 L2.4 4.4 L9.9 8.5 Z" />
+    </svg>
+  );
+}
+
 function StarSep() {
-  return <img src={starIcon} alt="✦" className="inline-block h-2.5 w-2.5 mx-3 opacity-60" style={{ verticalAlign: 'middle' }} />;
+  return <Star8 className="inline-block h-2.5 w-2.5 mx-3 opacity-50 shrink-0" />;
 }
 
 export default function AnnouncementBanner() {
@@ -35,7 +42,6 @@ export default function AnnouncementBanner() {
     .filter(Boolean)
     .map(interpolate);
 
-  // Add vendite and incarichi
   texts.push(`Vendite ${venditeValue}/${venditeTarget}`);
   texts.push(`Incarichi mese ${incarichiValue}/${incarichiTarget}`);
 
@@ -53,11 +59,17 @@ export default function AnnouncementBanner() {
       }}
     >
       <div
-        className="flex items-center whitespace-nowrap h-full text-[11px] font-semibold tracking-wider animate-ticker"
-        style={{ animationDuration: duration }}
+        className="flex items-center whitespace-nowrap h-full animate-ticker"
+        style={{
+          animationDuration: duration,
+          fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
+          fontSize: '11px',
+          fontWeight: 600,
+          letterSpacing: '0.15em',
+        }}
       >
         {[0, 1].map((dup) => (
-          <span key={dup} className="flex items-center px-4">
+          <span key={dup} className="flex items-center px-4 uppercase">
             {texts.map((t, i) => (
               <span key={i} className="flex items-center">
                 {i > 0 && <StarSep />}
