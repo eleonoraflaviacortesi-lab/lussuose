@@ -2169,7 +2169,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   return (
     <div
-      className="border border-border rounded-2xl bg-background overflow-hidden"
+      className="rounded-2xl bg-card overflow-hidden"
       onClick={(e) => {
         // Deselect when clicking on the container background (not on rows/headers)
         if (e.target === e.currentTarget) {
