@@ -55,7 +55,7 @@ const PerformanceCharts = forwardRef<HTMLDivElement, Props>(({ myData, chartPeri
   }, [performanceChartData]);
 
   return (
-    <div ref={ref} className="bg-card rounded-2xl p-4 space-y-3 border shadow-none">
+    <div ref={ref} className="bg-card rounded-2xl p-4 space-y-3 shadow-none border-0">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 shrink-0">
           <TrendingUp className="w-3 h-3 text-foreground" />
