@@ -292,18 +292,13 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           <X className="w-4 h-4" />
         </button>
 
-        {/* Title with saved indicator */}
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <h3 className="text-center text-base font-bold tracking-wide uppercase">
-            Modifica Notizia
-          </h3>
-          {showSaved && (
-            <span className="flex items-center gap-1 text-xs text-success animate-in fade-in duration-200">
-              <Check className="w-3 h-3" />
-              Salvato
-            </span>
-          )}
-        </div>
+        {/* Saved indicator */}
+        {showSaved && (
+          <div className="flex items-center justify-center gap-1 mb-4 text-xs text-success animate-in fade-in duration-200">
+            <Check className="w-3 h-3" />
+            Salvato
+          </div>
+        )}
 
         <div className="space-y-3">
           {/* Emoji + Name row */}
