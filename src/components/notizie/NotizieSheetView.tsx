@@ -862,17 +862,18 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   }, []);
 
   const rowNumWidth = 52;
+  const viewportAvailableWidth = Math.max(tableViewportWidth - 2, 1);
   const rawTotalWidth = rowNumWidth + orderedColumns.reduce((s, c) => s + (colWidths[c.key] || c.width), 0);
-  const widthScale = tableViewportWidth > 0 && rawTotalWidth > 0
-    ? Math.min(1, (tableViewportWidth - 2) / rawTotalWidth)
+  const widthScale = rawTotalWidth > 0
+    ? Math.min(1, viewportAvailableWidth / rawTotalWidth)
     : 1;
 
-  const adaptiveRowNumWidth = Math.max(38, Math.floor(rowNumWidth * widthScale));
+  const adaptiveRowNumWidth = Math.max(1, Math.floor(rowNumWidth * widthScale));
   const adaptiveColWidths = useMemo(() => {
     const next: Record<string, number> = {};
     orderedColumns.forEach((col) => {
       const baseWidth = colWidths[col.key] || col.width;
-      next[col.key] = Math.max(58, Math.floor(baseWidth * widthScale));
+      next[col.key] = Math.max(1, Math.floor(baseWidth * widthScale));
     });
     return next;
   }, [orderedColumns, colWidths, widthScale]);

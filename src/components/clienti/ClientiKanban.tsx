@@ -177,8 +177,9 @@ export function ClientiKanban({
     if (!viewportWidth) return 260;
 
     const gap = 12;
-    const availableWidth = viewportWidth - gap * (totalColumns - 1) - 8;
-    return Math.min(280, Math.max(92, Math.floor(availableWidth / totalColumns)));
+    const availableWidth = Math.max(viewportWidth - gap * (totalColumns - 1) - 8, totalColumns);
+    const idealWidth = Math.floor(availableWidth / totalColumns);
+    return Math.min(280, Math.max(1, idealWidth));
   }, [columns.length, groupBy, viewportWidth]);
 
   // Handle drag end
@@ -287,7 +288,7 @@ export function ClientiKanban({
                       className="w-2 h-2 rounded-full" 
                       style={{ backgroundColor: column.color }}
                     />
-                    <span className="text-sm font-medium">{column.label}</span>
+                    <span className="text-sm font-medium truncate">{column.label}</span>
                     <span className="text-xs text-muted-foreground ml-auto">
                       {column.items.length}
                     </span>
@@ -339,7 +340,7 @@ export function ClientiKanban({
             style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}
           >
             <Plus className="w-5 h-5" />
-            <span className="text-sm font-medium">Aggiungi colonna</span>
+            {adaptiveColumnWidth >= 140 && <span className="text-sm font-medium truncate">Aggiungi colonna</span>}
           </button>
         )}
       </div>
