@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
+import { cn } from '@/lib/utils';
 import { Search, X, LayoutGrid, Table2, FileSpreadsheet } from 'lucide-react';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import NotiziaDetail from './NotiziaDetail';
@@ -113,11 +114,11 @@ const NotiziePage = () => {
     <div className="space-y-3 pt-3 pb-20 lg:pt-1 lg:pb-4 lg:space-y-2">
       <div className="flex items-center justify-between gap-4 pt-[25px] shadow-none">
         {/* View toggle */}
-        <div className="flex items-center gap-1 bg-muted rounded-lg p-0.5">
+        <div className="flex items-center gap-1 bg-card rounded-lg p-0.5">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
-            className="h-7 px-2 text-xs"
+            className={cn("h-7 px-2 text-xs rounded-md", viewMode === 'kanban' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
             onClick={() => handleViewChange('kanban')}
           >
             <LayoutGrid className="w-3.5 h-3.5 mr-1" />
@@ -126,7 +127,7 @@ const NotiziePage = () => {
           <Button
             variant={viewMode === 'sheet' ? 'default' : 'ghost'}
             size="sm"
-            className="h-7 px-2 text-xs"
+            className={cn("h-7 px-2 text-xs rounded-md", viewMode === 'sheet' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
             onClick={() => handleViewChange('sheet')}
           >
             <Table2 className="w-3.5 h-3.5 mr-1" />
@@ -136,7 +137,7 @@ const NotiziePage = () => {
         
         <div className="flex items-center gap-2">
           <UndoRedoButtons />
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleExportExcel}>
+          <Button variant="outline" size="sm" className="gap-1.5 bg-card border-0 hover:bg-muted" onClick={handleExportExcel}>
             <FileSpreadsheet className="w-4 h-4" />
             <span className="hidden sm:inline">Excel</span>
           </Button>

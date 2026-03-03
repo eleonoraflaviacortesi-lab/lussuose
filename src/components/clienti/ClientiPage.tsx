@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { isDarkColor } from '@/lib/utils';
+import { cn, isDarkColor } from '@/lib/utils';
 import { useClienti } from '@/hooks/useClienti';
 import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
@@ -250,22 +250,20 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       {/* Header row: view toggle + actions */}
       <div className="flex items-center gap-1.5 sm:gap-2 pt-[15px]">
         {/* View toggle */}
-        <div className="flex rounded-lg border overflow-hidden">
+        <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
           <Button
             variant={viewMode === 'kanban' ? 'default' : 'ghost'}
             size="sm"
-            className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
+            className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'kanban' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
             onClick={() => setViewMode('kanban')}>
-
             <LayoutGrid className="w-4 h-4" />
             <span className="hidden sm:inline">Kanban</span>
           </Button>
           <Button
             variant={viewMode === 'sheet' ? 'default' : 'ghost'}
             size="sm"
-            className="rounded-none gap-1 sm:gap-1.5 px-2.5 sm:px-4"
+            className={cn("rounded-md gap-1 sm:gap-1.5 px-2.5 sm:px-4", viewMode === 'sheet' ? 'bg-foreground text-background hover:bg-foreground/90' : 'text-foreground hover:bg-muted')}
             onClick={() => setViewMode('sheet')}>
-
             <Table className="w-4 h-4" />
             <span className="hidden sm:inline">Spreadsheet</span>
           </Button>
@@ -276,7 +274,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           <Button
             variant={filterQualified ? 'default' : 'outline'}
             size="sm"
-            className="gap-1.5 px-2.5 sm:px-3 h-9"
+            className={cn("gap-1.5 px-2.5 sm:px-3 h-9 border-0", filterQualified ? 'bg-foreground text-background' : 'bg-card hover:bg-muted')}
             onClick={() => setFilterQualified(prev => !prev)}
           >
             <Sparkles className="w-4 h-4" />
@@ -286,18 +284,18 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
         <div className="flex-1" />
 
         {isCoordinator &&
-        <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+        <Button variant="outline" size="icon" onClick={() => setAnalysisOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
             <BarChart3 className="w-4 h-4" />
             <span className="hidden sm:inline">Analisi</span>
           </Button>
         }
         {isCoordinator &&
-        <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+        <Button variant="outline" size="icon" onClick={() => setImportDialogOpen(true)} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">CSV</span>
           </Button>
         }
-        <Button variant="outline" size="icon" onClick={handleExportExcel} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5">
+        <Button variant="outline" size="icon" onClick={handleExportExcel} className="w-9 h-9 sm:w-auto sm:h-9 sm:px-3 sm:gap-1.5 bg-card border-0 hover:bg-muted">
           <FileSpreadsheet className="w-4 h-4" />
           <span className="hidden sm:inline">Excel</span>
         </Button>
