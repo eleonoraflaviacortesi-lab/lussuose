@@ -944,6 +944,12 @@ const CalendarPage = () => {
 
 
 
+
+
+
+
+
+
             // Use default values
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateNotizia.mutate({ id: notiziaId, reminder_date: newDate.toISOString(), silent: true });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('cliente-')) {const clienteId = draggableId.replace('cliente-', '');const cliente = clienti?.find((c) => c.id === clienteId);if (cliente) {// Use default time of 09:00 if no reminder_date exists
         let hours = 9;let minutes = 0;if (cliente.reminder_date) {try {const oldDate = parseISO(cliente.reminder_date);if (!isNaN(oldDate.getTime())) {hours = oldDate.getHours();minutes = oldDate.getMinutes();}} catch {
@@ -977,101 +983,95 @@ const CalendarPage = () => {
 
             // Use default values
           }}const newDate = setMinutes(setHours(targetDate, hours), minutes);triggerHaptic('light');updateCliente({ id: clienteId, reminder_date: newDate.toISOString() });toast.success(`Promemoria spostato a ${format(newDate, 'd MMM', { locale: it })}`);}} else if (draggableId.startsWith('task-')) {const taskId = draggableId.replace('task-', '');const task = tasks?.find((t) => t.id === taskId);if (task) {const newDateStr = format(targetDate, 'yyyy-MM-dd');triggerHaptic('light');updateTask.mutate({ id: taskId, due_date: newDateStr });toast.success(`Task spostata a ${format(targetDate, 'd MMM', { locale: it })}`);}}}, [notizie, clienti, tasks, updateNotizia, updateCliente, updateTask]); // Drag and drop handler
-  const handleDragEnd = useCallback((result: DropResult) => {
-    // Reset dragging state after a short delay to prevent click from firing
-    setTimeout(() => setIsDragging(false), 100);
+  const handleDragEnd = useCallback((result: DropResult) => {// Reset dragging state after a short delay to prevent click from firing
+      setTimeout(() => setIsDragging(false), 100);try {const { destination, source, draggableId } = result; // Dropped outside
+        if (!destination) {
+          return;
+        }
 
-    try {
-      const { destination, source, draggableId } = result;
+        // Handle week navigation drops
+        if (destination.droppableId === 'prev-week') {
+          const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
+          moveEvent(draggableId, targetDate);
+          return;
+        }
 
-      // Dropped outside
-      if (!destination) {
-        return;
-      }
+        if (destination.droppableId === 'next-week') {
+          const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
+          moveEvent(draggableId, targetDate);
+          return;
+        }
 
-      // Handle week navigation drops
-      if (destination.droppableId === 'prev-week') {
-        const targetDate = addDays(currentWeekStart, -1); // Last day of previous week (Sunday)
+        // Same position - no change needed (reordering in same day is a no-op for date)
+        if (destination.droppableId === source.droppableId && destination.index === source.index) {
+          return;
+        }
+
+        // Same day but different position - reorder within the day
+        if (destination.droppableId === source.droppableId) {
+          const dayKey = source.droppableId.replace('day-', '');
+          const events = eventsByDay.get(dayKey) || [];
+
+          // Get only draggable events (same filter as in the render)
+          const draggableEvents = events.filter((e) =>
+          e.type === 'notizia_reminder' ||
+          e.type === 'cliente_reminder' ||
+          e.type === 'task'
+          );
+
+          // Create a copy and reorder
+          const reordered = [...draggableEvents];
+          const [removed] = reordered.splice(source.index, 1);
+          reordered.splice(destination.index, 0, removed);
+
+          // Calculate new display_order for all events in this day and group by type
+          const taskUpdates: {id: string;display_order: number;}[] = [];
+          const notiziaUpdates: {id: string;display_order: number;}[] = [];
+          const clienteUpdates: {id: string;display_order: number;}[] = [];
+
+          reordered.forEach((event, index) => {
+            const newOrder = index * 10;
+            if (event.type === 'task' && event.taskId) {
+              taskUpdates.push({ id: event.taskId, display_order: newOrder });
+            } else if (event.type === 'notizia_reminder' && event.notiziaId) {
+              notiziaUpdates.push({ id: event.notiziaId, display_order: newOrder });
+            } else if (event.type === 'cliente_reminder' && event.clienteId) {
+              clienteUpdates.push({ id: event.clienteId, display_order: newOrder });
+            }
+          });
+
+          // Batch updates for each type
+          if (taskUpdates.length > 0) reorderTasks.mutate(taskUpdates);
+          if (notiziaUpdates.length > 0) reorderNotizie.mutate(notiziaUpdates);
+          if (clienteUpdates.length > 0) reorderClienti.mutate(clienteUpdates);
+
+          triggerHaptic('light');
+          return;
+        }
+
+        // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
+        const targetDayKey = destination.droppableId.replace('day-', '');
+
+        // Validate the date string before parsing
+        if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
+          console.error('Invalid target date key:', targetDayKey);
+          return;
+        }
+
+        const targetDate = parseISO(targetDayKey);
+
+        // Check if targetDate is valid
+        if (isNaN(targetDate.getTime())) {
+          console.error('Invalid target date:', targetDayKey);
+          return;
+        }
+
         moveEvent(draggableId, targetDate);
-        return;
+      } catch (error) {
+        console.error('Error during drag and drop:', error);
+        toast.error('Errore durante lo spostamento. Riprova.');
       }
-
-      if (destination.droppableId === 'next-week') {
-        const targetDate = addDays(currentWeekStart, 7); // First day of next week (Monday)
-        moveEvent(draggableId, targetDate);
-        return;
-      }
-
-      // Same position - no change needed (reordering in same day is a no-op for date)
-      if (destination.droppableId === source.droppableId && destination.index === source.index) {
-        return;
-      }
-
-      // Same day but different position - reorder within the day
-      if (destination.droppableId === source.droppableId) {
-        const dayKey = source.droppableId.replace('day-', '');
-        const events = eventsByDay.get(dayKey) || [];
-
-        // Get only draggable events (same filter as in the render)
-        const draggableEvents = events.filter((e) =>
-        e.type === 'notizia_reminder' ||
-        e.type === 'cliente_reminder' ||
-        e.type === 'task'
-        );
-
-        // Create a copy and reorder
-        const reordered = [...draggableEvents];
-        const [removed] = reordered.splice(source.index, 1);
-        reordered.splice(destination.index, 0, removed);
-
-        // Calculate new display_order for all events in this day and group by type
-        const taskUpdates: {id: string;display_order: number;}[] = [];
-        const notiziaUpdates: {id: string;display_order: number;}[] = [];
-        const clienteUpdates: {id: string;display_order: number;}[] = [];
-
-        reordered.forEach((event, index) => {
-          const newOrder = index * 10;
-          if (event.type === 'task' && event.taskId) {
-            taskUpdates.push({ id: event.taskId, display_order: newOrder });
-          } else if (event.type === 'notizia_reminder' && event.notiziaId) {
-            notiziaUpdates.push({ id: event.notiziaId, display_order: newOrder });
-          } else if (event.type === 'cliente_reminder' && event.clienteId) {
-            clienteUpdates.push({ id: event.clienteId, display_order: newOrder });
-          }
-        });
-
-        // Batch updates for each type
-        if (taskUpdates.length > 0) reorderTasks.mutate(taskUpdates);
-        if (notiziaUpdates.length > 0) reorderNotizie.mutate(notiziaUpdates);
-        if (clienteUpdates.length > 0) reorderClienti.mutate(clienteUpdates);
-
-        triggerHaptic('light');
-        return;
-      }
-
-      // Get the target day from droppableId (format: 'day-yyyy-MM-dd')
-      const targetDayKey = destination.droppableId.replace('day-', '');
-
-      // Validate the date string before parsing
-      if (!targetDayKey || !/^\d{4}-\d{2}-\d{2}$/.test(targetDayKey)) {
-        console.error('Invalid target date key:', targetDayKey);
-        return;
-      }
-
-      const targetDate = parseISO(targetDayKey);
-
-      // Check if targetDate is valid
-      if (isNaN(targetDate.getTime())) {
-        console.error('Invalid target date:', targetDayKey);
-        return;
-      }
-
-      moveEvent(draggableId, targetDate);
-    } catch (error) {
-      console.error('Error during drag and drop:', error);
-      toast.error('Errore durante lo spostamento. Riprova.');
-    }
-  }, [currentWeekStart, moveEvent]);
+    }, [currentWeekStart, moveEvent]);
 
   // Legacy alias for backward compatibility
   const moveEventToDate = moveEvent;
@@ -1447,7 +1447,7 @@ const CalendarPage = () => {
                           setShowAddMenu(true);
                           setAddMenuInitialType('notizia');
                         }}
-                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        className="flex-1 py-2 rounded-xl text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium border-0 border-black border-none shadow-2xl">
                         
                               <FileText className="w-3.5 h-3.5" />
                               Seller
@@ -1458,7 +1458,7 @@ const CalendarPage = () => {
                           setSelectedDate(day);
                           setShowAddTaskDialog(true);
                         }}
-                        className="flex-1 py-2 rounded-xl border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium">
+                        className="flex-1 py-2 rounded-xl border-dashed border-muted-foreground/30 text-muted-foreground hover:border-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 text-[10px] font-medium shadow-2xl border-0">
                         
                               <Pencil className="w-3.5 h-3.5" />
                               Task
