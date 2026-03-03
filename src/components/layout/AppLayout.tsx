@@ -78,9 +78,9 @@ function FixedHeader({ onOpenCliente }: { onOpenCliente: (id: string) => void })
         {!searchOpen && (
           <button
             onClick={() => setSearchOpen(true)}
-            className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
+            className="h-8 w-8 rounded-full bg-foreground flex items-center justify-center hover:bg-foreground/85 transition-colors"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-3.5 w-3.5 text-background" />
           </button>
         )}
         <div
