@@ -21,7 +21,7 @@ const KPISummaryWidgets = ({ kpis }: KPISummaryWidgetsProps) => {
       { label: 'Appuntamenti', value: kpis.appuntamenti?.value || 0, target: kpis.appuntamenti?.target || 0, icon: CalendarCheck },
       { label: 'Acquisizioni', value: kpis.acquisizioni?.value || 0, target: kpis.acquisizioni?.target || 0, icon: Home },
       { label: 'Incarichi', value: kpis.incarichi?.value || 0, target: kpis.incarichi?.target || 0, icon: Handshake },
-      { label: 'Trattative Chiuse', value: kpis.trattativeChiuse?.value || 0, target: kpis.trattativeChiuse?.target || 0, icon: TrendingUp },
+      { label: 'Trattative', value: kpis.trattativeChiuse?.value || 0, target: kpis.trattativeChiuse?.target || 0, icon: TrendingUp },
     ];
   }, [kpis]);
 
