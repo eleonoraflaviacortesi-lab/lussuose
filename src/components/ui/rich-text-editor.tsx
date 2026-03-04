@@ -89,7 +89,7 @@ export const RichTextEditor = memo(({
   }, [execCommand]);
 
   return (
-    <div className={cn("rounded-2xl bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] overflow-hidden", className)}>
+    <div className={cn("rounded-2xl bg-white overflow-hidden", className)}>
       {/* Toolbar */}
       <div className="flex items-center gap-0.5 px-3 py-1.5 border-b border-border/40">
         <ToolbarButton

@@ -40,8 +40,8 @@ const isDarkColor = (color: string | null): boolean => {
   return luminance < 0.5;
 };
 
-const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
-const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
+const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
 const liquidGlassPopover = "bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl";
 
 const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆', '🌊', '🏖️', '🌅', '🌄', '🏔️', '🌲', '🌴', '🌷', '🌹', '💐', '🎨', '🎭', '🎪', '🎢', '🎡', '📸'];
@@ -276,7 +276,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       {/* Side peek panel */}
       <div 
         className={cn(
-          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background border-l border-border/50 shadow-[-8px_0_30px_rgba(0,0,0,0.12)]",
+          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background rounded-l-2xl border-0 shadow-[-8px_0_30px_rgba(0,0,0,0.08)]",
           "animate-in slide-in-from-right duration-300",
           "w-full sm:w-[480px] md:w-[520px]",
         )}
@@ -310,7 +310,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 <PopoverTrigger asChild>
                   <button 
                     type="button"
-                    className="w-12 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg active:scale-95 transition-transform"
+                    className="w-12 h-10 bg-white rounded-full flex items-center justify-center text-lg active:scale-95 transition-transform"
                   >
                     {editData.emoji}
                   </button>
@@ -322,7 +322,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                       value={customEmoji}
                       onChange={(e) => setCustomEmoji(e.target.value)}
                       placeholder="Incolla emoji..."
-                      className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                      className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm border-0 focus:outline-none"
                     />
                     <button
                       type="button"
@@ -447,7 +447,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                 <button
                   type="button"
                   onClick={handlePhoneClick}
-                  className="w-10 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center active:scale-95 transition-transform"
+                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
                 >
                   <Phone className="w-4 h-4 text-primary" />
                 </button>
@@ -556,7 +556,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   <button
                     type="button"
                     className={cn(
-                      "w-full bg-white rounded-full px-4 py-2.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
+                      "w-full bg-white rounded-full px-4 py-2.5 text-sm border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
                       !editData.reminder_date && "text-muted-foreground"
                     )}
                   >
@@ -582,7 +582,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                           updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
-                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm border-0">
                           <SelectValue placeholder="Ora" />
                         </SelectTrigger>
                         <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
@@ -599,7 +599,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                           updateField('reminder_time', `${hour}:${mins}`);
                         }}
                       >
-                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                        <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm border-0">
                           <SelectValue placeholder="Min" />
                         </SelectTrigger>
                         <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
@@ -692,7 +692,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               });
               window.open(url, '_blank');
             }}
-            className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
+            className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium active:scale-[0.98] transition-transform hover:opacity-90"
           >
             <CalendarIcon className="w-4 h-4" />
             <span>Aggiungi a Google Calendar</span>
