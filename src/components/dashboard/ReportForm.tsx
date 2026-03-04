@@ -189,14 +189,19 @@ const ReportForm = () => {
   return (
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header with Date Picker */}
-      <div className="flex items-center justify-center gap-3 mb-6">
-        <Calendar className="w-4 h-4 text-muted-foreground" />
-        <input
-          type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-          className="text-center text-sm font-light bg-transparent border-0 border-b border-border rounded-none outline-none focus:ring-0 focus:border-foreground transition-colors py-1"
-        />
+      <div className="flex items-center justify-center mb-6">
+        <label className="inline-flex items-center gap-2.5 bg-muted/60 border border-border rounded-full px-5 py-2 cursor-pointer hover:bg-muted transition-colors">
+          <Calendar className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium tracking-wide text-foreground">
+            {new Date(date + 'T00:00:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+          </span>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="absolute opacity-0 w-0 h-0"
+          />
+        </label>
       </div>
 
 
