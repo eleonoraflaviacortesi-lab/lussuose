@@ -5,9 +5,29 @@ import { useProfiles } from '@/hooks/useProfiles';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import logoLarge from '@/assets/app_logo.svg';
+import starIcon from '@/assets/star_icon.png';
 import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
 import AnnouncementBanner from '@/components/layout/AnnouncementBanner';
+import { useMemo } from 'react';
+
+const headerQuotes = [
+  { text: "The obstacle is the way.", author: "Ryan Holiday" },
+  { text: "What you seek is seeking you.", author: "Rumi" },
+  { text: "We suffer more in imagination than in reality.", author: "Seneca" },
+  { text: "What we resist, persists.", author: "Carl Jung" },
+  { text: "You are not your thoughts.", author: "Eckhart Tolle" },
+  { text: "How we spend our days is how we spend our lives.", author: "Annie Dillard" },
+  { text: "The only way out is through.", author: "Robert Frost" },
+  { text: "He who has a why can bear almost any how.", author: "Nietzsche" },
+  { text: "In the middle of difficulty lies opportunity.", author: "Einstein" },
+  { text: "The unexamined life is not worth living.", author: "Socrates" },
+  { text: "One day or day one. You decide.", author: "Paulo Coelho" },
+  { text: "The mind is everything. What you think, you become.", author: "Buddha" },
+  { text: "Where attention goes, energy flows.", author: "James Redfield" },
+  { text: "Be yourself; everyone else is already taken.", author: "Oscar Wilde" },
+  { text: "What consumes your mind, controls your life.", author: "Stoic proverb" },
+];
 
 interface DemoAccount {
   user_id: string;
@@ -24,6 +44,13 @@ const SEDI = ['CITTÀ DI CASTELLO', 'AREZZO'] as const;
 const ROLES = ['agente', 'coordinatore'] as const;
 
 const Auth = () => {
+  const quote = useMemo(() => {
+    const today = new Date();
+    const dayOfYear = Math.floor(
+      (today.getTime() - new Date(today.getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    return headerQuotes[dayOfYear % headerQuotes.length];
+  }, []);
   const [loading, setLoading] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newName, setNewName] = useState('');
@@ -160,12 +187,21 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <AnnouncementBanner />
 
-      {/* Header - Same glass style as app */}
-      <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem] mt-[calc(var(--banner-height,34px)+env(safe-area-inset-top,0px))]">
-        <img
-          src={logoLarge}
-          alt="Logo"
-          className="h-[5.5rem] -my-4" />
+      {/* Header - Same glass style as app with daily quote */}
+      <div
+        className="flex items-center gap-2 px-4 min-h-14 py-2 mt-[calc(var(--banner-height,34px)+env(safe-area-inset-top,0px))]"
+        style={{ backgroundColor: 'white', borderBottomRightRadius: '1.5rem', borderBottomLeftRadius: '1.5rem' }}
+      >
+        <div className="flex-1 min-w-0 flex items-center justify-center gap-1 px-1">
+          <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+          <p
+            className="text-[9px] uppercase text-muted-foreground/70 text-center leading-relaxed"
+            style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}
+          >
+            {quote.text} — {quote.author}
+          </p>
+          <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+        </div>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
