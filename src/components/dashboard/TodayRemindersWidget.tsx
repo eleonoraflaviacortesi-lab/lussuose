@@ -10,10 +10,11 @@ import { cn, isDarkColor } from '@/lib/utils';
 
 type TodayRemindersWidgetProps = {
   onNotiziaClick?: (notizia: Notizia) => void;
+  onClienteClick?: (clienteId: string) => void;
   onGoToCalendar?: () => void;
 };
 
-const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayRemindersWidgetProps) => {
+const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }: TodayRemindersWidgetProps) => {
   const { clienti } = useClienti();
   const { notizie } = useNotizie();
   const { columns } = useKanbanColumns();
@@ -80,6 +81,8 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
   const handleReminderClick = (reminder: typeof todayReminders[0]) => {
     if (reminder.type === 'notizia' && onNotiziaClick) {
       onNotiziaClick(reminder.data);
+    } else if (reminder.type === 'cliente' && onClienteClick) {
+      onClienteClick(reminder.data.id);
     } else if (onGoToCalendar) {
       onGoToCalendar();
     }

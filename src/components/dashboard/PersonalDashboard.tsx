@@ -25,6 +25,7 @@ type KPIKey = 'contatti' | 'notizie' | 'chiusure' | 'conversioni' | 'appuntament
 type PersonalDashboardProps = {
   onGoToCalendar?: () => void;
   onOpenNotizia?: (notizia: Notizia) => void;
+  onOpenCliente?: (clienteId: string) => void;
 };
 
 /* ── Circular Progress Ring ───────────────────────────── */
@@ -54,7 +55,7 @@ const CircularProgress = ({ percent, size = 140, stroke = 8 }: { percent: number
   );
 };
 
-const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardProps) => {
+const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: PersonalDashboardProps) => {
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
   const { profile } = useAuth();
@@ -179,7 +180,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   };
 
   return (
-    <div className="pb-6 sm:pb-8 space-y-4 sm:space-y-6 animate-fade-in">
+    <div className="pb-6 sm:pb-8 space-y-3 sm:space-y-4 animate-fade-in">
 
       {/* Ciclo Produttivo CTA */}
       <div className="flex items-center justify-center">
@@ -212,7 +213,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {/* Left: Today Reminders (2 cols) */}
         <div className="md:col-span-2 [&>div]:h-full">
-          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
+          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onClienteClick={onOpenCliente} onGoToCalendar={onGoToCalendar} />
         </div>
 
         {/* Right: Incarichi del Mese (circular) */}

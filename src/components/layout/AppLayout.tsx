@@ -137,19 +137,21 @@ function FixedHeader({ onOpenCliente }: {onOpenCliente: (id: string) => void;}) 
         <NotificationBell onOpenCliente={onOpenCliente} inline />
       </div>
 
-      {/* Center: daily quote - triple tap for arcane fog */}
-      <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-1 px-1 cursor-pointer select-none">
-        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
-        <p
-          className={`text-[9px] uppercase text-muted-foreground/70 ${
-          isMobile ? 'text-center leading-relaxed' : 'truncate'}`
-          }
-          style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}>
-          
-          {quote.text} — {quote.author}
-        </p>
-        <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
-      </button>
+      {/* Center: daily quote - triple tap for arcane fog (hidden when search open on mobile) */}
+      {!(searchOpen && isMobile) && (
+        <button onClick={handleQuoteTap} className="flex-1 min-w-0 flex items-center justify-center gap-1 px-1 cursor-pointer select-none">
+          <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+          <p
+            className={`text-[9px] uppercase text-muted-foreground/70 ${
+            isMobile ? 'text-center leading-relaxed' : 'truncate'}`
+            }
+            style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}>
+            
+            {quote.text} — {quote.author}
+          </p>
+          <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
+        </button>
+      )}
 
       {/* Right: expandable search */}
       <div className="flex items-center shrink-0">
@@ -271,7 +273,7 @@ export default function AppLayout() {
   const renderContent = () => {
     switch (section) {
       case 'dashboard':
-        return <PersonalDashboard onGoToCalendar={() => navigate('/activities')} />;
+        return <PersonalDashboard onGoToCalendar={() => navigate('/activities')} onOpenCliente={handleOpenCliente} />;
       case 'properties':
         return <NotiziePage />;
       case 'contacts':
@@ -316,7 +318,7 @@ export default function AppLayout() {
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 min-w-0 overflow-x-hidden">
-            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-4 lg:px-8'} py-2 sm:py-6`}>
+            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-3 sm:px-4 lg:px-8'} py-2 sm:py-4`}>
               <Suspense
                 fallback={
                 <div className="py-10 flex items-center justify-center">
