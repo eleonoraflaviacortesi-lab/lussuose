@@ -203,7 +203,7 @@ const ReportForm = ({ initialDate, onDateUsed }: ReportFormProps = {}) => {
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header with Date Picker */}
       <div className="flex items-center justify-center mb-6">
-        <label className="inline-flex items-center gap-2.5 bg-background border border-border rounded-full px-5 py-2 cursor-pointer hover:bg-muted/50 transition-colors shadow-sm">
+        <label className="inline-flex items-center gap-2.5 bg-card rounded-full px-5 py-2 cursor-pointer hover:bg-card/90 transition-colors shadow-sm">
           <Calendar className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium tracking-wide text-foreground">
             {new Date(date + 'T00:00:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}
