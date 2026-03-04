@@ -96,17 +96,17 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       {/* Header */}
       <button
         onClick={goToCalendar}
-        className="w-full flex items-center justify-between p-5 hover:bg-muted/30 transition-colors rounded-t-3xl"
+        className="w-full flex items-center justify-between p-4 sm:p-5 hover:bg-muted/30 transition-colors rounded-t-3xl"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-foreground flex items-center justify-center">
-            <Calendar className="w-5 h-5 text-background" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-foreground flex items-center justify-center">
+            <Calendar className="w-[18px] h-[18px] sm:w-5 sm:h-5 text-background" />
           </div>
           <div className="text-left">
             <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">
               Oggi, {format(today, 'd MMMM', { locale: it })}
             </p>
-            <p className="font-bold text-lg">
+            <p className="font-bold text-base sm:text-lg">
               {todayReminders.length > 0 ? `${todayReminders.length} promemoria` : 'Nessun promemoria'}
             </p>
           </div>
@@ -115,7 +115,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
       </button>
 
       {/* Reminders list */}
-      <div className="px-5 pb-5 space-y-2">
+      <div className="px-4 pb-4 sm:px-5 sm:pb-5 space-y-2">
         {todayReminders.slice(0, 5).map((reminder) => {
           const isBuyer = reminder.type === 'cliente';
 
@@ -124,7 +124,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onGoToCalendar }: TodayReminders
               key={reminder.id}
               onClick={() => handleReminderClick(reminder)}
               className={cn(
-                "w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all active:scale-[0.98] relative",
+                "w-full flex items-center gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl transition-all active:scale-[0.98] relative",
                 isBuyer
                   ? "bg-background border border-foreground/10"
                   : ""
