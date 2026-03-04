@@ -6,7 +6,7 @@ interface EntityCardWrapperProps {
   cardColor: string | null;
   isDragging?: boolean;
   onClick: () => void;
-  onContextAction: (pos: { x: number; y: number }) => void;
+  onContextAction: (pos: {x: number;y: number;}) => void;
   children: ReactNode;
   className?: string;
 }
@@ -24,10 +24,10 @@ export const EntityCardWrapper = memo(({
   onClick,
   onContextAction,
   children,
-  className,
+  className
 }: EntityCardWrapperProps) => {
   const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
+  const touchStartPos = useRef<{x: number;y: number;} | null>(null);
   const pickerWasOpen = useRef(false);
 
   const handleContextMenu = useCallback((e: React.MouseEvent) => {
@@ -76,11 +76,11 @@ export const EntityCardWrapper = memo(({
 
   return (
     <div
-      className={cn(
-        "rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 border border-border/30 select-none active:scale-[0.97]",
-        cardColor ? "backdrop-blur-sm" : "bg-card",
-        isDragging && "opacity-70 rotate-2",
-        className,
+      className={cn("rounded-xl p-2 lg:p-2 cursor-pointer transition-all duration-100 border border-border/30 select-none active:scale-[0.97] my-[3px]",
+
+      cardColor ? "backdrop-blur-sm" : "bg-card",
+      isDragging && "opacity-70 rotate-2",
+      className
       )}
       style={cardColor ? {
         backgroundColor: cardColor,
@@ -90,10 +90,10 @@ export const EntityCardWrapper = memo(({
       onContextMenu={handleContextMenu}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+      onTouchEnd={handleTouchEnd}>
+      
       {children}
-    </div>
-  );
+    </div>);
+
 });
 EntityCardWrapper.displayName = 'EntityCardWrapper';
