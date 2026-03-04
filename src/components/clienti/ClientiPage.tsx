@@ -161,11 +161,11 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
       setSelectedCliente(null);
     }
   }, [selectedCliente, deleteCliente, createCliente, pushAction]);
-  const displayClients = isCoordinator
-    ? clienti
-    : showAllBuyers
-      ? clienti
-      : clienti.filter((c) => c.assigned_to === profile?.user_id);
+  const displayClients = isCoordinator ?
+  clienti :
+  showAllBuyers ?
+  clienti :
+  clienti.filter((c) => c.assigned_to === profile?.user_id);
 
   // Create grouped data for display (for agents, use only their clients)
   const displayGrouped = useMemo(() => {
@@ -184,25 +184,25 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   const handleExportExcel = useCallback(async () => {
     const today = format(new Date(), 'yyyy-MM-dd');
     await exportToExcel(`buyers_${today}`, [
-      { header: 'Nome', key: 'nome', width: 20 },
-      { header: 'Cognome', key: 'cognome', width: 20 },
-      { header: 'Telefono', key: 'telefono', width: 18 },
-      { header: 'Email', key: 'email', width: 25 },
-      { header: 'Paese', key: 'paese', width: 15 },
-      { header: 'Lingua', key: 'lingua', width: 12 },
-      { header: 'Stato', key: 'status', width: 15 },
-      { header: 'Budget Max', key: 'budget_max', width: 15 },
-      { header: 'Regioni', key: 'regioni', width: 25 },
-      { header: 'Tipologia', key: 'tipologia', width: 25 },
-      { header: 'Portale', key: 'portale', width: 20 },
-      { header: 'Sede', key: 'sede', width: 12 },
-      { header: 'Note Extra', key: 'note_extra', width: 40 },
-      { header: 'Data Submission', key: 'data_submission', width: 20 },
-      { header: 'Creato', key: 'created_at', width: 20 },
-    ], displayClients.map(c => ({
+    { header: 'Nome', key: 'nome', width: 20 },
+    { header: 'Cognome', key: 'cognome', width: 20 },
+    { header: 'Telefono', key: 'telefono', width: 18 },
+    { header: 'Email', key: 'email', width: 25 },
+    { header: 'Paese', key: 'paese', width: 15 },
+    { header: 'Lingua', key: 'lingua', width: 12 },
+    { header: 'Stato', key: 'status', width: 15 },
+    { header: 'Budget Max', key: 'budget_max', width: 15 },
+    { header: 'Regioni', key: 'regioni', width: 25 },
+    { header: 'Tipologia', key: 'tipologia', width: 25 },
+    { header: 'Portale', key: 'portale', width: 20 },
+    { header: 'Sede', key: 'sede', width: 12 },
+    { header: 'Note Extra', key: 'note_extra', width: 40 },
+    { header: 'Data Submission', key: 'data_submission', width: 20 },
+    { header: 'Creato', key: 'created_at', width: 20 }],
+    displayClients.map((c) => ({
       ...c,
       regioni: Array.isArray(c.regioni) ? c.regioni.join(', ') : '',
-      tipologia: Array.isArray(c.tipologia) ? c.tipologia.join(', ') : '',
+      tipologia: Array.isArray(c.tipologia) ? c.tipologia.join(', ') : ''
     })));
   }, [displayClients]);
 
@@ -232,7 +232,7 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
     if (!filterQualified) return sortedGrouped;
     const filtered = new Map<string, Cliente[]>();
     sortedGrouped.forEach((clients, key) => {
-      filtered.set(key, clients.filter(c => c.status === 'qualified'));
+      filtered.set(key, clients.filter((c) => c.status === 'qualified'));
     });
     return filtered;
   }, [sortedGrouped, filterQualified]);
@@ -246,12 +246,12 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
   }
 
   return (
-    <div className="py-1 sm:py-4 space-y-2 sm:space-y-4 px-1 sm:px-[10px] w-full min-w-0">
+    <div className="py-1 space-y-2 sm:space-y-4 px-1 sm:px-[10px] w-full min-w-0 sm:py-0">
       {/* Header row: view toggle + actions */}
-      <div className="flex items-center gap-1.5 sm:gap-2 pt-1 sm:pt-[15px] overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1">
+      <div className="flex items-center gap-1.5 sm:gap-2 pt-1 sm:pt-[15px] overflow-x-auto overflow-y-hidden w-full min-w-0 pb-1 py-0">
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* View toggle */}
-          <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1">
+          <div className="flex rounded-lg bg-card overflow-hidden p-0.5 gap-1 py-px">
             <Button
               variant={viewMode === 'kanban' ? 'default' : 'ghost'}
               size="sm"
@@ -271,17 +271,17 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           </div>
 
           {viewMode === 'kanban' && <UndoRedoButtons />}
-          {viewMode === 'kanban' && (
-            <Button
-              variant={filterQualified ? 'default' : 'outline'}
-              size="sm"
-              className={cn("gap-1.5 px-2.5 sm:px-3 h-9 border-0", filterQualified ? 'bg-foreground text-background' : 'bg-card hover:bg-muted')}
-              onClick={() => setFilterQualified(prev => !prev)}
-            >
+          {viewMode === 'kanban' &&
+          <Button
+            variant={filterQualified ? 'default' : 'outline'}
+            size="sm"
+            className={cn("gap-1.5 px-2.5 sm:px-3 h-9 border-0", filterQualified ? 'bg-foreground text-background' : 'bg-card hover:bg-muted')}
+            onClick={() => setFilterQualified((prev) => !prev)}>
+            
               <Sparkles className="w-4 h-4" />
               <span className="hidden sm:inline">Qualificati</span>
             </Button>
-          )}
+          }
         </div>
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -353,10 +353,10 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
           <div className="flex items-center gap-1.5 shrink-0">
             <Users className="w-4 h-4 text-muted-foreground" />
             <Switch
-              id="show-all-buyers"
-              checked={showAllBuyers}
-              onCheckedChange={setShowAllBuyers}
-            />
+            id="show-all-buyers"
+            checked={showAllBuyers}
+            onCheckedChange={setShowAllBuyers} />
+          
             <Label htmlFor="show-all-buyers" className="text-xs cursor-pointer whitespace-nowrap">
               {showAllBuyers ? 'Tutti' : 'Miei'}
             </Label>
