@@ -11,8 +11,8 @@ import { useNotizie, NotiziaStatus } from '@/hooks/useNotizie';
 import { cn } from '@/lib/utils';
 import { generateNotiziaCalendarUrl } from '@/lib/googleCalendar';
 
-const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
-const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
+const pillInputClass = "w-full bg-white rounded-full px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/20";
+const pillTextareaClass = "w-full bg-white rounded-2xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground border-0 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none";
 const liquidGlassPopover = "bg-white/95 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border-0 rounded-2xl";
 
 const commonEmojis = ['📋', '🏠', '🏡', '🏰', '🏛️', '🌳', '⭐', '💎', '🔑', '📍', '🌸', '🌺', '🌻', '🍀', '✨', '💫', '🎯', '🔥', '💰', '🏆', '🌊', '🏖️', '🌅', '🌄', '🏔️', '🌲', '🌴', '🌷', '🌹', '💐', '🎨', '🎭', '🎪', '🎢', '🎡', '📸'];
@@ -168,7 +168,7 @@ const AddNotiziaDialog = ({
                     <PopoverTrigger asChild>
                       <button 
                         type="button"
-                        className="w-10 h-10 bg-white rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.08)] flex items-center justify-center text-lg active:scale-95 transition-transform"
+                        className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-lg active:scale-95 transition-transform"
                       >
                         {formData.emoji || <Plus className="w-4 h-4 text-muted-foreground" />}
                       </button>
@@ -190,7 +190,7 @@ const AddNotiziaDialog = ({
                           value={customEmoji}
                           onChange={(e) => setCustomEmoji(e.target.value)}
                           placeholder="Incolla emoji..."
-                          className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                          className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm border-0 focus:outline-none"
                         />
                         <button
                           type="button"
@@ -261,7 +261,7 @@ const AddNotiziaDialog = ({
                   value={formData.status}
                   onValueChange={(value) => setFormData({ ...formData, status: value as NotiziaStatus })}
                 >
-                  <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0">
+                  <SelectTrigger className="bg-white rounded-full px-4 py-2.5 h-auto text-sm border-0">
                     <SelectValue />
                   </SelectTrigger>
                 <SelectContent className={cn(liquidGlassPopover, "rounded-xl")}>
@@ -298,7 +298,7 @@ const AddNotiziaDialog = ({
                       <button
                         type="button"
                         className={cn(
-                          "w-full bg-white rounded-full px-4 py-2.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
+                          "w-full bg-white rounded-full px-4 py-2.5 text-sm border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
                           !formData.created_date && "text-muted-foreground"
                         )}
                       >
@@ -326,7 +326,7 @@ const AddNotiziaDialog = ({
                       <button
                         type="button"
                         className={cn(
-                          "w-full bg-white rounded-full px-4 py-2.5 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
+                          "w-full bg-white rounded-full px-4 py-2.5 text-sm border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
                           !formData.reminder_date && "text-muted-foreground"
                         )}
                       >
@@ -348,7 +348,7 @@ const AddNotiziaDialog = ({
                           type="time"
                           value={formData.reminder_time}
                           onChange={(e) => setFormData({ ...formData, reminder_time: e.target.value })}
-                          className="w-full bg-white rounded-full px-4 py-2 text-sm shadow-[0_2px_8px_rgba(0,0,0,0.08)] border-0 focus:outline-none"
+                          className="w-full bg-white rounded-full px-4 py-2 text-sm border-0 focus:outline-none"
                         />
                       </div>
                     </PopoverContent>
@@ -377,7 +377,7 @@ const AddNotiziaDialog = ({
                   });
                   window.open(url, '_blank');
                 }}
-                className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium shadow-[0_2px_8px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform hover:opacity-90"
+                className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium active:scale-[0.98] transition-transform hover:opacity-90"
               >
                 <CalendarIcon className="w-4 h-4" />
                 <span>Aggiungi a Google Calendar</span>
