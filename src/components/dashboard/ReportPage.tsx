@@ -14,36 +14,36 @@ const ReportPage = () => {
   return (
     <div>
       {/* Tab pills */}
-      <div className="flex items-center justify-center gap-2 px-6 pt-2 pb-4">
+      <div className="flex items-center justify-center gap-2 px-6 pb-4 pt-0">
         <button
           onClick={() => setActiveTab('nuovo')}
           className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide transition-colors ${
-            activeTab === 'nuovo'
-              ? 'bg-foreground text-background'
-              : 'bg-card text-muted-foreground hover:bg-card/90'
-          }`}
-        >
+          activeTab === 'nuovo' ?
+          'bg-foreground text-background' :
+          'bg-card text-muted-foreground hover:bg-card/90'}`
+          }>
+          
           NUOVO REPORT
         </button>
         <button
           onClick={() => setActiveTab('storico')}
           className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide transition-colors ${
-            activeTab === 'storico'
-              ? 'bg-foreground text-background'
-              : 'bg-card text-muted-foreground hover:bg-card/90'
-          }`}
-        >
+          activeTab === 'storico' ?
+          'bg-foreground text-background' :
+          'bg-card text-muted-foreground hover:bg-card/90'}`
+          }>
+          
           I MIEI REPORT
         </button>
       </div>
 
-      {activeTab === 'nuovo' ? (
-        <ReportForm initialDate={editDate} onDateUsed={() => setEditDate(null)} />
-      ) : (
-        <ReportListTab onEditReport={handleEditReport} />
-      )}
-    </div>
-  );
+      {activeTab === 'nuovo' ?
+      <ReportForm initialDate={editDate} onDateUsed={() => setEditDate(null)} /> :
+
+      <ReportListTab onEditReport={handleEditReport} />
+      }
+    </div>);
+
 };
 
 export default ReportPage;
