@@ -25,8 +25,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  AlertDialogTrigger } from
+"@/components/ui/alert-dialog";
 
 // Helper to determine if color is dark
 const isDarkColor = (color: string | null): boolean => {
@@ -60,7 +60,7 @@ const statusLabels: Record<NotiziaStatus, string> = {
   taken: 'Taken',
   credit: 'Credit',
   no: 'No',
-  sold: 'Sold',
+  sold: 'Sold'
 };
 
 const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
@@ -84,13 +84,13 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     comments: [] as NotiziaComment[],
     prezzo_richiesto: null as number | null,
     valore: null as number | null,
-    rating: null as number | null,
+    rating: null as number | null
   });
 
   // Auto-save function - exclude comments to prevent overwriting external changes
   const performSave = useCallback(() => {
     if (!notizia || !editData.name.trim()) return;
-    
+
     let reminderDateTime: string | null = null;
     if (editData.reminder_date) {
       const [hours, minutes] = editData.reminder_time.split(':');
@@ -98,7 +98,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       reminderDate.setHours(parseInt(hours), parseInt(minutes));
       reminderDateTime = reminderDate.toISOString();
     }
-    
+
     updateNotizia.mutate({
       id: notizia.id,
       name: editData.name,
@@ -111,7 +111,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       reminder_date: reminderDateTime,
       prezzo_richiesto: editData.prezzo_richiesto,
       valore: editData.valore,
-      rating: editData.rating,
+      rating: editData.rating
     });
 
     // Show saved indicator
@@ -131,7 +131,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   // Update handler that triggers auto-save
   const updateField = useCallback((field: string, value: any) => {
-    setEditData(prev => ({ ...prev, [field]: value }));
+    setEditData((prev) => ({ ...prev, [field]: value }));
   }, []);
 
   // Trigger save on blur for text fields
@@ -141,7 +141,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   // Immediate save for select/picker changes
   const updateAndSave = useCallback((field: string, value: any) => {
-    setEditData(prev => {
+    setEditData((prev) => {
       const newData = { ...prev, [field]: value };
       // Save directly with new data to avoid stale closure
       setTimeout(() => {
@@ -149,7 +149,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           clearTimeout(saveTimeoutRef.current);
         }
         if (!notizia || !newData.name.trim()) return;
-        
+
         let reminderDateTime: string | null = null;
         if (newData.reminder_date) {
           const [hours, minutes] = newData.reminder_time.split(':');
@@ -157,7 +157,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           reminderDate.setHours(parseInt(hours), parseInt(minutes));
           reminderDateTime = reminderDate.toISOString();
         }
-        
+
         updateNotizia.mutate({
           id: notizia.id,
           name: newData.name,
@@ -170,9 +170,9 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           reminder_date: reminderDateTime,
           prezzo_richiesto: newData.prezzo_richiesto,
           valore: newData.valore,
-          rating: newData.rating,
+          rating: newData.rating
         });
-        
+
         setShowSaved(true);
         setTimeout(() => setShowSaved(false), 1500);
       }, 100);
@@ -197,7 +197,7 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         comments: notizia.comments || [],
         prezzo_richiesto: notizia.prezzo_richiesto ?? null,
         valore: notizia.valore ?? null,
-        rating: notizia.rating ?? null,
+        rating: notizia.rating ?? null
       });
       setNewComment('');
     }
@@ -220,28 +220,28 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
     const comment: NotiziaComment = {
       id: crypto.randomUUID(),
       text: newComment.trim(),
-      created_at: new Date().toISOString(),
+      created_at: new Date().toISOString()
     };
     const newComments = [...editData.comments, comment];
     setEditData({ ...editData, comments: newComments });
-    
+
     // Send mention notifications
     await sendMentionNotifications(newComment.trim(), {
       type: 'comment_notizia',
       entityName: editData.name,
-      referenceId: notizia.id,
+      referenceId: notizia.id
     });
-    
+
     setNewComment('');
     // Save comments directly
     updateNotizia.mutate({ id: notizia.id, comments: newComments, silent: true });
   };
 
   const handleDeleteComment = (commentId: string) => {
-    const newComments = editData.comments.filter(c => c.id !== commentId);
-    setEditData({ 
-      ...editData, 
-      comments: newComments 
+    const newComments = editData.comments.filter((c) => c.id !== commentId);
+    setEditData({
+      ...editData,
+      comments: newComments
     });
     // Save comments directly
     updateNotizia.mutate({ id: notizia.id, comments: newComments, silent: true });
@@ -268,25 +268,25 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
   return (
     <Fragment>
       {/* Backdrop overlay - transparent to keep content visible */}
-      <div 
+      <div
         className="fixed inset-0 z-[54] bg-black/10 animate-in fade-in duration-200"
         style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}
-        onClick={() => onOpenChange(false)}
-      />
+        onClick={() => onOpenChange(false)} />
+      
       {/* Side peek panel */}
-      <div 
+      <div
         className={cn(
           "fixed right-0 bottom-0 z-[55] flex flex-col bg-background rounded-l-2xl border-0 shadow-[-8px_0_30px_rgba(0,0,0,0.08)]",
           "animate-in slide-in-from-right duration-300",
-          "w-full sm:w-[480px] md:w-[520px]",
+          "w-full sm:w-[480px] md:w-[520px]"
         )}
-        style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}
-      >
+        style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}>
+        
         {/* Close button - fixed at top right of panel */}
-        <button 
+        <button
           onClick={() => onOpenChange(false)}
-          className="absolute right-8 top-4 z-10 text-muted-foreground active:scale-95 transition-transform"
-        >
+          className="absolute right-8 top-4 z-10 text-muted-foreground active:scale-95 transition-transform">
+          
           <X className="w-4 h-4" />
         </button>
         {/* Side peek scrollable content */}
@@ -294,24 +294,24 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           <div className="w-full pt-4 px-5 pb-10">
 
         {/* Saved indicator */}
-        {showSaved && (
-          <div className="flex items-center justify-center gap-1 mb-4 text-xs text-success animate-in fade-in duration-200">
+        {showSaved &&
+            <div className="flex items-center justify-center gap-1 mb-4 text-xs text-success animate-in fade-in duration-200">
             <Check className="w-3 h-3" />
             Salvato
           </div>
-        )}
+            }
 
-        <div className="space-y-3">
+        <div className="space-y-3 my-[5px]">
           {/* Emoji + Name row */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-0 py-0">
             <div>
               <Label className="text-xs font-medium mb-1.5 block">Emoji</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <button 
-                    type="button"
-                    className="w-12 h-10 bg-white rounded-full flex items-center justify-center text-lg active:scale-95 transition-transform"
-                  >
+                  <button
+                        type="button"
+                        className="w-12 h-10 bg-white rounded-full flex items-center justify-center text-lg active:scale-95 transition-transform">
+                        
                     {editData.emoji}
                   </button>
                 </PopoverTrigger>
@@ -319,33 +319,33 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                   {/* Custom emoji input */}
                   <div className="flex gap-2 mb-3">
                     <input
-                      value={customEmoji}
-                      onChange={(e) => setCustomEmoji(e.target.value)}
-                      placeholder="Incolla emoji..."
-                      className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm border-0 focus:outline-none"
-                    />
+                          value={customEmoji}
+                          onChange={(e) => setCustomEmoji(e.target.value)}
+                          placeholder="Incolla emoji..."
+                          className="flex-1 bg-white rounded-full px-3 py-1.5 text-sm border-0 focus:outline-none" />
+                        
                     <button
-                      type="button"
-                      onClick={handleCustomEmojiSubmit}
-                      className="px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium active:scale-95 transition-transform"
-                    >
+                          type="button"
+                          onClick={handleCustomEmojiSubmit}
+                          className="px-3 py-1.5 bg-primary text-primary-foreground rounded-full text-xs font-medium active:scale-95 transition-transform">
+                          
                       Usa
                     </button>
                   </div>
                   <div className="grid grid-cols-7 gap-1">
-                    {commonEmojis.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => updateAndSave('emoji', emoji)}
-                        className={cn(
-                          "w-8 h-8 flex items-center justify-center rounded-lg active:scale-95 transition-transform",
-                          editData.emoji === emoji && "bg-accent"
-                        )}
-                      >
+                    {commonEmojis.map((emoji) =>
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => updateAndSave('emoji', emoji)}
+                          className={cn(
+                            "w-8 h-8 flex items-center justify-center rounded-lg active:scale-95 transition-transform",
+                            editData.emoji === emoji && "bg-accent"
+                          )}>
+                          
                         {emoji}
                       </button>
-                    ))}
+                        )}
                   </div>
                 </PopoverContent>
               </Popover>
@@ -353,13 +353,13 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <div className="flex-1">
               <Label htmlFor="edit-name" className="text-xs font-medium mb-1.5 block">Nome proprietà *</Label>
               <input
-                id="edit-name"
-                value={editData.name}
-                onChange={(e) => updateField('name', e.target.value)}
-                onBlur={handleBlur}
-                placeholder="Es: Villa Serenity"
-                className={pillInputClass}
-              />
+                    id="edit-name"
+                    value={editData.name}
+                    onChange={(e) => updateField('name', e.target.value)}
+                    onBlur={handleBlur}
+                    placeholder="Es: Villa Serenity"
+                    className={pillInputClass} />
+                  
             </div>
           </div>
 
@@ -367,40 +367,40 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
           <div className="flex items-center gap-2">
             <Label className="text-xs font-medium">Rating</Label>
             <StarRating
-              value={editData.rating}
-              onChange={(val) => {
-                if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
-                setEditData(prev => ({ ...prev, rating: val }));
-                if (notizia) {
-                  updateNotizia.mutate({ id: notizia.id, rating: val, silent: true });
-                }
-              }}
-              size="sm"
-            />
+                  value={editData.rating}
+                  onChange={(val) => {
+                    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+                    setEditData((prev) => ({ ...prev, rating: val }));
+                    if (notizia) {
+                      updateNotizia.mutate({ id: notizia.id, rating: val, silent: true });
+                    }
+                  }}
+                  size="sm" />
+                
           </div>
           
           <div className="grid grid-cols-2 gap-2">
             <div>
               <Label htmlFor="edit-zona" className="text-xs font-medium mb-1.5 block">Zona</Label>
               <input
-                id="edit-zona"
-                value={editData.zona}
-                onChange={(e) => updateField('zona', e.target.value)}
-                onBlur={handleBlur}
-                placeholder="Es: Umbertide"
-                className={pillInputClass}
-              />
+                    id="edit-zona"
+                    value={editData.zona}
+                    onChange={(e) => updateField('zona', e.target.value)}
+                    onBlur={handleBlur}
+                    placeholder="Es: Umbertide"
+                    className={pillInputClass} />
+                  
             </div>
             <div>
               <Label htmlFor="edit-type" className="text-xs font-medium mb-1.5 block">Tipo</Label>
               <input
-                id="edit-type"
-                value={editData.type}
-                onChange={(e) => updateField('type', e.target.value)}
-                onBlur={handleBlur}
-                placeholder="Es: Casale"
-                className={pillInputClass}
-              />
+                    id="edit-type"
+                    value={editData.type}
+                    onChange={(e) => updateField('type', e.target.value)}
+                    onBlur={handleBlur}
+                    placeholder="Es: Casale"
+                    className={pillInputClass} />
+                  
             </div>
           </div>
           
@@ -408,26 +408,26 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <div>
               <Label htmlFor="edit-prezzo" className="text-xs font-medium mb-1.5 block">Prezzo Richiesto</Label>
               <input
-                id="edit-prezzo"
-                type="number"
-                value={editData.prezzo_richiesto ?? ''}
-                onChange={(e) => updateField('prezzo_richiesto', e.target.value ? Number(e.target.value) : null)}
-                onBlur={handleBlur}
-                placeholder="€ 350.000"
-                className={pillInputClass}
-              />
+                    id="edit-prezzo"
+                    type="number"
+                    value={editData.prezzo_richiesto ?? ''}
+                    onChange={(e) => updateField('prezzo_richiesto', e.target.value ? Number(e.target.value) : null)}
+                    onBlur={handleBlur}
+                    placeholder="€ 350.000"
+                    className={pillInputClass} />
+                  
             </div>
             <div>
               <Label htmlFor="edit-valore" className="text-xs font-medium mb-1.5 block">Valore</Label>
               <input
-                id="edit-valore"
-                type="number"
-                value={editData.valore ?? ''}
-                onChange={(e) => updateField('valore', e.target.value ? Number(e.target.value) : null)}
-                onBlur={handleBlur}
-                placeholder="€ 300.000"
-                className={pillInputClass}
-              />
+                    id="edit-valore"
+                    type="number"
+                    value={editData.valore ?? ''}
+                    onChange={(e) => updateField('valore', e.target.value ? Number(e.target.value) : null)}
+                    onBlur={handleBlur}
+                    placeholder="€ 300.000"
+                    className={pillInputClass} />
+                  
             </div>
           </div>
           
@@ -435,71 +435,71 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
             <Label htmlFor="edit-phone" className="text-xs font-medium mb-1.5 block">Telefono</Label>
             <div className="flex gap-2">
               <input
-                id="edit-phone"
-                type="tel"
-                value={editData.phone}
-                onChange={(e) => updateField('phone', e.target.value)}
-                onBlur={handleBlur}
-                placeholder="+39 333 1234567"
-                className={cn(pillInputClass, "flex-1")}
-              />
-              {editData.phone && (
-                <button
-                  type="button"
-                  onClick={handlePhoneClick}
-                  className="w-10 h-10 bg-white rounded-full flex items-center justify-center active:scale-95 transition-transform"
-                >
+                    id="edit-phone"
+                    type="tel"
+                    value={editData.phone}
+                    onChange={(e) => updateField('phone', e.target.value)}
+                    onBlur={handleBlur}
+                    placeholder="+39 333 1234567"
+                    className={cn(pillInputClass, "flex-1")} />
+                  
+              {editData.phone &&
+                  <button
+                    type="button"
+                    onClick={handlePhoneClick}
+                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center active:scale-95 transition-transform">
+                    
                   <Phone className="w-4 h-4 text-primary" />
                 </button>
-              )}
+                  }
             </div>
           </div>
           
           <div>
             <Label className="text-xs font-medium mb-1.5 block">Status</Label>
             <div className="flex flex-wrap gap-1.5">
-              {columns.map((col) => (
-                <button
-                  key={col.key}
-                  type="button"
-                  onClick={() => updateAndSave('status', col.key as NotiziaStatus)}
-                  className={cn(
-                    "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
-                    editData.status === col.key && "ring-2 ring-offset-1 ring-foreground"
-                  )}
-                  style={{ 
-                    backgroundColor: col.color,
-                    color: isDarkColor(col.color) ? 'white' : 'black'
-                  }}
-                >
+              {columns.map((col) =>
+                  <button
+                    key={col.key}
+                    type="button"
+                    onClick={() => updateAndSave('status', col.key as NotiziaStatus)}
+                    className={cn(
+                      "px-2.5 py-1 text-[10px] font-medium rounded-full transition-all active:scale-95",
+                      editData.status === col.key && "ring-2 ring-offset-1 ring-foreground"
+                    )}
+                    style={{
+                      backgroundColor: col.color,
+                      color: isDarkColor(col.color) ? 'white' : 'black'
+                    }}>
+                    
                   {col.label}
                 </button>
-              ))}
+                  )}
             </div>
           </div>
           
           <div>
             <Label htmlFor="edit-notes" className="text-xs font-medium mb-1.5 block">Note</Label>
             <RichTextEditor
-              value={editData.notes}
-              onChange={(val) => updateField('notes', val)}
-              onBlur={handleBlur}
-              placeholder="Aggiungi note..."
-              minHeight="60px"
-            />
+                  value={editData.notes}
+                  onChange={(val) => updateField('notes', val)}
+                  onBlur={handleBlur}
+                  placeholder="Aggiungi note..."
+                  minHeight="60px" />
+                
           </div>
 
           {/* Comments Section */}
           <div>
             <Label className="text-xs font-medium mb-1.5 block">Commenti</Label>
             {/* Existing comments */}
-            {editData.comments.length > 0 && (
-              <div className="space-y-2 mb-2 max-h-32 overflow-y-auto">
-                {editData.comments.map((comment) => (
-                  <div 
+            {editData.comments.length > 0 &&
+                <div className="space-y-2 mb-2 max-h-32 overflow-y-auto">
+                {editData.comments.map((comment) =>
+                  <div
                     key={comment.id}
-                    className="bg-white/60 rounded-xl px-3 py-2 text-sm flex items-start gap-2 group"
-                  >
+                    className="bg-white/60 rounded-xl px-3 py-2 text-sm flex items-start gap-2 group">
+                    
                     <div className="flex-1 min-w-0">
                       <p className="text-foreground leading-snug">{comment.text}</p>
                       <span className="text-[10px] text-muted-foreground">
@@ -509,29 +509,29 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
                     <button
                       type="button"
                       onClick={() => handleDeleteComment(comment.id)}
-                      className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-0.5"
-                    >
+                      className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity p-0.5">
+                      
                       <X className="w-3 h-3" />
                     </button>
                   </div>
-                ))}
+                  )}
               </div>
-            )}
+                }
             {/* New comment input */}
             <div className="flex gap-2 items-center w-full">
               <MentionInput
-                value={newComment}
-                onChange={setNewComment}
-                onSubmit={handleAddComment}
-                placeholder="Aggiungi un commento... usa @ per taggare"
-                className={cn(pillInputClass, "flex-1")}
-              />
+                    value={newComment}
+                    onChange={setNewComment}
+                    onSubmit={handleAddComment}
+                    placeholder="Aggiungi un commento... usa @ per taggare"
+                    className={cn(pillInputClass, "flex-1")} />
+                  
               <button
-                type="button"
-                onClick={handleAddComment}
-                disabled={!newComment.trim()}
-                className="w-10 h-10 bg-foreground text-background rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50 flex-shrink-0"
-              >
+                    type="button"
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim()}
+                    className="w-10 h-10 bg-foreground text-background rounded-full flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50 flex-shrink-0">
+                    
                 <Send className="w-4 h-4" />
               </button>
            </div>
@@ -554,98 +554,98 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               <Popover>
                 <PopoverTrigger asChild>
                   <button
-                    type="button"
-                    className={cn(
-                      "w-full bg-white rounded-full px-4 py-2.5 text-sm border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
-                      !editData.reminder_date && "text-muted-foreground"
-                    )}
-                  >
+                        type="button"
+                        className={cn(
+                          "w-full bg-white rounded-full px-4 py-2.5 text-sm border-0 flex items-center gap-2 active:scale-[0.98] transition-transform",
+                          !editData.reminder_date && "text-muted-foreground"
+                        )}>
+                        
                     <Bell className="w-4 h-4" />
                     {editData.reminder_date ? format(editData.reminder_date, 'd MMM', { locale: it }) : 'Seleziona'}
                   </button>
                 </PopoverTrigger>
                 <PopoverContent className={cn(liquidGlassPopover, "w-auto p-0")} align="start">
                   <Calendar
-                    mode="single"
-                    selected={editData.reminder_date || undefined}
-                    onSelect={(date) => updateField('reminder_date', date || null)}
-                    locale={it}
-                    className="pointer-events-auto"
-                  />
+                        mode="single"
+                        selected={editData.reminder_date || undefined}
+                        onSelect={(date) => updateField('reminder_date', date || null)}
+                        locale={it}
+                        className="pointer-events-auto" />
+                      
                   <div className="p-3 bg-white/60 backdrop-blur-sm border-t border-muted/30">
                     <Label className="text-xs font-medium mb-1.5 block">Ora</Label>
                     <div className="flex gap-2">
                       <Select
-                        value={editData.reminder_time?.split(':')[0] || '09'}
-                        onValueChange={(hour) => {
-                          const mins = editData.reminder_time?.split(':')[1] || '00';
-                          updateField('reminder_time', `${hour}:${mins}`);
-                        }}
-                      >
+                            value={editData.reminder_time?.split(':')[0] || '09'}
+                            onValueChange={(hour) => {
+                              const mins = editData.reminder_time?.split(':')[1] || '00';
+                              updateField('reminder_time', `${hour}:${mins}`);
+                            }}>
+                            
                         <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm border-0">
                           <SelectValue placeholder="Ora" />
                         </SelectTrigger>
                         <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
-                          {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map((hour) => (
-                            <SelectItem key={hour} value={hour}>{hour}</SelectItem>
-                          ))}
+                          {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map((hour) =>
+                              <SelectItem key={hour} value={hour}>{hour}</SelectItem>
+                              )}
                         </SelectContent>
                       </Select>
                       <span className="flex items-center text-muted-foreground font-medium">:</span>
                       <Select
-                        value={editData.reminder_time?.split(':')[1] || '00'}
-                        onValueChange={(mins) => {
-                          const hour = editData.reminder_time?.split(':')[0] || '09';
-                          updateField('reminder_time', `${hour}:${mins}`);
-                        }}
-                      >
+                            value={editData.reminder_time?.split(':')[1] || '00'}
+                            onValueChange={(mins) => {
+                              const hour = editData.reminder_time?.split(':')[0] || '09';
+                              updateField('reminder_time', `${hour}:${mins}`);
+                            }}>
+                            
                         <SelectTrigger className="flex-1 bg-white rounded-full px-3 py-2 h-auto text-sm border-0">
                           <SelectValue placeholder="Min" />
                         </SelectTrigger>
                         <SelectContent className={cn(liquidGlassPopover, "rounded-xl max-h-48")}>
-                          {['00', '15', '30', '45'].map((mins) => (
-                            <SelectItem key={mins} value={mins}>{mins}</SelectItem>
-                          ))}
+                          {['00', '15', '30', '45'].map((mins) =>
+                              <SelectItem key={mins} value={mins}>{mins}</SelectItem>
+                              )}
                         </SelectContent>
                       </Select>
                     </div>
                     
                     {/* Save button - always visible when date is selected */}
-                    {editData.reminder_date && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const [hours, minutes] = editData.reminder_time.split(':');
-                          const reminderDate = new Date(editData.reminder_date!);
-                          reminderDate.setHours(parseInt(hours), parseInt(minutes));
+                    {editData.reminder_date &&
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const [hours, minutes] = editData.reminder_time.split(':');
+                            const reminderDate = new Date(editData.reminder_date!);
+                            reminderDate.setHours(parseInt(hours), parseInt(minutes));
+
+                            updateNotizia.mutate({
+                              id: notizia.id,
+                              reminder_date: reminderDate.toISOString()
+                            });
+
+                            setShowSaved(true);
+                            setTimeout(() => setShowSaved(false), 1500);
+                          }}
+                          className="w-full mt-3 py-2.5 rounded-full bg-foreground text-background text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:opacity-90">
                           
-                          updateNotizia.mutate({
-                            id: notizia.id,
-                            reminder_date: reminderDate.toISOString(),
-                          });
-                          
-                          setShowSaved(true);
-                          setTimeout(() => setShowSaved(false), 1500);
-                        }}
-                        className="w-full mt-3 py-2.5 rounded-full bg-foreground text-background text-sm font-medium flex items-center justify-center gap-2 active:scale-[0.98] transition-transform hover:opacity-90"
-                      >
                         <Check className="w-4 h-4" />
                         <span>Salva</span>
                       </button>
-                    )}
+                        }
                     
                     {/* Remove reminder button */}
-                    {editData.reminder_date && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          updateAndSave('reminder_date', null);
-                        }}
-                        className="w-full mt-2 py-2 rounded-full bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive hover:text-white transition-colors"
-                      >
+                    {editData.reminder_date &&
+                        <button
+                          type="button"
+                          onClick={() => {
+                            updateAndSave('reminder_date', null);
+                          }}
+                          className="w-full mt-2 py-2 rounded-full bg-destructive/10 text-destructive text-xs font-medium hover:bg-destructive hover:text-white transition-colors">
+                          
                         Rimuovi promemoria
                       </button>
-                    )}
+                        }
                   </div>
                 </PopoverContent>
               </Popover>
@@ -654,68 +654,68 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
           {/* Google Calendar Button */}
           <button
-            type="button"
-            onClick={() => {
-              // First save the notizia
-              let reminderDateTime: string | null = null;
-              const [hours, minutes] = editData.reminder_time.split(':');
-              const reminderDate = editData.reminder_date 
-                ? new Date(editData.reminder_date)
-                : new Date();
-              reminderDate.setHours(parseInt(hours), parseInt(minutes));
-              
-              if (editData.reminder_date) {
-                reminderDateTime = reminderDate.toISOString();
-              }
-              
-              updateNotizia.mutate({
-                id: notizia.id,
-                name: editData.name,
-                zona: editData.zona || undefined,
-                phone: editData.phone || undefined,
-                type: editData.type || undefined,
-                notes: editData.notes || undefined,
-                status: editData.status,
-                emoji: editData.emoji || '📋',
-                reminder_date: reminderDateTime,
-              });
-              
-              // Then open Google Calendar
-              const url = generateNotiziaCalendarUrl({
-                name: editData.name,
-                emoji: editData.emoji,
-                zona: editData.zona || undefined,
-                type: editData.type || undefined,
-                phone: editData.phone || undefined,
-                notes: editData.notes || undefined,
-                reminder_date: reminderDate,
-              });
-              window.open(url, '_blank');
-            }}
-            className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium active:scale-[0.98] transition-transform hover:opacity-90"
-          >
+                type="button"
+                onClick={() => {
+                  // First save the notizia
+                  let reminderDateTime: string | null = null;
+                  const [hours, minutes] = editData.reminder_time.split(':');
+                  const reminderDate = editData.reminder_date ?
+                  new Date(editData.reminder_date) :
+                  new Date();
+                  reminderDate.setHours(parseInt(hours), parseInt(minutes));
+
+                  if (editData.reminder_date) {
+                    reminderDateTime = reminderDate.toISOString();
+                  }
+
+                  updateNotizia.mutate({
+                    id: notizia.id,
+                    name: editData.name,
+                    zona: editData.zona || undefined,
+                    phone: editData.phone || undefined,
+                    type: editData.type || undefined,
+                    notes: editData.notes || undefined,
+                    status: editData.status,
+                    emoji: editData.emoji || '📋',
+                    reminder_date: reminderDateTime
+                  });
+
+                  // Then open Google Calendar
+                  const url = generateNotiziaCalendarUrl({
+                    name: editData.name,
+                    emoji: editData.emoji,
+                    zona: editData.zona || undefined,
+                    type: editData.type || undefined,
+                    phone: editData.phone || undefined,
+                    notes: editData.notes || undefined,
+                    reminder_date: reminderDate
+                  });
+                  window.open(url, '_blank');
+                }}
+                className="w-full flex items-center justify-center gap-2 bg-foreground text-background rounded-full px-4 py-2.5 text-sm font-medium active:scale-[0.98] transition-transform hover:opacity-90">
+                
             <CalendarIcon className="w-4 h-4" />
             <span>Aggiungi a Google Calendar</span>
             <ExternalLink className="w-3 h-3 opacity-60" />
           </button>
           
           <div className="flex justify-center gap-2 pt-3">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              className="rounded-full px-6 text-sm active:scale-[0.98] transition-transform"
-            >
+            <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  className="rounded-full px-6 text-sm active:scale-[0.98] transition-transform">
+                  
               Chiudi
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  type="button"
-                  variant="destructive" 
-                  size="icon" 
-                  className="rounded-full w-10 h-10 active:scale-95 transition-transform"
-                >
+                <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="rounded-full w-10 h-10 active:scale-95 transition-transform">
+                      
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </AlertDialogTrigger>
@@ -737,8 +737,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
         </div>
         </div>
       </div>
-    </Fragment>
-  );
+    </Fragment>);
+
 };
 
 export default NotiziaDetail;
