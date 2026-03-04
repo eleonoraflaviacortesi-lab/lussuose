@@ -20,7 +20,7 @@ const ReportPage = () => {
           className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide transition-colors ${
             activeTab === 'nuovo'
               ? 'bg-foreground text-background'
-              : 'bg-background text-muted-foreground hover:bg-background/80'
+              : 'bg-card text-muted-foreground hover:bg-card/90'
           }`}
         >
           NUOVO REPORT
@@ -30,7 +30,7 @@ const ReportPage = () => {
           className={`px-5 py-2 rounded-full text-sm font-medium tracking-wide transition-colors ${
             activeTab === 'storico'
               ? 'bg-foreground text-background'
-              : 'bg-background text-muted-foreground hover:bg-background/80'
+              : 'bg-card text-muted-foreground hover:bg-card/90'
           }`}
         >
           I MIEI REPORT
