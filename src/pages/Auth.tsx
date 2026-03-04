@@ -195,8 +195,8 @@ const Auth = () => {
         <div className="flex-1 min-w-0 flex items-center justify-center gap-1 px-1">
           <img src={starIcon} alt="" className="h-3 w-3 shrink-0 opacity-50" />
           <p
-           className="text-[10px] text-muted-foreground/70 text-center leading-relaxed"
-            style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}
+            className="text-[9px] uppercase text-muted-foreground/70 text-center leading-relaxed"
+            style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif', letterSpacing: '0.25em' }}
           >
             {quote.text} — {quote.author}
           </p>
