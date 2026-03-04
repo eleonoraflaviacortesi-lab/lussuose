@@ -77,10 +77,10 @@ export const KanbanColumnHeader = memo(({
 
       <button
         onClick={() => !isProtected && setEditing(true)}
-        className={cn(
-          "text-[11px] font-semibold px-2 py-0.5 rounded-md transition-transform",
-          !isProtected && "hover:scale-105 cursor-text",
-          isProtected && "cursor-default"
+        className={cn("px-2 py-0.5 rounded-md transition-transform text-xs font-medium",
+
+        !isProtected && "hover:scale-105 cursor-text",
+        isProtected && "cursor-default"
         )}
         style={{
           backgroundColor: column.color,
