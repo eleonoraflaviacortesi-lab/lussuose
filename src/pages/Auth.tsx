@@ -7,6 +7,7 @@ import { toast } from '@/hooks/use-toast';
 import logoLarge from '@/assets/app_logo.svg';
 import { cn } from '@/lib/utils';
 import { Plus, X, UserPlus } from 'lucide-react';
+import AnnouncementBanner from '@/components/layout/AnnouncementBanner';
 
 interface DemoAccount {
   user_id: string;
@@ -157,30 +158,14 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* iOS Safe Area Background */}
-      <div className="fixed inset-x-0 top-0 h-[env(safe-area-inset-top)] bg-black z-50" />
-      
-      {/* Ticker Banner - Black with smooth scroll */}
-      <div className="bg-black text-white pt-[env(safe-area-inset-top)] pb-2 overflow-hidden">
-        <div className="flex animate-ticker whitespace-nowrap pt-2">
-          {[...Array(8)].map((_, i) =>
-          <span key={i} className="flex items-center gap-6 mx-6 text-sm font-bold tracking-[0.15em] uppercase">
-              <span>CORTESI LUXURY REAL ESTATE</span>
-              <span>★</span>
-              <span>LE LUSSUOSE</span>
-              <span>★</span>
-            </span>
-          )}
-        </div>
-      </div>
+      <AnnouncementBanner />
 
       {/* Header - Same glass style as app */}
-      <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem]">
+      <div className="glass-header flex items-center justify-center px-4 py-1 rounded-b-[2rem] mt-[calc(var(--banner-height,34px)+env(safe-area-inset-top,0px))]">
         <img
           src={logoLarge}
           alt="Logo"
           className="h-[5.5rem] -my-4" />
-        
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
