@@ -1,10 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useDailyData } from '@/hooks/useDailyData';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, startOfMonth, endOfMonth, eachWeekOfInterval } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { Trash2, Pencil, Search, CalendarDays } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { useNavigate } from 'react-router-dom';
 
 interface ReportListTabProps {
   onEditReport: (date: string) => void;
@@ -14,13 +13,39 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
   const { myData, deleteDailyData } = useDailyData();
   const [search, setSearch] = useState('');
   const [monthFilter, setMonthFilter] = useState('');
+  const [weekFilter, setWeekFilter] = useState('');
+
+  const months = useMemo(() => {
+    if (!myData) return [];
+    const set = new Set(myData.map((r) => r.date.substring(0, 7)));
+    return Array.from(set).sort().reverse();
+  }, [myData]);
+
+  const weeks = useMemo(() => {
+    if (!monthFilter) return [];
+    const monthStart = startOfMonth(parseISO(monthFilter + '-01'));
+    const monthEnd = endOfMonth(monthStart);
+    const weekStarts = eachWeekOfInterval({ start: monthStart, end: monthEnd }, { weekStartsOn: 1 });
+    return weekStarts.map((ws, i) => ({
+      label: `Settimana ${i + 1}`,
+      value: String(i + 1),
+      start: ws,
+      end: new Date(Math.min(new Date(ws.getTime() + 6 * 86400000).getTime(), monthEnd.getTime())),
+    }));
+  }, [monthFilter]);
 
   const filtered = useMemo(() => {
     if (!myData) return [];
     return myData.filter((r) => {
       if (monthFilter) {
-        const ym = r.date.substring(0, 7); // YYYY-MM
-        if (ym !== monthFilter) return false;
+        if (r.date.substring(0, 7) !== monthFilter) return false;
+      }
+      if (weekFilter && weeks.length > 0) {
+        const w = weeks[parseInt(weekFilter) - 1];
+        if (w) {
+          const d = parseISO(r.date);
+          if (d < w.start || d > w.end) return false;
+        }
       }
       if (search) {
         const s = search.toLowerCase();
@@ -30,20 +55,13 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
       }
       return true;
     });
-  }, [myData, search, monthFilter]);
+  }, [myData, search, monthFilter, weekFilter, weeks]);
 
   const handleDelete = (id: string, date: string) => {
     if (confirm(`Eliminare il report del ${format(parseISO(date), 'dd/MM/yyyy')}?`)) {
       deleteDailyData.mutate(id);
     }
   };
-
-  // Get unique months from data
-  const months = useMemo(() => {
-    if (!myData) return [];
-    const set = new Set(myData.map((r) => r.date.substring(0, 7)));
-    return Array.from(set).sort().reverse();
-  }, [myData]);
 
   return (
     <div className="px-6 pb-8 animate-fade-in">
@@ -55,13 +73,13 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
             placeholder="Cerca per data o note..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 rounded-full bg-background"
+            className="pl-9 rounded-full bg-card border-0"
           />
         </div>
         <select
           value={monthFilter}
-          onChange={(e) => setMonthFilter(e.target.value)}
-          className="h-10 rounded-full border border-border bg-background px-4 text-sm text-foreground"
+          onChange={(e) => { setMonthFilter(e.target.value); setWeekFilter(''); }}
+          className="h-10 rounded-full border-0 bg-card px-4 text-sm text-foreground"
         >
           <option value="">Tutti i mesi</option>
           {months.map((m) => (
@@ -70,6 +88,20 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
             </option>
           ))}
         </select>
+        {monthFilter && weeks.length > 0 && (
+          <select
+            value={weekFilter}
+            onChange={(e) => setWeekFilter(e.target.value)}
+            className="h-10 rounded-full border-0 bg-card px-4 text-sm text-foreground"
+          >
+            <option value="">Tutte le settimane</option>
+            {weeks.map((w) => (
+              <option key={w.value} value={w.value}>
+                {w.label} ({format(w.start, 'dd/MM')} - {format(w.end, 'dd/MM')})
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* List */}
@@ -86,17 +118,14 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
             return (
               <div
                 key={r.id}
-                className="flex items-center gap-3 bg-card border border-border rounded-2xl px-4 py-3 group hover:bg-muted/30 transition-colors"
+                className="flex items-center gap-3 bg-card rounded-2xl px-4 py-3 group hover:bg-muted/30 transition-colors"
               >
-                {/* Date */}
                 <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-muted flex flex-col items-center justify-center">
                   <span className="text-lg font-bold leading-none">{format(d, 'dd')}</span>
                   <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
                     {format(d, 'MMM', { locale: it })}
                   </span>
                 </div>
-
-                {/* Summary */}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">
                     {format(d, 'EEEE', { locale: it }).charAt(0).toUpperCase() + format(d, 'EEEE', { locale: it }).slice(1)}
@@ -113,8 +142,6 @@ const ReportListTab = ({ onEditReport }: ReportListTabProps) => {
                     <p className="text-xs text-muted-foreground/70 truncate mt-0.5">{r.notes}</p>
                   )}
                 </div>
-
-                {/* Actions */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => onEditReport(r.date)}
