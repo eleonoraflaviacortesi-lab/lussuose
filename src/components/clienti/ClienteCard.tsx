@@ -344,9 +344,9 @@ export const ClienteCard = memo(({
 
       {/* Notes preview */}
       {cliente.note_extra && (
-        <div className="text-xs opacity-70 mb-1.5 line-clamp-2 whitespace-pre-line break-words">
+        <p className="text-xs opacity-70 mb-1.5 line-clamp-2 whitespace-pre-line break-words">
           {cliente.note_extra}
-        </div>
+        </p>
       )}
 
       {/* Regions */}
