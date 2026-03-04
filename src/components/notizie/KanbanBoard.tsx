@@ -575,7 +575,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               <div
                 ref={columnProvided.innerRef}
                 {...columnProvided.draggableProps}
-                className={cn("flex flex-col relative flex-shrink-0 mx-[5px] my-[10px]",
+                className={cn("flex flex-col relative flex-shrink-0 mx-[5px] my-[5px]",
 
                 columnSnapshot.isDragging && "z-50"
                 )}
