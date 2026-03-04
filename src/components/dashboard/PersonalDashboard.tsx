@@ -150,7 +150,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <button
         key={w.label}
         onClick={() => setSelectedKPI(w.kpiKey)}
-        className="bg-card rounded-3xl border border-border p-3 md:p-5 text-left transition-all active:scale-[0.97] cursor-pointer hover:border-foreground/20"
+        className="bg-card rounded-3xl border border-border p-2.5 sm:p-3 md:p-5 text-left transition-all active:scale-[0.97] cursor-pointer hover:border-foreground/20"
       >
         <div className="flex items-center justify-between mb-2 md:mb-3">
           <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
@@ -179,22 +179,28 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
   };
 
   return (
-    <div className="pb-8 space-y-6 animate-fade-in">
+    <div className="pb-6 sm:pb-8 space-y-4 sm:space-y-6 animate-fade-in">
 
       {/* Ciclo Produttivo CTA */}
-      <div className="flex justify-center">
+      <div className="flex items-center justify-center">
         <button
           onClick={() => navigate('/inserisci')}
-          className={`flex items-center gap-2.5 px-6 py-3 rounded-full text-sm font-semibold tracking-widest transition-all active:scale-95 ${
+          className={`inline-flex h-11 items-center justify-center gap-2.5 px-6 rounded-full text-sm font-semibold leading-none tracking-widest transition-all active:scale-95 ${
             hasReportedToday
               ? 'bg-muted text-muted-foreground'
               : 'bg-foreground text-background'
           }`}
         >
           {hasReportedToday ? (
-            <><Check className="w-4 h-4" /> FATTO</>
+            <>
+              <Check className="w-4 h-4 shrink-0" />
+              <span className="leading-none">FATTO</span>
+            </>
           ) : (
-            <><Plus className="w-4 h-4" /> CICLO PRODUTTIVO</>
+            <>
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="leading-none">CICLO PRODUTTIVO</span>
+            </>
           )}
         </button>
       </div>
@@ -203,14 +209,14 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <WeeklyGoalsWidget />
 
       {/* Main Grid: Reminders + Annual Progress */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {/* Left: Today Reminders (2 cols) */}
         <div className="md:col-span-2 [&>div]:h-full">
           <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onGoToCalendar={onGoToCalendar} />
         </div>
 
         {/* Right: Incarichi del Mese (circular) */}
-        <div className="bg-card rounded-3xl border border-border p-6 flex flex-col items-center justify-center gap-3">
+        <div className="bg-card rounded-3xl border border-border p-4 sm:p-6 flex flex-col items-center justify-center gap-3">
           <p className="text-xs font-semibold tracking-[0.2em] uppercase text-muted-foreground">Incarichi del Mese</p>
           <CircularProgress percent={incarichiMesePercent} />
           <div className="text-center">
@@ -226,12 +232,12 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       </div>
 
       {/* KPI Row 1 */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {kpiRow1.map(renderKPICard)}
       </div>
 
       {/* KPI Row 2 */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
         {kpiRow2.map(renderKPICard)}
       </div>
 
@@ -239,16 +245,16 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia }: PersonalDashboardP
       <AcquisitionChart />
 
       {/* Volume cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-foreground text-background rounded-3xl p-6 flex flex-col justify-between">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-foreground text-background rounded-3xl p-4 sm:p-6 flex flex-col justify-between">
           <p className="text-[10px] font-medium tracking-[0.2em] uppercase opacity-60 mb-3">VOLUME GENERATO</p>
           <p className="text-3xl font-bold">{formatCompactCurrency(fatturato)}</p>
         </div>
-        <div className="bg-foreground text-background rounded-3xl p-6 flex flex-col justify-between">
+        <div className="bg-foreground text-background rounded-3xl p-4 sm:p-6 flex flex-col justify-between">
           <p className="text-[10px] font-medium tracking-[0.2em] uppercase opacity-60 mb-3">VOLUME A CREDITO</p>
           <p className="text-3xl font-bold">{formatCompactCurrency(fatturatoCredito)}</p>
         </div>
-        <div className="bg-card rounded-3xl border border-border p-6">
+        <div className="bg-card rounded-3xl border border-border p-4 sm:p-6">
           <div className="flex items-center gap-2 mb-3">
             <Gift className="w-4 h-4 text-foreground" />
             <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-muted-foreground">INCARICHI TEAM</p>
