@@ -567,7 +567,7 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               }
             }}
             {...provided.droppableProps}
-            className="flex gap-3 pb-3 overflow-x-auto w-full min-w-0 max-w-full lg:gap-3">
+            className="flex gap-3 pb-3 overflow-x-auto w-full min-w-0 max-w-full lg:gap-3 mx-0">
             
               {columns.map((column, columnIndex) =>
             <Draggable key={column.id} draggableId={`column-${column.id}`} index={columnIndex}>
@@ -575,9 +575,9 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
               <div
                 ref={columnProvided.innerRef}
                 {...columnProvided.draggableProps}
-                className={cn(
-                  "flex flex-col relative flex-shrink-0",
-                  columnSnapshot.isDragging && "z-50"
+                className={cn("flex flex-col relative flex-shrink-0 mx-[5px] my-[10px]",
+
+                columnSnapshot.isDragging && "z-50"
                 )}
                 style={{ width: adaptiveColumnWidth, minWidth: adaptiveColumnWidth, maxWidth: adaptiveColumnWidth }}>
                 
