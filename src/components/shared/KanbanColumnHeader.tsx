@@ -84,7 +84,10 @@ export const KanbanColumnHeader = memo(({
         )}
         style={{
           backgroundColor: column.color,
-          color: isDarkColor(column.color) ? 'white' : 'black'
+          color: isDarkColor(column.color) ? 'white' : 'black',
+          textTransform: 'none',
+          letterSpacing: 'normal',
+          fontSize: '12px',
         }}
         title={isProtected ? "Colonna protetta" : "Clicca per modificare nome"}>
         
