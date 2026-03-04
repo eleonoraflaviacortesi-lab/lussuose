@@ -95,8 +95,13 @@ const CurrencyField = ({
   </div>;
 
 
-const ReportForm = () => {
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+interface ReportFormProps {
+  initialDate?: string | null;
+  onDateUsed?: () => void;
+}
+
+const ReportForm = ({ initialDate, onDateUsed }: ReportFormProps = {}) => {
+  const [date, setDate] = useState(initialDate || new Date().toISOString().split('T')[0]);
   const [formData, setFormData] = useState<ReportFormData>({
     contatti_reali: 0,
     notizie_reali: 0,
@@ -127,6 +132,14 @@ const ReportForm = () => {
   }), [settings]);
 
   // Load existing data for selected date
+  // Handle initialDate prop from edit
+  useEffect(() => {
+    if (initialDate) {
+      setDate(initialDate);
+      onDateUsed?.();
+    }
+  }, [initialDate]);
+
   useEffect(() => {
     if (myData) {
       const existingEntry = myData.find((entry) => entry.date === date);
@@ -190,7 +203,7 @@ const ReportForm = () => {
     <div className="px-6 pb-8 animate-fade-in">
       {/* Header with Date Picker */}
       <div className="flex items-center justify-center mb-6">
-        <label className="inline-flex items-center gap-2.5 bg-muted/60 border border-border rounded-full px-5 py-2 cursor-pointer hover:bg-muted transition-colors">
+        <label className="inline-flex items-center gap-2.5 bg-background border border-border rounded-full px-5 py-2 cursor-pointer hover:bg-muted/50 transition-colors shadow-sm">
           <Calendar className="w-4 h-4 text-muted-foreground" />
           <span className="text-sm font-medium tracking-wide text-foreground">
             {new Date(date + 'T00:00:00').toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })}

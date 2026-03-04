@@ -27,7 +27,7 @@ const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
 const SedeTargetsPage = lazy(() => import('@/components/settings/SedeTargetsPage'));
 const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
-const ReportForm = lazy(() => import('@/components/dashboard/ReportForm'));
+const ReportForm = lazy(() => import('@/components/dashboard/ReportPage'));
 
 // Dialog components for "+ New" actions
 const AddNotiziaDialog = lazy(() => import('@/components/notizie/AddNotiziaDialog'));
