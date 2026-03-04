@@ -335,7 +335,7 @@ export const ClienteCard = memo(({
           {cliente.emoji}
         </span>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm whitespace-normal break-words" style={titleStyle(getTitleFormat((cliente as any).custom_fields))}>{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
+          <h4 className="text-sm whitespace-normal break-words" style={{ textTransform: 'none', letterSpacing: 'normal', fontSize: '14px', ...titleStyle(getTitleFormat((cliente as any).custom_fields)) }}>{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
           {cliente.paese && (
             <span className="text-xs opacity-70">{cliente.paese}</span>
           )}
