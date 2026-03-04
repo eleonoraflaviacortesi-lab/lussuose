@@ -2,14 +2,14 @@ import { useBannerSettings } from '@/hooks/useBannerSettings';
 import { useKPIs } from '@/hooks/useKPIs';
 
 const formatCurrency = (n: number) =>
-  n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-function Star8({ className = '' }: { className?: string }) {
+function Star8({ className = '' }: {className?: string;}) {
   return (
     <svg viewBox="0 0 24 24" className={className} fill="currentColor">
       <path d="M12 0 L14.1 8.5 L21.6 4.4 L16.5 11 L24 12 L16.5 13 L21.6 19.6 L14.1 15.5 L12 24 L9.9 15.5 L2.4 19.6 L7.5 13 L0 12 L7.5 11 L2.4 4.4 L9.9 8.5 Z" />
-    </svg>
-  );
+    </svg>);
+
 }
 
 function StarSep() {
@@ -33,14 +33,14 @@ export default function AnnouncementBanner() {
   const incarichiTarget = monthKpis?.incarichi?.target || 0;
 
   const interpolate = (t: string) =>
-    t
-      .replace(/\{remaining\}/g, formatCurrency(remaining))
-      .replace(/\{target\}/g, formatCurrency(target))
-      .replace(/\{fatturatoCredito\}/g, formatCurrency(fatturatoCredito));
+  t.
+  replace(/\{remaining\}/g, formatCurrency(remaining)).
+  replace(/\{target\}/g, formatCurrency(target)).
+  replace(/\{fatturatoCredito\}/g, formatCurrency(fatturatoCredito));
 
-  const texts = [settings.text1, settings.text2, settings.text3, settings.text4]
-    .filter(Boolean)
-    .map(interpolate);
+  const texts = [settings.text1, settings.text2, settings.text3, settings.text4].
+  filter(Boolean).
+  map(interpolate);
 
   texts.push(`Vendite ${venditeValue}/${venditeTarget}`);
   texts.push(`Incarichi mese ${incarichiValue}/${incarichiTarget}`);
@@ -56,9 +56,9 @@ export default function AnnouncementBanner() {
         backgroundColor: settings.bgColor,
         color: settings.textColor,
         paddingTop: 'env(safe-area-inset-top, 0px)',
-        height: 'calc(var(--banner-height, 34px) + env(safe-area-inset-top, 0px))',
-      }}
-    >
+        height: 'calc(var(--banner-height, 34px) + env(safe-area-inset-top, 0px))'
+      }}>
+      
       <div
         className="flex items-center whitespace-nowrap h-full animate-ticker"
         style={{
@@ -66,21 +66,21 @@ export default function AnnouncementBanner() {
           fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif',
           fontSize: '11px',
           fontWeight: 600,
-          letterSpacing: '0.15em',
-        }}
-      >
-        {[0, 1].map((dup) => (
-          <span key={dup} className="flex items-center px-4 uppercase">
-            {texts.map((t, i) => (
-              <span key={i} className="flex items-center">
+          letterSpacing: '0.15em'
+        }}>
+        
+        {[0, 1].map((dup) =>
+        <span key={dup} className="flex items-center px-4 uppercase">
+            {texts.map((t, i) =>
+          <span key={i} className="flex items-center">
                 {i > 0 && <StarSep />}
-                <span>{t}</span>
+                <span className="text-sm">{t}</span>
               </span>
-            ))}
+          )}
             <StarSep />
           </span>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
