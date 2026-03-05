@@ -260,6 +260,10 @@ export default function AppLayout() {
     navigate('/contacts');
   }, [navigate]);
 
+  const handleGoToCalendarWithEntity = useCallback((entityType?: 'notizia' | 'cliente', entityId?: string) => {
+    navigate('/activities', { state: entityType && entityId ? { openEntityType: entityType, openEntityId: entityId } : undefined });
+  }, [navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -273,7 +277,7 @@ export default function AppLayout() {
   const renderContent = () => {
     switch (section) {
       case 'dashboard':
-        return <PersonalDashboard onGoToCalendar={() => navigate('/activities')} onOpenCliente={handleOpenCliente} />;
+        return <PersonalDashboard onGoToCalendar={() => navigate('/activities')} onOpenNotizia={(notizia) => handleGoToCalendarWithEntity('notizia', notizia.id)} onOpenCliente={(clienteId) => handleGoToCalendarWithEntity('cliente', clienteId)} />;
       case 'properties':
         return <NotiziePage />;
       case 'contacts':
