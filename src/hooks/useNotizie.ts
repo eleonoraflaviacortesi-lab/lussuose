@@ -79,7 +79,7 @@ export const useNotizie = () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('notizie')
-        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online,prezzo_richiesto,valore,rating')
+        .select('id,name,zona,phone,type,notes,status,emoji,created_at,updated_at,user_id,reminder_date,comments,card_color,display_order,is_online,prezzo_richiesto,valore,rating,custom_fields')
         .eq('user_id', user.id) // Only user's own notizie
         .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
