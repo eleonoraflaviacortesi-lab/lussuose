@@ -167,7 +167,7 @@ export function ClienteDetail({
       "fixed bottom-0 z-[55] flex flex-col bg-background",
       fullScreen
         ? "right-0"
-        : "inset-x-0 rounded-l-2xl border border-border md:left-[var(--sidebar-width,16rem)] animate-in slide-in-from-bottom duration-300",
+        : "left-0 right-0 md:left-auto md:right-0 md:w-[min(680px,calc(100vw-var(--sidebar-width,16rem)))] rounded-l-2xl border border-border animate-in slide-in-from-bottom duration-300",
     )} style={fullScreen ? { top: panelTop, left: panelLeft } : { top: panelTop }}>
       <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
