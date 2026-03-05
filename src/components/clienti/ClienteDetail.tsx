@@ -6,6 +6,7 @@ import { MergeClienteDialog } from './MergeClienteDialog';
 import { Cliente } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/components/ui/sidebar';
 import MentionInput from '@/components/ui/mention-input';
 import { useMentionNotifications } from '@/hooks/useMentionNotifications';
 import { Badge } from '@/components/ui/badge';
@@ -101,6 +102,7 @@ export function ClienteDetail({
 }: ClienteDetailProps) {
   const [newComment, setNewComment] = useState('');
   const { sendMentionNotifications } = useMentionNotifications();
+  const { state: sidebarState, isMobile } = useSidebar();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [mergeOpen, setMergeOpen] = useState(false);
   const [mergeTallyOnly, setMergeTallyOnly] = useState(false);
@@ -154,6 +156,8 @@ export function ClienteDetail({
   };
 
   const assignedAgent = agents.find(a => a.user_id === cliente.assigned_to);
+  const panelTop = 'calc(var(--total-banner-height, 28px) + 3.5rem)';
+  const panelLeft = isMobile ? '0px' : sidebarState === 'expanded' ? '18rem' : '3.5rem';
 
   if (!open) return null;
 
@@ -162,9 +166,9 @@ export function ClienteDetail({
     <div className={cn(
       "fixed bottom-0 z-[55] flex flex-col bg-background",
       fullScreen
-        ? "inset-x-0 md:left-[var(--sidebar-width,16rem)]"
+        ? "right-0"
         : "inset-x-0 rounded-l-2xl border border-border md:left-[var(--sidebar-width,16rem)] animate-in slide-in-from-bottom duration-300",
-    )} style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}>
+    )} style={fullScreen ? { top: panelTop, left: panelLeft } : { top: panelTop }}>
       <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
             <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
