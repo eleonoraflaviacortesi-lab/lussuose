@@ -270,8 +270,8 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
       {/* Full-page side-peek panel — same style as ClienteDetail */}
       <div
         className={cn(
-          "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background rounded-l-2xl border border-border md:left-[var(--sidebar-width,16rem)]",
-          "animate-in slide-in-from-bottom duration-300"
+          "fixed bottom-0 z-[55] flex flex-col bg-background rounded-l-2xl border border-border",
+          "left-0 right-0 md:left-auto md:right-0 md:w-[min(680px,calc(100vw-var(--sidebar-width,16rem)))]",
         )}
         style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}>
         
