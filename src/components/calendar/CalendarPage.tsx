@@ -2,6 +2,7 @@ import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star, MoreHorizontal, User, FileText, Pencil } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import CommentPopover from './CommentPopover';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
@@ -411,6 +412,7 @@ EventContextMenu.displayName = 'EventContextMenu';
 
 const CalendarPage = () => {
   const isMobile = useIsMobile();
+  const location = useLocation();
   const [viewMode, setViewMode] = useState<CalendarViewMode>('day');
   const [currentWeekStart, setCurrentWeekStart] = useState(() => new Date());
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -461,6 +463,23 @@ const CalendarPage = () => {
   const { columns } = useKanbanColumns();
   const { profiles } = useProfiles();
   const { user } = useAuth();
+
+  // Auto-open entity detail from navigation state (e.g. from dashboard widget)
+  useEffect(() => {
+    const state = location.state as { openEntityType?: string; openEntityId?: string } | null;
+    if (!state?.openEntityType || !state?.openEntityId) return;
+    if (loadingNotizie || loadingClienti) return;
+
+    if (state.openEntityType === 'notizia') {
+      const notizia = notizie?.find((n) => n.id === state.openEntityId);
+      if (notizia) setSelectedNotizia(notizia);
+    } else if (state.openEntityType === 'cliente') {
+      const cliente = clienti?.find((c) => c.id === state.openEntityId);
+      if (cliente) setSelectedCliente(cliente);
+    }
+    // Clear state to prevent re-opening on re-render
+    window.history.replaceState({}, '');
+  }, [location.state, notizie, clienti, loadingNotizie, loadingClienti]);
 
 
   // Helper to get status color from columns
