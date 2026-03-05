@@ -322,104 +322,106 @@ export const ClienteCard = memo(({
   };
 
   return (
-    <EntityCardWrapper
-      cardColor={cliente.card_color}
-      isDragging={isDragging}
-      onClick={handleCardClick}
-      onContextAction={handleContextAction}
-      className={cn("relative p-3", !cliente.card_color && "bg-card", textColor)}
-    >
-      {/* Header with emoji and name */}
-      <div className="flex items-start gap-2 mb-2">
-        <span className="text-xl flex-shrink-0">
-          {cliente.emoji}
-        </span>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-sm whitespace-normal break-words" style={{ textTransform: 'none', letterSpacing: 'normal', fontSize: '14px', ...titleStyle(getTitleFormat((cliente as any).custom_fields)) }}>{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
-          {cliente.paese && (
-            <span className="text-xs opacity-70">{cliente.paese}</span>
-          )}
-        </div>
-      </div>
-
-      {/* Notes preview */}
-      {cliente.note_extra && (
-        <p className="text-xs opacity-70 mb-1.5 line-clamp-2 whitespace-pre-line break-words">
-          {cliente.note_extra}
-        </p>
-      )}
-
-      {/* Regions */}
-      {cliente.regioni.length > 0 && (
-        <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
-          <MapPin className="w-3 h-3 flex-shrink-0" />
-          <span className="truncate">{cliente.regioni.join(', ')}</span>
-        </div>
-      )}
-
-      {/* Budget */}
-      {cliente.budget_max && (
-        <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
-          <Euro className="w-3 h-3 flex-shrink-0" />
-          <span>{formatBudget(cliente.budget_max)} max</span>
-        </div>
-      )}
-
-      {/* Property types */}
-      {cliente.tipologia.length > 0 && (
-        <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
-          <Home className="w-3 h-3 flex-shrink-0" />
-          <span className="truncate">{cliente.tipologia.join(', ')}</span>
-        </div>
-      )}
-
-      {/* Footer: Agent + Urgency + Reminder */}
-      <div className="flex items-center justify-between mt-2 pt-2 flex-wrap gap-1">
-        {showAgent && (
-          <div className="flex items-center gap-1.5 text-xs opacity-70">
-            {agentEmoji ? (
-              <span className="text-base">{agentEmoji}</span>
-            ) : (
-              <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[10px]">?</span>
+    <>
+      <EntityCardWrapper
+        cardColor={cliente.card_color}
+        isDragging={isDragging}
+        onClick={handleCardClick}
+        onContextAction={handleContextAction}
+        className={cn("relative p-3", !cliente.card_color && "bg-card", textColor)}
+      >
+        {/* Header with emoji and name */}
+        <div className="flex items-start gap-2 mb-2">
+          <span className="text-xl flex-shrink-0">
+            {cliente.emoji}
+          </span>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-sm whitespace-normal break-words" style={{ textTransform: 'none', letterSpacing: 'normal', fontSize: '14px', ...titleStyle(getTitleFormat((cliente as any).custom_fields)) }}>{[cliente.nome, cliente.cognome].filter(Boolean).join(' ')}</h4>
+            {cliente.paese && (
+              <span className="text-xs opacity-70">{cliente.paese}</span>
             )}
-            <span className="truncate max-w-[80px]">
-              {agentName || 'Non assegnato'}
-            </span>
+          </div>
+        </div>
+
+        {/* Notes preview */}
+        {cliente.note_extra && (
+          <p className="text-xs opacity-70 mb-1.5 line-clamp-2 whitespace-pre-line break-words">
+            {cliente.note_extra}
+          </p>
+        )}
+
+        {/* Regions */}
+        {cliente.regioni.length > 0 && (
+          <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
+            <MapPin className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{cliente.regioni.join(', ')}</span>
           </div>
         )}
-        <div className="flex items-center gap-2">
-          {reminderStatus && (
-            <div className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              reminderStatus === 'overdue' ? 'text-destructive' : 
-              reminderStatus === 'today' ? 'text-primary' : 'text-amber-600'
-            )}>
-              <Bell className="w-3 h-3" />
-              <span>
-                {reminderStatus === 'overdue' ? 'Scaduto' : 
-                 reminderStatus === 'today' ? 'Oggi' : 'Domani'}
+
+        {/* Budget */}
+        {cliente.budget_max && (
+          <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
+            <Euro className="w-3 h-3 flex-shrink-0" />
+            <span>{formatBudget(cliente.budget_max)} max</span>
+          </div>
+        )}
+
+        {/* Property types */}
+        {cliente.tipologia.length > 0 && (
+          <div className="flex items-center gap-1 text-xs mb-1.5 opacity-80">
+            <Home className="w-3 h-3 flex-shrink-0" />
+            <span className="truncate">{cliente.tipologia.join(', ')}</span>
+          </div>
+        )}
+
+        {/* Footer: Agent + Urgency + Reminder */}
+        <div className="flex items-center justify-between mt-2 pt-2 flex-wrap gap-1">
+          {showAgent && (
+            <div className="flex items-center gap-1.5 text-xs opacity-70">
+              {agentEmoji ? (
+                <span className="text-base">{agentEmoji}</span>
+              ) : (
+                <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[10px]">?</span>
+              )}
+              <span className="truncate max-w-[80px]">
+                {agentName || 'Non assegnato'}
               </span>
             </div>
           )}
-          {urgent && (
-            <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
-              <Clock className="w-3 h-3" />
-              <span>Urgente</span>
-            </div>
-          )}
-          {daysSinceContact !== null && daysSinceContact > 14 && (
-            <div className={cn(
-              "flex items-center gap-1 text-xs font-medium",
-              daysSinceContact > 30 ? 'text-destructive' : 'text-amber-600'
-            )}>
-              <AlertCircle className="w-3 h-3" />
-              <span>{daysSinceContact}g</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {reminderStatus && (
+              <div className={cn(
+                "flex items-center gap-1 text-xs font-medium",
+                reminderStatus === 'overdue' ? 'text-destructive' : 
+                reminderStatus === 'today' ? 'text-primary' : 'text-amber-600'
+              )}>
+                <Bell className="w-3 h-3" />
+                <span>
+                  {reminderStatus === 'overdue' ? 'Scaduto' : 
+                   reminderStatus === 'today' ? 'Oggi' : 'Domani'}
+                </span>
+              </div>
+            )}
+            {urgent && (
+              <div className="flex items-center gap-1 text-xs text-amber-600 font-medium">
+                <Clock className="w-3 h-3" />
+                <span>Urgente</span>
+              </div>
+            )}
+            {daysSinceContact !== null && daysSinceContact > 14 && (
+              <div className={cn(
+                "flex items-center gap-1 text-xs font-medium",
+                daysSinceContact > 30 ? 'text-destructive' : 'text-amber-600'
+              )}>
+                <AlertCircle className="w-3 h-3" />
+                <span>{daysSinceContact}g</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </EntityCardWrapper>
 
-      {/* Context menu picker */}
+      {/* Context menu picker - rendered OUTSIDE EntityCardWrapper to avoid transform clipping */}
       {pickerOpen && onColorChange && onStatusChange && (
         <ColorStatusPickerPill
           position={pickerPos}
@@ -436,7 +438,7 @@ export const ClienteCard = memo(({
           onClose={() => setPickerOpen(false)}
         />
       )}
-    </EntityCardWrapper>
+    </>
   );
 });
 
