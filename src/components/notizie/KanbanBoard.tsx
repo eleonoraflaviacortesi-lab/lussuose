@@ -1,4 +1,5 @@
 import { memo, useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { Notizia, NotiziaStatus, useNotizie } from '@/hooks/useNotizie';
 import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/useKanbanColumns';
@@ -379,7 +380,7 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
         </div>
       </EntityCardWrapper>
 
-      {pickerOpen &&
+      {pickerOpen && createPortal(
       <ColorStatusPickerPill
         position={pickerPos}
         currentColor={notizia.card_color}
@@ -392,18 +393,18 @@ const Card = memo(({ notizia, columns, onClick, onColorChange, onEmojiChange, on
         onEmojiSelect={onEmojiChange}
         onTitleFormatChange={onTitleFormatChange}
         onDelete={onDelete}
-        onClose={() => setPickerOpen(false)} />
+        onClose={() => setPickerOpen(false)} />,
+      document.body
+      )}
 
-      }
-
-      {emojiPickerOpen &&
+      {emojiPickerOpen && createPortal(
       <EmojiPickerPill
         position={pickerPos}
         currentEmoji={notizia.emoji}
         onSelect={onEmojiChange}
-        onClose={() => setEmojiPickerOpen(false)} />
-
-      }
+        onClose={() => setEmojiPickerOpen(false)} />,
+      document.body
+      )}
     </>);
 
 });
