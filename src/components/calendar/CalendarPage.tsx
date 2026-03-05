@@ -465,10 +465,14 @@ const CalendarPage = () => {
   const { user } = useAuth();
 
   // Auto-open entity detail from navigation state (e.g. from dashboard widget)
+  const handledNavStateRef = useRef<string | null>(null);
   useEffect(() => {
     const state = location.state as { openEntityType?: string; openEntityId?: string } | null;
     if (!state?.openEntityType || !state?.openEntityId) return;
     if (loadingNotizie || loadingClienti) return;
+    const stateKey = `${state.openEntityType}:${state.openEntityId}`;
+    if (handledNavStateRef.current === stateKey) return;
+    handledNavStateRef.current = stateKey;
 
     if (state.openEntityType === 'notizia') {
       const notizia = notizie?.find((n) => n.id === state.openEntityId);
@@ -477,7 +481,6 @@ const CalendarPage = () => {
       const cliente = clienti?.find((c) => c.id === state.openEntityId);
       if (cliente) setSelectedCliente(cliente);
     }
-    // Clear state to prevent re-opening on re-render
     window.history.replaceState({}, '');
   }, [location.state, notizie, clienti, loadingNotizie, loadingClienti]);
 
