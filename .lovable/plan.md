@@ -1,17 +1,34 @@
 
 
-## Plan: Grid layout on desktop + neutral color scheme for KPI widgets
+## Auto-update `last_contact_date` when suggesting a property
+
+### Problem
+When you suggest/send a property link to a buyer, the buyer's `last_contact_date` doesn't update. This means the "freshness" badge on cards (amber after 14 days, red after 30) stays stale even though you just interacted with that client.
+
+### Solution
+Update `last_contact_date` on the `clienti` record automatically whenever a property is toggled as "suggested" (i.e., sent to the buyer). This is a single-line addition.
 
 ### Changes
 
-**`src/components/dashboard/KPISummaryWidgets.tsx`**
-- Change grid from `grid-cols-2` to `grid-cols-2 md:grid-cols-3` so desktop shows 3 per row (6 widgets = 2 rows of 3)
-- Remove all custom color classes (`widget-peach`, `widget-mint`, etc.) and replace with standard card styling: `bg-card text-card-foreground` with `border border-border`
-- Progress bar uses `bg-muted` track and `bg-foreground` fill instead of colored variants
+**1. `src/hooks/useProperties.ts` — `toggleSuggestedMutation`**
 
-**`src/index.css`** (optional cleanup)
-- Remove the widget color CSS variables (`--widget-peach`, `--widget-mint`, etc.) since they're no longer used
+After the `client_property_matches` update succeeds (line ~162), also update the parent `clienti` row:
 
-### Result
-Widgets will display in a clean white/black/grey palette matching the existing design language, and on desktop they'll show 3 across instead of 2.
+```ts
+// After updating the match row, update client's last_contact_date
+if (suggested) {
+  await supabase
+    .from('clienti')
+    .update({ last_contact_date: new Date().toISOString() })
+    .eq('id', clienteId);
+}
+```
+
+This reuses the exact same pattern already in `useClienteActivities.ts` (line 85-88) for call/email/visit activities.
+
+### What this achieves
+- The freshness badge on the Kanban card resets when you suggest a property
+- The "Data Contatto" column in the spreadsheet view updates automatically
+- The `ClienteReminder` widget in the detail panel reflects the latest interaction
+- No database migration needed — the `last_contact_date` column already exists
 
