@@ -163,8 +163,7 @@ export function ClienteDetail({
       "fixed bottom-0 z-[55] flex flex-col bg-background",
       fullScreen
         ? "inset-x-0 md:left-[var(--sidebar-width,16rem)]"
-        : "inset-x-0 rounded-l-2xl border border-border md:left-[var(--sidebar-width,16rem)]",
-      "animate-in slide-in-from-bottom duration-300"
+        : "inset-x-0 rounded-l-2xl border border-border md:left-[var(--sidebar-width,16rem)] animate-in slide-in-from-bottom duration-300",
     )} style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}>
       <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
           <div className="flex items-center gap-3">
