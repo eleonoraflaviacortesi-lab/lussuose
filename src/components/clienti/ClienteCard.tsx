@@ -1,4 +1,5 @@
 import { memo, useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Cliente, ClienteStatus } from '@/types';
 import { cn, isDarkColor } from '@/lib/utils';
 import { MapPin, Euro, Home, Clock, Bell, X, AlertCircle, Star, Trash2 } from 'lucide-react';
@@ -422,7 +423,7 @@ export const ClienteCard = memo(({
       </EntityCardWrapper>
 
       {/* Context menu picker - rendered OUTSIDE EntityCardWrapper to avoid transform clipping */}
-      {pickerOpen && onColorChange && onStatusChange && (
+      {pickerOpen && onColorChange && onStatusChange && createPortal(
         <ColorStatusPickerPill
           position={pickerPos}
           currentColor={cliente.card_color}
@@ -436,7 +437,8 @@ export const ClienteCard = memo(({
           onTitleFormatChange={onTitleFormatChange}
           onDelete={onDelete}
           onClose={() => setPickerOpen(false)}
-        />
+        />,
+        document.body
       )}
     </>
   );
