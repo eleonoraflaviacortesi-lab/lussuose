@@ -1,11 +1,12 @@
 import { memo } from 'react';
-import { Bold, Italic, Underline } from 'lucide-react';
+import { Bold, Italic, Underline, Strikethrough } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface TitleFormat {
   bold?: boolean;
   italic?: boolean;
   underline?: boolean;
+  strikethrough?: boolean;
   color?: string | null;
 }
 
@@ -53,6 +54,16 @@ export const TitleFormatControls = memo(({ format, onChange }: TitleFormatContro
         >
           <Underline className="w-3.5 h-3.5" />
         </button>
+        <button
+          onClick={() => onChange({ ...format, strikethrough: !format.strikethrough })}
+          className={cn(
+            "w-7 h-7 rounded-md flex items-center justify-center transition-all active:scale-90 border",
+            format.strikethrough ? "bg-foreground text-background border-foreground" : "bg-card border-border hover:bg-muted"
+          )}
+          title="Barrato"
+        >
+          <Strikethrough className="w-3.5 h-3.5" />
+        </button>
         
         <div className="w-px h-5 bg-border mx-0.5" />
         
@@ -82,6 +93,7 @@ export function getTitleFormat(customFields: any): TitleFormat {
     bold: customFields.title_bold || false,
     italic: customFields.title_italic || false,
     underline: customFields.title_underline || false,
+    strikethrough: customFields.title_strikethrough || false,
     color: customFields.title_color || null,
   };
 }
@@ -91,15 +103,20 @@ export function titleFormatToCustomFields(format: TitleFormat): Record<string, a
     title_bold: format.bold || false,
     title_italic: format.italic || false,
     title_underline: format.underline || false,
+    title_strikethrough: format.strikethrough || false,
     title_color: format.color || null,
   };
 }
 
 export function titleStyle(format: TitleFormat): React.CSSProperties {
+  const decorations: string[] = [];
+  if (format.underline) decorations.push('underline');
+  if (format.strikethrough) decorations.push('line-through');
+  
   return {
     fontWeight: format.bold ? 700 : undefined,
     fontStyle: format.italic ? 'italic' : undefined,
-    textDecoration: format.underline ? 'underline' : undefined,
+    textDecoration: decorations.length > 0 ? decorations.join(' ') : undefined,
     color: format.color || undefined,
   };
 }
