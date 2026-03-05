@@ -167,10 +167,20 @@ export function useClientPropertyMatches(clienteId: string | undefined) {
         .single();
 
       if (error) throw error;
+
+      // Auto-update last_contact_date when suggesting a property
+      if (suggested && clienteId) {
+        await supabase
+          .from('clienti')
+          .update({ last_contact_date: new Date().toISOString() })
+          .eq('id', clienteId);
+      }
+
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['property-matches', clienteId] });
+      queryClient.invalidateQueries({ queryKey: ['clienti'] });
     },
     onError: (error: any) => {
       toast({ 
