@@ -126,7 +126,7 @@ const EventContextMenu = memo(({
             {lastComment &&
           <div className="bg-muted/50 rounded-xl px-3 py-2 text-sm text-foreground mb-2 max-h-[60px] overflow-y-auto">
                 <p className="text-[10px] text-muted-foreground mb-0.5">
-                  {format(parseISO(lastComment.created_at), 'd MMM HH:mm', { locale: it })}
+                  {(lastComment.created_at || lastComment.createdAt) ? format(parseISO(lastComment.created_at || lastComment.createdAt), 'd MMM HH:mm', { locale: it }) : ''}
                 </p>
                 <p className="text-xs">{lastComment.text}</p>
               </div>
