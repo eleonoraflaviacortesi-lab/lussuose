@@ -464,7 +464,8 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
             await trackedUpdate(selectedCliente.id, updates);
           }
         }}
-        allClienti={clienti} />
+        allClienti={clienti}
+        fullScreen />
 
 
       {/* Add Dialog */}
