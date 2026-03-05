@@ -267,40 +267,31 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
 
   return (
     <Fragment>
-      {/* Backdrop overlay - transparent to keep content visible */}
-      <div
-        className="fixed inset-0 z-[54] bg-black/10 animate-in fade-in duration-200"
-        style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}
-        onClick={() => onOpenChange(false)} />
-      
-      {/* Side peek panel */}
+      {/* Full-page side-peek panel — same style as ClienteDetail */}
       <div
         className={cn(
-          "fixed right-0 bottom-0 z-[55] flex flex-col bg-background rounded-l-2xl border-0 shadow-[-8px_0_30px_rgba(0,0,0,0.08)]",
-          "animate-in slide-in-from-right duration-300",
-          "w-full sm:w-[480px] md:w-[520px]"
+          "fixed inset-x-0 bottom-0 z-[55] flex flex-col bg-background md:left-[var(--sidebar-width,16rem)]",
+          "animate-in slide-in-from-bottom duration-300"
         )}
         style={{ top: 'calc(var(--total-banner-height, 28px) + 3.5rem)' }}>
         
-        {/* Close button - fixed at top right of panel */}
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute right-8 top-4 z-10 text-muted-foreground active:scale-95 transition-transform">
-          
-          <X className="w-4 h-4" />
-        </button>
-        {/* Side peek scrollable content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="w-full pt-4 px-5 pb-10">
+        <div className="px-4 pt-4 pb-2 flex-shrink-0 pr-12">
+          <div className="flex items-center gap-3">
+            <button onClick={() => onOpenChange(false)} className="text-muted-foreground active:scale-95 transition-transform">
+              <X className="w-5 h-5" />
+            </button>
 
         {/* Saved indicator */}
         {showSaved &&
-            <div className="flex items-center justify-center gap-1 mb-4 text-xs text-success animate-in fade-in duration-200">
+            <div className="flex items-center gap-1 text-xs text-success animate-in fade-in duration-200">
             <Check className="w-3 h-3" />
             Salvato
           </div>
             }
+          </div>
+        </div>
 
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 pb-4">
         <div className="space-y-3 my-[5px]">
           {/* Emoji + Name row */}
           <div className="flex gap-2 mt-0 py-0">
@@ -733,7 +724,6 @@ const NotiziaDetail = ({ notizia, open, onOpenChange }: NotiziaDetailProps) => {
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </div>
         </div>
         </div>
       </div>
