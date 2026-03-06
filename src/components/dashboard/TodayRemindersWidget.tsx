@@ -25,6 +25,12 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
     return col?.color || '#6b7280';
   };
 
+  const calendarColors = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem('calendar_event_colors') || '{}') as Record<string, string>;
+    } catch { return {} as Record<string, string>; }
+  }, []);
+
   const todayReminders = useMemo(() => {
     const reminders: Array<{
       id: string;
@@ -33,6 +39,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
       time: string;
       emoji?: string | null;
       statusColor: string;
+      cardColor?: string;
       lastComment?: NotiziaComment;
       data: any;
     }> = [];
@@ -45,13 +52,15 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
           text: comments[comments.length - 1].text,
           created_at: comments[comments.length - 1].created_at || comments[comments.length - 1].createdAt || ''
         } : undefined;
+        const clienteEventId = `cliente-${cliente.id}`;
         reminders.push({
-          id: `cliente-${cliente.id}`,
+          id: clienteEventId,
           type: 'cliente',
           name: cliente.nome,
           time: format(parseISO(cliente.reminder_date), 'HH:mm'),
           emoji: cliente.emoji,
           statusColor: getStatusColor(cliente.status),
+          cardColor: calendarColors[clienteEventId],
           lastComment,
           data: cliente
         });
@@ -62,13 +71,15 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
       if (notizia.reminder_date && isSameDay(parseISO(notizia.reminder_date), today)) {
         const comments = notizia.comments || [];
         const lastComment = comments.length > 0 ? comments[comments.length - 1] : undefined;
+        const notiziaEventId = `notizia-${notizia.id}`;
         reminders.push({
-          id: `notizia-${notizia.id}`,
+          id: notiziaEventId,
           type: 'notizia',
           name: notizia.name,
           time: format(parseISO(notizia.reminder_date), 'HH:mm'),
           emoji: notizia.emoji,
           statusColor: getStatusColor(notizia.status),
+          cardColor: calendarColors[notiziaEventId],
           lastComment,
           data: notizia
         });
@@ -122,17 +133,21 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
         {todayReminders.slice(0, 5).map((reminder) => {
           const isBuyer = reminder.type === 'cliente';
 
+          const effectiveColor = reminder.cardColor || (isBuyer ? undefined : reminder.statusColor);
+          const hasCustomColor = !!effectiveColor;
+          const darkBg = hasCustomColor ? isDarkColor(effectiveColor!) : false;
+
           return (
             <button
               key={reminder.id}
               onClick={() => handleReminderClick(reminder)}
               className={cn(
                 "w-full flex items-center gap-3 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-2xl transition-all active:scale-[0.98] relative",
-                isBuyer
+                !hasCustomColor && isBuyer
                   ? "bg-background border border-foreground/10"
                   : ""
               )}
-              style={!isBuyer ? { backgroundColor: reminder.statusColor } : undefined}
+              style={hasCustomColor ? { backgroundColor: effectiveColor } : undefined}
             >
               {isBuyer && (
                 <div className="absolute -top-1.5 right-3 bg-foreground text-background text-[7px] font-bold px-1.5 py-0.5 rounded-full tracking-wider uppercase">
@@ -145,26 +160,26 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
               ) : (
                 <div className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center",
-                  isBuyer ? "bg-muted" : "bg-white/20"
+                  !hasCustomColor && isBuyer ? "bg-muted" : "bg-white/20"
                 )}>
-                  {isBuyer ? (
+                  {isBuyer && !hasCustomColor ? (
                     <User className="w-4 h-4 text-foreground" />
                   ) : (
-                    <FileText className={cn("w-4 h-4", isDarkColor(reminder.statusColor) ? "text-white" : "text-black")} />
+                    <FileText className={cn("w-4 h-4", darkBg ? "text-white" : "text-black")} />
                   )}
                 </div>
               )}
               <div className="flex-1 min-w-0 text-left">
                 <p className={cn(
                   "font-semibold text-sm truncate",
-                  isBuyer ? "text-foreground" : isDarkColor(reminder.statusColor) ? "text-white" : "text-black"
+                  !hasCustomColor && isBuyer ? "text-foreground" : darkBg ? "text-white" : "text-black"
                 )}>
                   {reminder.name}
                 </p>
                 {reminder.lastComment?.text && (
                   <p className={cn(
                     "text-[9px] truncate mt-0.5 opacity-80",
-                    isBuyer ? "text-muted-foreground" : isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60"
+                    !hasCustomColor && isBuyer ? "text-muted-foreground" : darkBg ? "text-white/70" : "text-black/60"
                   )}>
                     💬 {reminder.lastComment.text.replace(/<[^>]*>/g, '').trim()}
                     {reminder.lastComment.created_at && ` · ${format(parseISO(reminder.lastComment.created_at), 'd MMM', { locale: it })}`}
@@ -173,7 +188,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
               </div>
               <span className={cn(
                 "text-xs font-medium",
-                isBuyer ? "text-muted-foreground" : isDarkColor(reminder.statusColor) ? "text-white/70" : "text-black/60"
+                !hasCustomColor && isBuyer ? "text-muted-foreground" : darkBg ? "text-white/70" : "text-black/60"
               )}>
                 {reminder.time}
               </span>
