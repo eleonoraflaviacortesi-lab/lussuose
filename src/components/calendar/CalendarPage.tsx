@@ -629,8 +629,11 @@ const CalendarPage = () => {
         }
       });
 
-      // Sort: urgent first, then by displayOrder
+      // Sort: completed last, urgent first, then by displayOrder
       events.sort((a, b) => {
+        const aCompleted = !!(a.completed);
+        const bCompleted = !!(b.completed);
+        if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
         if (a.urgent && !b.urgent) return -1;
         if (!a.urgent && b.urgent) return 1;
         return (a.displayOrder || 0) - (b.displayOrder || 0);
