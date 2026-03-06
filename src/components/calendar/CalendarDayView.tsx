@@ -63,16 +63,16 @@ const CalendarDayView = ({
   };
 
   const getEventStyles = (event: CalendarEvent) => {
-    // Tasks - white card with black border by default, or custom color
+    // Tasks - light gray card, no border
     if (event.type === 'task') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       
       return {
-        bg: hasCustomColor ? '' : 'bg-white',
+        bg: hasCustomColor ? '' : 'bg-[#e8e8e8]',
         customBg: baseColor,
-        border: hasCustomColor ? (baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300') : 'border border-foreground',
+        border: 'border-transparent',
         label: 'Task',
         textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         showBuyerBadge: false,
@@ -81,12 +81,12 @@ const CalendarDayView = ({
       };
     }
     
-    // Buyers (cliente_reminder) - Minimal elegant: white card with black border
+    // Buyers (cliente_reminder) - no border
     if (event.type === 'cliente_reminder') {
       return {
-        bg: 'bg-white',
+        bg: 'bg-card',
         customBg: null,
-        border: 'border border-foreground',
+        border: 'border-transparent',
         label: 'Buyer',
         textClass: 'text-foreground',
         showBuyerBadge: true,
@@ -95,14 +95,14 @@ const CalendarDayView = ({
       };
     }
     
-    // Notizie (seller leads) - use status color or sage green default
+    // Notizie (seller leads) - no border
     if (event.type === 'notizia_reminder') {
       const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
         customBg: baseColor,
-        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
+        border: 'border-transparent',
         label: 'Notizia',
         textClass: textColor,
         showBuyerBadge: false,
@@ -189,8 +189,7 @@ const CalendarDayView = ({
                   className={cn(
                     "rounded-xl p-4 transition-all cursor-pointer relative active:scale-[0.98]",
                     styles.bg,
-                    styles.border,
-                    event.urgent && "ring-2 ring-red-500"
+                    styles.border
                   )}
                   style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
                   onClick={() => handleEventClick(event)}
