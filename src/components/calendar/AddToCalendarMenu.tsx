@@ -263,7 +263,7 @@ const AddToCalendarMenu = ({
                   
                         <span className="text-xl">{notizia.emoji || '📋'}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{notizia.name}</p>
+                          <p className="font-medium truncate text-sm">{notizia.name}</p>
                           {notizia.reminder_date &&
                     <p className="text-xs text-muted-foreground">
                               Ha già promemoria: {format(new Date(notizia.reminder_date), 'd MMM', { locale: it })}
