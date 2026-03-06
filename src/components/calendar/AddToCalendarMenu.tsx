@@ -156,7 +156,7 @@ const AddToCalendarMenu = ({
                   <User className="w-6 h-6 text-background" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Buyer</p>
+                  <p className="font-medium text-sm">Buyer</p>
                   <p className="text-sm text-muted-foreground">Imposta promemoria per un buyer</p>
                 </div>
               </button>
@@ -169,7 +169,7 @@ const AddToCalendarMenu = ({
                   <FileText className="w-6 h-6 text-background" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Seller</p>
+                  <p className="font-medium text-sm">Seller</p>
                   <p className="text-sm text-muted-foreground">Imposta promemoria per un seller</p>
                 </div>
               </button>
@@ -185,7 +185,7 @@ const AddToCalendarMenu = ({
                   <Pencil className="w-6 h-6 text-background" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Task</p>
+                  <p className="font-medium text-sm">Task</p>
                   <p className="text-sm text-muted-foreground">Aggiungi un'attività da completare</p>
                 </div>
               </button>
