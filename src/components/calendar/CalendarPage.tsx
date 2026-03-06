@@ -1738,16 +1738,16 @@ const EventCard = memo(({
   event, onClick, onContextMenu, onTouchStart, onTouchEnd, onToggle, hasComment, compact, comments, onAddComment, showDetails, onMobileMenu, isMobile
 }: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;hasComment?: boolean;compact?: boolean;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;onMobileMenu?: () => void;isMobile?: boolean;}) => {
   const getEventStyles = () => {
-    // Tasks - white card with black border by default, or custom color
+    // Tasks - light gray card, no border
     if (event.type === 'task') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
 
       return {
-        bg: hasCustomColor ? '' : 'bg-white',
+        bg: hasCustomColor ? '' : 'bg-[#e8e8e8]',
         customBg: baseColor,
-        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        border: 'border-transparent',
         textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         timeClass: 'text-muted-foreground',
         isBuyer: false,
@@ -1757,15 +1757,15 @@ const EventCard = memo(({
       };
     }
 
-    // Buyers (cliente_reminder)
+    // Buyers (cliente_reminder) - no border
     if (event.type === 'cliente_reminder') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
-        bg: hasCustomColor ? '' : 'bg-white',
+        bg: hasCustomColor ? '' : 'bg-card',
         customBg: baseColor,
-        border: hasCustomColor ? baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300' : 'border border-foreground',
+        border: 'border-transparent',
         textClass: textColor,
         timeClass: hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: true,
@@ -1775,14 +1775,14 @@ const EventCard = memo(({
       };
     }
 
-    // Sellers (notizie) - use cardColor override or kanban status color
+    // Sellers (notizie) - no border
     if (event.type === 'notizia_reminder') {
       const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
         customBg: baseColor,
-        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
+        border: 'border-transparent',
         textClass: textColor,
         timeClass: isDarkColor(baseColor) ? 'text-white/70' : 'text-muted-foreground',
         isBuyer: false,
@@ -1836,8 +1836,7 @@ const EventCard = memo(({
       className={cn(
         "rounded-lg p-2 transition-all hover:scale-[1.02] cursor-pointer relative",
         styles.bg,
-        styles.border,
-        event.urgent && "ring-2 ring-red-500"
+        styles.border
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
       onClick={(e) => {
@@ -1941,16 +1940,16 @@ const DraggableEventCard = memo(({
   showDetails
 }: {event: CalendarEvent;onClick: () => void;onContextMenu: (e: React.MouseEvent) => void;onTouchStart: (e: React.TouchEvent) => void;onTouchEnd: () => void;onToggle: (id: string, completed: boolean) => void;isDragging: boolean;hasComment?: boolean;dragHandleProps?: any;comments?: NotiziaComment[];onAddComment?: (text: string) => void;showDetails?: boolean;}) => {
   const getEventStyles = () => {
-    // Tasks - white card with black border, or custom color
+    // Tasks - light gray card, no border
     if (event.type === 'task') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
 
       return {
-        bg: hasCustomColor ? '' : 'bg-white',
+        bg: hasCustomColor ? '' : 'bg-[#e8e8e8]',
         customBg: baseColor,
-        border: hasCustomColor ? 'border-transparent' : 'border border-foreground',
+        border: 'border-transparent',
         textClass: event.completed ? 'line-through text-muted-foreground' : textColor,
         showBuyerBadge: false,
         showTaskBadge: true,
@@ -1958,15 +1957,15 @@ const DraggableEventCard = memo(({
       };
     }
 
-    // Buyers (cliente_reminder)
+    // Buyers (cliente_reminder) - no border
     if (event.type === 'cliente_reminder') {
       const hasCustomColor = !!event.cardColor;
       const baseColor = event.cardColor || null;
       const textColor = hasCustomColor && baseColor && isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
-        bg: hasCustomColor ? '' : 'bg-white',
+        bg: hasCustomColor ? '' : 'bg-card',
         customBg: baseColor,
-        border: hasCustomColor ? baseColor && isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300' : 'border border-foreground',
+        border: 'border-transparent',
         textClass: textColor,
         showBuyerBadge: true,
         showTaskBadge: false,
@@ -1974,14 +1973,14 @@ const DraggableEventCard = memo(({
       };
     }
 
-    // Sellers (notizie) - use cardColor override or kanban status color
+    // Sellers (notizie) - no border
     if (event.type === 'notizia_reminder') {
       const baseColor = event.cardColor || event.statusColor || '#8B9A7D';
       const textColor = isDarkColor(baseColor) ? 'text-white' : 'text-foreground';
       return {
         bg: '',
         customBg: baseColor,
-        border: isDarkColor(baseColor) ? 'border-transparent' : 'border border-gray-300',
+        border: 'border-transparent',
         textClass: textColor,
         showBuyerBadge: false,
         showTaskBadge: false,
@@ -2009,7 +2008,6 @@ const DraggableEventCard = memo(({
         "rounded-lg p-2 transition-all relative cursor-grab active:cursor-grabbing touch-none",
         styles.bg,
         styles.border,
-        event.urgent && "ring-2 ring-red-500",
         isDragging && "ring-2 ring-primary scale-105 opacity-90"
       )}
       style={styles.customBg ? { backgroundColor: styles.customBg } : undefined}
