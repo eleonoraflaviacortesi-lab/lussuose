@@ -161,10 +161,10 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
         <SidebarSeparator className="bg-border/30" />
 
-        <SidebarContent className={collapsed && !isMobile ? 'flex flex-col justify-center flex-1' : ''}>
+        <SidebarContent>
           <SidebarGroup>
             <SidebarGroupContent>
-              <SidebarMenu>
+              <SidebarMenu className={collapsed && !isMobile ? 'items-center' : ''}>
                 {navItems.map((item) => {
                   const active = isActive(item.url);
                   return (
