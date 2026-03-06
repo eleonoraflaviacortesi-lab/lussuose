@@ -4,16 +4,16 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  SheetTitle } from
+'@/components/ui/sheet';
 import {
   Command,
   CommandInput,
   CommandList,
   CommandEmpty,
   CommandGroup,
-  CommandItem,
-} from '@/components/ui/command';
+  CommandItem } from
+'@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { format, setHours, setMinutes } from 'date-fns';
 import { it } from 'date-fns/locale';
@@ -57,7 +57,7 @@ const AddToCalendarMenu = ({
   onAddAppointment,
   onAddClienteReminder,
   onAddNotiziaReminder,
-  onAddTask,
+  onAddTask
 }: Props) => {
   const [selectedType, setSelectedType] = useState<AddType | null>(initialType || null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -72,7 +72,7 @@ const AddToCalendarMenu = ({
 
   // Filter clienti without reminder on this date
   const availableClienti = useMemo(() => {
-    return clienti.filter(c => {
+    return clienti.filter((c) => {
       // Include all clienti, let user choose even if already has reminder
       return c.nome.toLowerCase().includes(searchQuery.toLowerCase());
     });
@@ -80,7 +80,7 @@ const AddToCalendarMenu = ({
 
   // Filter notizie without reminder on this date
   const availableNotizie = useMemo(() => {
-    return notizie.filter(n => {
+    return notizie.filter((n) => {
       return n.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
   }, [notizie, searchQuery]);
@@ -120,21 +120,21 @@ const AddToCalendarMenu = ({
         <SheetHeader className="pb-4 border-b border-muted">
           <SheetTitle className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {selectedType && (
-                <button
-                  onClick={handleBack}
-                  className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"
-                >
+              {selectedType &&
+              <button
+                onClick={handleBack}
+                className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                
                   <X className="w-4 h-4" />
                 </button>
-              )}
+              }
               <div>
                 <p className="text-xl font-bold">
-                  {selectedType === 'cliente' 
-                    ? 'Seleziona Buyer' 
-                    : selectedType === 'notizia' 
-                    ? 'Seleziona Seller' 
-                    : 'Aggiungi'}
+                  {selectedType === 'cliente' ?
+                  'Seleziona Buyer' :
+                  selectedType === 'notizia' ?
+                  'Seleziona Seller' :
+                  'Aggiungi'}
                 </p>
                 <p className="text-sm text-muted-foreground font-normal">
                   {format(date, 'd MMMM yyyy', { locale: it })}
@@ -145,13 +145,13 @@ const AddToCalendarMenu = ({
         </SheetHeader>
 
         <div className="py-4 overflow-y-auto max-h-[calc(70vh-120px)]">
-          {!selectedType ? (
-            // Main menu
-            <div className="space-y-3">
+          {!selectedType ?
+          // Main menu
+          <div className="space-y-3">
               <button
-                onClick={() => setSelectedType('cliente')}
-                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-              >
+              onClick={() => setSelectedType('cliente')}
+              className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+              
                 <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
                   <User className="w-6 h-6 text-background" />
                 </div>
@@ -162,9 +162,9 @@ const AddToCalendarMenu = ({
               </button>
 
               <button
-                onClick={() => setSelectedType('notizia')}
-                className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
-              >
+              onClick={() => setSelectedType('notizia')}
+              className="w-full flex items-center gap-4 p-4 rounded-xl bg-muted/50 hover:bg-muted transition-colors">
+              
                 <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
                   <FileText className="w-6 h-6 text-background" />
                 </div>
@@ -175,12 +175,12 @@ const AddToCalendarMenu = ({
               </button>
 
               <button
-                onClick={() => {
-                  onAddTask();
-                  onOpenChange(false);
-                }}
-                className="w-full flex items-center gap-4 p-4 rounded-xl bg-white border border-foreground hover:bg-muted transition-colors"
-              >
+              onClick={() => {
+                onAddTask();
+                onOpenChange(false);
+              }}
+              className="w-full flex items-center gap-4 p-4 rounded-xl bg-white border border-foreground hover:bg-muted transition-colors">
+              
                 <div className="w-12 h-12 rounded-full bg-foreground flex items-center justify-center">
                   <Pencil className="w-6 h-6 text-background" />
                 </div>
@@ -189,98 +189,98 @@ const AddToCalendarMenu = ({
                   <p className="text-sm text-muted-foreground">Aggiungi un'attività da completare</p>
                 </div>
               </button>
-            </div>
-          ) : selectedType === 'cliente' ? (
-            // Cliente search
-            <Command className="rounded-xl border-0 bg-transparent">
+            </div> :
+          selectedType === 'cliente' ?
+          // Cliente search
+          <Command className="rounded-xl border-0 bg-transparent">
               <div className="px-1 pb-3">
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted">
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <input
-                    type="text"
-                    placeholder="Cerca buyer..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
-                  />
+                  type="text"
+                  placeholder="Cerca buyer..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground" />
+                
                 </div>
               </div>
               <CommandList className="max-h-[calc(70vh-220px)]">
-                {availableClienti.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground text-sm">
+                {availableClienti.length === 0 ?
+              <div className="py-8 text-center text-muted-foreground text-sm">
                     Nessun buyer trovato
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {availableClienti.map((cliente) => (
-                      <button
-                        key={cliente.id}
-                        onClick={() => handleSelectCliente(cliente)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
-                      >
+                  </div> :
+
+              <div className="space-y-2">
+                    {availableClienti.map((cliente) =>
+                <button
+                  key={cliente.id}
+                  onClick={() => handleSelectCliente(cliente)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left">
+                  
                         <span className="text-xl">{cliente.emoji || '👤'}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{cliente.nome}</p>
-                          {cliente.reminder_date && (
-                            <p className="text-xs text-muted-foreground">
+                          <p className="font-medium truncate text-sm">{cliente.nome}</p>
+                          {cliente.reminder_date &&
+                    <p className="text-xs text-muted-foreground">
                               Ha già promemoria: {format(new Date(cliente.reminder_date), 'd MMM', { locale: it })}
                             </p>
-                          )}
+                    }
                         </div>
                       </button>
-                    ))}
-                  </div>
                 )}
+                  </div>
+              }
               </CommandList>
-            </Command>
-          ) : (
-            // Notizia search
-            <Command className="rounded-xl border-0 bg-transparent">
+            </Command> :
+
+          // Notizia search
+          <Command className="rounded-xl border-0 bg-transparent">
               <div className="px-1 pb-3">
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-muted">
                   <Search className="w-4 h-4 text-muted-foreground" />
                   <input
-                    type="text"
-                    placeholder="Cerca seller..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground"
-                  />
+                  type="text"
+                  placeholder="Cerca seller..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="flex-1 bg-transparent border-0 outline-none text-sm placeholder:text-muted-foreground" />
+                
                 </div>
               </div>
               <CommandList className="max-h-[calc(70vh-220px)]">
-                {availableNotizie.length === 0 ? (
-                  <div className="py-8 text-center text-muted-foreground text-sm">
+                {availableNotizie.length === 0 ?
+              <div className="py-8 text-center text-muted-foreground text-sm">
                     Nessun seller trovato
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {availableNotizie.map((notizia) => (
-                      <button
-                        key={notizia.id}
-                        onClick={() => handleSelectNotizia(notizia)}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left"
-                      >
+                  </div> :
+
+              <div className="space-y-2">
+                    {availableNotizie.map((notizia) =>
+                <button
+                  key={notizia.id}
+                  onClick={() => handleSelectNotizia(notizia)}
+                  className="w-full flex items-center gap-3 p-3 rounded-xl bg-muted/50 hover:bg-muted transition-colors text-left">
+                  
                         <span className="text-xl">{notizia.emoji || '📋'}</span>
                         <div className="flex-1 min-w-0">
                           <p className="font-medium truncate">{notizia.name}</p>
-                          {notizia.reminder_date && (
-                            <p className="text-xs text-muted-foreground">
+                          {notizia.reminder_date &&
+                    <p className="text-xs text-muted-foreground">
                               Ha già promemoria: {format(new Date(notizia.reminder_date), 'd MMM', { locale: it })}
                             </p>
-                          )}
+                    }
                         </div>
                       </button>
-                    ))}
-                  </div>
                 )}
+                  </div>
+              }
               </CommandList>
             </Command>
-          )}
+          }
         </div>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>);
+
 };
 
 export default AddToCalendarMenu;
