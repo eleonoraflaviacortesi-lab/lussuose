@@ -161,7 +161,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
         <SidebarSeparator className="bg-border/30" />
 
-        <SidebarContent>
+        <SidebarContent className={collapsed && !isMobile ? 'flex flex-col justify-center flex-1' : ''}>
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
