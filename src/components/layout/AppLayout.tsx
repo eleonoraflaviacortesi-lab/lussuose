@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo, lazy, Suspense, ReactNode } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Search } from 'lucide-react';
@@ -6,10 +6,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useClienti } from '@/hooks/useClienti';
 import { useProfiles } from '@/hooks/useProfiles';
 import { SidebarProvider, SidebarInset, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
-import logo from '@/assets/app_logo.svg';
 import starIcon from '@/assets/star_icon.png';
 import { AppSidebar } from './AppSidebar';
-import { AppBreadcrumbs } from './AppBreadcrumbs';
 import { NotificationBell } from './NotificationBell';
 import PullToRefresh from '@/components/ui/pull-to-refresh';
 import ChatGlobalListener from '@/components/chat/ChatGlobalListener';
@@ -17,17 +15,6 @@ import { triggerArcaneFog } from '@/lib/arcaneFog';
 import AnnouncementBanner from './AnnouncementBanner';
 import { triggerHaptic } from '@/lib/haptics';
 import { supabase } from '@/integrations/supabase/client';
-
-// Lazy-load page components
-const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
-const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
-const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
-const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
-const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
-const SedeTargetsPage = lazy(() => import('@/components/settings/SedeTargetsPage'));
-const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
-const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
-const ReportForm = lazy(() => import('@/components/dashboard/ReportPage'));
 
 // Dialog components for "+ New" actions
 const AddNotiziaDialog = lazy(() => import('@/components/notizie/AddNotiziaDialog'));
@@ -186,13 +173,12 @@ function FixedHeader({ onOpenCliente }: {onOpenCliente: (id: string) => void;}) 
 
 }
 
-export default function AppLayout() {
+export default function AppLayout({ children }: { children?: ReactNode }) {
   const location = useLocation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, loading } = useAuth();
 
-  const [pendingClienteId, setPendingClienteId] = useState<string | null>(null);
   const [showNewProperty, setShowNewProperty] = useState(false);
   const [showNewContact, setShowNewContact] = useState(false);
   const [showNewActivity, setShowNewActivity] = useState(false);
@@ -256,12 +242,7 @@ export default function AppLayout() {
   }, [playTrillo]);
 
   const handleOpenCliente = useCallback((clienteId: string) => {
-    setPendingClienteId(clienteId);
-    navigate('/contacts');
-  }, [navigate]);
-
-  const handleGoToCalendarWithEntity = useCallback((entityType?: 'notizia' | 'cliente', entityId?: string) => {
-    navigate('/activities', { state: entityType && entityId ? { openEntityType: entityType, openEntityId: entityId } : undefined });
+    navigate('/contacts', { state: { openClienteId: clienteId } });
   }, [navigate]);
 
   if (loading) {
@@ -269,40 +250,9 @@ export default function AppLayout() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
       </div>);
-
   }
 
   if (!user) return <Navigate to="/auth" replace />;
-
-  const renderContent = () => {
-    switch (section) {
-      case 'dashboard':
-        return <PersonalDashboard onGoToCalendar={() => navigate('/activities')} onOpenNotizia={(notizia) => handleGoToCalendarWithEntity('notizia', notizia.id)} onOpenCliente={(clienteId) => handleGoToCalendarWithEntity('cliente', clienteId)} />;
-      case 'properties':
-        return <NotiziePage />;
-      case 'contacts':
-        return (
-          <ClientiPage
-            initialClienteId={pendingClienteId}
-            onClienteOpened={() => setPendingClienteId(null)} />);
-
-
-      case 'activities':
-        return <CalendarPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'sede-targets':
-        return <SedeTargetsPage />;
-      case 'chat':
-        return <OfficeChatPage />;
-      case 'office':
-        return <UfficioPage />;
-      case 'inserisci':
-        return <ReportForm />;
-      default:
-        return <PersonalDashboard />;
-    }
-  };
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -313,7 +263,6 @@ export default function AppLayout() {
           onNewContact={() => setShowNewContact(true)}
           onNewActivity={() => setShowNewActivity(true)}
           onNewDailyReport={() => navigate('/inserisci')} />
-        
 
         <SidebarInset className="min-w-0 max-w-full">
           <FixedHeader onOpenCliente={handleOpenCliente} />
@@ -323,27 +272,17 @@ export default function AppLayout() {
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 min-w-0 overflow-x-hidden">
             <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-3 sm:px-4 lg:px-8'} py-2 sm:py-4`}>
-              <Suspense
-                fallback={
-                <div className="py-10 flex items-center justify-center">
-                    <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
-                  </div>
-                }>
-                
-                <div key={section} className="animate-fade-in">
-                  {renderContent()}
-                </div>
-              </Suspense>
+              <div key={section} className="animate-fade-in">
+                {children}
+              </div>
             </main>
           </PullToRefresh>
         </SidebarInset>
-
 
         {/* Global chat listener */}
         <ChatGlobalListener
           activeTab={section}
           onGoToChat={() => navigate('/chat')} />
-        
 
         {/* "+ New" dialogs */}
         <Suspense fallback={null}>
@@ -351,7 +290,6 @@ export default function AppLayout() {
           <AddNotiziaDialog
             open={showNewProperty}
             onOpenChange={setShowNewProperty} />
-
           }
           {showNewContact &&
           <AddClienteDialog
@@ -359,16 +297,13 @@ export default function AppLayout() {
             onOpenChange={setShowNewContact}
             onAdd={async (c) => {await createCliente(c);setShowNewContact(false);}}
             agents={agents} />
-
           }
           {showNewActivity &&
           <AddAppointmentDialog
             open={showNewActivity}
             onOpenChange={setShowNewActivity} />
-
           }
         </Suspense>
       </div>
     </SidebarProvider>);
-
 }

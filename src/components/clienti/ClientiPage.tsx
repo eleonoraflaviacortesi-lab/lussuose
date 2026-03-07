@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { cn, isDarkColor } from '@/lib/utils';
 import { useClienti } from '@/hooks/useClienti';
 import { useAuth } from '@/hooks/useAuth';
@@ -38,7 +39,11 @@ interface ClientiPageProps {
   onClienteOpened?: () => void;
 }
 
-export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPageProps) {
+export function ClientiPage({ initialClienteId: propClienteId, onClienteOpened }: ClientiPageProps = {}) {
+  const location = useLocation();
+  const navState = location.state as { openClienteId?: string } | null;
+  const initialClienteId = propClienteId ?? navState?.openClienteId ?? null;
+  const handledNavRef = useRef<string | null>(null);
   const { profile } = useAuth();
   const { pushAction } = useUndoRedo();
   const [groupBy, setGroupBy] = useState<ClienteGroupBy>('status');
@@ -74,9 +79,10 @@ export function ClientiPage({ initialClienteId, onClienteOpened }: ClientiPagePr
 
   // Handle opening cliente from notification
   useEffect(() => {
-    if (initialClienteId && clienti.length > 0) {
+    if (initialClienteId && initialClienteId !== handledNavRef.current && clienti.length > 0) {
       const cliente = clienti.find((c) => c.id === initialClienteId);
       if (cliente) {
+        handledNavRef.current = initialClienteId;
         setSelectedCliente(cliente);
         setDetailOpen(true);
         onClienteOpened?.();

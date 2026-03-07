@@ -8,8 +8,32 @@ import { UndoRedoProvider } from "@/hooks/useUndoRedo";
 import AppLayout from "@/components/layout/AppLayout";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import { lazy, Suspense } from "react";
+
+// Lazy-load page components
+const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
+const NotiziePage = lazy(() => import('@/components/notizie/NotiziePage'));
+const ClientiPage = lazy(() => import('@/components/clienti/ClientiPage'));
+const CalendarPage = lazy(() => import('@/components/calendar/CalendarPage'));
+const SettingsPage = lazy(() => import('@/components/settings/SettingsPage'));
+const SedeTargetsPage = lazy(() => import('@/components/settings/SedeTargetsPage'));
+const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
+const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
+const ReportForm = lazy(() => import('@/components/dashboard/ReportPage'));
 
 export const queryClient = new QueryClient();
+
+const PageSuspense = ({ children }: { children: React.ReactNode }) => (
+  <Suspense
+    fallback={
+      <div className="py-10 flex items-center justify-center">
+        <div className="w-4 h-4 border-2 border-foreground border-t-transparent rounded-full animate-spin" />
+      </div>
+    }
+  >
+    {children}
+  </Suspense>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -20,16 +44,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* New clean routes */}
-            <Route path="/" element={<AppLayout />} />
-            <Route path="/properties" element={<AppLayout />} />
-            <Route path="/contacts" element={<AppLayout />} />
-            <Route path="/activities" element={<AppLayout />} />
-            <Route path="/settings" element={<AppLayout />} />
-            <Route path="/sede-targets" element={<AppLayout />} />
-            <Route path="/chat" element={<AppLayout />} />
-            <Route path="/office" element={<AppLayout />} />
-            <Route path="/inserisci" element={<AppLayout />} />
+            <Route path="/" element={<AppLayout><PageSuspense><PersonalDashboard /></PageSuspense></AppLayout>} />
+            <Route path="/properties" element={<AppLayout><PageSuspense><NotiziePage /></PageSuspense></AppLayout>} />
+            <Route path="/contacts" element={<AppLayout><PageSuspense><ClientiPage /></PageSuspense></AppLayout>} />
+            <Route path="/activities" element={<AppLayout><PageSuspense><CalendarPage /></PageSuspense></AppLayout>} />
+            <Route path="/settings" element={<AppLayout><PageSuspense><SettingsPage /></PageSuspense></AppLayout>} />
+            <Route path="/sede-targets" element={<AppLayout><PageSuspense><SedeTargetsPage /></PageSuspense></AppLayout>} />
+            <Route path="/chat" element={<AppLayout><PageSuspense><OfficeChatPage /></PageSuspense></AppLayout>} />
+            <Route path="/office" element={<AppLayout><PageSuspense><UfficioPage /></PageSuspense></AppLayout>} />
+            <Route path="/inserisci" element={<AppLayout><PageSuspense><ReportForm /></PageSuspense></AppLayout>} />
 
             {/* Legacy redirects */}
             <Route path="/notizie" element={<Navigate to="/properties" replace />} />
