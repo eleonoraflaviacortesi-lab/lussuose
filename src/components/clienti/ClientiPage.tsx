@@ -386,7 +386,14 @@ export function ClientiPage({ initialClienteId: propClienteId, onClienteOpened }
       }
 
       {/* Board */}
-      {viewMode === 'kanban' ?
+      {clienti.length === 0 ? (
+        <KanbanEmptyColumn
+          message="Nessun contatto ancora"
+          ctaLabel="Aggiungi il primo contatto"
+          onAdd={() => setAddDialogOpen(true)}
+          fullPage
+        />
+      ) : viewMode === 'kanban' ?
       <ClientiKanban
         clientiGrouped={finalGrouped}
         groupBy={isCoordinator ? groupBy : 'status'}
