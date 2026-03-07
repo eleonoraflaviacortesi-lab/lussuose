@@ -67,7 +67,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: Per
   const { myData, allData } = useDailyData();
   const { annualTargets, targets: sedeTargets } = useSedeTargets();
   const { settings } = useUserSettings();
-  const navigate = useNavigate();
+  
   const { hasReportedToday } = useTodayReportStatus();
 
   const annualTarget = annualTargets?.vendite_target || 48;
