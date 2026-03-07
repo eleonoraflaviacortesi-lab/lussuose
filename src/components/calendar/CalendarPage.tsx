@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, memo, useEffect, useCallback } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { format, startOfWeek, addDays, isSameDay, parseISO, addWeeks, subWeeks, setHours, setMinutes, startOfMonth, endOfMonth, addMonths, isSameMonth } from 'date-fns';
 import { it } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Plus, X, Check, AlertTriangle, Trash2, MessageCircle, Send, CalendarDays, Palette, Star, MoreHorizontal, User, FileText, Pencil } from 'lucide-react';
@@ -439,22 +440,15 @@ const CalendarPage = () => {
   const [isDragging, setIsDragging] = useState(false);
 
   // Calendar-only event colors (stored in localStorage, not on notizia/cliente)
-  const [calendarEventColors, setCalendarEventColors] = useState<Record<string, string>>(() => {
-    try {
-      const stored = localStorage.getItem('calendar_event_colors');
-      return stored ? JSON.parse(stored) : {};
-    } catch {return {};}
-  });
+  const [calendarEventColors, setCalendarEventColors] = useLocalStorage<Record<string, string>>('calendar_event_colors', {});
 
   const setCalendarEventColor = useCallback((eventId: string, color: string | null) => {
     setCalendarEventColors((prev) => {
       const next = { ...prev };
-      if (color) next[eventId] = color;else
-      delete next[eventId];
-      localStorage.setItem('calendar_event_colors', JSON.stringify(next));
+      if (color) next[eventId] = color; else delete next[eventId];
       return next;
     });
-  }, []);
+  }, [setCalendarEventColors]);
 
   const { appointments, isLoading: loadingAppointments, toggleCompleted } = useAppointments();
   const { clienti, isLoading: loadingClienti, updateCliente, deleteCliente, addComment: addClienteComment, reorderClienti } = useClienti();

@@ -7,6 +7,7 @@ import { useClienti } from '@/hooks/useClienti';
 import { useNotizie, Notizia } from '@/hooks/useNotizie';
 import { useKanbanColumns } from '@/hooks/useKanbanColumns';
 import { cn, isDarkColor } from '@/lib/utils';
+import { getLS } from '@/lib/localStorage';
 
 type TodayRemindersWidgetProps = {
   onNotiziaClick?: (notizia: Notizia) => void;
@@ -25,11 +26,7 @@ const TodayRemindersWidget = ({ onNotiziaClick, onClienteClick, onGoToCalendar }
     return col?.color || '#6b7280';
   };
 
-  const calendarColors = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('calendar_event_colors') || '{}') as Record<string, string>;
-    } catch { return {} as Record<string, string>; }
-  }, []);
+  const calendarColors = useMemo(() => getLS<Record<string, string>>('calendar_event_colors', {}), []);
 
   const todayReminders = useMemo(() => {
     const reminders: Array<{

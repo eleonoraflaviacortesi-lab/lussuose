@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
+import { getLS, setLS } from '@/lib/localStorage';
 import { createPortal } from 'react-dom';
 import { Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import { useKanbanColumns } from '@/hooks/useKanbanColumns';
@@ -415,7 +416,7 @@ const LS_WIDTHS = 'notizie-sheet-col-widths-v2';
 const LS_COL_FORMATS = 'notizie-sheet-col-formats';
 
 function getSavedColWidths(): Record<string, number> | null {
-  try { const r = localStorage.getItem(LS_WIDTHS); return r ? JSON.parse(r) : null; } catch { return null; }
+  return getLS<Record<string, number> | null>(LS_WIDTHS, null);
 }
 
 // --- Column Filter ---
@@ -476,10 +477,10 @@ function ColumnFilterPopover({
 function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: string; colKey: string; sheetId: string; onChange?: (v: string) => void }) {
   const storageKey = `col-dropdown-opts-${sheetId}-${colKey}`;
   const [open, setOpen] = useState(false);
-  const [opts, setOpts] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; } });
+  const [opts, setOpts] = useState<string[]>(() => getLS<string[]>(storageKey, []));
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
-  const saveOpts = (next: string[]) => { setOpts(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
+  const saveOpts = (next: string[]) => { setOpts(next); setLS(storageKey, next); };
   if (!open) return <span className="block text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 rounded min-h-[28px] truncate" onClick={e => { e.stopPropagation(); setOpen(true); }}>{value || '—'}</span>;
   return (
     <div className="relative">
@@ -661,9 +662,7 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   const [selectedCellCol, setSelectedCellCol] = useState<string | null>(null);
   const [colFilters, setColFilters] = useState<Record<string, Set<string>>>({});
   const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
-  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => {
-    try { const s = localStorage.getItem(LS_COL_FORMATS); return s ? JSON.parse(s) : {}; } catch { return {}; }
-  });
+  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => getLS(LS_COL_FORMATS, {}));
   const [contextMenu, setContextMenu] = useState<{ notizia: Notizia; x: number; y: number } | null>(null);
   const [cellMenu, setCellMenu] = useState<CellMenuInfo | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
@@ -672,9 +671,9 @@ const NotizieSheetView = ({ notizie, onNotiziaClick, onUpdate, onDelete, searchQ
   const resizingRef = useRef<{ key: string; startX: number; startWidth: number } | null>(null);
 
   // Persist col formats
-  useEffect(() => { try { localStorage.setItem(LS_COL_FORMATS, JSON.stringify(colFormats)); } catch {} }, [colFormats]);
+  useEffect(() => { setLS(LS_COL_FORMATS, colFormats); }, [colFormats]);
   // Persist col widths
-  useEffect(() => { try { localStorage.setItem(LS_WIDTHS, JSON.stringify(colWidths)); } catch {} }, [colWidths]);
+  useEffect(() => { setLS(LS_WIDTHS, colWidths); }, [colWidths]);
 
   const orderedColumns = useMemo(() => colOrder.map(k => COLUMNS.find(c => c.key === k)!).filter(Boolean), [colOrder]);
 

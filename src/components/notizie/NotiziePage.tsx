@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { cn } from '@/lib/utils';
 import { Search, X, LayoutGrid, Table2, FileSpreadsheet } from 'lucide-react';
 import { useNotizie, Notizia, NotiziaStatus } from '@/hooks/useNotizie';
@@ -41,14 +42,11 @@ const NotiziePage = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [quickAddStatus, setQuickAddStatus] = useState<NotiziaStatus | null>(null);
-  const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>(() => {
-    try {return localStorage.getItem('notizie-view-mode') as any || 'kanban';} catch {return 'kanban';}
-  });
+  const [viewMode, setViewMode] = useLocalStorage<'kanban' | 'sheet'>('notizie-view-mode', 'kanban');
 
   const handleViewChange = useCallback((mode: 'kanban' | 'sheet') => {
     setViewMode(mode);
-    try {localStorage.setItem('notizie-view-mode', mode);} catch {}
-  }, []);
+  }, [setViewMode]);
 
   const handleNotiziaClick = useCallback((notizia: Notizia) => {
     setSelectedNotizia(notizia);
