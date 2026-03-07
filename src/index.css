@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import "@fontsource/playfair-display/400.css";
-@import "@fontsource/playfair-display/500.css";
-@import "@fontsource/playfair-display/600.css";
-@import "@fontsource/playfair-display/700.css";
+/* Playfair Display - self-hosted variable font, scoped via .font-playfair / font-serif */
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/PlayfairDisplay-Variable.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Outfit font family */
 @font-face { font-family: 'Outfit'; src: url('/fonts/Outfit-Thin.ttf') format('truetype'); font-weight: 100; font-style: normal; font-display: swap; }
