@@ -6,6 +6,7 @@ import { useKanbanColumns, KanbanColumn, PROTECTED_COLUMN_KEY } from '@/hooks/us
 import { cn, isDarkColor } from '@/lib/utils';
 import { triggerHaptic } from '@/lib/haptics';
 import { MessageCircle, X, Plus, Star, Wifi, WifiOff, Trash2 } from 'lucide-react';
+import { KanbanEmptyColumn } from '@/components/shared/KanbanEmptyColumn';
 import { ColorPickerOverlay } from '@/components/ui/color-picker-overlay';
 import { useFavoriteColors } from '@/hooks/useFavoriteColors';
 import { useUndoRedo } from '@/hooks/useUndoRedo';
@@ -604,7 +605,13 @@ const KanbanBoard = memo(({ notizieByStatus, onNotiziaClick, onStatusChange, onQ
                       snapshot.isDraggingOver && "bg-accent/20"
                     )}>
                     
-                            {(notizieByStatus[column.key] || []).map((notizia, index) =>
+                            {(notizieByStatus[column.key] || []).length === 0 ? (
+                      <KanbanEmptyColumn
+                        message="Nessuna notizia"
+                        ctaLabel="Aggiungi notizia"
+                        onAdd={onQuickAdd ? () => onQuickAdd(column.key as NotiziaStatus) : undefined}
+                      />
+                    ) : (notizieByStatus[column.key] || []).map((notizia, index) =>
                     <Draggable key={notizia.id} draggableId={notizia.id} index={index}>
                                 {(provided, snapshot) =>
                       <div

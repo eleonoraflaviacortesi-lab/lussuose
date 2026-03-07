@@ -7,6 +7,7 @@ import { triggerHaptic } from '@/lib/haptics';
 import { useClientKanbanColumns, ClientKanbanColumn } from '@/hooks/useClientKanbanColumns';
 import { Plus } from 'lucide-react';
 import { KanbanColumnHeader } from '@/components/shared/KanbanColumnHeader';
+import { KanbanEmptyColumn } from '@/components/shared/KanbanEmptyColumn';
 
 interface ClientiKanbanProps {
   clientiGrouped: Map<string, Cliente[]>;
@@ -272,7 +273,9 @@ export function ClientiKanban({
             }
                 
                 <div className="space-y-2">
-                  {column.items.map((cliente, index) =>
+                  {column.items.length === 0 ? (
+                    <KanbanEmptyColumn message="Nessun contatto" />
+                  ) : column.items.map((cliente, index) =>
               <Draggable
                 key={cliente.id}
                 draggableId={cliente.id}
