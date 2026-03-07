@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
+import { getLS, setLS } from '@/lib/localStorage';
 import { createPortal } from 'react-dom';
 import { Notizia, NotiziaStatus } from '@/hooks/useNotizie';
 import { useKanbanColumns } from '@/hooks/useKanbanColumns';
