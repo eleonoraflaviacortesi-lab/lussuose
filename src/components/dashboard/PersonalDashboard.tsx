@@ -55,7 +55,11 @@ const CircularProgress = ({ percent, size = 140, stroke = 8 }: { percent: number
   );
 };
 
-const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: PersonalDashboardProps) => {
+const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: PersonalDashboardProps = {}) => {
+  const navigate = useNavigate();
+  const defaultGoToCalendar = onGoToCalendar ?? (() => navigate('/activities'));
+  const defaultOpenNotizia = onOpenNotizia ?? ((notizia: Notizia) => navigate('/activities', { state: { openEntityType: 'notizia', openEntityId: notizia.id } }));
+  const defaultOpenCliente = onOpenCliente ?? ((clienteId: string) => navigate('/activities', { state: { openEntityType: 'cliente', openEntityId: clienteId } }));
   const [chartPeriod, setChartPeriod] = useState<Period>('month');
   const [selectedKPI, setSelectedKPI] = useState<KPIKey | null>(null);
   const { profile } = useAuth();
@@ -127,7 +131,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: Per
   const incarichiPercent = Math.min(100, Math.round(incarichiTeam / incarichiTarget * 100));
 
   const handleNotiziaClick = (notizia: Notizia) => {
-    onOpenNotizia?.(notizia);
+    defaultOpenNotizia(notizia);
   };
 
   /* KPI rows data */
@@ -213,7 +217,7 @@ const PersonalDashboard = ({ onGoToCalendar, onOpenNotizia, onOpenCliente }: Per
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
         {/* Left: Today Reminders (2 cols) */}
         <div className="md:col-span-2 [&>div]:h-full">
-          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onClienteClick={onOpenCliente} onGoToCalendar={onGoToCalendar} />
+          <TodayRemindersWidget onNotiziaClick={handleNotiziaClick} onClienteClick={defaultOpenCliente} onGoToCalendar={defaultGoToCalendar} />
         </div>
 
         {/* Right: Incarichi del Mese (circular) */}
