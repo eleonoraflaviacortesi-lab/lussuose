@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Cliente, ClienteStatus, ClienteGroupBy, ClienteFilters as Filters } from '@/types';
 import { ClientiFilters } from './ClientiFilters';
 import { ClientiKanban } from './ClientiKanban';
+import { KanbanEmptyColumn } from '@/components/shared/KanbanEmptyColumn';
 import { ClientiSheetView } from './ClientiSheetView';
 import { ClienteDetail } from './ClienteDetail';
 import { AddClienteDialog } from './AddClienteDialog';
