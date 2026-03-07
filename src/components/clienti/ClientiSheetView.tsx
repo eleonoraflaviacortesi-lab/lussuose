@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef, useMemo, useEffect, memo } from 'react';
+import { getLS, setLS } from '@/lib/localStorage';
 import { useColumnTypeOverrides } from '@/hooks/useColumnTypeOverrides';
 import { ColumnTypeMenu } from '@/components/ui/column-type-menu';
 import { createPortal } from 'react-dom';
@@ -130,13 +131,10 @@ const EmojiGridWithCustom = memo(function EmojiGridWithCustom({ currentEmoji, on
 
 // --- Lingua colors persistence (global) ---
 function getCustomLinguaColors(): Record<string, string> {
-  try {
-    const saved = localStorage.getItem('custom-lingua-colors');
-    return saved ? JSON.parse(saved) : {};
-  } catch { return {}; }
+  return getLS<Record<string, string>>('custom-lingua-colors', {});
 }
 function saveCustomLinguaColors(colors: Record<string, string>) {
-  localStorage.setItem('custom-lingua-colors', JSON.stringify(colors));
+  setLS('custom-lingua-colors', colors);
   window.dispatchEvent(new StorageEvent('storage', { key: 'custom-lingua-colors' }));
 }
 function getMergedLinguaColors(): Record<string, string> {
@@ -605,47 +603,33 @@ CellContextMenu.displayName = 'CellContextMenu';
 
 // Portal options stored in localStorage for customization
 function getCustomPortals(): string[] {
-  try {
-    const saved = localStorage.getItem('custom-portals');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
+  return getLS<string[]>('custom-portals', []);
 }
 
 function saveCustomPortals(portals: string[]) {
-  localStorage.setItem('custom-portals', JSON.stringify(portals));
+  setLS('custom-portals', portals);
 }
 
-// Custom lingua options persistence
 function getCustomLinguaOptions(): string[] {
-  try {
-    const saved = localStorage.getItem('custom-lingua-options');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
+  return getLS<string[]>('custom-lingua-options', []);
 }
 function saveCustomLinguaOptions(opts: string[]) {
-  localStorage.setItem('custom-lingua-options', JSON.stringify(opts));
+  setLS('custom-lingua-options', opts);
 }
 
-// Custom tipo_contatto options persistence
 function getCustomTipoContattoOptions(): string[] {
-  try {
-    const saved = localStorage.getItem('custom-tipo-contatto-options');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
+  return getLS<string[]>('custom-tipo-contatto-options', []);
 }
 function saveCustomTipoContattoOptions(opts: string[]) {
-  localStorage.setItem('custom-tipo-contatto-options', JSON.stringify(opts));
+  setLS('custom-tipo-contatto-options', opts);
 }
 
 function getCustomPortaleColors(): Record<string, string> {
-  try {
-    const saved = localStorage.getItem('custom-portale-colors');
-    return saved ? JSON.parse(saved) : {};
-  } catch { return {}; }
+  return getLS<Record<string, string>>('custom-portale-colors', {});
 }
 
 function saveCustomPortaleColors(colors: Record<string, string>) {
-  localStorage.setItem('custom-portale-colors', JSON.stringify(colors));
+  setLS('custom-portale-colors', colors);
   // Dispatch storage event so other PortalBadgeCell instances sync
   window.dispatchEvent(new StorageEvent('storage', { key: 'custom-portale-colors' }));
 }
@@ -1315,10 +1299,10 @@ function SheetToolbar({
 function OverrideDropdownCell({ value, colKey, sheetId, onChange }: { value: string; colKey: string; sheetId: string; onChange?: (v: string) => void }) {
   const storageKey = `col-dropdown-opts-${sheetId}-${colKey}`;
   const [open, setOpen] = useState(false);
-  const [opts, setOpts] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(storageKey) || '[]'); } catch { return []; } });
+  const [opts, setOpts] = useState<string[]>(() => getLS<string[]>(storageKey, []));
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState('');
-  const saveOpts = (next: string[]) => { setOpts(next); localStorage.setItem(storageKey, JSON.stringify(next)); };
+  const saveOpts = (next: string[]) => { setOpts(next); setLS(storageKey, next); };
   if (!open) return <span className="block text-xs px-2 py-1.5 cursor-pointer hover:bg-secondary/50 rounded min-h-[28px] truncate" onClick={e => { e.stopPropagation(); setOpen(true); }}>{value || '—'}</span>;
   return (
     <div className="relative">
@@ -1769,14 +1753,11 @@ function ColumnFilterPopover({
 
 // --- Custom columns management ---
 function getCustomColumns(): ColumnDef[] {
-  try {
-    const saved = localStorage.getItem('clienti-custom-columns');
-    return saved ? JSON.parse(saved) : [];
-  } catch { return []; }
+  return getLS<ColumnDef[]>('clienti-custom-columns', []);
 }
 
 function saveCustomColumns(cols: ColumnDef[]) {
-  localStorage.setItem('clienti-custom-columns', JSON.stringify(cols));
+  setLS('clienti-custom-columns', cols);
 }
 
 function getCustomFieldValue(cliente: Cliente, key: string): string {
@@ -1785,16 +1766,12 @@ function getCustomFieldValue(cliente: Cliente, key: string): string {
   return String(cf[key] ?? '');
 }
 
-// --- Persistence helpers for column widths ---
 function getSavedColWidths(): Record<string, number> | null {
-  try {
-    const saved = localStorage.getItem('clienti-sheet-col-widths');
-    return saved ? JSON.parse(saved) : null;
-  } catch { return null; }
+  return getLS<Record<string, number> | null>('clienti-sheet-col-widths', null);
 }
 
 function saveColWidths(widths: Record<string, number>) {
-  localStorage.setItem('clienti-sheet-col-widths', JSON.stringify(widths));
+  setLS('clienti-sheet-col-widths', widths);
 }
 
 // --- Main Component ---
@@ -1819,12 +1796,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
   const [copiedValue, setCopiedValue] = useState<string | null>(null);
   const [colFilters, setColFilters] = useState<Record<string, Set<string>>>({});
   const [rowFormats, setRowFormats] = useState<Record<string, FormatState>>({});
-  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => {
-    try {
-      const saved = localStorage.getItem('clienti-sheet-col-formats');
-      return saved ? JSON.parse(saved) : {};
-    } catch { return {}; }
-  });
+  const [colFormats, setColFormats] = useState<Record<string, { bold?: boolean; italic?: boolean; strikethrough?: boolean; bgColor?: string | null; textColor?: string | null }>>(() => getLS('clienti-sheet-col-formats', {}));
   const [addingColumn, setAddingColumn] = useState(false);
   const [newColName, setNewColName] = useState('');
   const [qualifiedFilter, setQualifiedFilter] = useState(false);
@@ -1832,9 +1804,7 @@ export function ClientiSheetView({ clienti, agents, onCardClick, onUpdate, onDel
 
   // Persist colFormats to localStorage
   useEffect(() => {
-    try {
-      localStorage.setItem('clienti-sheet-col-formats', JSON.stringify(colFormats));
-    } catch {}
+    setLS('clienti-sheet-col-formats', colFormats);
   }, [colFormats]);
 
   useEffect(() => {
