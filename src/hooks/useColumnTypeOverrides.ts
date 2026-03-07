@@ -1,25 +1,13 @@
 import { useState, useCallback } from 'react';
+import { getLS, setLS } from '@/lib/localStorage';
 
 export type ColumnTypeOverride = 'text' | 'dropdown' | 'url' | 'checkbox';
 
 const STORAGE_KEY_PREFIX = 'col-type-overrides-';
 
-function loadOverrides(sheetId: string): Record<string, ColumnTypeOverride> {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY_PREFIX + sheetId);
-    return raw ? JSON.parse(raw) : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveOverrides(sheetId: string, overrides: Record<string, ColumnTypeOverride>) {
-  localStorage.setItem(STORAGE_KEY_PREFIX + sheetId, JSON.stringify(overrides));
-}
-
 export function useColumnTypeOverrides(sheetId: string) {
   const [overrides, setOverrides] = useState<Record<string, ColumnTypeOverride>>(
-    () => loadOverrides(sheetId)
+    () => getLS<Record<string, ColumnTypeOverride>>(STORAGE_KEY_PREFIX + sheetId, {})
   );
 
   const setColumnType = useCallback((colKey: string, type: ColumnTypeOverride | null) => {
@@ -30,7 +18,7 @@ export function useColumnTypeOverrides(sheetId: string) {
       } else {
         next[colKey] = type;
       }
-      saveOverrides(sheetId, next);
+      setLS(STORAGE_KEY_PREFIX + sheetId, next);
       return next;
     });
   }, [sheetId]);
