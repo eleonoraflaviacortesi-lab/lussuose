@@ -9,6 +9,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import { lazy, Suspense } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 // Lazy-load page components
 const PersonalDashboard = lazy(() => import('@/components/dashboard/PersonalDashboard'));
@@ -53,15 +54,15 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<AppLayout><PageSuspense><PersonalDashboard /></PageSuspense></AppLayout>} />
-            <Route path="/properties" element={<AppLayout><PageSuspense><NotiziePage /></PageSuspense></AppLayout>} />
-            <Route path="/contacts" element={<AppLayout><PageSuspense><ClientiPage /></PageSuspense></AppLayout>} />
-            <Route path="/activities" element={<AppLayout><PageSuspense><CalendarPage /></PageSuspense></AppLayout>} />
-            <Route path="/settings" element={<AppLayout><PageSuspense><SettingsPage /></PageSuspense></AppLayout>} />
-            <Route path="/sede-targets" element={<AppLayout><PageSuspense><SedeTargetsPage /></PageSuspense></AppLayout>} />
-            <Route path="/chat" element={<AppLayout><PageSuspense><OfficeChatPage /></PageSuspense></AppLayout>} />
-            <Route path="/office" element={<AppLayout><PageSuspense><UfficioPage /></PageSuspense></AppLayout>} />
-            <Route path="/inserisci" element={<AppLayout><PageSuspense><ReportForm /></PageSuspense></AppLayout>} />
+            <Route path="/" element={<AppLayout><ErrorBoundary><PageSuspense><PersonalDashboard /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/properties" element={<AppLayout><ErrorBoundary><PageSuspense><NotiziePage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/contacts" element={<AppLayout><ErrorBoundary><PageSuspense><ClientiPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/activities" element={<AppLayout><ErrorBoundary><PageSuspense><CalendarPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/settings" element={<AppLayout><ErrorBoundary><PageSuspense><SettingsPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/sede-targets" element={<AppLayout><ErrorBoundary><PageSuspense><SedeTargetsPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/chat" element={<AppLayout><ErrorBoundary><PageSuspense><OfficeChatPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/office" element={<AppLayout><ErrorBoundary><PageSuspense><UfficioPage /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/inserisci" element={<AppLayout><ErrorBoundary><PageSuspense><ReportForm /></PageSuspense></ErrorBoundary></AppLayout>} />
 
             {/* Legacy redirects */}
             <Route path="/notizie" element={<Navigate to="/properties" replace />} />
