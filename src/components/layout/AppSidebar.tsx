@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList, Target } from 'lucide-react';
+import { LayoutDashboard, Building2, Users, CalendarDays, Settings, Plus, LogOut, ClipboardList, Target, User } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { NavLink } from '@/components/NavLink';
 import { useAuth } from '@/hooks/useAuth';
@@ -203,6 +203,34 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
 
         <SidebarFooter className="p-2">
           <SidebarMenu>
+            {/* Profile link */}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive('/profile')}
+                tooltip="Profilo"
+                className={cn(isMobile && 'h-10 gap-3')}
+              >
+                <NavLink
+                  to="/profile"
+                  onClick={handleNavClick}
+                  className={cn(
+                    'transition-colors rounded-lg',
+                    isActive('/profile')
+                      ? 'bg-foreground text-background font-medium hover:bg-foreground/90 hover:text-background'
+                      : 'hover:bg-muted text-muted-foreground font-normal'
+                  )}
+                  activeClassName=""
+                >
+                  <span className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-xs shrink-0">
+                    {profile?.avatar_emoji || '👤'}
+                  </span>
+                  <span className="!uppercase !tracking-[0.15em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Profilo</span>
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            {/* Sign out */}
             <SidebarMenuItem>
               <SidebarMenuButton
                 onClick={handleSignOut}
@@ -213,11 +241,7 @@ export function AppSidebar({ onNewProperty, onNewContact, onNewActivity, onNewDa
                 )}
               >
                 <LogOut className="h-4 w-4" />
-                {isMobile ? (
-                  <span className="!uppercase !tracking-[0.18em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
-                ) : (
-                  <span className="!uppercase !tracking-[0.15em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
-                )}
+                <span className="!uppercase !tracking-[0.15em] !text-[10px]" style={{ fontFamily: 'Helvetica Neue, Helvetica, Arial, sans-serif' }}>Sign out</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

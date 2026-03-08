@@ -21,6 +21,7 @@ const SedeTargetsPage = lazy(() => import('@/components/settings/SedeTargetsPage
 const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,7 @@ const App = () => (
             <Route path="/chat" element={<AppLayout><ErrorBoundary><PageSuspense><OfficeChatPage /></PageSuspense></ErrorBoundary></AppLayout>} />
             <Route path="/office" element={<AppLayout><ErrorBoundary><PageSuspense><UfficioPage /></PageSuspense></ErrorBoundary></AppLayout>} />
             <Route path="/inserisci" element={<AppLayout><ErrorBoundary><PageSuspense><ReportForm /></PageSuspense></ErrorBoundary></AppLayout>} />
+            <Route path="/profile" element={<AppLayout><ErrorBoundary><PageSuspense><ProfilePage /></PageSuspense></ErrorBoundary></AppLayout>} />
 
             {/* Legacy redirects */}
             <Route path="/notizie" element={<Navigate to="/properties" replace />} />
