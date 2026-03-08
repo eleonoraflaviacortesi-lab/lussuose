@@ -9,7 +9,7 @@ interface Profile {
   full_name: string;
   role: 'agente' | 'coordinatore' | 'admin';
   sede: string;
-  sedi?: string[];
+  sedi: string[] | null;
   avatar_emoji?: string;
 }
 

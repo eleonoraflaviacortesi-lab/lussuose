@@ -80,7 +80,7 @@ const SettingsPage = () => {
     if (profile) {
       setFullName(profile.full_name || '');
       setSede(profile.sede || 'AREZZO');
-      setSelectedSedi((profile as any).sedi || []);
+      setSelectedSedi(profile.sedi || []);
       setRole(profile.role || 'agente');
       if (profile.avatar_emoji) setSelectedEmoji(profile.avatar_emoji);
     }
