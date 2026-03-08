@@ -582,6 +582,23 @@ const OfficeChatPage = () => {
     <div className="flex flex-col h-[calc(100vh-200px)] max-w-2xl mx-auto relative">
       {/* Messages area */}
       <div ref={containerRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin">
+        {/* Load older messages button */}
+        {hasMore && messages.length > 0 && (
+          <div className="flex justify-center py-3">
+            <button
+              onClick={loadOlderMessages}
+              disabled={loadingMore}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-full glass-surface disabled:opacity-50"
+            >
+              {loadingMore ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                  Caricamento…
+                </span>
+              ) : 'Carica messaggi precedenti'}
+            </button>
+          </div>
+        )}
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             Nessun messaggio ancora. Inizia la conversazione! 💬
