@@ -51,9 +51,9 @@ export function useClienti(options?: {
   const { groupBy = 'status', filters = {} } = options || {};
 
   // Fetch clienti - RLS handles filtering, but we include sedi in cache key
-  const allSedi = profile?.sede ? [profile.sede, ...((profile as any).sedi || [])] : [];
+  const allSedi = profile?.sede ? [profile.sede, ...(profile.sedi || [])] : [];
   const { data: clienti = [], isLoading, error } = useQuery({
-    queryKey: ['clienti', profile?.sede, (profile as any)?.sedi],
+    queryKey: ['clienti', profile?.sede, profile?.sedi],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('clienti')
@@ -128,9 +128,9 @@ export function useClienti(options?: {
 
   // Fetch agents for assignment dropdown - include all sedi for coordinators
   const { data: agents = [] } = useQuery({
-    queryKey: ['agents', profile?.sede, (profile as any)?.sedi],
+    queryKey: ['agents', profile?.sede, profile?.sedi],
     queryFn: async () => {
-      const sediToFetch = [profile?.sede, ...((profile as any)?.sedi || [])].filter(Boolean);
+      const sediToFetch = [profile?.sede, ...(profile?.sedi || [])].filter(Boolean);
       
       let query = supabase
         .from('profiles')
@@ -212,11 +212,11 @@ export function useClienti(options?: {
       await queryClient.cancelQueries({ queryKey: ['clienti'] });
       
       // Snapshot previous value
-      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi]);
+      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, profile?.sedi]);
       
       // Optimistically update cache
       if (previousClienti) {
-        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi], (old) =>
+        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, profile?.sedi], (old) =>
           old?.map((c) =>
             c.id === id
               ? { 
@@ -239,7 +239,7 @@ export function useClienti(options?: {
     onError: (error: any, variables, context) => {
       // Rollback on error
       if (context?.previousClienti) {
-        queryClient.setQueryData(['clienti', profile?.sede, (profile as any)?.sedi], context.previousClienti);
+        queryClient.setQueryData(['clienti', profile?.sede, profile?.sedi], context.previousClienti);
       }
       toast({ title: 'Errore', description: error.message, variant: 'destructive' });
     },
@@ -373,10 +373,10 @@ export function useClienti(options?: {
     onMutate: async (updates) => {
       await queryClient.cancelQueries({ queryKey: ['clienti'] });
       
-      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi]);
+      const previousClienti = queryClient.getQueryData<Cliente[]>(['clienti', profile?.sede, profile?.sedi]);
       
       if (previousClienti) {
-        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, (profile as any)?.sedi], 
+        queryClient.setQueryData<Cliente[]>(['clienti', profile?.sede, profile?.sedi], 
           previousClienti.map(cliente => {
             const update = updates.find(u => u.id === cliente.id);
             return update ? { ...cliente, display_order: update.display_order } : cliente;
@@ -388,7 +388,7 @@ export function useClienti(options?: {
     },
     onError: (err, updates, context) => {
       if (context?.previousClienti) {
-        queryClient.setQueryData(['clienti', profile?.sede, (profile as any)?.sedi], context.previousClienti);
+        queryClient.setQueryData(['clienti', profile?.sede, profile?.sedi], context.previousClienti);
       }
     },
   });
