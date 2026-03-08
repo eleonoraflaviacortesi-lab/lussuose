@@ -40,6 +40,9 @@ const OfficeChatPage = () => {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const PAGE_SIZE = 40;
 
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
