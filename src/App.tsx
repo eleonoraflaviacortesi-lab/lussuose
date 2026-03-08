@@ -21,7 +21,16 @@ const OfficeChatPage = lazy(() => import('@/components/chat/OfficeChatPage'));
 const UfficioPage = lazy(() => import('@/components/ufficio/UfficioPage'));
 const ReportForm = lazy(() => import('@/components/dashboard/ReportPage'));
 
-export const queryClient = new QueryClient();
+export const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2,
+      gcTime: 1000 * 60 * 10,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const PageSuspense = ({ children }: { children: React.ReactNode }) => (
   <Suspense
