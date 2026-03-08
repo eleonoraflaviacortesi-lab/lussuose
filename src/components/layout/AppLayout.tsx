@@ -30,7 +30,8 @@ const pathToSection: Record<string, string> = {
   '/sede-targets': 'sede-targets',
   '/chat': 'chat',
   '/office': 'office',
-  '/inserisci': 'inserisci'
+  '/inserisci': 'inserisci',
+  '/profile': 'profile'
 };
 
 const headerQuotes = [
