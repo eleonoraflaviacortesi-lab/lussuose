@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useMemo } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -8,8 +8,8 @@ const ReportAnalysisTab = lazy(() => import('@/components/dashboard/ReportAnalys
 
 type SubTab = 'ufficio' | 'riunioni' | 'analisi';
 
-const allSubTabs: { id: SubTab; label: string; coordinatorOnly?: boolean }[] = [
-  { id: 'ufficio', label: 'Ufficio', coordinatorOnly: true },
+const subTabs: { id: SubTab; label: string }[] = [
+  { id: 'ufficio', label: 'Ufficio' },
   { id: 'riunioni', label: 'Riunioni' },
   { id: 'analisi', label: 'Analisi' },
 ];
@@ -17,19 +17,13 @@ const allSubTabs: { id: SubTab; label: string; coordinatorOnly?: boolean }[] = [
 const UfficioPage = () => {
   const { profile } = useAuth();
   const isCoordinator = profile?.role === 'coordinatore' || profile?.role === 'admin';
-
-  const visibleTabs = useMemo(
-    () => allSubTabs.filter((t) => !t.coordinatorOnly || isCoordinator),
-    [isCoordinator],
-  );
-
-  const [active, setActive] = useState<SubTab>(isCoordinator ? 'ufficio' : 'riunioni');
+  const [active, setActive] = useState<SubTab>('ufficio');
 
   return (
     <div className="space-y-4">
       <div className="flex justify-center pt-[25px]">
         <div className="glass-surface inline-flex items-center gap-1 p-1 rounded-full">
-          {visibleTabs.map((tab) => (
+          {subTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActive(tab.id)}
@@ -54,7 +48,7 @@ const UfficioPage = () => {
         }
       >
         <div key={active} className="animate-fade-in">
-          {active === 'ufficio' && isCoordinator && <AgencyDashboard />}
+          {active === 'ufficio' && <AgencyDashboard personalOnly={!isCoordinator} />}
           {active === 'riunioni' && <MeetingsPage />}
           {active === 'analisi' && <ReportAnalysisTab />}
         </div>
