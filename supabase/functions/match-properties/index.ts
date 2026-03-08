@@ -2,14 +2,21 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
+
+function jsonResponse(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  });
+}
 
 interface Cliente {
   id: string;
   budget_max: number | null;
-  regioni: string[];
-  tipologia: string[];
+  regioni: string[] | null;
+  tipologia: string[] | null;
   piscina: string | null;
   terreno: string | null;
   dimensioni_min: number | null;
@@ -23,15 +30,14 @@ interface Property {
   price: number | null;
   region: string | null;
   property_type: string | null;
-  has_pool: boolean;
-  has_land: boolean;
+  has_pool: boolean | null;
+  has_land: boolean | null;
   surface_mq: number | null;
   rooms: number | null;
   bathrooms: number | null;
-  active: boolean;
+  active: boolean | null;
 }
 
-// Map Italian region names to English
 const regionMapping: Record<string, string[]> = {
   'Tuscany': ['tuscany', 'toscana'],
   'Umbria': ['umbria'],
@@ -43,7 +49,6 @@ const regionMapping: Record<string, string[]> = {
   'Lombardia': ['lombardia', 'lombardy'],
 };
 
-// Map property types
 const typeMapping: Record<string, string[]> = {
   'Villa': ['villa'],
   'Farmhouse': ['farmhouse', 'casale', 'podere', 'country house'],
@@ -58,9 +63,7 @@ const typeMapping: Record<string, string[]> = {
 function normalizeRegion(region: string): string {
   const lower = region.toLowerCase();
   for (const [key, values] of Object.entries(regionMapping)) {
-    if (values.some(v => lower.includes(v))) {
-      return key;
-    }
+    if (values.some(v => lower.includes(v))) return key;
   }
   return region;
 }
@@ -68,93 +71,96 @@ function normalizeRegion(region: string): string {
 function normalizeType(type: string): string {
   const lower = type.toLowerCase();
   for (const [key, values] of Object.entries(typeMapping)) {
-    if (values.some(v => lower.includes(v))) {
-      return key;
-    }
+    if (values.some(v => lower.includes(v))) return key;
   }
   return type;
+}
+
+/** Returns true if the client has at least one matchable criterion. */
+function hasMatchableCriteria(c: Cliente): boolean {
+  return (
+    (c.budget_max != null && c.budget_max > 0) ||
+    (Array.isArray(c.regioni) && c.regioni.length > 0) ||
+    (Array.isArray(c.tipologia) && c.tipologia.length > 0)
+  );
 }
 
 function calculateMatchScore(cliente: Cliente, property: Property): number {
   let score = 0;
   let maxScore = 0;
 
-  // Budget check (30 points) - allow up to €100k over budget for negotiation
-  if (cliente.budget_max && property.price) {
+  const regioni = Array.isArray(cliente.regioni) ? cliente.regioni : [];
+  const tipologia = Array.isArray(cliente.tipologia) ? cliente.tipologia : [];
+
+  // Budget check (30 points)
+  if (cliente.budget_max != null && cliente.budget_max > 0 && property.price != null) {
     maxScore += 30;
-    const budgetWithMargin = cliente.budget_max + 100000; // €100k negotiation margin
-    
+    const budgetWithMargin = cliente.budget_max + 100000;
     if (property.price <= cliente.budget_max) {
-      score += 30; // Perfect - under budget
+      score += 30;
     } else if (property.price <= budgetWithMargin) {
-      // Gradual decrease: full points at budget, 15 points at budget+100k
       const overBudget = property.price - cliente.budget_max;
       const penalty = (overBudget / 100000) * 15;
       score += Math.max(15, 30 - penalty);
     }
-    // Over budget+100k = 0 points
   }
 
   // Region match (25 points)
-  if (cliente.regioni.length > 0 && property.region) {
+  if (regioni.length > 0 && property.region) {
     maxScore += 25;
     const normalizedPropertyRegion = normalizeRegion(property.region);
-    const clienteRegionsNormalized = cliente.regioni.map(r => normalizeRegion(r));
-    
+    const clienteRegionsNormalized = regioni.map(r => normalizeRegion(r));
     if (clienteRegionsNormalized.includes(normalizedPropertyRegion)) {
       score += 25;
     }
   }
 
-  // Property type match (20 points) - flexible matching
-  if (cliente.tipologia.length > 0 && property.property_type) {
+  // Property type match (20 points)
+  if (tipologia.length > 0 && property.property_type) {
     maxScore += 20;
     const normalizedPropertyType = normalizeType(property.property_type);
-    const clienteTypesNormalized = cliente.tipologia.map(t => normalizeType(t));
-    
-    // Full match
-    if (clienteTypesNormalized.some(t => 
-      t === normalizedPropertyType || 
+    const clienteTypesNormalized = tipologia.map(t => normalizeType(t));
+
+    if (clienteTypesNormalized.some(t =>
+      t === normalizedPropertyType ||
       normalizedPropertyType.toLowerCase().includes(t.toLowerCase())
     )) {
       score += 20;
     } else {
-      // Partial match for similar types (e.g., Villa ~ Country House)
       const similarTypes: Record<string, string[]> = {
         'Villa': ['Country House', 'Estate', 'Mansion'],
         'Farmhouse': ['Country House', 'Cottage', 'Estate'],
         'Apartment': ['Flat'],
         'Estate': ['Villa', 'Mansion', 'Farmhouse'],
       };
-      
       for (const clienteType of clienteTypesNormalized) {
         const similar = similarTypes[clienteType] || [];
         if (similar.includes(normalizedPropertyType)) {
-          score += 12; // Partial credit for similar types
+          score += 12;
           break;
         }
       }
     }
   }
 
-  // Pool preference (10 points) - flexible
+  // Pool preference (10 points)
   if (cliente.piscina) {
     maxScore += 10;
-    const wantsPool = cliente.piscina.toLowerCase().includes('yes') || 
+    const wantsPool = cliente.piscina.toLowerCase().includes('yes') ||
                       cliente.piscina.toLowerCase().includes('sì');
     if (wantsPool && property.has_pool) {
       score += 10;
     } else if (wantsPool && !property.has_pool) {
-      score += 3; // Pool can often be added
+      score += 3;
     } else {
-      score += 10; // No preference or doesn't want pool
+      score += 10;
     }
   }
 
   // Land preference (10 points)
   if (cliente.terreno) {
     maxScore += 10;
-    const wantsLand = cliente.terreno.toLowerCase().includes('yes') || 
+    const wantsLand = cliente.terreno.toLowerCase().includes('yes') ||
                       cliente.terreno.toLowerCase().includes('sì');
     if (wantsLand && property.has_land) {
       score += 10;
@@ -163,47 +169,36 @@ function calculateMatchScore(cliente: Cliente, property: Property): number {
     }
   }
 
-  // Rooms match (5 points) - flexible: allow ±2 rooms
-  if (cliente.camere && property.rooms) {
+  // Rooms match (5 points)
+  if (cliente.camere && property.rooms != null) {
     maxScore += 5;
     const wantedRooms = parseInt(cliente.camere) || 0;
     if (wantedRooms > 0) {
       const diff = Math.abs(property.rooms - wantedRooms);
-      if (diff === 0) {
-        score += 5;
-      } else if (diff <= 1) {
-        score += 4; // 1 room difference
-      } else if (diff <= 2) {
-        score += 3; // 2 rooms difference
-      } else if (diff <= 3) {
-        score += 1; // 3 rooms difference
-      }
+      if (diff === 0) score += 5;
+      else if (diff <= 1) score += 4;
+      else if (diff <= 2) score += 3;
+      else if (diff <= 3) score += 1;
     }
   }
 
-  // Size match (5 points) - flexible with 20% tolerance
-  if ((cliente.dimensioni_min || cliente.dimensioni_max) && property.surface_mq) {
+  // Size match (5 points)
+  if ((cliente.dimensioni_min != null || cliente.dimensioni_max != null) && property.surface_mq != null) {
     maxScore += 5;
-    const tolerance = 0.2; // 20% tolerance
-    const minWithTolerance = cliente.dimensioni_min ? cliente.dimensioni_min * (1 - tolerance) : 0;
-    const maxWithTolerance = cliente.dimensioni_max ? cliente.dimensioni_max * (1 + tolerance) : Infinity;
-    
+    const tolerance = 0.2;
+    const minWithTolerance = cliente.dimensioni_min != null ? cliente.dimensioni_min * (1 - tolerance) : 0;
+    const maxWithTolerance = cliente.dimensioni_max != null ? cliente.dimensioni_max * (1 + tolerance) : Infinity;
+
     if (property.surface_mq >= minWithTolerance && property.surface_mq <= maxWithTolerance) {
       score += 5;
     } else {
-      // Partial credit if close
-      const minOk = !cliente.dimensioni_min || property.surface_mq >= cliente.dimensioni_min * 0.7;
-      const maxOk = !cliente.dimensioni_max || property.surface_mq <= cliente.dimensioni_max * 1.4;
-      if (minOk && maxOk) {
-        score += 2;
-      }
+      const minOk = cliente.dimensioni_min == null || property.surface_mq >= cliente.dimensioni_min * 0.7;
+      const maxOk = cliente.dimensioni_max == null || property.surface_mq <= cliente.dimensioni_max * 1.4;
+      if (minOk && maxOk) score += 2;
     }
   }
 
-  // If no factors were compared, return 0
   if (maxScore === 0) return 0;
-
-  // Calculate percentage
   return Math.round((score / maxScore) * 100);
 }
 
@@ -213,19 +208,30 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    // Validate environment
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!supabaseUrl || !supabaseServiceKey) {
+      return jsonResponse({ error: 'Server misconfigured: missing environment variables' }, 500);
+    }
+
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { clienteId } = await req.json();
+    // Parse & validate request body
+    let body: Record<string, unknown>;
+    try {
+      body = await req.json();
+    } catch {
+      return jsonResponse({ error: 'Invalid JSON body' }, 400);
+    }
 
-    console.log('Calculating property matches...');
+    const clienteId = typeof body.clienteId === 'string' ? body.clienteId : null;
 
-    // Get clients to match
+    // Fetch clients
     let clienteQuery = supabase
       .from('clienti')
       .select('id, budget_max, regioni, tipologia, piscina, terreno, dimensioni_min, dimensioni_max, camere, bagni');
-    
+
     if (clienteId) {
       clienteQuery = clienteQuery.eq('id', clienteId);
     }
@@ -234,13 +240,29 @@ Deno.serve(async (req) => {
 
     if (clientiError) {
       console.error('Failed to fetch clienti:', clientiError);
-      return new Response(
-        JSON.stringify({ success: false, error: clientiError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      return jsonResponse({ error: `Failed to fetch clients: ${clientiError.message}` }, 500);
+    }
+
+    if (!clienti || clienti.length === 0) {
+      return jsonResponse(
+        { error: clienteId ? `Client not found: ${clienteId}` : 'No clients found' },
+        404,
       );
     }
 
-    // Get active properties
+    // Filter clients that have at least one matchable criterion
+    const matchableClienti = clienti.filter((c) => hasMatchableCriteria(c as Cliente));
+    const skippedCount = clienti.length - matchableClienti.length;
+
+    if (matchableClienti.length === 0) {
+      return jsonResponse({
+        success: true,
+        message: 'No clients have sufficient criteria (budget_max, regioni, or tipologia) for matching',
+        stats: { clients: 0, skipped: skippedCount, properties: 0, matches: 0 },
+      });
+    }
+
+    // Fetch active properties
     const { data: properties, error: propertiesError } = await supabase
       .from('properties')
       .select('id, price, region, property_type, has_pool, has_land, surface_mq, rooms, bathrooms, active')
@@ -248,22 +270,25 @@ Deno.serve(async (req) => {
 
     if (propertiesError) {
       console.error('Failed to fetch properties:', propertiesError);
-      return new Response(
-        JSON.stringify({ success: false, error: propertiesError.message }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+      return jsonResponse({ error: `Failed to fetch properties: ${propertiesError.message}` }, 500);
     }
 
-    console.log(`Matching ${clienti?.length || 0} clients against ${properties?.length || 0} properties`);
+    if (!properties || properties.length === 0) {
+      return jsonResponse({
+        success: true,
+        message: 'No active properties available for matching',
+        stats: { clients: matchableClienti.length, properties: 0, matches: 0 },
+      });
+    }
+
+    console.log(`Matching ${matchableClienti.length} clients against ${properties.length} properties (${skippedCount} skipped)`);
 
     let matchesCreated = 0;
-    let matchesUpdated = 0;
 
-    for (const cliente of (clienti || [])) {
-      for (const property of (properties || [])) {
+    for (const cliente of matchableClienti) {
+      for (const property of properties) {
         const score = calculateMatchScore(cliente as Cliente, property as Property);
 
-        // Only save matches with score >= 30
         if (score >= 30) {
           const { error: upsertError } = await supabase
             .from('client_property_matches')
@@ -277,7 +302,7 @@ Deno.serve(async (req) => {
             });
 
           if (upsertError) {
-            console.error(`Failed to upsert match:`, upsertError);
+            console.error(`Failed to upsert match (${cliente.id} ↔ ${property.id}):`, upsertError);
           } else {
             matchesCreated++;
           }
@@ -287,24 +312,21 @@ Deno.serve(async (req) => {
 
     console.log(`Match complete: ${matchesCreated} matches created/updated`);
 
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: `Matched ${clienti?.length || 0} clients against ${properties?.length || 0} properties`,
-        stats: {
-          clients: clienti?.length || 0,
-          properties: properties?.length || 0,
-          matches: matchesCreated,
-        },
-      }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-    );
-
+    return jsonResponse({
+      success: true,
+      message: `Matched ${matchableClienti.length} clients against ${properties.length} properties`,
+      stats: {
+        clients: matchableClienti.length,
+        skipped: skippedCount,
+        properties: properties.length,
+        matches: matchesCreated,
+      },
+    });
   } catch (error) {
     console.error('Match error:', error);
-    return new Response(
-      JSON.stringify({ success: false, error: error instanceof Error ? error.message : 'Match failed' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    return jsonResponse(
+      { error: error instanceof Error ? error.message : 'Unexpected server error' },
+      500,
     );
   }
 });
