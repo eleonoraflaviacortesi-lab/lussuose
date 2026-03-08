@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useLocation } from 'react-router-dom';
 import { cn, isDarkColor } from '@/lib/utils';
 import { useClienti } from '@/hooks/useClienti';
@@ -55,7 +56,7 @@ export function ClientiPage({ initialClienteId: propClienteId, onClienteOpened }
   const [importDialogOpen, setImportDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [dateSortDir, setDateSortDir] = useState<'desc' | 'asc' | null>(null);
-  const [viewMode, setViewMode] = useState<'kanban' | 'sheet'>('kanban');
+  const [viewMode, setViewMode] = useLocalStorage<'kanban' | 'sheet'>('clienti-view-mode', 'kanban');
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [filterQualified, setFilterQualified] = useState(false);
   const [showAllBuyers, setShowAllBuyers] = useState(false);
