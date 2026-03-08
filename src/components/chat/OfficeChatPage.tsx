@@ -40,6 +40,9 @@ const OfficeChatPage = () => {
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [isSending, setIsSending] = useState(false);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const PAGE_SIZE = 40;
 
   // Recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -94,7 +97,13 @@ const OfficeChatPage = () => {
       .slice(0, 5);
   }, [profiles, user?.id, mentionQuery]);
 
-  // Load messages
+  const mapMessage = useCallback((d: any): ChatMessage => ({
+    ...d,
+    reactions: (d.reactions as any) || [],
+    mentions: (d.mentions as any) || [],
+  }), []);
+
+  // Load initial messages (last PAGE_SIZE, desc → reverse to asc)
   useEffect(() => {
     if (!user || !sede) return;
 
@@ -103,14 +112,11 @@ const OfficeChatPage = () => {
         .from('chat_messages')
         .select('*')
         .eq('sede', sede)
-        .order('created_at', { ascending: true })
-        .limit(200);
+        .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE);
       if (data) {
-        setMessages(data.map(d => ({
-          ...d,
-          reactions: (d.reactions as any) || [],
-          mentions: (d.mentions as any) || [],
-        })) as ChatMessage[]);
+        setMessages(data.map(mapMessage).reverse());
+        setHasMore(data.length === PAGE_SIZE);
       }
     };
 
@@ -125,11 +131,7 @@ const OfficeChatPage = () => {
         filter: `sede=eq.${sede}`,
       }, (payload) => {
         if (payload.eventType === 'INSERT') {
-          const newMsg = {
-            ...payload.new,
-            reactions: (payload.new.reactions as any) || [],
-            mentions: (payload.new.mentions as any) || [],
-          } as ChatMessage;
+          const newMsg = mapMessage(payload.new);
           setMessages(prev => {
             if (prev.some(m => m.id === newMsg.id)) return prev;
             return [...prev, newMsg];
@@ -138,11 +140,7 @@ const OfficeChatPage = () => {
             setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50);
           }
         } else if (payload.eventType === 'UPDATE') {
-          const updated = {
-            ...payload.new,
-            reactions: (payload.new.reactions as any) || [],
-            mentions: (payload.new.mentions as any) || [],
-          } as ChatMessage;
+          const updated = mapMessage(payload.new);
           setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
         } else if (payload.eventType === 'DELETE') {
           setMessages(prev => prev.filter(m => m.id !== (payload.old as any).id));
@@ -151,7 +149,37 @@ const OfficeChatPage = () => {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user, sede]);
+  }, [user, sede, mapMessage]);
+
+  // Load older messages (cursor-based)
+  const loadOlderMessages = useCallback(async () => {
+    if (!user || !sede || loadingMore || !hasMore || messages.length === 0) return;
+    setLoadingMore(true);
+    const oldestCreatedAt = messages[0].created_at;
+    const container = containerRef.current;
+    const prevScrollHeight = container?.scrollHeight || 0;
+
+    const { data } = await supabase
+      .from('chat_messages')
+      .select('*')
+      .eq('sede', sede)
+      .lt('created_at', oldestCreatedAt)
+      .order('created_at', { ascending: false })
+      .limit(PAGE_SIZE);
+
+    if (data) {
+      const older = data.map(mapMessage).reverse();
+      setHasMore(data.length === PAGE_SIZE);
+      setMessages(prev => [...older, ...prev]);
+      // Preserve scroll position after prepend
+      requestAnimationFrame(() => {
+        if (container) {
+          container.scrollTop = container.scrollHeight - prevScrollHeight;
+        }
+      });
+    }
+    setLoadingMore(false);
+  }, [user, sede, loadingMore, hasMore, messages, mapMessage]);
 
   // Load linked data for messages
   useEffect(() => {
@@ -554,6 +582,23 @@ const OfficeChatPage = () => {
     <div className="flex flex-col h-[calc(100vh-200px)] max-w-2xl mx-auto relative">
       {/* Messages area */}
       <div ref={containerRef} className="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin">
+        {/* Load older messages button */}
+        {hasMore && messages.length > 0 && (
+          <div className="flex justify-center py-3">
+            <button
+              onClick={loadOlderMessages}
+              disabled={loadingMore}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors px-4 py-1.5 rounded-full glass-surface disabled:opacity-50"
+            >
+              {loadingMore ? (
+                <span className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
+                  Caricamento…
+                </span>
+              ) : 'Carica messaggi precedenti'}
+            </button>
+          </div>
+        )}
         {messages.length === 0 && (
           <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
             Nessun messaggio ancora. Inizia la conversazione! 💬
