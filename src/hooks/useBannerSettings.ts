@@ -28,7 +28,7 @@ export const useBannerSettings = () => {
   useEffect(() => {
     const fetchBannerSettings = async () => {
       const { data } = await supabase
-        .from('app_settings' as any)
+        .from('app_settings')
         .select('key, value')
         .in('key', [
           'banner_text_1', 'banner_text_2', 'banner_text_3', 'banner_text_4',
@@ -37,7 +37,7 @@ export const useBannerSettings = () => {
 
       if (data) {
         const newSettings = { ...defaultSettings };
-        (data as any[]).forEach((item: { key: string; value: string }) => {
+        data.forEach((item) => {
           if (item.key === 'banner_text_1') newSettings.text1 = item.value;
           if (item.key === 'banner_text_2') newSettings.text2 = item.value;
           if (item.key === 'banner_text_3') newSettings.text3 = item.value;
