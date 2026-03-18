@@ -45,6 +45,7 @@ type Props = {
   onAddClienteReminder: (clienteId: string, date: Date) => void;
   onAddNotiziaReminder: (notiziaId: string, date: Date) => void;
   onAddTask: () => void;
+  onAddNotizia?: () => void;
 };
 
 const AddToCalendarMenu = ({
