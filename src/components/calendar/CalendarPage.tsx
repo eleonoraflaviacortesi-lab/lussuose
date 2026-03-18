@@ -421,6 +421,7 @@ const CalendarPage = () => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [addMenuInitialType, setAddMenuInitialType] = useState<'cliente' | 'notizia' | null>(null);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
+  const [showAddNotiziaDialog, setShowAddNotiziaDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
 
