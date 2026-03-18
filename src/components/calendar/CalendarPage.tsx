@@ -1558,6 +1558,11 @@ const CalendarPage = () => {
           setShowAddMenu(false);
           setAddMenuInitialType(null);
           setShowAddTaskDialog(true);
+        }}
+        onAddNotizia={() => {
+          setShowAddMenu(false);
+          setAddMenuInitialType(null);
+          setShowAddNotiziaDialog(true);
         }} />
 
       }
