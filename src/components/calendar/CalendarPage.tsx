@@ -1576,6 +1576,13 @@ const CalendarPage = () => {
 
       }
 
+      {/* Add Notizia Dialog */}
+      <AddNotiziaDialog
+        open={showAddNotiziaDialog}
+        onOpenChange={setShowAddNotiziaDialog}
+        showTrigger={false}
+      />
+
       {/* Day View Sheet (Mobile) */}
       <CalendarDayView
         open={showDayView}
