@@ -1314,7 +1314,8 @@ const CalendarPage = () => {
                   onAddComment={(text) => handleEventAddComment(event, text)}
                   compact
                   isMobile={isMobile}
-                  onMobileMenu={() => handleMobileContextMenu(event)} />
+                  onMobileMenu={() => handleMobileContextMenu(event)}
+                  showDetails={viewMode !== 'month'} />
 
                 )
                 }
