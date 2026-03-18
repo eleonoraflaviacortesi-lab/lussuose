@@ -1432,7 +1432,7 @@ const CalendarPage = () => {
                             comments={getEventComments(event)}
                             onAddComment={(text) => handleEventAddComment(event, text)}
                             dragHandleProps={dragProv.dragHandleProps}
-                            showDetails={viewMode === 'day'} />
+                            showDetails={true} />
                           
                                 </div>
                         }
