@@ -23,6 +23,7 @@ import EditTaskDialog from './EditTaskDialog';
 import TaskContextMenu from './TaskContextMenu';
 import CalendarDayView from './CalendarDayView';
 import NotiziaDetail from '@/components/notizie/NotiziaDetail';
+import AddNotiziaDialog from '@/components/notizie/AddNotiziaDialog';
 import { ClienteDetail } from '@/components/clienti/ClienteDetail';
 import { useProfiles } from '@/hooks/useProfiles';
 import { useAuth } from '@/hooks/useAuth';
@@ -420,6 +421,7 @@ const CalendarPage = () => {
   const [showAddMenu, setShowAddMenu] = useState(false);
   const [addMenuInitialType, setAddMenuInitialType] = useState<'cliente' | 'notizia' | null>(null);
   const [showAddTaskDialog, setShowAddTaskDialog] = useState(false);
+  const [showAddNotiziaDialog, setShowAddNotiziaDialog] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showDayView, setShowDayView] = useState(false);
 
@@ -1556,6 +1558,11 @@ const CalendarPage = () => {
           setShowAddMenu(false);
           setAddMenuInitialType(null);
           setShowAddTaskDialog(true);
+        }}
+        onAddNotizia={() => {
+          setShowAddMenu(false);
+          setAddMenuInitialType(null);
+          setShowAddNotiziaDialog(true);
         }} />
 
       }
@@ -1568,6 +1575,13 @@ const CalendarPage = () => {
         date={selectedDate} />
 
       }
+
+      {/* Add Notizia Dialog */}
+      <AddNotiziaDialog
+        open={showAddNotiziaDialog}
+        onOpenChange={setShowAddNotiziaDialog}
+        showTrigger={false}
+      />
 
       {/* Day View Sheet (Mobile) */}
       <CalendarDayView

@@ -45,6 +45,7 @@ type Props = {
   onAddClienteReminder: (clienteId: string, date: Date) => void;
   onAddNotiziaReminder: (notiziaId: string, date: Date) => void;
   onAddTask: () => void;
+  onAddNotizia?: () => void;
 };
 
 const AddToCalendarMenu = ({
@@ -57,7 +58,8 @@ const AddToCalendarMenu = ({
   onAddAppointment,
   onAddClienteReminder,
   onAddNotiziaReminder,
-  onAddTask
+  onAddTask,
+  onAddNotizia
 }: Props) => {
   const [selectedType, setSelectedType] = useState<AddType | null>(initialType || null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -248,6 +250,19 @@ const AddToCalendarMenu = ({
                 
                 </div>
               </div>
+              {onAddNotizia &&
+                <div className="px-1 pb-3">
+                  <button
+                    onClick={() => {
+                      onAddNotizia();
+                      handleClose();
+                    }}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-muted-foreground/30 hover:bg-muted transition-colors text-left">
+                    <span className="text-xl">➕</span>
+                    <p className="font-medium text-sm">Aggiungi nuovo seller</p>
+                  </button>
+                </div>
+              }
               <CommandList className="max-h-[calc(70vh-220px)]">
                 {availableNotizie.length === 0 ?
               <div className="py-8 text-center text-muted-foreground text-sm">
