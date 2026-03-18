@@ -58,7 +58,8 @@ const AddToCalendarMenu = ({
   onAddAppointment,
   onAddClienteReminder,
   onAddNotiziaReminder,
-  onAddTask
+  onAddTask,
+  onAddNotizia
 }: Props) => {
   const [selectedType, setSelectedType] = useState<AddType | null>(initialType || null);
   const [searchQuery, setSearchQuery] = useState('');
