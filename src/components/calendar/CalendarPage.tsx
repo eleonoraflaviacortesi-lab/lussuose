@@ -1315,7 +1315,7 @@ const CalendarPage = () => {
                   compact
                   isMobile={isMobile}
                   onMobileMenu={() => handleMobileContextMenu(event)}
-                  showDetails={viewMode !== 'month'} />
+                  showDetails />
 
                 )
                 }
