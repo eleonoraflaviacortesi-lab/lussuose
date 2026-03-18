@@ -1408,7 +1408,7 @@ const CalendarPage = () => {
                         onTouchEnd={handleTouchEnd}
                         onToggle={handleToggleCompleted}
                         hasComment={false}
-                        showDetails={viewMode === 'day'} />
+                        showDetails={true} />
 
                       )}
                           
