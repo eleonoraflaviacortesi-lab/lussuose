@@ -1314,7 +1314,8 @@ const CalendarPage = () => {
                   onAddComment={(text) => handleEventAddComment(event, text)}
                   compact
                   isMobile={isMobile}
-                  onMobileMenu={() => handleMobileContextMenu(event)} />
+                  onMobileMenu={() => handleMobileContextMenu(event)}
+                  showDetails />
 
                 )
                 }
@@ -1408,7 +1409,7 @@ const CalendarPage = () => {
                         onTouchEnd={handleTouchEnd}
                         onToggle={handleToggleCompleted}
                         hasComment={false}
-                        showDetails={viewMode === 'day'} />
+                        showDetails={true} />
 
                       )}
                           
@@ -1432,7 +1433,7 @@ const CalendarPage = () => {
                             comments={getEventComments(event)}
                             onAddComment={(text) => handleEventAddComment(event, text)}
                             dragHandleProps={dragProv.dragHandleProps}
-                            showDetails={viewMode === 'day'} />
+                            showDetails={true} />
                           
                                 </div>
                         }

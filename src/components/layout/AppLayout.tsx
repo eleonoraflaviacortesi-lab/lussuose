@@ -272,7 +272,7 @@ export default function AppLayout({ children }: { children?: ReactNode }) {
 
           {/* Main content */}
           <PullToRefresh onRefresh={handleRefresh} className="flex-1 min-w-0 overflow-x-hidden">
-            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-3 sm:px-4 lg:px-8'} py-2 sm:py-4`}>
+            <main className={`mx-auto w-full min-w-0 animate-in fade-in duration-150 ${section === 'contacts' || section === 'properties' || section === 'activities' ? 'max-w-full px-1 sm:px-2 lg:px-4' : 'max-w-5xl px-3 sm:px-4 lg:px-8'} py-2 sm:py-4`}>
               <div key={section} className="animate-fade-in">
                 {children}
               </div>
