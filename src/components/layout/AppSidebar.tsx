@@ -29,6 +29,7 @@ const navItems = [
   { title: 'Notizie', url: '/properties', icon: Building2 },
   { title: 'Buyers', url: '/contacts', icon: Users },
   { title: 'Calendar', url: '/activities', icon: CalendarDays },
+  { title: 'Ciclo Produttivo', url: '/inserisci', icon: ClipboardList },
   { title: 'Settings', url: '/settings', icon: Settings },
   { title: 'Obiettivi Agenzia', url: '/sede-targets', icon: Target },
 ];
