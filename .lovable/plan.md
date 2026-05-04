@@ -1,17 +1,32 @@
+## Plan: Export Excel completo per Buyers
 
+Attualmente l'export Excel della pagina Buyers (`ClientiPage.tsx`) include solo 15 colonne base. Va esteso a **tutti i campi** dell'interfaccia `Cliente` (visibili nel dettaglio cliente).
 
-## Plan: Add "Ciclo Produttivo" link to Sidebar
+### Modifica
 
-The route `/inserisci` already exists and renders `ReportPage` (with the NUOVO REPORT / I MIEI REPORT tabs shown in the screenshot). It just needs a sidebar entry.
+**File**: `src/components/clienti/ClientiPage.tsx` — funzione `handleExportExcel` (righe 192–215).
 
-### Changes
+Aggiungere tutte le colonne mancanti dal tipo `Cliente` (definito in `src/types/index.ts`):
 
-**1. `src/components/layout/AppSidebar.tsx`**
-- Add `ClipboardList` (already imported) to `navItems` array:
-  ```ts
-  { title: 'Ciclo Produttivo', url: '/inserisci', icon: ClipboardList }
-  ```
-- Place it after "Calendar" and before "Settings" for logical grouping.
+**Anagrafica & contatto**: nome, cognome, telefono, email, paese, lingua, rating
 
-That's it — the route, page component, and tab UI (screenshot view) already exist and work correctly. Only the sidebar link is missing.
+**Budget & ricerca**: budget_max, mutuo, tempo_ricerca, ha_visitato, interesse_affitto, uso
 
+**Localizzazione**: regioni, vicinanza_citta, motivo_zona
+
+**Proprietà desiderata**: tipologia, stile, contesto, dimensioni_min, dimensioni_max, camere, bagni, layout, dependance, terreno, piscina
+
+**Riferimento immobile**: portale, property_name, ref_number
+
+**Gestione lead**: status, contattato_da, tipo_contatto, assigned_to, sede, emoji, reminder_date, last_contact_date
+
+**Note & meta**: descrizione, note_extra, tally_submission_id, data_submission, created_at, updated_at
+
+**Trasformazioni necessarie** nel `.map()`:
+- Array (`regioni`, `motivo_zona`, `tipologia`, `contesto`) → join con `, `
+- Booleani (`ha_visitato`, `vicinanza_citta`) → `'Sì' / 'No'`
+- Restanti campi passano diretti (numeri/stringhe/date)
+
+I campi `comments`, `card_color`, `row_bg_color`, `row_text_color`, `display_order` vengono esclusi (metadati UI non utili in export).
+
+Nessun'altra modifica: il pulsante, l'utility `exportToExcel`, e il flusso restano invariati.
