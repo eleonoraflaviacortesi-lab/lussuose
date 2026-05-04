@@ -64,23 +64,12 @@ const Auth = () => {
   // Fetch all profiles with their emails to show as selectable accounts
   useEffect(() => {
     const fetchProfiles = async () => {
-      const { data } = await supabase.
-      from('profiles').
-      select('full_name, avatar_emoji, sede, user_id').
-      order('full_name');
+      const { data } = await supabase.rpc('get_login_accounts');
 
       if (data) {
-        // Map user_id to known emails (fetched from auth.users reference)
-        const emailMap: Record<string, string> = {
-          '02c5c45d-f5db-415c-9ee3-b3b517b03762': 'dalila@lelussuose.it',
-          '986533ef-e6f2-4e3a-a222-66d6abcaee58': 'eleonoraflaviacortesi@gmail.com',
-          '78477b00-31bd-44a8-8dc2-6a8fa58e8c0c': 'elisa@lelussuose.it',
-          '76b70b52-f636-4eb3-befa-b65a7751fb22': 'tizianello@lelussuose.it'
-        };
-
-        const accountList: DemoAccount[] = data.map((p) => ({
+        const accountList: DemoAccount[] = data.map((p: any) => ({
           user_id: p.user_id,
-          email: emailMap[p.user_id] || `${p.full_name.toLowerCase().replace(/\s+/g, '.')}@lelussuose.it`,
+          email: `${p.full_name.toLowerCase().replace(/\s+/g, '.')}@lelussuose.it`,
           full_name: p.full_name,
           avatar_emoji: p.avatar_emoji || '🖤',
           sede: p.sede
@@ -150,12 +139,9 @@ const Auth = () => {
         setNewName('');
         setShowAddForm(false);
         // Refresh accounts list
-        const { data } = await supabase.
-        from('profiles').
-        select('full_name, avatar_emoji, sede, user_id').
-        order('full_name');
+        const { data } = await supabase.rpc('get_login_accounts');
         if (data) {
-          setAccounts(data.map((p) => ({
+          setAccounts(data.map((p: any) => ({
             user_id: p.user_id,
             email: `${p.full_name.toLowerCase().replace(/\s+/g, '.')}@lelussuose.it`,
             full_name: p.full_name,
