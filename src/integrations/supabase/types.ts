@@ -1177,6 +1177,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_login_accounts: {
+        Args: never
+        Returns: {
+          avatar_emoji: string
+          full_name: string
+          sede: string
+          user_id: string
+        }[]
+      }
       is_coordinator_or_admin: { Args: { _user_id: string }; Returns: boolean }
       is_same_sede: {
         Args: { _notizia_user_id: string; _user_id: string }
