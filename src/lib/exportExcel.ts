@@ -25,6 +25,17 @@ export interface ExcelColumn {
   width?: number;
 }
 
+function colLetter(index: number): string {
+  // Convert 0-based column index to Excel letter (A, B, ..., Z, AA, AB, ...)
+  let n = index;
+  let s = '';
+  while (n >= 0) {
+    s = String.fromCharCode(65 + (n % 26)) + s;
+    n = Math.floor(n / 26) - 1;
+  }
+  return s;
+}
+
 /**
  * Export rows to a .xlsx file and trigger a browser download.
  */
@@ -36,7 +47,7 @@ export async function exportToExcel(
   // Dynamic import for the XLSX library (using a CDN-safe approach with pure JS)
   // We'll generate a proper XLSX using the xml structure manually
 
-  const colLetters = columns.map((_, i) => String.fromCharCode(65 + i));
+  const colLetters = columns.map((_, i) => colLetter(i));
 
   // Build shared strings
   const strings: string[] = [];
